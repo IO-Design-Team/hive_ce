@@ -139,7 +139,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
     final result = await store.getAllKeys(null).asFuture() as JSArray;
     final List<String> keys =
-        List.from(result.toDart.map((e) => (e as JSString).toDart));
+        List.from(result.toDart.cast<JSString>().map((e) => e.toDart));
     _cachedKeys = keys.toSet();
     return keys;
   }
