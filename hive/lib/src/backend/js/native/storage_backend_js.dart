@@ -81,19 +81,35 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  Object? decodeValue(JSArrayBuffer value) {
-    var bytes = Uint8List.view(value.toDart);
-    if (_isEncoded(bytes)) {
-      var reader = BinaryReaderImpl(bytes, _registry);
-      reader.skip(2);
-      if (_cipher == null) {
-        return reader.read();
+  Object? decodeValue(JSAny? value) {
+    if (value is JSArrayBuffer) {
+      var bytes = Uint8List.view(value.toDart);
+      if (_isEncoded(bytes)) {
+        var reader = BinaryReaderImpl(bytes, _registry);
+        reader.skip(2);
+        if (_cipher == null) {
+          return reader.read();
+        } else {
+          return reader.readEncrypted(_cipher!);
+        }
       } else {
-        return reader.readEncrypted(_cipher!);
+        return bytes;
       }
-    } else {
-      return bytes;
+    } else if (value is JSNumber) {
+      return value.toDartDouble;
+    } else if (value is JSBoolean) {
+      return value.toDart;
+    } else if (value is JSString) {
+      return value.toDart;
+    } else if (value is JSArray<JSNumber>) {
+      return value.toDart.map((e) => e.toDartDouble).toList();
+    } else if (value is JSArray<JSBoolean>) {
+      return value.toDart.map((e) => e.toDart).toList();
+    } else if (value is JSArray<JSString>) {
+      return value.toDart.map((e) => e.toDart).toList();
     }
+
+    return null;
   }
 
   /// Not part of public API
@@ -131,7 +147,7 @@ class StorageBackendJs extends StorageBackend {
 
     if (store.has('getAll') && !cursor) {
       final result = await store.getAll(null).asFuture();
-      return (result as JSArray).toDart.cast<JSArrayBuffer>().map(decodeValue);
+      return (result as JSArray).toDart.map(decodeValue);
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.value).toList();
