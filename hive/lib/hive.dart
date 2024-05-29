@@ -19,7 +19,7 @@ import 'package:hive/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 export 'src/box_collection/box_collection_stub.dart'
-    if (dart.library.html) 'package:hive/src/box_collection/box_collection_indexed_db.dart'
+    if (dart.library.js_interop) 'package:hive/src/box_collection/box_collection_indexed_db.dart'
     if (dart.library.io) 'package:hive/src/box_collection/box_collection.dart';
 export 'src/object/hive_object.dart' show HiveObject, HiveObjectMixin;
 

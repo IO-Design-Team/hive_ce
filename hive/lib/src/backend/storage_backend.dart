@@ -6,7 +6,7 @@ import 'package:hive/src/box/keystore.dart';
 
 export 'package:hive/src/backend/stub/backend_manager.dart'
     if (dart.library.io) 'package:hive/src/backend/vm/backend_manager.dart'
-    if (dart.library.html) 'package:hive/src/backend/js/backend_manager.dart';
+    if (dart.library.js_interop) 'package:hive/src/backend/js/backend_manager.dart';
 
 /// Abstract storage backend
 abstract class StorageBackend {
