@@ -175,7 +175,7 @@ class StorageBackendJs extends StorageBackend {
   Future<Object?> readValue(Frame frame) async {
     final value =
         await getStore(false).get(_frameKeyToJS(frame.key)).asFuture();
-    return decodeValue(value as JSArrayBuffer);
+    return decodeValue(value);
   }
 
   @override
