@@ -23,8 +23,8 @@ class BoxCollection implements implementation.BoxCollection {
   }) async {
     final factory = window.indexedDB;
     final request = factory.open(name, 1);
-    request.onupgradeneeded = (event) {
-      final _db = event.target.result as IDBDatabase;
+    request.onupgradeneeded = (IDBVersionChangeEvent event) {
+      final _db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
       for (final name in boxNames) {
         _db.createObjectStore(
           name,
@@ -90,7 +90,7 @@ class BoxCollection implements implementation.BoxCollection {
       fun(txn);
     }
     final completer = Completer<void>();
-    txn.oncomplete = (_) {
+    txn.oncomplete = (Event e) {
       completer.complete();
     }.toJS;
     return;

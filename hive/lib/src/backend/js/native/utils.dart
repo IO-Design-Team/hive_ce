@@ -6,10 +6,10 @@ import 'package:web/web.dart';
 extension IDBRequestExtension on IDBRequest {
   Future<dynamic> asFuture() {
     final completer = Completer<dynamic>();
-    onsuccess = (e) {
+    onsuccess = (Event e) {
       completer.complete(result);
     }.toJS;
-    onerror = (e) {
+    onerror = (Event e) {
       completer.completeError(error!);
     }.toJS;
     return completer.future;
@@ -21,15 +21,15 @@ extension IDBObjectStoreExtension on IDBObjectStore {
     final cursorRequest = openCursor();
     final cursorCompleter = Completer<void>();
     final cursors = <IDBCursorWithValue>[];
-    cursorRequest.onsuccess = (e) {
-      final cursor = e.target.result as IDBCursorWithValue?;
+    cursorRequest.onsuccess = (Event e) {
+      final cursor = (e.target as IDBRequest).result as IDBCursorWithValue?;
       if (cursor == null) {
         cursorCompleter.complete();
         return;
       }
       cursors.add(cursor);
     }.toJS;
-    cursorRequest.onerror = (e) {
+    cursorRequest.onerror = (Event e) {
       cursorCompleter.completeError(cursorRequest.error!);
     }.toJS;
     await cursorCompleter.future;

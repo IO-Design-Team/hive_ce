@@ -197,8 +197,8 @@ class StorageBackendJs extends StorageBackend {
       await indexDB.deleteDatabase(_db.name).asFuture();
     } else {
       final request = indexDB.open(_db.name, 1);
-      request.onupgradeneeded = (e) {
-        var db = e.target.result as IDBDatabase;
+      request.onupgradeneeded = (IDBVersionChangeEvent e) {
+        var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
           db.deleteObjectStore(objectStoreName);
         }
