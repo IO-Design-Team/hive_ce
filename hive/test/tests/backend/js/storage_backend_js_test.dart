@@ -1,48 +1,51 @@
 @TestOn('browser')
 
 import 'dart:async' show Future;
-import 'dart:html';
-import 'dart:indexed_db';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:hive/hive.dart';
 import 'package:hive/src/backend/js/native/storage_backend_js.dart';
+import 'package:hive/src/backend/js/native/utils.dart';
 import 'package:hive/src/binary/binary_writer_impl.dart';
 import 'package:hive/src/binary/frame.dart';
 import 'package:hive/src/box/change_notifier.dart';
 import 'package:hive/src/box/keystore.dart';
 import 'package:hive/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
+import 'package:web/web.dart';
 
 import '../../frames.dart';
 
-late final Database _nullDatabase;
+late final IDBDatabase _nullDatabase;
 StorageBackendJs _getBackend({
-  Database? db,
+  IDBDatabase? db,
   HiveCipher? cipher,
   TypeRegistry registry = TypeRegistryImpl.nullImpl,
 }) {
   return StorageBackendJs(db ?? _nullDatabase, cipher, 'box', registry);
 }
 
-Future<Database> _openDb([String name = 'testBox']) async {
-  return await window.indexedDB!.open(name, version: 1, onUpgradeNeeded: (e) {
-    var db = e.target.result as Database;
-    if (!db.objectStoreNames!.contains('box')) {
+Future<IDBDatabase> _openDb([String name = 'testBox']) async {
+  final request = window.indexedDB.open(name, 1);
+  request.onupgradeneeded = (e) {
+    var db = e.target.result as IDBDatabase;
+    if (!db.objectStoreNames.contains('box')) {
       db.createObjectStore('box');
     }
-  });
+  }.toJS;
+  return await request.asFuture() as IDBDatabase;
 }
 
-ObjectStore _getStore(Database db) {
-  return db.transaction('box', 'readwrite').objectStore('box');
+IDBObjectStore _getStore(IDBDatabase db) {
+  return db.transaction('box'.toJS, 'readwrite').objectStore('box');
 }
 
-Future<Database> _getDbWith(Map<String, dynamic> content) async {
+Future<IDBDatabase> _getDbWith(Map<String, dynamic> content) async {
   var db = await _openDb();
   var store = _getStore(db);
-  await store.clear();
-  content.forEach((k, v) => store.put(v, k));
+  await store.clear().asFuture();
+  content.forEach((k, v) => store.put(v, k.toJS));
   return db;
 }
 
