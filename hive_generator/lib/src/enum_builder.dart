@@ -3,7 +3,7 @@ import 'package:hive_generator/src/builder.dart';
 import 'package:hive_generator/src/helper.dart';
 
 class EnumBuilder extends Builder {
-  EnumBuilder(ClassElement cls, List<AdapterField> getters)
+  EnumBuilder(InterfaceElement cls, List<AdapterField> getters)
       : super(cls, getters);
 
   @override

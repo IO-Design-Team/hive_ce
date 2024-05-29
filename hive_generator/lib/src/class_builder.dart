@@ -7,13 +7,14 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_generator/src/builder.dart';
 import 'package:hive_generator/src/helper.dart';
+import 'package:hive_generator/src/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'type_helper.dart';
 
 class ClassBuilder extends Builder {
   ClassBuilder(
-    ClassElement cls,
+    InterfaceElement cls,
     List<AdapterField> getters,
     List<AdapterField> setters,
   ) : super(cls, getters, setters);
@@ -99,6 +100,10 @@ class ClassBuilder extends Builder {
       return '($variable as List$suffix)${_castIterable(type)}';
     } else if (mapChecker.isAssignableFromType(type)) {
       return '($variable as Map$suffix)${_castMap(type)}';
+    } else if (type.isDartCoreInt) {
+      return '($variable as num$suffix)$suffix.toInt()';
+    } else if (type.isDartCoreDouble) {
+      return '($variable as num$suffix)$suffix.toDouble()';
     } else {
       return '$variable as ${_displayString(type)}';
     }

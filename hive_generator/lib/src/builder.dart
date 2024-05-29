@@ -12,7 +12,7 @@ class AdapterField {
 }
 
 abstract class Builder {
-  final ClassElement cls;
+  final InterfaceElement cls;
   final List<AdapterField> getters;
   final List<AdapterField> setters;
 
