@@ -1,13 +1,15 @@
-import 'dart:html';
-import 'dart:indexed_db';
+import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:hive/hive.dart';
+import 'package:hive/src/backend/js/native/utils.dart';
 import 'package:hive/src/box_collection/box_collection_stub.dart'
     as implementation;
+import 'package:web/web.dart';
 
 /// represents a [BoxCollection] for raw use with indexed DB
 class BoxCollection implements implementation.BoxCollection {
-  final Database _db;
+  final IDBDatabase _db;
   @override
   final Set<String> boxNames;
 
@@ -20,22 +22,22 @@ class BoxCollection implements implementation.BoxCollection {
     HiveCipher? key,
   }) async {
     final factory = window.indexedDB;
-    if (factory == null) {
-      throw Exception(
-          'Unable to open FluffyBox collection - IndexedDB not supported in this browser!');
-    }
-    final _db = await factory.open(name, version: 1,
-        onUpgradeNeeded: (VersionChangeEvent event) {
-      final _db = event.target.result;
+    final request = factory.open(name, 1);
+    request.onupgradeneeded = (event) {
+      final _db = event.target.result as IDBDatabase;
       for (final name in boxNames) {
-        _db.createObjectStore(name, autoIncrement: true);
+        _db.createObjectStore(
+          name,
+          IDBObjectStoreParameters(autoIncrement: true),
+        );
       }
-    });
+    }.toJS;
+    final _db = await request.asFuture() as IDBDatabase;
     return BoxCollection(_db, boxNames);
   }
 
   @override
-  String get name => _db.name!;
+  String get name => _db.name;
 
   @override
   Future<CollectionBox<V>> openBox<V>(String name,
@@ -61,7 +63,7 @@ class BoxCollection implements implementation.BoxCollection {
 
   final List<CollectionBox> _openBoxes = [];
 
-  List<Future<void> Function(Transaction txn)>? _txnCache;
+  List<Future<void> Function(IDBTransaction txn)>? _txnCache;
 
   @override
   Future<void> transaction(
@@ -77,14 +79,20 @@ class BoxCollection implements implementation.BoxCollection {
     _txnCache = [];
     await action();
     final cache =
-        List<Future<void> Function(Transaction txn)>.from(_txnCache ?? []);
+        List<Future<void> Function(IDBTransaction txn)>.from(_txnCache ?? []);
     _txnCache = null;
     if (cache.isEmpty) return;
-    final txn = _db.transaction(boxNames, readOnly ? 'readonly' : 'readwrite');
+    final txn = _db.transaction(
+      boxNames.map((e) => e.toJS).toList().toJS,
+      readOnly ? 'readonly' : 'readwrite',
+    );
     for (final fun in cache) {
       fun(txn);
     }
-    await txn.completed;
+    final completer = Completer<void>();
+    txn.oncomplete = (_) {
+      completer.complete();
+    }.toJS;
     return;
   }
 
@@ -100,10 +108,7 @@ class BoxCollection implements implementation.BoxCollection {
     }
     _openBoxes.clear();
     _db.close();
-    if (factory == null || _db.name == null) {
-      throw Exception('Unable to delete fluffybox collection');
-    }
-    factory.deleteDatabase(_db.name!);
+    factory.deleteDatabase(_db.name);
   }
 }
 
@@ -118,7 +123,6 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   CollectionBox(this.name, this.boxCollection) {
     if (!(V is String ||
         V is int ||
-        V is Object ||
         V is List<Object?> ||
         V is Map<String, Object?> ||
         V is double)) {
@@ -128,48 +132,47 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   }
 
   @override
-  Future<List<String>> getAllKeys([Transaction? txn]) async {
+  Future<List<String>> getAllKeys([IDBTransaction? txn]) async {
     final cachedKey = _cachedKeys;
     if (cachedKey != null) return cachedKey.toList();
-    txn ??= boxCollection._db.transaction(name, 'readonly');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final request = store.getAllKeys(null);
-    await request.onSuccess.first;
-    final List<String> keys =
-        List.from(request.result.cast<String>() as Iterable);
+    final result = await store.getAllKeys(null).asFuture() as List;
+    final List<String> keys = List.from(result.cast<String>() as Iterable);
     _cachedKeys = keys.toSet();
     return keys;
   }
 
   @override
-  Future<Map<String, V>> getAllValues([Transaction? txn]) async {
-    txn ??= boxCollection._db.transaction(name, 'readonly');
+  Future<Map<String, V>> getAllValues([IDBTransaction? txn]) async {
+    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final map = <String, V>{};
-    final cursorStream = store.openCursor(autoAdvance: true);
-    await for (final cursor in cursorStream) {
+    final cursors = await store.getCursors();
+    for (final cursor in cursors) {
       map[cursor.key as String] = cursor.value as V;
     }
     return map;
   }
 
   @override
-  Future<V?> get(String key, [Transaction? txn]) async {
+  Future<V?> get(String key, [IDBTransaction? txn]) async {
     if (_cache.containsKey(key)) return _cache[key];
-    txn ??= boxCollection._db.transaction(name, 'readonly');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    _cache[key] = await store.getObject(key) as V?;
+    _cache[key] = await store.get(key.toJS).asFuture() as V?;
     return _cache[key];
   }
 
   @override
-  Future<List<V?>> getAll(List<String> keys, [Transaction? txn]) async {
+  Future<List<V?>> getAll(List<String> keys, [IDBTransaction? txn]) async {
     if (!keys.any((key) => !_cache.containsKey(key))) {
       return keys.map((key) => _cache[key]).toList();
     }
-    txn ??= boxCollection._db.transaction(name, 'readonly');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final list = await Future.wait(keys.map(store.getObject));
+    final list =
+        await Future.wait(keys.map((e) => store.get(e.toJS).asFuture()));
     for (var i = 0; i < keys.length; i++) {
       _cache[keys[i]] = list[i] as V?;
     }
@@ -178,8 +181,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
   @override
   Future<void> put(String key, V val, [Object? transaction]) async {
-    Transaction? txn;
-    if (transaction is Transaction) {
+    IDBTransaction? txn;
+    if (transaction is IDBTransaction) {
       txn = transaction;
     }
     if (val == null) {
@@ -193,16 +196,16 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name, 'readwrite');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.put(val, key);
+    await store.put(val.toJSBox, key.toJS).asFuture();
     _cache[key] = val;
     _cachedKeys?.add(key);
     return;
   }
 
   @override
-  Future<void> delete(String key, [Transaction? txn]) async {
+  Future<void> delete(String key, [IDBTransaction? txn]) async {
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => delete(key, txn));
@@ -211,16 +214,16 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name, 'readwrite');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.delete(key);
+    await store.delete(key.toJS).asFuture();
     _cache[key] = null;
     _cachedKeys?.remove(key);
     return;
   }
 
   @override
-  Future<void> deleteAll(List<String> keys, [Transaction? txn]) async {
+  Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => deleteAll(keys, txn));
@@ -231,10 +234,10 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name, 'readwrite');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
     for (final key in keys) {
-      await store.delete(key);
+      await store.delete(key.toJS).asFuture();
       _cache[key] = null;
       _cachedKeys?.removeAll(keys);
     }
@@ -242,7 +245,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   }
 
   @override
-  Future<void> clear([Transaction? txn]) async {
+  Future<void> clear([IDBTransaction? txn]) async {
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add(clear);
@@ -251,9 +254,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name, 'readwrite');
+    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.clear();
+    await store.clear().asFuture();
     _cache.clear();
     _cachedKeys = null;
     return;

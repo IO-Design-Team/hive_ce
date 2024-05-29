@@ -112,7 +112,7 @@ class StorageBackendJs extends StorageBackend {
       final result = await getStore(false).getAllKeys(null).asFuture();
       return result;
     } else {
-      final cursors = await getCursors(store);
+      final cursors = await store.getCursors();
       return cursors.map((e) => e.key).toList();
     }
   }
@@ -126,28 +126,9 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture();
       return (result as List).map(decodeValue);
     } else {
-      final cursors = await getCursors(store);
+      final cursors = await store.getCursors();
       return cursors.map((e) => e.value).toList();
     }
-  }
-
-  Future<List<IDBCursorWithValue>> getCursors(IDBObjectStore store) async {
-    final cursorRequest = store.openCursor();
-    final cursorCompleter = Completer<void>();
-    final cursors = <IDBCursorWithValue>[];
-    cursorRequest.onsuccess = (e) {
-      final cursor = e.target.result as IDBCursorWithValue?;
-      if (cursor == null) {
-        cursorCompleter.complete();
-        return;
-      }
-      cursors.add(cursor);
-    }.toJS;
-    cursorRequest.onerror = (e) {
-      cursorCompleter.completeError(cursorRequest.error!);
-    }.toJS;
-    await cursorCompleter.future;
-    return cursors;
   }
 
   @override
