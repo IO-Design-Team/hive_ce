@@ -65,7 +65,7 @@ class BackendManager implements BackendManagerInterface {
           db.deleteObjectStore(objectStoreName);
         }
       }.toJS;
-      final db = await request.asFuture();
+      final db = await request.asFuture() as IDBDatabase;
       if (db.objectStoreNames.length == 0) {
         await indexedDB!.deleteDatabase(databaseName).asFuture();
       }
@@ -93,7 +93,7 @@ class BackendManager implements BackendManagerInterface {
           var db = e.target.result as IDBDatabase;
           _exists = db.objectStoreNames.contains(objectStoreName);
         }.toJS;
-        final db = await request.asFuture();
+        final db = await request.asFuture() as IDBDatabase;
         _exists = db.objectStoreNames.contains(objectStoreName);
       }
       return _exists;
