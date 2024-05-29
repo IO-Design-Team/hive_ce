@@ -3,10 +3,10 @@ import 'package:hive/hive.dart';
 /// Not part of public API
 class Frame {
   /// Not part of public API
-  final dynamic key;
+  final Object? key;
 
   /// Not part of public API
-  final dynamic value;
+  final Object? value;
 
   /// Not part of public API
   final bool deleted;

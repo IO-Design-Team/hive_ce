@@ -137,8 +137,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (cachedKey != null) return cachedKey.toList();
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final result = await store.getAllKeys(null).asFuture() as List;
-    final List<String> keys = List.from(result.cast<String>() as Iterable);
+    final result = await store.getAllKeys(null).asFuture() as JSArray;
+    final List<String> keys =
+        List.from(result.toDart.map((e) => (e as JSString).toDart));
     _cachedKeys = keys.toSet();
     return keys;
   }
@@ -150,7 +151,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final map = <String, V>{};
     final cursors = await store.getCursors();
     for (final cursor in cursors) {
-      map[cursor.key as String] = cursor.value as V;
+      map[cursor.key as String] = cursor.value.dartify() as V;
     }
     return map;
   }
@@ -160,7 +161,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (_cache.containsKey(key)) return _cache[key];
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    _cache[key] = await store.get(key.toJS).asFuture() as V?;
+    final value = await store.get(key.toJS).asFuture();
+    _cache[key] = value.dartify() as V?;
     return _cache[key];
   }
 
@@ -174,7 +176,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final list =
         await Future.wait(keys.map((e) => store.get(e.toJS).asFuture()));
     for (var i = 0; i < keys.length; i++) {
-      _cache[keys[i]] = list[i] as V?;
+      _cache[keys[i]] = list[i].dartify() as V?;
     }
     return list.cast<V?>();
   }

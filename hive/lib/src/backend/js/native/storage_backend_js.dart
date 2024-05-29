@@ -41,7 +41,7 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  dynamic encodeValue(Frame frame) {
+  Object? encodeValue(Frame frame) {
     var value = frame.value;
     if (_cipher == null) {
       if (value == null) {
@@ -76,7 +76,7 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  dynamic decodeValue(dynamic value) {
+  Object? decodeValue(Object? value) {
     if (value is ByteBuffer) {
       var bytes = Uint8List.view(value);
       if (_isEncoded(bytes)) {
@@ -105,12 +105,12 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  Future<List<dynamic>> getKeys({bool cursor = false}) async {
+  Future<List<Object?>> getKeys({bool cursor = false}) async {
     var store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture();
-      return result;
+      return (result as JSArray).toDart.map((e) => e.dartify()).toList();
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.key).toList();
@@ -119,12 +119,12 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  Future<Iterable<dynamic>> getValues({bool cursor = false}) async {
+  Future<Iterable<Object?>> getValues({bool cursor = false}) async {
     var store = getStore(false);
 
     if (store.has('getAll') && !cursor) {
       final result = await store.getAll(null).asFuture();
-      return (result as List).map(decodeValue);
+      return (result as JSArray).toDart.map((e) => decodeValue(e.dartify()));
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.value).toList();
@@ -153,9 +153,9 @@ class StorageBackendJs extends StorageBackend {
   }
 
   @override
-  Future<dynamic> readValue(Frame frame) async {
-    final value = await getStore(false).get(frame.key).asFuture();
-    return decodeValue(value);
+  Future<Object?> readValue(Frame frame) async {
+    final value = await getStore(false).get(frame.key.jsify()).asFuture();
+    return decodeValue(value.dartify());
   }
 
   @override
@@ -163,9 +163,11 @@ class StorageBackendJs extends StorageBackend {
     var store = getStore(true);
     for (var frame in frames) {
       if (frame.deleted) {
-        await store.delete(frame.key).asFuture();
+        await store.delete(frame.key.jsify()).asFuture();
       } else {
-        await store.put(encodeValue(frame), frame.key).asFuture();
+        await store
+            .put(encodeValue(frame).jsify(), frame.key.jsify())
+            .asFuture();
       }
     }
   }

@@ -4,8 +4,8 @@ import 'dart:js_interop';
 import 'package:web/web.dart';
 
 extension IDBRequestExtension on IDBRequest {
-  Future<dynamic> asFuture() {
-    final completer = Completer<dynamic>();
+  Future<JSAny?> asFuture() {
+    final completer = Completer<JSAny?>();
     onsuccess = (Event e) {
       completer.complete(result);
     }.toJS;
