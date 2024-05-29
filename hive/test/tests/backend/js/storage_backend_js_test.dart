@@ -28,8 +28,8 @@ StorageBackendJs _getBackend({
 
 Future<IDBDatabase> _openDb([String name = 'testBox']) async {
   final request = window.indexedDB.open(name, 1);
-  request.onupgradeneeded = (e) {
-    var db = e.target.result as IDBDatabase;
+  request.onupgradeneeded = (IDBVersionChangeEvent e) {
+    var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {
       db.createObjectStore('box');
     }
@@ -117,15 +117,21 @@ void main() async {
       test('primitive', () {
         var backend = _getBackend();
         expect(backend.decodeValue(null), null);
-        expect(backend.decodeValue(11), 11);
-        expect(backend.decodeValue(17.25), 17.25);
-        expect(backend.decodeValue(true), true);
-        expect(backend.decodeValue('hello'), 'hello');
-        expect(backend.decodeValue([11, 12, 13]), [11, 12, 13]);
-        expect(backend.decodeValue([17.25, 17.26]), [17.25, 17.26]);
+        expect(backend.decodeValue(11.toJS), 11);
+        expect(backend.decodeValue(17.25.toJS), 17.25);
+        expect(backend.decodeValue(true.toJS), true);
+        expect(backend.decodeValue('hello'.toJS), 'hello');
+        expect(
+          backend.decodeValue([11, 12, 13].map((e) => e.toJS).toList().toJS),
+          [11, 12, 13],
+        );
+        expect(
+          backend.decodeValue([17.25, 17.26].map((e) => e.toJS).toList().toJS),
+          [17.25, 17.26],
+        );
 
         var bytes = Uint8List.fromList([1, 2, 3]);
-        expect(backend.decodeValue(bytes.buffer), [1, 2, 3]);
+        expect(backend.decodeValue(bytes.buffer.toJS), [1, 2, 3]);
       });
 
       test('crypto', () {
@@ -134,7 +140,8 @@ void main() async {
         var i = 0;
         for (var testFrame in testFrames) {
           var bytes = [0x90, 0xA9, ...frameValuesBytesEncrypted[i]];
-          var value = backend.decodeValue(Uint8List.fromList(bytes).buffer);
+          var value =
+              backend.decodeValue(Uint8List.fromList(bytes).buffer.toJS);
           expect(value, testFrame.value);
           i++;
         }

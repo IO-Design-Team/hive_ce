@@ -9,8 +9,8 @@ import 'package:web/web.dart';
 
 Future<IDBDatabase> _openDb() async {
   final request = window.indexedDB.open('testBox', 1);
-  request.onupgradeneeded = (e) {
-    var db = e.target.result as IDBDatabase;
+  request.onupgradeneeded = (IDBVersionChangeEvent e) {
+    var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {
       db.createObjectStore('box');
     }

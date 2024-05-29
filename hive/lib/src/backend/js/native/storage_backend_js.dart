@@ -101,12 +101,8 @@ class StorageBackendJs extends StorageBackend {
       return value.toDart;
     } else if (value is JSString) {
       return value.toDart;
-    } else if (value is JSArray<JSNumber>) {
-      return value.toDart.map((e) => e.toDartDouble).toList();
-    } else if (value is JSArray<JSBoolean>) {
-      return value.toDart.map((e) => e.toDart).toList();
-    } else if (value is JSArray<JSString>) {
-      return value.toDart.map((e) => e.toDart).toList();
+    } else if (value is JSArray) {
+      return value.toDart;
     }
 
     return null;
