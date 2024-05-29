@@ -137,8 +137,10 @@ Frame lazyFrameWithLength(Frame frame, int length) {
 
 void expectFrame(Frame f1, Frame f2) {
   expect(f1.key, f2.key);
-  if (f1.value is double && f2.value is double) {
-    if (f1.value.isNaN as bool && f1.value.isNaN as bool) return;
+  final f1Value = f1.value;
+  final f2Value = f2.value;
+  if (f1Value is double && f2Value is double) {
+    if (f1Value.isNaN && f2Value.isNaN) return;
   }
   expect(f1.value, f2.value);
   expect(f1.length, f2.length);
