@@ -6,50 +6,6 @@ part of 'types.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-class Enum1Adapter extends TypeAdapter<Enum1> {
-  @override
-  final int typeId = 3;
-
-  @override
-  Enum1 read(BinaryReader reader) {
-    switch (reader.readByte()) {
-      case 0:
-        return Enum1.emumValue1;
-      case 1:
-        return Enum1.emumValue2;
-      case 2:
-        return Enum1.emumValue3;
-      default:
-        return Enum1.emumValue2;
-    }
-  }
-
-  @override
-  void write(BinaryWriter writer, Enum1 obj) {
-    switch (obj) {
-      case Enum1.emumValue1:
-        writer.writeByte(0);
-        break;
-      case Enum1.emumValue2:
-        writer.writeByte(1);
-        break;
-      case Enum1.emumValue3:
-        writer.writeByte(2);
-        break;
-    }
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Enum1Adapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class Class1Adapter extends TypeAdapter<Class1> {
   @override
   final int typeId = 1;
@@ -107,10 +63,10 @@ class Class2Adapter extends TypeAdapter<Class2> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Class2(
-      fields[0] == null ? 0 : fields[0] as int,
+      fields[0] == null ? 0 : (fields[0] as num).toInt(),
       fields[1] as String,
       (fields[6] as Map?)?.map((dynamic k, dynamic v) => MapEntry(
-          k as int,
+          (k as num).toInt(),
           (v as Map).map((dynamic k, dynamic v) =>
               MapEntry(k as String, (v as List).cast<Class1>())))),
     );
@@ -150,7 +106,7 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
 
   @override
   void write(BinaryWriter writer, EmptyClass obj) {
-    writer..writeByte(0);
+    writer.writeByte(0);
   }
 
   @override
@@ -160,6 +116,50 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is EmptyClassAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class Enum1Adapter extends TypeAdapter<Enum1> {
+  @override
+  final int typeId = 3;
+
+  @override
+  Enum1 read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return Enum1.emumValue1;
+      case 1:
+        return Enum1.emumValue2;
+      case 2:
+        return Enum1.emumValue3;
+      default:
+        return Enum1.emumValue2;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, Enum1 obj) {
+    switch (obj) {
+      case Enum1.emumValue1:
+        writer.writeByte(0);
+        break;
+      case Enum1.emumValue2:
+        writer.writeByte(1);
+        break;
+      case Enum1.emumValue3:
+        writer.writeByte(2);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Enum1Adapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
