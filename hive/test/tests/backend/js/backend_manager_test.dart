@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'package:web/web.dart';
 
 Future<IDBDatabase> _openDb() {
-  final request = window.indexedDB.open('testBox', 1);
+  final request = window.self.indexedDB.open('testBox', 1);
   request.onupgradeneeded = (IDBVersionChangeEvent e) {
     var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {

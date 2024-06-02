@@ -21,8 +21,7 @@ class BoxCollection implements implementation.BoxCollection {
     dynamic path,
     HiveCipher? key,
   }) async {
-    final factory = window.indexedDB;
-    final request = factory.open(name, 1);
+    final request = window.self.indexedDB.open(name, 1);
     request.onupgradeneeded = (IDBVersionChangeEvent event) {
       final _db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
       for (final name in boxNames) {
@@ -101,14 +100,13 @@ class BoxCollection implements implementation.BoxCollection {
 
   @override
   Future<void> deleteFromDisk() async {
-    final factory = window.indexedDB;
     for (final box in _openBoxes) {
       box._cache.clear();
       box._cachedKeys = null;
     }
     _openBoxes.clear();
     _db.close();
-    factory.deleteDatabase(_db.name);
+    window.self.indexedDB.deleteDatabase(_db.name);
   }
 }
 
