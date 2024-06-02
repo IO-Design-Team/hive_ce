@@ -32,7 +32,7 @@ class BoxCollection implements implementation.BoxCollection {
         );
       }
     }.toJS;
-    final _db = await request.asFuture() as IDBDatabase;
+    final _db = await request.asFuture<IDBDatabase>();
     return BoxCollection(_db, boxNames);
   }
 
@@ -137,7 +137,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (cachedKey != null) return cachedKey.toList();
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final result = await store.getAllKeys(null).asFuture() as JSArray;
+    final result = await store.getAllKeys(null).asFuture<JSArray>();
     final List<String> keys =
         List.from(result.toDart.cast<JSString>().map((e) => e.toDart));
     _cachedKeys = keys.toSet();

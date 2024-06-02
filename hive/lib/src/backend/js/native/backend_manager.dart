@@ -24,7 +24,7 @@ class BackendManager implements BackendManagerInterface {
         db.createObjectStore(objectStoreName);
       }
     }.toJS;
-    var db = await request.asFuture() as IDBDatabase;
+    var db = await request.asFuture<IDBDatabase>();
 
     // in case the objectStore is not contained, re-open the db and
     // update version
@@ -38,7 +38,7 @@ class BackendManager implements BackendManagerInterface {
           db.createObjectStore(objectStoreName);
         }
       }.toJS;
-      db = await request.asFuture() as IDBDatabase;
+      db = await request.asFuture<IDBDatabase>();
     }
 
     print('Got object store $objectStoreName in database $databaseName.');
@@ -65,7 +65,7 @@ class BackendManager implements BackendManagerInterface {
           db.deleteObjectStore(objectStoreName);
         }
       }.toJS;
-      final db = await request.asFuture() as IDBDatabase;
+      final db = await request.asFuture<IDBDatabase>();
       if (db.objectStoreNames.length == 0) {
         await indexedDB!.deleteDatabase(databaseName).asFuture();
       }
@@ -93,7 +93,7 @@ class BackendManager implements BackendManagerInterface {
           var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
           _exists = db.objectStoreNames.contains(objectStoreName);
         }.toJS;
-        final db = await request.asFuture() as IDBDatabase;
+        final db = await request.asFuture<IDBDatabase>();
         _exists = db.objectStoreNames.contains(objectStoreName);
       }
       return _exists;

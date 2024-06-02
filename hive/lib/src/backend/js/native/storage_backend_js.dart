@@ -127,8 +127,8 @@ class StorageBackendJs extends StorageBackend {
     var store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
-      final result = await getStore(false).getAllKeys(null).asFuture();
-      return (result as JSArray).toDart.map((e) {
+      final result = await getStore(false).getAllKeys(null).asFuture<JSArray>();
+      return result.toDart.map((e) {
         if (e.isA<JSNumber>()) {
           e as JSNumber;
           return e.toDartInt;
@@ -149,8 +149,8 @@ class StorageBackendJs extends StorageBackend {
     var store = getStore(false);
 
     if (store.has('getAll') && !cursor) {
-      final result = await store.getAll(null).asFuture();
-      return (result as JSArray).toDart.map(decodeValue);
+      final result = await store.getAll(null).asFuture<JSArray>();
+      return result.toDart.map(decodeValue);
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.value).toList();
@@ -232,7 +232,7 @@ class StorageBackendJs extends StorageBackend {
           db.deleteObjectStore(objectStoreName);
         }
       }.toJS;
-      final db = request.asFuture() as IDBDatabase;
+      final db = await request.asFuture<IDBDatabase>();
       if (db.objectStoreNames.length == 0) {
         await indexDB.deleteDatabase(_db.name).asFuture();
       }

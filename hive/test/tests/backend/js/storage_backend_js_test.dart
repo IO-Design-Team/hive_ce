@@ -34,7 +34,7 @@ Future<IDBDatabase> _openDb([String name = 'testBox']) async {
       db.createObjectStore('box');
     }
   }.toJS;
-  return await request.asFuture() as IDBDatabase;
+  return await request.asFuture<IDBDatabase>();
 }
 
 IDBObjectStore _getStore(IDBDatabase db) {
