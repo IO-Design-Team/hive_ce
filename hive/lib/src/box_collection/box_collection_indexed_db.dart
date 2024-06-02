@@ -18,7 +18,7 @@ class BoxCollection implements implementation.BoxCollection {
   static Future<BoxCollection> open(
     String name,
     Set<String> boxNames, {
-    dynamic path,
+    String? path,
     HiveCipher? key,
   }) async {
     final request = window.self.indexedDB.open(name, 1);
@@ -198,7 +198,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.put(val.toJSBox, key.toJS).asFuture();
+    await store.put(val.jsify(), key.toJS).asFuture();
     _cache[key] = val;
     _cachedKeys?.add(key);
     return;
