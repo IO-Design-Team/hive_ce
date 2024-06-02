@@ -71,7 +71,7 @@ class StorageBackendJs extends StorageBackend {
     if (_cipher == null) {
       frameWriter.write(value);
     } else {
-      frameWriter.writeEncrypted(value, _cipher!);
+      frameWriter.writeEncrypted(value, _cipher);
     }
 
     var bytes = frameWriter.toBytes();
@@ -82,7 +82,8 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   Object? decodeValue(JSAny? value) {
-    if (value is JSArrayBuffer) {
+    if (value.isA<JSArrayBuffer>()) {
+      value as JSArrayBuffer;
       var bytes = Uint8List.view(value.toDart);
       if (_isEncoded(bytes)) {
         var reader = BinaryReaderImpl(bytes, _registry);
@@ -90,18 +91,22 @@ class StorageBackendJs extends StorageBackend {
         if (_cipher == null) {
           return reader.read();
         } else {
-          return reader.readEncrypted(_cipher!);
+          return reader.readEncrypted(_cipher);
         }
       } else {
         return bytes;
       }
-    } else if (value is JSNumber) {
+    } else if (value.isA<JSNumber>()) {
+      value as JSNumber;
       return value.toDartDouble;
-    } else if (value is JSBoolean) {
+    } else if (value.isA<JSBoolean>()) {
+      value as JSBoolean;
       return value.toDart;
-    } else if (value is JSString) {
+    } else if (value.isA<JSString>()) {
+      value as JSString;
       return value.toDart;
-    } else if (value is JSArray) {
+    } else if (value.isA<JSArray>()) {
+      value as JSArray;
       return value.toDart;
     }
 
@@ -123,13 +128,17 @@ class StorageBackendJs extends StorageBackend {
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture();
-      return (result as JSArray).toDart.map((e) {
-        if (e is JSNumber) {
-          return e.toDartInt;
-        } else if (e is JSString) {
-          return e.toDart;
+      final keys = <Object?>[];
+      for (final key in (result as JSArray).toDart) {
+        if (key.isA<JSNumber>()) {
+          key as JSNumber;
+          keys.add(key.toDartInt);
+        } else if (key.isA<JSString>()) {
+          key as JSString;
+          keys.add(key.toDart);
         }
-      }).toList();
+      }
+      return keys;
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.key).toList();

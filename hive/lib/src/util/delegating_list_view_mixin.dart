@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 /// Not part of public API
-abstract class DelegatingListViewMixin<E> implements List<E> {
+mixin DelegatingListViewMixin<E> implements List<E> {
   /// Not part of public API
   @protected
   @visibleForTesting
