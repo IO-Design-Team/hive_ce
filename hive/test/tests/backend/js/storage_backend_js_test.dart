@@ -41,12 +41,32 @@ IDBObjectStore _getStore(IDBDatabase db) {
   return db.transaction('box'.toJS, 'readwrite').objectStore('box');
 }
 
-Future<IDBDatabase> _getDbWith(Map<String, dynamic> content) async {
+Future<IDBDatabase> _getDbWith(Map<String, Object?> content) async {
   var db = await _openDb();
   var store = _getStore(db);
   await store.clear().asFuture();
-  content.forEach((k, v) => store.put(v, k.toJS));
+  content.forEach((k, v) => store.put(_toJS(v), k.toJS));
   return db;
+}
+
+JSAny? _toJS(Object? value) {
+  if (value == null) {
+    return null;
+  } else if (value is num) {
+    return value.toJS;
+  } else if (value is bool) {
+    return value.toJS;
+  } else if (value is String) {
+    return value.toJS;
+  } else if (value is List<num>) {
+    return value.map((e) => e.toJS).toList().toJS;
+  } else if (value is List<bool>) {
+    return value.map((e) => e.toJS).toList().toJS;
+  } else if (value is List<String>) {
+    return value.map((e) => e.toJS).toList().toJS;
+  } else {
+    return null;
+  }
 }
 
 void main() async {
@@ -63,13 +83,28 @@ void main() async {
           [11, 12, 13], [17.25, 17.26], [true, false], ['str1', 'str2'] //
         ];
         var backend = _getBackend();
-        for (var value in values) {
-          expect(backend.encodeValue(Frame('key', value)), value);
+        for (var i = 0; i < values.length; i++) {
+          final value = values[i];
+          final encoded = backend.encodeValue(Frame('key', value));
+          final expected = _toJS(value);
+          if (encoded.isA<JSArray>()) {
+            encoded as JSArray;
+            expected as JSArray;
+            expect(encoded.toDart.length, expected.toDart.length);
+            for (var j = 0; j < encoded.toDart.length; j++) {
+              expect(encoded.toDart[j], expected.toDart[j]);
+            }
+          } else {
+            expect(
+              encoded.equals(expected).toDart,
+              isTrue,
+            );
+          }
         }
 
         var bytes = Uint8List.fromList([1, 2, 3]);
-        var buffer = backend.encodeValue(Frame('key', bytes)) as ByteBuffer;
-        expect(Uint8List.view(buffer), [1, 2, 3]);
+        var buffer = backend.encodeValue(Frame('key', bytes)) as JSArrayBuffer;
+        expect(Uint8List.view(buffer.toDart), [1, 2, 3]);
       });
 
       test('crypto', () {
@@ -77,8 +112,8 @@ void main() async {
             StorageBackendJs(_nullDatabase, testCipher, 'box', testRegistry);
         var i = 0;
         for (var frame in testFrames) {
-          var buffer = backend.encodeValue(frame) as ByteBuffer;
-          var bytes = Uint8List.view(buffer);
+          var buffer = backend.encodeValue(frame) as JSArrayBuffer;
+          var bytes = Uint8List.view(buffer.toDart);
           expect(bytes.sublist(28),
               [0x90, 0xA9, ...frameValuesBytesEncrypted[i]].sublist(28));
           i++;
@@ -92,8 +127,8 @@ void main() async {
             'otherKey': null
           });
           var backend = StorageBackendJs(_nullDatabase, null, 'box');
-          var encoded =
-              Uint8List.view(backend.encodeValue(frame) as ByteBuffer);
+          var encoded = Uint8List.view(
+              (backend.encodeValue(frame) as JSArrayBuffer).toDart);
 
           var writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
             ..write(frame.value);
@@ -103,8 +138,9 @@ void main() async {
         test('bytes which start with signature', () {
           var frame = Frame(0, Uint8List.fromList([0x90, 0xA9, 1, 2, 3]));
           var backend = _getBackend();
-          var encoded =
-              Uint8List.view(backend.encodeValue(frame) as ByteBuffer);
+          var encoded = Uint8List.view(
+            (backend.encodeValue(frame) as JSArrayBuffer).toDart,
+          );
 
           var writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
             ..write(frame.value);

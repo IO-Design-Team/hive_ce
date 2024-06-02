@@ -261,7 +261,7 @@ class StorageBackendJs extends StorageBackend {
     } else if (key is String) {
       return key.toJS;
     } else {
-      throw HiveError('Invalid key type');
+      throw HiveError('Invalid key type: ${key.runtimeType}');
     }
   }
 }
