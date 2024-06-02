@@ -58,12 +58,11 @@ JSAny? _toJS(Object? value) {
     return value.toJS;
   } else if (value is String) {
     return value.toJS;
-  } else if (value is List<num>) {
-    return value.map((e) => e.toJS).toList().toJS;
-  } else if (value is List<bool>) {
-    return value.map((e) => e.toJS).toList().toJS;
-  } else if (value is List<String>) {
-    return value.map((e) => e.toJS).toList().toJS;
+  } else if (value is List<num> ||
+      value is List<bool> ||
+      value is List<String>) {
+    value as List;
+    return value.map(_toJS).toList().toJS;
   } else {
     return null;
   }

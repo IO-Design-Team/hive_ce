@@ -41,8 +41,9 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  JSAny? encodeValue(Frame frame) {
-    var value = frame.value;
+  JSAny? encodeValue(Frame frame) => _encodeValue(frame.value);
+
+  JSAny? _encodeValue(Object? value) {
     if (_cipher == null) {
       if (value == null) {
         return null;
@@ -56,12 +57,11 @@ class StorageBackendJs extends StorageBackend {
         return value.toJS;
       } else if (value is String) {
         return value.toJS;
-      } else if (value is List<num>) {
-        return value.map((e) => e.toJS).toList().toJS;
-      } else if (value is List<bool>) {
-        return value.map((e) => e.toJS).toList().toJS;
-      } else if (value is List<String>) {
-        return value.map((e) => e.toJS).toList().toJS;
+      } else if (value is List<num> ||
+          value is List<bool> ||
+          value is List<String>) {
+        value as List;
+        return value.map(_encodeValue).toList().toJS;
       }
     }
 
