@@ -95,10 +95,7 @@ void main() async {
               expect(encoded.toDart[j], expected.toDart[j]);
             }
           } else {
-            expect(
-              encoded.equals(expected).toDart,
-              isTrue,
-            );
+            expect(encoded.equals(expected).toDart, true);
           }
         }
 

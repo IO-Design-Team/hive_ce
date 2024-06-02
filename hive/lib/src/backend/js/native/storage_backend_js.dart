@@ -107,18 +107,7 @@ class StorageBackendJs extends StorageBackend {
       return value.toDart;
     } else if (value.isA<JSArray>()) {
       value as JSArray;
-      return value.toDart.map((e) {
-        if (e.isA<JSNumber>()) {
-          e as JSNumber;
-          return e.toDartDouble;
-        } else if (e.isA<JSBoolean>()) {
-          e as JSBoolean;
-          return e.toDart;
-        } else if (e.isA<JSString>()) {
-          e as JSString;
-          return e.toDart;
-        }
-      }).toList();
+      return value.toDart.map(decodeValue).toList();
     }
 
     return null;
@@ -139,17 +128,15 @@ class StorageBackendJs extends StorageBackend {
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture();
-      final keys = <Object?>[];
-      for (final key in (result as JSArray).toDart) {
-        if (key.isA<JSNumber>()) {
-          key as JSNumber;
-          keys.add(key.toDartInt);
-        } else if (key.isA<JSString>()) {
-          key as JSString;
-          keys.add(key.toDart);
+      return (result as JSArray).toDart.map((e) {
+        if (e.isA<JSNumber>()) {
+          e as JSNumber;
+          return e.toDartInt;
+        } else if (e.isA<JSString>()) {
+          e as JSString;
+          e.toDart;
         }
-      }
-      return keys;
+      }).toList();
     } else {
       final cursors = await store.getCursors();
       return cursors.map((e) => e.key).toList();
