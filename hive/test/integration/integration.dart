@@ -23,7 +23,7 @@ Future<HiveImpl> createHive() async {
 Future<BoxBase<T>> openBox<T>(bool lazy,
     {HiveInterface? hive, List<int>? encryptionKey}) async {
   hive ??= await createHive();
-  var id = Random().nextInt(99999999);
+  var id = Random.secure().nextInt(99999999);
   HiveCipher? cipher;
   if (encryptionKey != null) {
     cipher = HiveAesCipher(encryptionKey);
