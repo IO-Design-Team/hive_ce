@@ -138,8 +138,8 @@ class StorageBackendJs extends StorageBackend {
         }
       }).toList();
     } else {
-      final cursors = await store.getCursors();
-      return cursors.map((e) => e.key).toList();
+      final items = await store.iterate();
+      return items.keys.map((e) => e.dartify()).toList();
     }
   }
 
@@ -152,8 +152,8 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture<JSArray>();
       return result.toDart.map(decodeValue);
     } else {
-      final cursors = await store.getCursors();
-      return cursors.map((e) => e.value).toList();
+      final items = await store.iterate();
+      return items.values.map((e) => e.dartify()).toList();
     }
   }
 

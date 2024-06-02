@@ -17,22 +17,23 @@ extension IDBRequestExtension on IDBRequest {
 }
 
 extension IDBObjectStoreExtension on IDBObjectStore {
-  Future<List<IDBCursorWithValue>> getCursors() async {
-    final cursorRequest = openCursor();
-    final cursorCompleter = Completer<void>();
-    final cursors = <IDBCursorWithValue>[];
-    cursorRequest.onsuccess = (Event e) {
+  Future<Map<JSAny?, JSAny?>> iterate() async {
+    final request = openCursor();
+    final completer = Completer<void>();
+    final items = <JSAny?, JSAny?>{};
+    request.onsuccess = (Event e) {
       final cursor = (e.target as IDBRequest).result as IDBCursorWithValue?;
       if (cursor == null) {
-        cursorCompleter.complete();
+        completer.complete();
         return;
       }
-      cursors.add(cursor);
+      items[cursor.key] = cursor.value;
+      cursor.continue_();
     }.toJS;
-    cursorRequest.onerror = (Event e) {
-      cursorCompleter.completeError(cursorRequest.error!);
+    request.onerror = (Event e) {
+      completer.completeError(request.error!);
     }.toJS;
-    await cursorCompleter.future;
-    return cursors;
+    await completer.future;
+    return items;
   }
 }

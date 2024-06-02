@@ -147,9 +147,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final map = <String, V>{};
-    final cursors = await store.getCursors();
-    for (final cursor in cursors) {
-      map[cursor.key as String] = cursor.value.dartify() as V;
+    final items = await store.iterate();
+    for (final entry in items.entries) {
+      map[(entry.key as JSString).toDart] = entry.value.dartify() as V;
     }
     return map;
   }
