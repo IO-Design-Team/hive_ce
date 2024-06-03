@@ -121,8 +121,7 @@ class StorageBackendJs extends StorageBackend {
         }
       }).toList();
     } else {
-      final items = await store.iterate();
-      return items.keys.map((e) => e.dartify()).toList();
+      return store.iterate().map((e) => e.key.dartify()).toList();
     }
   }
 
@@ -135,8 +134,7 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture<JSArray>();
       return result.toDart.map(decodeValue);
     } else {
-      final items = await store.iterate();
-      return items.values.map((e) => e.dartify()).toList();
+      return store.iterate().map((e) => e.value.dartify()).toList();
     }
   }
 
