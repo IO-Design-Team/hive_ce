@@ -41,9 +41,8 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  JSAny? encodeValue(Frame frame) => _encodeValue(frame.value);
-
-  JSAny? _encodeValue(Object? value) {
+  JSAny? encodeValue(Frame frame) {
+    var value = frame.value;
     if (_cipher == null) {
       if (value == null) {
         return null;
@@ -51,17 +50,13 @@ class StorageBackendJs extends StorageBackend {
         if (!_isEncoded(value)) {
           return value.buffer.toJS;
         }
-      } else if (value is num) {
-        return value.toJS;
-      } else if (value is bool) {
-        return value.toJS;
-      } else if (value is String) {
-        return value.toJS;
-      } else if (value is List<num> ||
+      } else if (value is num ||
+          value is bool ||
+          value is String ||
+          value is List<num> ||
           value is List<bool> ||
           value is List<String>) {
-        value as List;
-        return value.map(_encodeValue).toList().toJS;
+        return value.jsify();
       }
     }
 
@@ -71,7 +66,7 @@ class StorageBackendJs extends StorageBackend {
     if (_cipher == null) {
       frameWriter.write(value);
     } else {
-      frameWriter.writeEncrypted(value, _cipher);
+      frameWriter.writeEncrypted(value, _cipher!);
     }
 
     var bytes = frameWriter.toBytes();
@@ -82,7 +77,7 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   Object? decodeValue(JSAny? value) {
-    if (value.isA<JSArrayBuffer>()) {
+    if (value.instanceOfString('ArrayBuffer')) {
       value as JSArrayBuffer;
       var bytes = Uint8List.view(value.toDart);
       if (_isEncoded(bytes)) {
@@ -91,26 +86,14 @@ class StorageBackendJs extends StorageBackend {
         if (_cipher == null) {
           return reader.read();
         } else {
-          return reader.readEncrypted(_cipher);
+          return reader.readEncrypted(_cipher!);
         }
       } else {
         return bytes;
       }
-    } else if (value.isA<JSNumber>()) {
-      value as JSNumber;
-      return value.toDartDouble;
-    } else if (value.isA<JSBoolean>()) {
-      value as JSBoolean;
-      return value.toDart;
-    } else if (value.isA<JSString>()) {
-      value as JSString;
-      return value.toDart;
-    } else if (value.isA<JSArray>()) {
-      value as JSArray;
-      return value.toDart.map(decodeValue).toList();
+    } else {
+      return value.dartify();
     }
-
-    return null;
   }
 
   /// Not part of public API
@@ -180,8 +163,7 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<Object?> readValue(Frame frame) async {
-    final value =
-        await getStore(false).get(_frameKeyToJS(frame.key)).asFuture();
+    final value = await getStore(false).get(frame.key.jsify()).asFuture();
     return decodeValue(value);
   }
 
@@ -190,11 +172,9 @@ class StorageBackendJs extends StorageBackend {
     var store = getStore(true);
     for (var frame in frames) {
       if (frame.deleted) {
-        await store.delete(_frameKeyToJS(frame.key)).asFuture();
+        await store.delete(frame.key.jsify()).asFuture();
       } else {
-        await store
-            .put(encodeValue(frame), _frameKeyToJS(frame.key))
-            .asFuture();
+        await store.put(encodeValue(frame), frame.key.jsify()).asFuture();
       }
     }
   }
@@ -241,14 +221,4 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<void> flush() => Future.value();
-
-  JSAny _frameKeyToJS(Object? key) {
-    if (key is int) {
-      return key.toJS;
-    } else if (key is String) {
-      return key.toJS;
-    } else {
-      throw HiveError('Invalid key type: ${key.runtimeType}');
-    }
-  }
 }

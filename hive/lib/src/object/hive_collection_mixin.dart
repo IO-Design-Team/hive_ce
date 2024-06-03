@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
 
 /// Implemetation of [HiveCollection].
-mixin HiveCollectionMixin<E extends HiveObjectMixin>
+abstract class HiveCollectionMixin<E extends HiveObjectMixin>
     implements HiveCollection<E> {
   @override
   Iterable<dynamic> get keys sync* {

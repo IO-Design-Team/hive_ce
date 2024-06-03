@@ -45,27 +45,8 @@ Future<IDBDatabase> _getDbWith(Map<String, Object?> content) async {
   var db = await _openDb();
   var store = _getStore(db);
   await store.clear().asFuture();
-  content.forEach((k, v) => store.put(_toJS(v), k.toJS));
+  content.forEach((k, v) => store.put(v.jsify(), k.toJS));
   return db;
-}
-
-JSAny? _toJS(Object? value) {
-  if (value == null) {
-    return null;
-  } else if (value is num) {
-    return value.toJS;
-  } else if (value is bool) {
-    return value.toJS;
-  } else if (value is String) {
-    return value.toJS;
-  } else if (value is List<num> ||
-      value is List<bool> ||
-      value is List<String>) {
-    value as List;
-    return value.map(_toJS).toList().toJS;
-  } else {
-    return null;
-  }
 }
 
 void main() async {
@@ -82,20 +63,8 @@ void main() async {
           [11, 12, 13], [17.25, 17.26], [true, false], ['str1', 'str2'] //
         ];
         var backend = _getBackend();
-        for (var i = 0; i < values.length; i++) {
-          final value = values[i];
-          final encoded = backend.encodeValue(Frame('key', value));
-          final expected = _toJS(value);
-          if (encoded.isA<JSArray>()) {
-            encoded as JSArray;
-            expected as JSArray;
-            expect(encoded.toDart.length, expected.toDart.length);
-            for (var j = 0; j < encoded.toDart.length; j++) {
-              expect(encoded.toDart[j], expected.toDart[j]);
-            }
-          } else {
-            expect(encoded.equals(expected).toDart, true);
-          }
+        for (var value in values) {
+          expect(backend.encodeValue(Frame('key', value)).dartify(), value);
         }
 
         var bytes = Uint8List.fromList([1, 2, 3]);
@@ -153,14 +122,8 @@ void main() async {
         expect(backend.decodeValue(17.25.toJS), 17.25);
         expect(backend.decodeValue(true.toJS), true);
         expect(backend.decodeValue('hello'.toJS), 'hello');
-        expect(
-          backend.decodeValue([11, 12, 13].map((e) => e.toJS).toList().toJS),
-          [11, 12, 13],
-        );
-        expect(
-          backend.decodeValue([17.25, 17.26].map((e) => e.toJS).toList().toJS),
-          [17.25, 17.26],
-        );
+        expect(backend.decodeValue([11, 12, 13].jsify()), [11, 12, 13]);
+        expect(backend.decodeValue([17.25, 17.26].jsify()), [17.25, 17.26]);
 
         var bytes = Uint8List.fromList([1, 2, 3]);
         expect(backend.decodeValue(bytes.buffer.toJS), [1, 2, 3]);
