@@ -8,14 +8,13 @@ jobs:
     strategy:
       matrix:
         test-platform: [vm, chrome]
-        dart-channel: ["3.3.0"]
+        dart-channel: ["3.4.0"]
         include:
           - test-platform: vm
             compiler: kernel
           - test-platform: chrome
             compiler: dart2js
           - test-platform: chrome
-            dart-channel: 3.4.0 # The test package requires 3.4.0 for WASM tests
             compiler: dart2wasm
     steps:
       - uses: actions/checkout@v4

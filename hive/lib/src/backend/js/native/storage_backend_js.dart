@@ -77,7 +77,7 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   Object? decodeValue(JSAny? value) {
-    if (value.instanceOfString('ArrayBuffer')) {
+    if (value.isA<JSArrayBuffer>()) {
       value as JSArrayBuffer;
       var bytes = Uint8List.view(value.toDart);
       if (_isEncoded(bytes)) {
