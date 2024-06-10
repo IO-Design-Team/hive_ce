@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        test-platform: [vm, chrome]
         dart-channel: ["3.4.0"]
         include:
           - test-platform: vm
