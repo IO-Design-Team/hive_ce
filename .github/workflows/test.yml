@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dart-channel: ["3.4.0"]
         include:
           - test-platform: vm
             compiler: kernel
@@ -20,7 +19,7 @@ jobs:
       - uses: browser-actions/setup-chrome@v1
       - uses: dart-lang/setup-dart@v1
         with:
-          sdk: ${{ matrix.dart-channel }}
+          sdk: 3.4.0
       - name: Install dependencies
         run: dart pub get
         working-directory: hive
