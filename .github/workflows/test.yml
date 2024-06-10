@@ -18,6 +18,7 @@ jobs:
             compiler: dart2wasm
     steps:
       - uses: actions/checkout@v4
+      - uses: browser-actions/setup-chrome@v1
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.dart-channel }}
@@ -32,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [dev, beta, stable]
+        flutter-channel: [beta, stable]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
