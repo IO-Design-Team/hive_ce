@@ -15,6 +15,7 @@ jobs:
           - test-platform: chrome
             compiler: dart2js
           - test-platform: chrome
+            dart-channel: 3.4.0 # The test package requires 3.4.0 for WASM tests
             compiler: dart2wasm
     steps:
       - uses: actions/checkout@v4
