@@ -13,14 +13,14 @@ jobs:
       image:  google/dart:latest
     
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
     - name: Collect coverage
       run: |
         dart pub get
         dart pub global activate test_coverage
         dart pub global run test_coverage --exclude "**/js/**"
       working-directory: hive
-    - uses: codecov/codecov-action@v1.0.0
+    - uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: hive/coverage/lcov.info
