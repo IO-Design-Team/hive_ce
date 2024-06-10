@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dart-channel: ["3.3.0"]
+        dart-channel: ["3.4.0"]
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
