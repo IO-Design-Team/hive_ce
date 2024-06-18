@@ -131,18 +131,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   }
 
   /// TODO: Document this!
-  CollectionBox(this.name, this.boxCollection) {
-    if (!(V is String ||
-        V is bool ||
-        V is int ||
-        V is List<Object?> ||
-        V is Map<String, Object?> ||
-        V is double)) {
-      throw Exception(
-        'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.',
-      );
-    }
-  }
+  CollectionBox(this.name, this.boxCollection);
 
   @override
   Future<List<String>> getAllKeys() async {
