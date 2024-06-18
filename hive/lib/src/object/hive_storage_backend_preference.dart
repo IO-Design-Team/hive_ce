@@ -1,4 +1,4 @@
-part of hive;
+part of '../../hive.dart';
 
 /// declares the preferred JS StorageBackend to be used
 ///

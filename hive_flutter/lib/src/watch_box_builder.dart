@@ -1,4 +1,4 @@
-part of hive_flutter;
+part of '../hive_flutter.dart';
 
 /// Signature for a function that builds a widget given a [Box].
 @Deprecated('Use [ValueListenableBuilder] and `box.listenable()` instead')
@@ -14,12 +14,12 @@ class WatchBoxBuilder extends StatefulWidget {
   ///
   /// If you specify [watchKeys], the widget only refreshes when a value
   /// associated to a key in [watchKeys] changes.
-  WatchBoxBuilder({
-    Key? key,
+  const WatchBoxBuilder({
+    super.key,
     required this.box,
     required this.builder,
     this.watchKeys,
-  }) : super(key: key);
+  });
 
   /// The box which should be watched.
   final Box box;
@@ -31,7 +31,7 @@ class WatchBoxBuilder extends StatefulWidget {
   final List<String>? watchKeys;
 
   @override
-  _WatchBoxBuilderState createState() => _WatchBoxBuilderState();
+  State<StatefulWidget> createState() => _WatchBoxBuilderState();
 }
 
 @Deprecated('Use [ValueListenableBuilder] and `box.listenable()` instead')

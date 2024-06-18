@@ -1,4 +1,6 @@
 @TestOn('vm')
+library;
+
 import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

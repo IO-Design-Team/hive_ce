@@ -1,4 +1,4 @@
-part of hive_object_internal;
+part of 'hive_object.dart';
 
 /// Not part of public API
 extension HiveObjectInternal on HiveObjectMixin {
@@ -21,7 +21,7 @@ extension HiveObjectInternal on HiveObjectMixin {
 
   /// Not part of public API
   void dispose() {
-    for (var list in _hiveLists.keys) {
+    for (final list in _hiveLists.keys) {
       (list as HiveListImpl).invalidate();
     }
 

@@ -12,7 +12,8 @@ class HiveFieldInfo {
   final DartObject? defaultValue;
 }
 
-HiveFieldInfo? getHiveFieldAnn(Element element) {
+HiveFieldInfo? getHiveFieldAnn(Element? element) {
+  if (element == null) return null;
   final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
   if (obj == null) return null;
 

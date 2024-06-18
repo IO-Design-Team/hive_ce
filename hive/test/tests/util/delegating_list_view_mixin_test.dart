@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:hive_ce/src/util/delegating_list_view_mixin.dart';
 import 'package:test/test.dart';
 
-import '../common.dart';
-
 void main() {
   group('DelegatingIterable', () {
     late _TestList<String> testList;
@@ -98,11 +96,7 @@ void main() {
 
     test('.forEach()', () {
       final it = testList.iterator;
-      if (soundNullSafety) {
-        expect(() => it.current, throwsA(anything));
-      } else {
-        expect(it.current, null);
-      }
+      expect(() => it.current, throwsA(anything));
       expect(it.moveNext(), isTrue);
       expect(it.current, 'a');
       expect(it.moveNext(), isTrue);
@@ -110,11 +104,7 @@ void main() {
       expect(it.moveNext(), isTrue);
       expect(it.current, 'cc');
       expect(it.moveNext(), isFalse);
-      if (soundNullSafety) {
-        expect(() => it.current, throwsA(anything));
-      } else {
-        expect(it.current, null);
-      }
+      expect(() => it.current, throwsA(anything));
     });
 
     test('.join()', () {

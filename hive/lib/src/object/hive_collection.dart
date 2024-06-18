@@ -1,4 +1,4 @@
-part of hive;
+part of '../../hive.dart';
 
 /// List containing [HiveObjectMixin]s.
 abstract class HiveCollection<E extends HiveObjectMixin> implements List<E> {

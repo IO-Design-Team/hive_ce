@@ -121,7 +121,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
         completer.complete();
         return newBox;
       } catch (error, stackTrace) {
-        newBox?.close();
+        unawaited(newBox?.close());
         completer.completeError(error, stackTrace);
         rethrow;
       } finally {

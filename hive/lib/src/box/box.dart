@@ -1,4 +1,4 @@
-part of hive;
+part of '../../hive.dart';
 
 /// Boxes contain all of your data. In the browser, each box has its own
 /// IndexedDB database. On all other platforms, each Box is stored in a

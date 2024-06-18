@@ -1,4 +1,4 @@
-part of hive_flutter;
+part of '../hive_flutter.dart';
 
 /// Flutter extensions for boxes.
 extension BoxX<T> on Box<T> {
@@ -39,14 +39,14 @@ class _BoxListenable<T, B extends BoxBase<T>> extends ValueListenable<B> {
       if (keys != null) {
         _subscription = box.watch().listen((event) {
           if (keys!.contains(event.key)) {
-            for (var listener in _listeners) {
+            for (final listener in _listeners) {
               listener();
             }
           }
         });
       } else {
         _subscription = box.watch().listen((_) {
-          for (var listener in _listeners) {
+          for (final listener in _listeners) {
             listener();
           }
         });

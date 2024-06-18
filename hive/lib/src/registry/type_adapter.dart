@@ -1,4 +1,4 @@
-part of hive;
+part of '../../hive.dart';
 
 /// Type adapters can be implemented to support non primitive values.
 @immutable

@@ -1,4 +1,4 @@
-part of hive;
+part of '../../hive.dart';
 
 /// Abstract cipher can be implemented to customize encryption.
 abstract class HiveCipher {
@@ -10,9 +10,19 @@ abstract class HiveCipher {
 
   /// Encrypt the given bytes.
   int encrypt(
-      Uint8List inp, int inpOff, int inpLength, Uint8List out, int outOff);
+    Uint8List inp,
+    int inpOff,
+    int inpLength,
+    Uint8List out,
+    int outOff,
+  );
 
   /// Decrypt the given bytes.
   int decrypt(
-      Uint8List inp, int inpOff, int inpLength, Uint8List out, int outOff);
+    Uint8List inp,
+    int inpOff,
+    int inpLength,
+    Uint8List out,
+    int outOff,
+  );
 }

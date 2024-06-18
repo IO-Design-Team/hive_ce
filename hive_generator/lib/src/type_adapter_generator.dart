@@ -108,12 +108,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
-      final getter = cls.lookUpGetter(name, library);
+      final getter = cls.augmented.lookUpGetter(name: name, library: library);
       if (getter != null) {
         final getterAnn =
-            getHiveFieldAnn(getter.variable) ?? getHiveFieldAnn(getter);
+            getHiveFieldAnn(getter.variable2) ?? getHiveFieldAnn(getter);
         if (getterAnn != null) {
-          final field = getter.variable;
+          final field = getter.variable2!;
           getters.add(
             AdapterField(
               getterAnn.index,
@@ -125,12 +125,13 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         }
       }
 
-      final setter = cls.lookUpSetter('$name=', library);
+      final setter =
+          cls.augmented.lookUpSetter(name: '$name=', library: library);
       if (setter != null) {
         final setterAnn =
-            getHiveFieldAnn(setter.variable) ?? getHiveFieldAnn(setter);
+            getHiveFieldAnn(setter.variable2) ?? getHiveFieldAnn(setter);
         if (setterAnn != null) {
-          final field = setter.variable;
+          final field = setter.variable2!;
           setters.add(
             AdapterField(
               setterAnn.index,

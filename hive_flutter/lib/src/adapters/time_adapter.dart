@@ -1,4 +1,4 @@
-part of hive_flutter_adapters;
+part of '../../adapters.dart';
 
 class TimeOfDayAdapter extends TypeAdapter<TimeOfDay> {
   @override

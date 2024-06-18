@@ -225,5 +225,5 @@ String _suffixFromType(DartType type) {
 
 String _displayString(DartType e) {
   final suffix = _suffixFromType(e);
-  return '${e.getDisplayString(withNullability: false)}$suffix';
+  return '${e.getDisplayString()}$suffix';
 }

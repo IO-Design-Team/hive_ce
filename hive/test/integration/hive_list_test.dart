@@ -12,7 +12,7 @@ class _TestObject extends HiveObject {
   _TestObject(this.name);
 
   @override
-  bool operator ==(dynamic other) => other is _TestObject && other.name == name;
+  bool operator ==(Object other) => other is _TestObject && other.name == name;
 
   @override
   int get hashCode => runtimeType.hashCode ^ name.hashCode;

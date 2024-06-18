@@ -72,7 +72,7 @@ class Frame {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is Frame) {
       return key == other.key &&
           value == other.value &&
