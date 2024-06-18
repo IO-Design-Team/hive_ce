@@ -1,7 +1,6 @@
 @TestOn('browser')
 library;
 
-
 import 'dart:js_interop';
 
 import 'package:hive_ce/src/backend/js/backend_manager.dart';

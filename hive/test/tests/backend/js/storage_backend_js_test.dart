@@ -1,7 +1,6 @@
 @TestOn('browser')
 library;
 
-
 import 'dart:async' show Future;
 import 'dart:js_interop';
 import 'dart:typed_data';
