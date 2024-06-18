@@ -17,7 +17,9 @@ class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
   }
 }
 
+/// TODO: Document this!
 class DateTimeWithoutTZ extends DateTime {
+  /// TODO: Document this!
   DateTimeWithoutTZ.fromMillisecondsSinceEpoch(super.millisecondsSinceEpoch)
       : super.fromMillisecondsSinceEpoch();
 }

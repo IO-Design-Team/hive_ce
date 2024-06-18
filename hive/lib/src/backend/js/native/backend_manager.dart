@@ -8,6 +8,7 @@ import 'package:web/web.dart';
 
 /// Opens IndexedDB databases
 class BackendManager implements BackendManagerInterface {
+  /// TODO: Document this!
   IDBFactory? get indexedDB => window.self.indexedDB;
 
   @override

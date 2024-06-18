@@ -22,5 +22,6 @@ class HiveField {
   /// ```
   final dynamic defaultValue;
 
+  /// TODO: Document this!
   const HiveField(this.index, {this.defaultValue});
 }

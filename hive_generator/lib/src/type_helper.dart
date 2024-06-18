@@ -3,8 +3,10 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
+/// TODO: Document this!
 const bool kConstConstructors = true;
 
+/// TODO: Document this!
 String constantToString(
   DartObject? object, [
   List<String> typeInformation = const [],
@@ -16,6 +18,7 @@ String constantToString(
       : revivableToString(object, typeInformation);
 }
 
+/// TODO: Document this!
 String revivableToString(DartObject? object, List<String> typeInformation) {
   final reader = ConstantReader(object);
   final revivable = reader.revive();
@@ -41,6 +44,7 @@ String revivableToString(DartObject? object, List<String> typeInformation) {
 
 // The code below is based on code from https://github.com/google/json_serializable.dart/blob/df60c2a95c4c0054d6ab785849937d7f5ade39fe/json_serializable/lib/src/json_key_utils.dart#L43
 
+/// TODO: Document this!
 String literalToString(DartObject object, List<String> typeInformation) {
   final reader = ConstantReader(object);
 
@@ -129,5 +133,6 @@ String literalToString(DartObject object, List<String> typeInformation) {
   );
 }
 
+/// TODO: Document this!
 Never throwUnsupported(String message) =>
     throw InvalidGenerationSourceError('Error with `@HiveField`. $message');

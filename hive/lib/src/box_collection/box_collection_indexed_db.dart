@@ -13,8 +13,10 @@ class BoxCollection implements implementation.BoxCollection {
   @override
   final Set<String> boxNames;
 
+  /// TODO: Document this!
   BoxCollection(this._db, this.boxNames);
 
+  /// TODO: Document this!
   static Future<BoxCollection> open(
     String name,
     Set<String> boxNames, {
@@ -112,6 +114,7 @@ class BoxCollection implements implementation.BoxCollection {
   }
 }
 
+/// TODO: Document this!
 class CollectionBox<V> implements implementation.CollectionBox<V> {
   @override
   final String name;
@@ -120,6 +123,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   final Map<String, V?> _cache = {};
   Set<String>? _cachedKeys;
 
+  /// TODO: Document this!
   CollectionBox(this.name, this.boxCollection) {
     if (!(V is String ||
         V is int ||

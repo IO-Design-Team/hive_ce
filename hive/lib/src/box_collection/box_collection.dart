@@ -7,6 +7,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
 
+/// TODO: Document this!
 class BoxCollection implements implementation.BoxCollection {
   @override
   final String name;
@@ -14,12 +15,14 @@ class BoxCollection implements implementation.BoxCollection {
   final Set<String> boxNames;
   HiveCipher? _cipher;
 
+  /// TODO: Document this!
   BoxCollection(this.name, this.boxNames);
 
   static bool _hiveInit = false;
 
   late Box<String> _badKeyBox;
 
+  /// TODO: Document this!
   static Future<BoxCollection> open(
     String name,
     Set<String> boxNames, {
@@ -114,6 +117,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   @override
   final BoxCollection boxCollection;
 
+  /// TODO: Document this!
   static final transactionBoxes = <Zone, Set<String>>{};
 
   BoxBase? _cachedBox;
@@ -126,6 +130,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     );
   }
 
+  /// TODO: Document this!
   CollectionBox(this.name, this.boxCollection) {
     if (!(V is String ||
         V is bool ||

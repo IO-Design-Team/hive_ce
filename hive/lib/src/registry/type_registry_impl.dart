@@ -7,13 +7,19 @@ import 'package:meta/meta.dart';
 /// Needed to codegen the TypeRegistry mock
 @visibleForTesting
 class ResolvedAdapter<T> {
+  /// TODO: Document this!
   final TypeAdapter adapter;
+
+  /// TODO: Document this!
   final int typeId;
 
+  /// TODO: Document this!
   ResolvedAdapter(this.adapter, this.typeId);
 
+  /// TODO: Document this!
   bool matchesRuntimeType(dynamic value) => value.runtimeType == T;
 
+  /// TODO: Document this!
   bool matchesType(dynamic value) => value is T;
 }
 
@@ -135,6 +141,7 @@ class TypeRegistryImpl implements TypeRegistry {
     return findAdapterForTypeId(typeId) != null;
   }
 
+  /// TODO: Document this!
   void resetAdapters() {
     _typeAdapters.clear();
   }

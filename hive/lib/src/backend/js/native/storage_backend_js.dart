@@ -19,6 +19,8 @@ class StorageBackendJs extends StorageBackend {
   static const _bytePrefix = [0x90, 0xA9];
   final IDBDatabase _db;
   final HiveCipher? _cipher;
+
+  /// TODO: Document this!
   final String objectStoreName;
 
   TypeRegistry _registry;

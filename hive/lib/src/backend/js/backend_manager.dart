@@ -8,6 +8,7 @@ abstract class BackendManager {
   BackendManager._();
 
   // dummy implementation as the WebWorker branch is not stable yet
+  /// TODO: Document this!
   static BackendManagerInterface select([
     HiveStorageBackendPreference? backendPreference,
   ]) {

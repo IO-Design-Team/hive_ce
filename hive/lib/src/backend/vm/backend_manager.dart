@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 class BackendManager implements BackendManagerInterface {
   final _delimiter = Platform.isWindows ? '\\' : '/';
 
+  /// TODO: Document this!
   static BackendManager select([
     HiveStorageBackendPreference? backendPreference,
   ]) =>

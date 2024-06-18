@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 
 /// Not part of public API
 abstract class BoxBaseImpl<E> implements BoxBase<E> {
+  /// TODO: Document this!
   static BoxBase<E> nullImpl<E>() => _NullBoxBase<E>();
 
   @override

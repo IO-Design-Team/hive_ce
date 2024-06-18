@@ -1,5 +1,6 @@
 part of '../../adapters.dart';
 
+/// TODO: Document this!
 class TimeOfDayAdapter extends TypeAdapter<TimeOfDay> {
   @override
   TimeOfDay read(BinaryReader reader) {

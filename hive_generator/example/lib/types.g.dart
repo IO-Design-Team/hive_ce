@@ -6,6 +6,7 @@ part of 'types.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
+/// TODO: Document this!
 class Class1Adapter extends TypeAdapter<Class1> {
   @override
   final int typeId = 1;
@@ -52,6 +53,7 @@ class Class1Adapter extends TypeAdapter<Class1> {
           typeId == other.typeId;
 }
 
+/// TODO: Document this!
 class Class2Adapter extends TypeAdapter<Class2> {
   @override
   final int typeId = 2;
@@ -100,6 +102,7 @@ class Class2Adapter extends TypeAdapter<Class2> {
           typeId == other.typeId;
 }
 
+/// TODO: Document this!
 class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
   @override
   final int typeId = 4;
@@ -125,6 +128,7 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
           typeId == other.typeId;
 }
 
+/// TODO: Document this!
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
   final int typeId = 3;

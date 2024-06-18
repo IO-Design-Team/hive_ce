@@ -58,4 +58,5 @@ mixin HiveObjectMixin {
   }
 }
 
+/// TODO: Document this!
 abstract class HiveObject with HiveObjectMixin {}

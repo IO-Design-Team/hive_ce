@@ -1,7 +1,9 @@
 import 'package:hive_ce_generator/src/builder.dart';
 import 'package:hive_ce_generator/src/helper.dart';
 
+/// TODO: Document this!
 class EnumBuilder extends Builder {
+  /// TODO: Document this!
   EnumBuilder(super.cls, super.getters);
 
   @override

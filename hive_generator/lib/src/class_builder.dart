@@ -10,18 +10,31 @@ import 'package:source_gen/source_gen.dart';
 
 import 'package:hive_ce_generator/src/type_helper.dart';
 
+/// TODO: Document this!
 class ClassBuilder extends Builder {
+  /// TODO: Document this!
   ClassBuilder(
     super.cls,
     super.getters,
     super.setters,
   );
 
+  /// TODO: Document this!
   var hiveListChecker = const TypeChecker.fromRuntime(HiveList);
+
+  /// TODO: Document this!
   var listChecker = const TypeChecker.fromRuntime(List);
+
+  /// TODO: Document this!
   var mapChecker = const TypeChecker.fromRuntime(Map);
+
+  /// TODO: Document this!
   var setChecker = const TypeChecker.fromRuntime(Set);
+
+  /// TODO: Document this!
   var iterableChecker = const TypeChecker.fromRuntime(Iterable);
+
+  /// TODO: Document this!
   var uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
 
   @override
@@ -111,11 +124,13 @@ class ClassBuilder extends Builder {
     }
   }
 
+  /// TODO: Document this!
   bool isMapOrIterable(DartType type) {
     return iterableChecker.isAssignableFromType(type) ||
         mapChecker.isAssignableFromType(type);
   }
 
+  /// TODO: Document this!
   bool isUint8List(DartType type) {
     return uint8ListChecker.isExactlyType(type);
   }

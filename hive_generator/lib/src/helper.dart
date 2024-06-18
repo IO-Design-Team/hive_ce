@@ -5,13 +5,19 @@ import 'package:source_gen/source_gen.dart';
 
 final _hiveFieldChecker = const TypeChecker.fromRuntime(HiveField);
 
+/// TODO: Document this!
 class HiveFieldInfo {
+  /// TODO: Document this!
   HiveFieldInfo(this.index, this.defaultValue);
 
+  /// TODO: Document this!
   final int index;
+
+  /// TODO: Document this!
   final DartObject? defaultValue;
 }
 
+/// TODO: Document this!
 HiveFieldInfo? getHiveFieldAnn(Element? element) {
   if (element == null) return null;
   final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
@@ -23,6 +29,7 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
   );
 }
 
+/// TODO: Document this!
 bool isLibraryNNBD(Element element) {
   final dartVersion = element.library!.languageVersion.effective;
   // Libraries with the dart version >= 2.12 are nnbd
@@ -33,6 +40,7 @@ bool isLibraryNNBD(Element element) {
   }
 }
 
+/// TODO: Document this!
 void check(bool condition, Object error) {
   if (!condition) {
     // ignore: only_throw_errors

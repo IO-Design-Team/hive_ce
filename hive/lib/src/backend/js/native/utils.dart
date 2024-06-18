@@ -3,7 +3,9 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart';
 
+/// TODO: Document this!
 extension IDBRequestExtension on IDBRequest {
+  /// TODO: Document this!
   Future<T> asFuture<T extends JSAny?>() {
     final completer = Completer<T>();
     onsuccess = (e) {
@@ -16,7 +18,9 @@ extension IDBRequestExtension on IDBRequest {
   }
 }
 
+/// TODO: Document this!
 extension IDBObjectStoreExtension on IDBObjectStore {
+  /// TODO: Document this!
   Stream<IDBCursorWithValue> iterate() {
     final controller = StreamController<IDBCursorWithValue>();
     final request = openCursor();

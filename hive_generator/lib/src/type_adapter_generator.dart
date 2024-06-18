@@ -8,7 +8,9 @@ import 'package:hive_ce_generator/src/helper.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
+/// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
+  /// TODO: Document this!
   static String generateName(String typeName) {
     var adapterName =
         '${typeName}Adapter'.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '');
@@ -72,6 +74,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     ''';
   }
 
+  /// TODO: Document this!
   InterfaceElement getClass(Element element) {
     check(
       element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
@@ -81,6 +84,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     return element as InterfaceElement;
   }
 
+  /// TODO: Document this!
   Set<String> getAllAccessorNames(InterfaceElement cls) {
     final accessorNames = <String>{};
 
@@ -99,6 +103,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     return accessorNames;
   }
 
+  /// TODO: Document this!
   List<List<AdapterField>> getAccessors(
     InterfaceElement cls,
     LibraryElement library,
@@ -147,6 +152,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     return [getters, setters];
   }
 
+  /// TODO: Document this!
   void verifyFieldIndices(List<AdapterField> fields) {
     for (final field in fields) {
       check(
@@ -166,6 +172,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     }
   }
 
+  /// TODO: Document this!
   String getAdapterName(String typeName, ConstantReader annotation) {
     final annAdapterName = annotation.read('adapterName');
     if (annAdapterName.isNull) {
@@ -175,6 +182,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     }
   }
 
+  /// TODO: Document this!
   int getTypeId(ConstantReader annotation) {
     check(
       !annotation.read('typeId').isNull,
