@@ -1,7 +1,5 @@
-*.hive
-.test_coverage.dart
-coverage_badge.svg
-
+# Do not remove or rename entries in this file, only add new ones
+# See https://github.com/flutter/flutter/issues/128635 for more context.
 
 # Miscellaneous
 *.class
@@ -22,20 +20,30 @@ coverage_badge.svg
 .idea/
 
 # Visual Studio Code related
-.vscode/
+.classpath
+.project
+.settings/
+.vscode/*
 
 # Flutter repo-specific
 /bin/cache/
+/bin/internal/bootstrap.bat
+/bin/internal/bootstrap.sh
 /bin/mingit/
 /dev/benchmarks/mega_gallery/
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
+/dev/devicelab/ABresults*.json
 /dev/docs/doc/
+/dev/docs/api_docs.zip
 /dev/docs/flutter.docs.zip
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
+/dev/integration_tests/**/xcuserdata
+/dev/integration_tests/**/Pods
 /packages/flutter/coverage/
 version
+analysis_benchmark.json
 
 # packages file containing multi-root paths
 .packages.generated
@@ -44,7 +52,10 @@ version
 **/doc/api/
 .dart_tool/
 .flutter-plugins
+.flutter-plugins-dependencies
+**/generated_plugin_registrant.dart
 .packages
+.pub-preload-cache/
 .pub-cache/
 .pub/
 build/
@@ -55,7 +66,7 @@ unlinked_spec.ds
 
 # Android related
 **/android/**/gradle-wrapper.jar
-**/android/.gradle
+.gradle/
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat
@@ -81,9 +92,12 @@ unlinked_spec.ds
 **/ios/**/profile
 **/ios/**/xcuserdata
 **/ios/.generated/
+**/ios/Flutter/.last_build_id
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/ephemeral
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
 **/ios/Flutter/flutter_assets/
@@ -91,11 +105,28 @@ unlinked_spec.ds
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+# macOS
+**/Flutter/ephemeral/
+**/Pods/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral
+**/xcuserdata/
+
+# Windows
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugin_registrant.h
+**/windows/flutter/generated_plugins.cmake
+
+# Linux
+**/linux/flutter/generated_plugin_registrant.cc
+**/linux/flutter/generated_plugin_registrant.h
+**/linux/flutter/generated_plugins.cmake
+
 # Coverage
 coverage/
 
-# JavaScipt
-web_worker.dart.js*
+# Symbols
+app.*.symbols
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
@@ -103,3 +134,10 @@ web_worker.dart.js*
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!/dev/ci/**/Gemfile.lock
+!.vscode/settings.json
+
+# hive
+*.hive
+.test_coverage.dart
+coverage_badge.svg
