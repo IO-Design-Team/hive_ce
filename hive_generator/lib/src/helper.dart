@@ -13,7 +13,7 @@ class HiveFieldInfo {
 }
 
 HiveFieldInfo? getHiveFieldAnn(Element element) {
-  var obj = _hiveFieldChecker.firstAnnotationOfExact(element);
+  final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
   if (obj == null) return null;
 
   return HiveFieldInfo(

@@ -12,7 +12,7 @@ void main() {
         0xcbf43926,
       );
 
-      var crc = Crc32.compute(Uint8List.fromList('12345'.codeUnits));
+      final crc = Crc32.compute(Uint8List.fromList('12345'.codeUnits));
       expect(
         Crc32.compute(Uint8List.fromList('6789'.codeUnits), crc: crc),
         equals(0xcbf43926),

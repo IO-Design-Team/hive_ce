@@ -1,22 +1,20 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
-import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 
 /// Not part of public API
 class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   /// Not part of public API
   BoxImpl(
-    HiveImpl hive,
-    String name,
-    KeyComparator? keyComparator,
-    CompactionStrategy compactionStrategy,
-    StorageBackend backend,
-  ) : super(hive, name, keyComparator, compactionStrategy, backend);
+    super.hive,
+    super.name,
+    super.keyComparator,
+    super.compactionStrategy,
+    super.backend,
+  );
 
   @override
   final bool lazy = false;
@@ -39,7 +37,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   E? get(dynamic key, {E? defaultValue}) {
     checkOpen();
 
-    var frame = keystore.get(key);
+    final frame = keystore.get(key);
     if (frame != null) {
       return frame.value as E?;
     } else {
@@ -59,8 +57,8 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
 
   @override
   Future<void> putAll(Map<dynamic, E> kvPairs) {
-    var frames = <Frame>[];
-    for (var key in kvPairs.keys) {
+    final frames = <Frame>[];
+    for (final key in kvPairs.keys) {
       frames.add(Frame(key, kvPairs[key]));
     }
 
@@ -69,8 +67,8 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
 
   @override
   Future<void> deleteAll(Iterable<dynamic> keys) {
-    var frames = <Frame>[];
-    for (var key in keys) {
+    final frames = <Frame>[];
+    for (final key in keys) {
       if (keystore.containsKey(key)) {
         frames.add(Frame.deleted(key));
       }
@@ -97,8 +95,8 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
 
   @override
   Map<dynamic, E> toMap() {
-    var map = <dynamic, E>{};
-    for (var frame in keystore.frames) {
+    final map = <dynamic, E>{};
+    for (final frame in keystore.frames) {
       map[frame.key] = frame.value as E;
     }
     return map;

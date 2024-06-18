@@ -48,7 +48,7 @@ class BufferedFileReader {
   @pragma('dart2js:tryInline')
   Uint8List viewBytes(int bytes) {
     assert(bytes >= 0 && remainingInBuffer >= bytes);
-    var view = Uint8List.view(buffer.buffer, _bufferOffset, bytes);
+    final view = Uint8List.view(buffer.buffer, _bufferOffset, bytes);
     _bufferOffset += bytes;
     return view;
   }
@@ -64,11 +64,11 @@ class BufferedFileReader {
   /// Not part of public API
   Future<int> loadBytes(int bytes) async {
     assert(bytes > 0);
-    var remaining = remainingInBuffer;
+    final remaining = remainingInBuffer;
     if (remaining >= bytes) {
       return remaining;
     } else {
-      var oldBuffer = buffer;
+      final oldBuffer = buffer;
       if (buffer.length < bytes) {
         buffer = Uint8List(bytes);
       }
@@ -78,7 +78,7 @@ class BufferedFileReader {
       }
 
       _bufferOffset = 0;
-      var readBytes = await file!.readInto(buffer, remaining);
+      final readBytes = await file!.readInto(buffer, remaining);
       _bufferSize = remaining + readBytes;
       _fileOffset += readBytes;
 

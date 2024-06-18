@@ -71,65 +71,65 @@ void main() {
   group('TypeRegistryImpl', () {
     group('.registerAdapter()', () {
       test('register', () {
-        var registry = TypeRegistryImpl();
-        var adapter = TestAdapter();
+        final registry = TypeRegistryImpl();
+        final adapter = TestAdapter();
         registry.registerAdapter(adapter);
 
-        var resolved = registry.findAdapterForValue(123)!;
+        final resolved = registry.findAdapterForValue(123)!;
         expect(resolved.typeId, 32);
         expect(resolved.adapter, adapter);
       });
 
       test('unsupported typeId', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         expect(() => registry.registerAdapter(TestAdapter(-1)),
-            throwsHiveError('not allowed'));
+            throwsHiveError('not allowed'),);
         expect(() => registry.registerAdapter(TestAdapter(224)),
-            throwsHiveError('not allowed'));
+            throwsHiveError('not allowed'),);
       });
 
       test('duplicate typeId', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter());
         expect(() => registry.registerAdapter(TestAdapter()),
-            throwsHiveError('already a TypeAdapter for typeId'));
+            throwsHiveError('already a TypeAdapter for typeId'),);
       });
 
       test('dynamic type', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         registry.registerAdapter<dynamic>(TestAdapter());
       });
     });
 
     test('.findAdapterForTypeId()', () {
-      var registry = TypeRegistryImpl();
-      var adapter = TestAdapter();
+      final registry = TypeRegistryImpl();
+      final adapter = TestAdapter();
       registry.registerAdapter(adapter);
 
-      var resolvedAdapter = registry.findAdapterForTypeId(32)!;
+      final resolvedAdapter = registry.findAdapterForTypeId(32)!;
       expect(resolvedAdapter.typeId, 32);
       expect(resolvedAdapter.adapter, adapter);
     });
 
     group('.findAdapterForValue()', () {
       test('finds adapter', () {
-        var registry = TypeRegistryImpl();
-        var adapter = TestAdapter();
+        final registry = TypeRegistryImpl();
+        final adapter = TestAdapter();
         registry.registerAdapter(adapter);
 
-        var resolvedAdapter = registry.findAdapterForValue(123)!;
+        final resolvedAdapter = registry.findAdapterForValue(123)!;
         expect(resolvedAdapter.typeId, 32);
         expect(resolvedAdapter.adapter, adapter);
       });
 
       test('returns first matching adapter', () {
-        var registry = TypeRegistryImpl();
-        var adapter1 = TestAdapter(0);
-        var adapter2 = TestAdapter(1);
+        final registry = TypeRegistryImpl();
+        final adapter1 = TestAdapter(0);
+        final adapter2 = TestAdapter(1);
         registry.registerAdapter(adapter1);
         registry.registerAdapter(adapter2);
 
-        var resolvedAdapter = registry.findAdapterForValue(123)!;
+        final resolvedAdapter = registry.findAdapterForValue(123)!;
         expect(resolvedAdapter.typeId, 32);
         expect(resolvedAdapter.adapter, adapter1);
       });
@@ -160,8 +160,8 @@ void main() {
     });
 
     test('.resetAdapters()', () {
-      var registry = TypeRegistryImpl();
-      var adapter = TestAdapter();
+      final registry = TypeRegistryImpl();
+      final adapter = TestAdapter();
       registry.registerAdapter(adapter);
 
       registry.resetAdapters();
@@ -170,41 +170,41 @@ void main() {
 
     group('.isAdapterRegistered()', () {
       test('returns false if adapter is not found', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
 
         expect(registry.isAdapterRegistered(0), false);
       });
 
       test('returns true if adapter is found', () {
-        var registry = TypeRegistryImpl();
-        var adapter = TestAdapter();
+        final registry = TypeRegistryImpl();
+        final adapter = TestAdapter();
         registry.registerAdapter(adapter);
 
         expect(registry.isAdapterRegistered(0), true);
       });
 
       test('unsupported typeId', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         expect(() => registry.isAdapterRegistered(-1),
-            throwsHiveError('not allowed'));
+            throwsHiveError('not allowed'),);
         expect(() => registry.isAdapterRegistered(224),
-            throwsHiveError('not allowed'));
+            throwsHiveError('not allowed'),);
       });
     });
 
     group('.ignoreTypeId()', () {
       test('registers IgnoredTypeAdapter', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         registry.ignoreTypeId(0);
-        var resolved = registry.findAdapterForTypeId(32)!;
+        final resolved = registry.findAdapterForTypeId(32)!;
         expect(resolved.adapter is IgnoredTypeAdapter, true);
       });
 
       test('duplicte typeId', () {
-        var registry = TypeRegistryImpl();
+        final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter());
         expect(() => registry.ignoreTypeId(0),
-            throwsHiveError('already a TypeAdapter for typeId'));
+            throwsHiveError('already a TypeAdapter for typeId'),);
       });
     });
   });

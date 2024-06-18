@@ -28,8 +28,8 @@ class TestAdapter extends TypeAdapter<TestObject> {
 
 void main() {
   test('ignore typeId with IgnoredTypeAdapter', () async {
-    var hive = await createHive();
-    var box1 = await hive.openBox('test');
+    final hive = await createHive();
+    final box1 = await hive.openBox('test');
 
     hive.registerAdapter(TestAdapter());
 
@@ -41,7 +41,7 @@ void main() {
     hive.resetAdapters();
     hive.ignoreTypeId(10);
 
-    var box2 = await hive.openBox('test');
+    final box2 = await hive.openBox('test');
 
     expect(box2, isNotNull);
     expect(box2.get(1), null);

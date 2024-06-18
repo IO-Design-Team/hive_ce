@@ -6,10 +6,10 @@ import 'package:web/web.dart';
 extension IDBRequestExtension on IDBRequest {
   Future<T> asFuture<T extends JSAny?>() {
     final completer = Completer<T>();
-    onsuccess = (Event e) {
+    onsuccess = (e) {
       completer.complete(result as T);
     }.toJS;
-    onerror = (Event e) {
+    onerror = (e) {
       completer.completeError(error!);
     }.toJS;
     return completer.future;
@@ -20,7 +20,7 @@ extension IDBObjectStoreExtension on IDBObjectStore {
   Stream<IDBCursorWithValue> iterate() {
     final controller = StreamController<IDBCursorWithValue>();
     final request = openCursor();
-    request.onsuccess = (Event e) {
+    request.onsuccess = (e) {
       final cursor = (e.target as IDBRequest).result as IDBCursorWithValue?;
       if (cursor == null) {
         controller.close();
@@ -29,7 +29,7 @@ extension IDBObjectStoreExtension on IDBObjectStore {
       controller.add(cursor);
       cursor.continue_();
     }.toJS;
-    request.onerror = (Event e) {
+    request.onerror = (e) {
       controller.addError(request.error!);
     }.toJS;
     return controller.stream;

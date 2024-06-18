@@ -5,13 +5,13 @@ import 'integration.dart';
 Future _performTest(bool lazy) async {
   var box = await openBox(lazy);
   for (var i = 0; i < 5; i++) {
-    var largeString = i.toString() * 1000000;
+    final largeString = i.toString() * 1000000;
     await box.put('string$i', largeString);
   }
 
   box = await box.reopen();
   for (var i = 0; i < 5; i++) {
-    var largeString = await await box.get('string$i');
+    final largeString = await await box.get('string$i');
 
     expect(largeString == i.toString() * 1000000, true);
   }
@@ -23,5 +23,5 @@ void main() {
     test('normal box', () => _performTest(false));
 
     test('lazy box', () => _performTest(true));
-  }, timeout: longTimeout);
+  }, timeout: longTimeout,);
 }

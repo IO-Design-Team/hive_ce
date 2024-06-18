@@ -37,7 +37,7 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 
 void main() {
   test('add and remove objects to / from HiveList', () async {
-    var hive = await createHive();
+    final hive = await createHive();
     hive.registerAdapter(_TestObjectAdapter());
     var box = await openBox<_TestObject>(false, hive: hive) as Box<_TestObject>;
 
@@ -46,7 +46,7 @@ void main() {
     await box.put('obj', obj);
 
     for (var i = 0; i < 100; i++) {
-      var element = _TestObject('element$i');
+      final element = _TestObject('element$i');
       await box.add(element);
       obj.list!.add(element);
     }
@@ -69,5 +69,5 @@ void main() {
 
     await obj.list![0].delete();
     expect(obj.list![0].name, 'element1');
-  }, timeout: longTimeout);
+  }, timeout: longTimeout,);
 }

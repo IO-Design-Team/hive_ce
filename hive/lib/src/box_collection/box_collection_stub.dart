@@ -16,7 +16,7 @@ abstract class BoxCollection {
 
   Future<CollectionBox<V>> openBox<V>(String name,
       {bool preload = false,
-      CollectionBox<V> Function(String, BoxCollection)? boxCreator});
+      CollectionBox<V> Function(String, BoxCollection)? boxCreator,});
 
   Future<void> transaction(
     Future<void> Function() action, {

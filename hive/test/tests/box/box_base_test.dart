@@ -14,18 +14,12 @@ import '../mocks.dart';
 
 class _BoxBaseMock<E> extends BoxBaseImpl<E> with Mock {
   _BoxBaseMock(
-    HiveImpl hive,
-    String name,
-    KeyComparator? keyComparator,
-    CompactionStrategy compactionStrategy,
-    StorageBackend backend,
-  ) : super(
-          hive,
-          name,
-          keyComparator,
-          compactionStrategy,
-          backend,
-        );
+    super.hive,
+    super.name,
+    super.keyComparator,
+    super.compactionStrategy,
+    super.backend,
+  );
 }
 
 _BoxBaseMock _openBoxBaseMock({
@@ -38,7 +32,7 @@ _BoxBaseMock _openBoxBaseMock({
   hive ??= HiveImpl();
   name ??= 'testBox';
   backend ??= MockStorageBackend();
-  var mock = _BoxBaseMock(
+  final mock = _BoxBaseMock(
     hive,
     name,
     null,
@@ -57,21 +51,21 @@ void main() {
 
   group('BoxBase', () {
     test('.name', () {
-      var box = _openBoxBaseMock(name: 'testName');
+      final box = _openBoxBaseMock(name: 'testName');
       expect(box.name, 'testName');
     });
 
     test('.path', () {
-      var backend = MockStorageBackend();
+      final backend = MockStorageBackend();
       when(() => backend.path).thenReturn('some/path');
 
-      var box = _openBoxBaseMock(backend: backend);
+      final box = _openBoxBaseMock(backend: backend);
       expect(box.path, 'some/path');
     });
 
     group('.keys', () {
       test('returns keys from keystore', () {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore
           ..insert(Frame.lazy('key1'))
           ..insert(Frame.lazy('key4'))
@@ -80,10 +74,10 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
         expect(() => box.keys, throwsHiveError('closed'));
       });
@@ -91,28 +85,28 @@ void main() {
 
     group('.length / .isEmpty / .isNotEmpty', () {
       test('empty box', () {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         expect(box.length, 0);
         expect(box.isEmpty, true);
         expect(box.isNotEmpty, false);
       });
 
       test('non empty box', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', null),
           Frame('key2', null),
-        ]);
-        var box = _openBoxBaseMock(keystore: keystore);
+        ],);
+        final box = _openBoxBaseMock(keystore: keystore);
         expect(box.length, 2);
         expect(box.isEmpty, false);
         expect(box.isNotEmpty, true);
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
         expect(() => box.length, throwsHiveError('closed'));
         expect(() => box.isEmpty, throwsHiveError('closed'));
@@ -122,8 +116,8 @@ void main() {
 
     group('.watch()', () {
       test('calls keystore.watch()', () {
-        var keystore = MockKeystore();
-        var box = _openBoxBaseMock(keystore: keystore);
+        final keystore = MockKeystore();
+        final box = _openBoxBaseMock(keystore: keystore);
         when(() => keystore.watch(key: 123)).thenAnswer((_) => Stream.empty());
 
         box.watch(key: 123);
@@ -131,18 +125,18 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.watch(), throwsHiveError('closed'));
+        expect(box.watch, throwsHiveError('closed'));
       });
     });
 
     group('.keyAt()', () {
       test('returns key at index', () {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore
           ..insert(Frame.lazy(0))
           ..insert(Frame.lazy('test'));
@@ -150,18 +144,18 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
         expect(() => box.keyAt(0), throwsHiveError('closed'));
       });
     });
 
     test('.initialize()', () async {
-      var backend = MockStorageBackend();
-      var box = _openBoxBaseMock(backend: backend);
+      final backend = MockStorageBackend();
+      final box = _openBoxBaseMock(backend: backend);
       when(() => box.lazy).thenReturn(false);
 
       when(() => backend.initialize(any(), any(), any())).thenAnswer((i) async {
@@ -174,20 +168,20 @@ void main() {
 
     group('.containsKey()', () {
       test('returns true if key exists', () {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('existingKey'));
         expect(box.containsKey('existingKey'), true);
       });
 
       test('returns false if key does not exist', () {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('existingKey'));
         expect(box.containsKey('nonExistingKey'), false);
       });
 
       test('does not use backend', () {
-        var backend = MockStorageBackend();
-        var box = _openBoxBaseMock(backend: backend);
+        final backend = MockStorageBackend();
+        final box = _openBoxBaseMock(backend: backend);
         box.keystore.insert(Frame.lazy('existingKey'));
 
         box.containsKey('existingKey');
@@ -196,10 +190,10 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
         expect(() => box.containsKey(0), throwsHiveError('closed'));
       });
@@ -207,7 +201,7 @@ void main() {
 
     group('.add()', () {
       test('calls put()', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         when(() => box.put(0, 123)).thenAnswer((i) => Future.value());
 
         expect(await box.add(123), 0);
@@ -215,7 +209,7 @@ void main() {
       });
 
       test('updates auto increment', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         returnFutureVoid(when(() => box.putAll({5: 123})));
 
         box.keystore.updateAutoIncrement(4);
@@ -224,7 +218,7 @@ void main() {
     });
 
     test('.addAll()', () async {
-      var box = _openBoxBaseMock();
+      final box = _openBoxBaseMock();
       box.keystore.updateAutoIncrement(4);
       final vals = {5: 1, 6: 2, 7: 3};
       returnFutureVoid(when(() => box.putAll(vals)));
@@ -236,7 +230,7 @@ void main() {
 
     group('.putAt()', () {
       test('override existing', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         returnFutureVoid(when(() => box.putAll({'b': 'test'})));
 
         box.keystore.insert(Frame.lazy('a'));
@@ -247,25 +241,25 @@ void main() {
       });
 
       test('throws RangeError for negative index', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(
-            () async => await box.putAt(-1, 'test'), throwsRangeError);
+            () async => await box.putAt(-1, 'test'), throwsRangeError,);
       });
 
       test('throws RangeError for index out of bounds', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(
-            () async => await box.putAt(1, 'test'), throwsRangeError);
+            () async => await box.putAt(1, 'test'), throwsRangeError,);
       });
     });
 
     group('.deleteAt()', () {
       test('delete frame', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         returnFutureVoid(when(() => box.deleteAll(['b'])));
 
         box.keystore.insert(Frame.lazy('a'));
@@ -276,14 +270,14 @@ void main() {
       });
 
       test('throws RangeError for negative index', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(() async => await box.deleteAt(-1), throwsRangeError);
       });
 
       test('throws RangeError for index out of bounds', () async {
-        var box = _openBoxBaseMock();
+        final box = _openBoxBaseMock();
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(() async => await box.deleteAt(1), throwsRangeError);
@@ -292,36 +286,36 @@ void main() {
 
     group('.clear()', () {
       test('clears keystore and backend', () async {
-        var backend = MockStorageBackend();
-        var keystore = MockKeystore();
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
 
-        returnFutureVoid(when(() => backend.clear()));
-        when(() => keystore.clear()).thenReturn(2);
+        returnFutureVoid(when(backend.clear));
+        when(keystore.clear).thenReturn(2);
 
-        var box = _openBoxBaseMock(backend: backend, keystore: keystore);
+        final box = _openBoxBaseMock(backend: backend, keystore: keystore);
 
         expect(await box.clear(), 2);
         verifyInOrder([
-          () => backend.clear(),
-          () => keystore.clear(),
+          backend.clear,
+          keystore.clear,
         ]);
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.clear(), throwsHiveError('closed'));
+        expect(box.clear, throwsHiveError('closed'));
       });
     });
 
     group('.compact()', () {
       test('does nothing if backend does not support compaction', () async {
-        var backend = MockStorageBackend();
+        final backend = MockStorageBackend();
         when(() => backend.supportsCompaction).thenReturn(false);
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
 
         await box.compact();
         verify(() => backend.supportsCompaction);
@@ -329,9 +323,9 @@ void main() {
       });
 
       test('does nothing if there are no deleted entries', () async {
-        var backend = MockStorageBackend();
+        final backend = MockStorageBackend();
         when(() => backend.supportsCompaction).thenReturn(true);
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         box.keystore.insert(Frame.lazy('key1'));
 
         await box.compact();
@@ -340,8 +334,8 @@ void main() {
       });
 
       test('compact', () async {
-        var backend = MockStorageBackend();
-        var keystore = MockKeystore();
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
 
         when(() => keystore.frames)
             .thenReturn([Frame('key', 1, length: 22, offset: 33)]);
@@ -350,83 +344,83 @@ void main() {
         when(() => keystore.deletedEntries).thenReturn(1);
         returnFutureVoid(
           when(
-              () => backend.compact([Frame('key', 1, length: 22, offset: 33)])),
+              () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),),
         );
 
-        var box = _openBoxBaseMock(backend: backend, keystore: keystore);
+        final box = _openBoxBaseMock(backend: backend, keystore: keystore);
 
         await box.compact();
         verify(
-            () => backend.compact([Frame('key', 1, length: 22, offset: 33)]));
-        verify(() => keystore.resetDeletedEntries());
+            () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),);
+        verify(keystore.resetDeletedEntries);
       });
 
       test('throws if box is closed', () async {
-        var backend = MockStorageBackend();
-        returnFutureVoid(when(() => backend.close()));
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
 
-        var box = _openBoxBaseMock(backend: backend);
+        final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.compact(), throwsHiveError('closed'));
+        expect(box.compact, throwsHiveError('closed'));
       });
     });
 
     test('.close()', () async {
-      var hive = MockHiveImpl();
-      var keystore = MockKeystore();
-      var backend = MockStorageBackend();
-      var box = _openBoxBaseMock(
+      final hive = MockHiveImpl();
+      final keystore = MockKeystore();
+      final backend = MockStorageBackend();
+      final box = _openBoxBaseMock(
         name: 'myBox',
         hive: hive,
         keystore: keystore,
         backend: backend,
       );
-      returnFutureVoid(when(() => keystore.close()));
-      returnFutureVoid(when(() => backend.close()));
+      returnFutureVoid(when(keystore.close));
+      returnFutureVoid(when(backend.close));
 
       await box.close();
       verifyInOrder([
-        () => keystore.close(),
+        keystore.close,
         () => hive.unregisterBox('myBox'),
-        () => backend.close(),
+        backend.close,
       ]);
       expect(box.isOpen, false);
     });
 
     group('.deleteFromDisk()', () {
       test('only deleted file if box is closed', () async {
-        var backend = MockStorageBackend();
-        var keystore = MockKeystore();
-        var box = _openBoxBaseMock(backend: backend, keystore: keystore);
-        returnFutureVoid(when(() => keystore.close()));
-        returnFutureVoid(when(() => backend.close()));
-        returnFutureVoid(when(() => backend.deleteFromDisk()));
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final box = _openBoxBaseMock(backend: backend, keystore: keystore);
+        returnFutureVoid(when(keystore.close));
+        returnFutureVoid(when(backend.close));
+        returnFutureVoid(when(backend.deleteFromDisk));
 
         await box.close();
 
         await box.deleteFromDisk();
-        verify(() => backend.deleteFromDisk());
+        verify(backend.deleteFromDisk);
       });
 
       test('closes and deletes box', () async {
-        var hive = MockHiveImpl();
-        var keystore = MockKeystore();
-        var backend = MockStorageBackend();
-        var box = _openBoxBaseMock(
+        final hive = MockHiveImpl();
+        final keystore = MockKeystore();
+        final backend = MockStorageBackend();
+        final box = _openBoxBaseMock(
           name: 'myBox',
           hive: hive,
           keystore: keystore,
           backend: backend,
         );
-        returnFutureVoid(when(() => keystore.close()));
-        returnFutureVoid(when(() => backend.close()));
-        returnFutureVoid(when(() => backend.deleteFromDisk()));
+        returnFutureVoid(when(keystore.close));
+        returnFutureVoid(when(backend.close));
+        returnFutureVoid(when(backend.deleteFromDisk));
 
         await box.deleteFromDisk();
         verifyInOrder([
-          () => keystore.close(),
+          keystore.close,
           () => hive.unregisterBox('myBox'),
-          () => backend.deleteFromDisk(),
+          backend.deleteFromDisk,
         ]);
         expect(box.isOpen, false);
       });

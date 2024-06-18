@@ -8,8 +8,8 @@ import '../mocks.dart';
 void main() {
   void expectTrx(Iterable<KeyTransaction> i1, Iterable<KeyTransaction> i2) {
     expect(i1.length, i2.length);
-    var l1 = i1.toList();
-    var l2 = i2.toList();
+    final l1 = i1.toList();
+    final l2 = i2.toList();
     for (var i = 0; i < i1.length; i++) {
       expect(l1[i].added, l2[i].added);
       expect(l1[i].deleted, l2[i].deleted);
@@ -18,13 +18,13 @@ void main() {
 
   group('Keystore', () {
     test('.length returns the number of frames in the store', () {
-      var keystore = Keystore.debug(frames: [Frame('a', 1), Frame(1, 'a')]);
+      final keystore = Keystore.debug(frames: [Frame('a', 1), Frame(1, 'a')]);
       expect(keystore.length, 2);
       expect(Keystore.debug().length, 0);
     });
 
     test('.autoIncrement() updates auto increment value', () {
-      var keystore = Keystore.debug();
+      final keystore = Keystore.debug();
       expect(keystore.autoIncrement(), 0);
       expect(keystore.autoIncrement(), 1);
       expect(keystore.autoIncrement(), 2);
@@ -40,14 +40,14 @@ void main() {
 
     group('.updateAutoIncrement()', () {
       test('increases auto increment value if given key is bigger', () {
-        var keystore = Keystore.debug();
+        final keystore = Keystore.debug();
         expect(keystore.autoIncrement(), 0);
         keystore.updateAutoIncrement(5);
         expect(keystore.autoIncrement(), 6);
       });
 
       test('does nothing if given key is lower', () {
-        var keystore = Keystore.debug();
+        final keystore = Keystore.debug();
 
         keystore.updateAutoIncrement(20);
         expect(keystore.autoIncrement(), 21);
@@ -58,7 +58,7 @@ void main() {
     });
 
     test('.containsKey() returns whether store has key', () {
-      var keystore = Keystore.debug(frames: [Frame('key1', null)]);
+      final keystore = Keystore.debug(frames: [Frame('key1', null)]);
 
       expect(keystore.containsKey('key1'), true);
       expect(keystore.containsKey('key2'), false);
@@ -66,12 +66,12 @@ void main() {
 
     group('.keyAt()', () {
       test('returns the key at the given index', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', null),
           Frame(2, null),
           Frame(0, null),
           Frame('0', null),
-        ]);
+        ],);
 
         expect(keystore.keyAt(0), 0);
         expect(keystore.keyAt(1), 2);
@@ -80,7 +80,7 @@ void main() {
       });
 
       test('throws RangeError if the index does not exist', () {
-        var keystore = Keystore.debug(frames: [Frame('key1', null)]);
+        final keystore = Keystore.debug(frames: [Frame('key1', null)]);
 
         expect(() => keystore.keyAt(1), throwsRangeError);
         expect(() => keystore.keyAt(999), throwsRangeError);
@@ -90,17 +90,17 @@ void main() {
 
     group('.get()', () {
       test('returns the frame of the given key', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', 'value1'),
           Frame(1, 'value2'),
-        ]);
+        ],);
 
         expect(keystore.get('key1'), Frame('key1', 'value1'));
         expect(keystore.get(1), Frame(1, 'value2'));
       });
 
       test('returns null if there is no such key', () {
-        var keystore = Keystore.debug(frames: [Frame('key', 'value')]);
+        final keystore = Keystore.debug(frames: [Frame('key', 'value')]);
         expect(keystore.get('key2'), null);
         expect(Keystore.debug().get('someKey'), null);
       });
@@ -108,40 +108,40 @@ void main() {
 
     group('.getAt()', () {
       test('returns the frame at the given index', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', 'value1'),
           Frame(4, 'value2'),
-        ]);
+        ],);
 
         expect(keystore.getAt(0), Frame(4, 'value2'));
         expect(keystore.getAt(1), Frame('key1', 'value1'));
       });
 
       test('throws RangeError index does not exist', () {
-        var keystore = Keystore.debug(frames: [Frame('key1', 'value1')]);
+        final keystore = Keystore.debug(frames: [Frame('key1', 'value1')]);
         expect(() => keystore.getAt(1), throwsRangeError);
         expect(() => Keystore.debug().getAt(0), throwsRangeError);
       });
     });
 
     test('.getKeys() returns the keys in the correct order', () {
-      var keystore = Keystore.debug(frames: [
+      final keystore = Keystore.debug(frames: [
         Frame('key1', null),
         Frame(2, null),
         Frame(0, null),
         Frame('0', null),
-      ]);
+      ],);
 
       expect(keystore.getKeys(), [0, 2, '0', 'key1']);
     });
 
     test('.getValues() returns the values in the order of their keys', () {
-      var keystore = Keystore.debug(frames: [
+      final keystore = Keystore.debug(frames: [
         Frame('key1', 4),
         Frame(2, 2),
         Frame(0, null),
         Frame('0', 3),
-      ]);
+      ],);
 
       expect(keystore.getValues(), [null, 2, 3, 4]);
     });
@@ -152,7 +152,7 @@ void main() {
             Frame(2, 2),
             Frame(0, null),
             Frame('0', 3),
-          ]);
+          ],);
 
       test('startKey and endKey specified', () {
         expect(keystore().getValuesBetween(2, '0'), [2, 3]);
@@ -174,7 +174,7 @@ void main() {
     group('.insert()', () {
       group('add', () {
         test('updates auto increment', () {
-          var keystore = Keystore.debug();
+          final keystore = Keystore.debug();
           expect(keystore.autoIncrement(), 0);
 
           keystore.insert(Frame(123, 'val'));
@@ -185,10 +185,10 @@ void main() {
         });
 
         test('initializes HiveObject', () {
-          var box = MockBox();
-          var keystore = Keystore.debug(box: box);
+          final box = MockBox();
+          final keystore = Keystore.debug(box: box);
 
-          var hiveObject = TestHiveObject();
+          final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
 
           expect(hiveObject.key, 'key');
@@ -196,27 +196,27 @@ void main() {
         });
 
         test('adds frame to store', () {
-          var keystore = Keystore.debug();
+          final keystore = Keystore.debug();
           keystore.insert(Frame('key2', 'val2'));
           keystore.insert(Frame('key1', 'val1'));
 
           expect(
-              keystore.frames, [Frame('key1', 'val1'), Frame('key2', 'val2')]);
+              keystore.frames, [Frame('key1', 'val1'), Frame('key2', 'val2')],);
         });
 
         test('returns overridden Frame', () {
-          var keystore = Keystore.debug();
+          final keystore = Keystore.debug();
 
-          var frame = Frame('key', 'val');
+          final frame = Frame('key', 'val');
           expect(keystore.insert(frame), null);
           expect(keystore.insert(Frame('key', 'val2')), frame);
         });
 
         test('unloads previous HiveObject', () {
-          var box = MockBox();
-          var keystore = Keystore.debug(box: box);
+          final box = MockBox();
+          final keystore = Keystore.debug(box: box);
 
-          var hiveObject = TestHiveObject();
+          final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
           keystore.insert(Frame('key', TestHiveObject()));
 
@@ -225,10 +225,10 @@ void main() {
         });
 
         test('does not unload HiveObject if it is the same instance', () {
-          var box = MockBox();
-          var keystore = Keystore.debug(box: box);
+          final box = MockBox();
+          final keystore = Keystore.debug(box: box);
 
-          var hiveObject = TestHiveObject();
+          final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
           keystore.insert(Frame('key', hiveObject));
 
@@ -237,7 +237,7 @@ void main() {
         });
 
         test('increases deletedEntries', () {
-          var keystore = Keystore.debug();
+          final keystore = Keystore.debug();
           expect(keystore.deletedEntries, 0);
 
           keystore.insert(Frame('key1', 'val1'));
@@ -248,8 +248,8 @@ void main() {
         });
 
         test('broadcasts change event', () {
-          var notifier = MockChangeNotifier();
-          var keystore = Keystore.debug(notifier: notifier);
+          final notifier = MockChangeNotifier();
+          final keystore = Keystore.debug(notifier: notifier);
 
           keystore.insert(Frame('key1', 'val1'));
           verify(() => notifier.notify(Frame('key1', 'val1')));
@@ -261,27 +261,27 @@ void main() {
 
       group('delete', () {
         test('deletes frame from store', () {
-          var keystore = Keystore.debug(frames: [
+          final keystore = Keystore.debug(frames: [
             Frame('key2', 'val2'),
             Frame('key1', 'val1'),
-          ]);
+          ],);
 
           keystore.insert(Frame.deleted('key2'));
           expect(keystore.frames, [Frame('key1', 'val1')]);
         });
 
         test('returns deleted Frame', () {
-          var frame = Frame('key', 'val');
-          var keystore = Keystore.debug(frames: [frame]);
+          final frame = Frame('key', 'val');
+          final keystore = Keystore.debug(frames: [frame]);
 
           expect(keystore.insert(Frame.deleted('key')), frame);
           expect(keystore.insert(Frame.deleted('key')), null);
         });
 
         test('unloads deleted HiveObject', () {
-          var box = MockBox();
-          var hiveObject = TestHiveObject();
-          var keystore =
+          final box = MockBox();
+          final hiveObject = TestHiveObject();
+          final keystore =
               Keystore.debug(frames: [Frame('key', hiveObject)], box: box);
 
           keystore.insert(Frame.deleted('key'));
@@ -290,7 +290,7 @@ void main() {
         });
 
         test('increases deletedEntries', () {
-          var keystore = Keystore.debug(frames: [Frame('key1', 'val1')]);
+          final keystore = Keystore.debug(frames: [Frame('key1', 'val1')]);
           expect(keystore.deletedEntries, 0);
 
           keystore.insert(Frame.deleted('key1'));
@@ -298,8 +298,8 @@ void main() {
         });
 
         test('broadcasts change event', () {
-          var notifier = MockChangeNotifier();
-          var keystore = Keystore.debug(
+          final notifier = MockChangeNotifier();
+          final keystore = Keystore.debug(
             frames: [Frame('key1', 'val1')],
             notifier: notifier,
           );
@@ -317,10 +317,10 @@ void main() {
 
     group('.beginTransaction()', () {
       test('adding new frames', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(notifier: notifier);
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(notifier: notifier);
 
-        var created = keystore.beginTransaction([
+        final created = keystore.beginTransaction([
           Frame('key1', 'val1'),
           Frame('key2', 'val2'),
         ]);
@@ -333,14 +333,14 @@ void main() {
       });
 
       test('overriding existing keys', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key1', 'val1')],
           notifier: notifier,
         );
         reset(notifier);
 
-        var created = keystore.beginTransaction([
+        final created = keystore.beginTransaction([
           Frame('key1', 'val2'),
           Frame('key2', 'val3'),
         ]);
@@ -355,14 +355,14 @@ void main() {
       });
 
       test('empty transaction', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key1', 'val1')],
           notifier: notifier,
         );
         reset(notifier);
 
-        var created = keystore.beginTransaction([]);
+        final created = keystore.beginTransaction([]);
 
         expect(created, false);
         expect(keystore.frames, [Frame('key1', 'val1')]);
@@ -370,8 +370,8 @@ void main() {
       });
 
       test('deleting frames', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [
             Frame('key1', 'val1'),
             Frame('key2', 'val2'),
@@ -380,7 +380,7 @@ void main() {
         );
         reset(notifier);
 
-        var created = keystore.beginTransaction([
+        final created = keystore.beginTransaction([
           Frame.deleted('key1'),
           Frame.deleted('key3'),
         ]);
@@ -396,7 +396,7 @@ void main() {
 
     group('.commitTransaction()', () {
       test('removes the oldest transaction', () {
-        var keystore = Keystore.debug();
+        final keystore = Keystore.debug();
         keystore.beginTransaction([Frame('key1', 'val1')]);
         keystore.beginTransaction([Frame('key2', 'val2')]);
 
@@ -410,15 +410,15 @@ void main() {
       });
 
       test('fails if there are no pending transactions', () {
-        var keystore = Keystore.debug();
-        expect(() => keystore.commitTransaction(), throwsStateError);
+        final keystore = Keystore.debug();
+        expect(keystore.commitTransaction, throwsStateError);
       });
     });
 
     group('.cancelTransaction()', () {
       test('add', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(notifier: notifier);
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(notifier: notifier);
         keystore.beginTransaction([Frame('key', 'val1')]);
         keystore.beginTransaction([Frame('otherKey', 'otherVal')]);
         reset(notifier);
@@ -433,8 +433,8 @@ void main() {
       });
 
       test('add then override', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(notifier: notifier);
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(notifier: notifier);
         keystore.beginTransaction([Frame('key', 'val1')]);
         keystore.beginTransaction([Frame('key', 'val2')]);
         reset(notifier);
@@ -446,8 +446,8 @@ void main() {
       });
 
       test('add then delete', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(notifier: notifier);
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(notifier: notifier);
         keystore.beginTransaction([Frame('key', 'val1')]);
         keystore.beginTransaction([
           Frame('otherKey', 'otherVal'),
@@ -471,8 +471,8 @@ void main() {
       });
 
       test('override', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key', 'val1')],
           notifier: notifier,
         );
@@ -486,8 +486,8 @@ void main() {
       });
 
       test('override then add', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key', 'val1')],
           notifier: notifier,
         );
@@ -506,8 +506,8 @@ void main() {
       });
 
       test('override then delete', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key', 'val1')],
           notifier: notifier,
         );
@@ -524,8 +524,8 @@ void main() {
       });
 
       test('delete', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key', 'val1')],
           notifier: notifier,
         );
@@ -539,8 +539,8 @@ void main() {
       });
 
       test('delete then add', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(frames: [Frame('key', 'val1')]);
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(frames: [Frame('key', 'val1')]);
         keystore.beginTransaction([Frame.deleted('key')]);
         keystore.beginTransaction([Frame('key', 'val2')]);
         reset(notifier);
@@ -558,21 +558,21 @@ void main() {
 
     group('.clear()', () {
       test('clears store', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', 'val1'),
           Frame('key2', 'val2'),
-        ]);
+        ],);
         keystore.clear();
         expect(keystore.frames, []);
       });
 
       test('unloads HiveObjects', () {
-        var hiveObject = TestHiveObject();
-        var box = MockBox();
-        var keystore = Keystore.debug(frames: [
+        final hiveObject = TestHiveObject();
+        final box = MockBox();
+        final keystore = Keystore.debug(frames: [
           Frame('key1', 'val1'),
           Frame('key2', hiveObject),
-        ], box: box);
+        ], box: box,);
         expect(hiveObject.key, 'key2');
         expect(hiveObject.box, box);
 
@@ -582,10 +582,10 @@ void main() {
       });
 
       test('resets deleted entries', () {
-        var keystore = Keystore.debug(frames: [
+        final keystore = Keystore.debug(frames: [
           Frame('key1', 'val1'),
           Frame('key2', 'val2'),
-        ]);
+        ],);
 
         keystore.insert(Frame.deleted('key1'));
         expect(keystore.deletedEntries, 1);
@@ -595,7 +595,7 @@ void main() {
       });
 
       test('resets auto increment counter', () {
-        var keystore = Keystore.debug();
+        final keystore = Keystore.debug();
         expect(keystore.autoIncrement(), 0);
         expect(keystore.autoIncrement(), 1);
 
@@ -604,8 +604,8 @@ void main() {
       });
 
       test('broadcasts change event', () {
-        var notifier = MockChangeNotifier();
-        var keystore = Keystore.debug(
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(
           frames: [Frame('key1', 'val1'), Frame('key2', 'val2')],
           notifier: notifier,
         );

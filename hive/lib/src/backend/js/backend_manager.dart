@@ -1,7 +1,7 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 
-import 'native/backend_manager.dart' as native;
+import 'package:hive_ce/src/backend/js/native/backend_manager.dart' as native;
 
 /// Opens IndexedDB databases
 abstract class BackendManager {
@@ -9,7 +9,7 @@ abstract class BackendManager {
 
   // dummy implementation as the WebWorker branch is not stable yet
   static BackendManagerInterface select(
-      [HiveStorageBackendPreference? backendPreference]) {
+      [HiveStorageBackendPreference? backendPreference,]) {
     switch (backendPreference) {
       default:
         return native.BackendManager();

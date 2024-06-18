@@ -28,8 +28,8 @@ StorageBackendJs _getBackend({
 
 Future<IDBDatabase> _openDb([String name = 'testBox']) async {
   final request = window.self.indexedDB.open(name, 1);
-  request.onupgradeneeded = (IDBVersionChangeEvent e) {
-    var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+  request.onupgradeneeded = (e) {
+    final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {
       db.createObjectStore('box');
     }
@@ -42,8 +42,8 @@ IDBObjectStore _getStore(IDBDatabase db) {
 }
 
 Future<IDBDatabase> _getDbWith(Map<String, Object?> content) async {
-  var db = await _openDb();
-  var store = _getStore(db);
+  final db = await _openDb();
+  final store = _getStore(db);
   await store.clear().asFuture();
   content.forEach((k, v) => store.put(v.jsify(), k.toJS));
   return db;
@@ -58,56 +58,56 @@ void main() async {
 
     group('.encodeValue()', () {
       test('primitive', () {
-        var values = [
+        final values = [
           null, 11, 17.25, true, 'hello', //
-          [11, 12, 13], [17.25, 17.26], [true, false], ['str1', 'str2'] //
+          [11, 12, 13], [17.25, 17.26], [true, false], ['str1', 'str2'], //
         ];
-        var backend = _getBackend();
-        for (var value in values) {
+        final backend = _getBackend();
+        for (final value in values) {
           expect(backend.encodeValue(Frame('key', value)).dartify(), value);
         }
 
-        var bytes = Uint8List.fromList([1, 2, 3]);
-        var buffer = backend.encodeValue(Frame('key', bytes)) as JSArrayBuffer;
+        final bytes = Uint8List.fromList([1, 2, 3]);
+        final buffer = backend.encodeValue(Frame('key', bytes)) as JSArrayBuffer;
         expect(Uint8List.view(buffer.toDart), [1, 2, 3]);
       });
 
       test('crypto', () {
-        var backend =
+        final backend =
             StorageBackendJs(_nullDatabase, testCipher, 'box', testRegistry);
         var i = 0;
-        for (var frame in testFrames) {
-          var buffer = backend.encodeValue(frame) as JSArrayBuffer;
-          var bytes = Uint8List.view(buffer.toDart);
+        for (final frame in testFrames) {
+          final buffer = backend.encodeValue(frame) as JSArrayBuffer;
+          final bytes = Uint8List.view(buffer.toDart);
           expect(bytes.sublist(28),
-              [0x90, 0xA9, ...frameValuesBytesEncrypted[i]].sublist(28));
+              [0x90, 0xA9, ...frameValuesBytesEncrypted[i]].sublist(28),);
           i++;
         }
       });
 
       group('non primitive', () {
         test('map', () {
-          var frame = Frame(0, {
+          final frame = Frame(0, {
             'key': Uint8List.fromList([1, 2, 3]),
-            'otherKey': null
+            'otherKey': null,
           });
-          var backend = StorageBackendJs(_nullDatabase, null, 'box');
-          var encoded = Uint8List.view(
-              (backend.encodeValue(frame) as JSArrayBuffer).toDart);
+          final backend = StorageBackendJs(_nullDatabase, null, 'box');
+          final encoded = Uint8List.view(
+              (backend.encodeValue(frame) as JSArrayBuffer).toDart,);
 
-          var writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
+          final writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
             ..write(frame.value);
           expect(encoded, [0x90, 0xA9, ...writer.toBytes()]);
         });
 
         test('bytes which start with signature', () {
-          var frame = Frame(0, Uint8List.fromList([0x90, 0xA9, 1, 2, 3]));
-          var backend = _getBackend();
-          var encoded = Uint8List.view(
+          final frame = Frame(0, Uint8List.fromList([0x90, 0xA9, 1, 2, 3]));
+          final backend = _getBackend();
+          final encoded = Uint8List.view(
             (backend.encodeValue(frame) as JSArrayBuffer).toDart,
           );
 
-          var writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
+          final writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
             ..write(frame.value);
           expect(encoded, [0x90, 0xA9, ...writer.toBytes()]);
         });
@@ -116,7 +116,7 @@ void main() async {
 
     group('.decodeValue()', () {
       test('primitive', () {
-        var backend = _getBackend();
+        final backend = _getBackend();
         expect(backend.decodeValue(null), null);
         expect(backend.decodeValue(11.toJS), 11);
         expect(backend.decodeValue(17.25.toJS), 17.25);
@@ -125,17 +125,17 @@ void main() async {
         expect(backend.decodeValue([11, 12, 13].jsify()), [11, 12, 13]);
         expect(backend.decodeValue([17.25, 17.26].jsify()), [17.25, 17.26]);
 
-        var bytes = Uint8List.fromList([1, 2, 3]);
+        final bytes = Uint8List.fromList([1, 2, 3]);
         expect(backend.decodeValue(bytes.buffer.toJS), [1, 2, 3]);
       });
 
       test('crypto', () {
-        var cipher = HiveAesCipher(Uint8List.fromList(List.filled(32, 1)));
-        var backend = _getBackend(cipher: cipher, registry: testRegistry);
+        final cipher = HiveAesCipher(Uint8List.fromList(List.filled(32, 1)));
+        final backend = _getBackend(cipher: cipher, registry: testRegistry);
         var i = 0;
-        for (var testFrame in testFrames) {
-          var bytes = [0x90, 0xA9, ...frameValuesBytesEncrypted[i]];
-          var value =
+        for (final testFrame in testFrames) {
+          final bytes = [0x90, 0xA9, ...frameValuesBytesEncrypted[i]];
+          final value =
               backend.decodeValue(Uint8List.fromList(bytes).buffer.toJS);
           expect(value, testFrame.value);
           i++;
@@ -143,10 +143,10 @@ void main() async {
       });
 
       test('non primitive', () {
-        var backend = _getBackend(registry: testRegistry);
-        for (var testFrame in testFrames) {
-          var bytes = backend.encodeValue(testFrame);
-          var value = backend.decodeValue(bytes);
+        final backend = _getBackend(registry: testRegistry);
+        for (final testFrame in testFrames) {
+          final bytes = backend.encodeValue(testFrame);
+          final value = backend.decodeValue(bytes);
           expect(value, testFrame.value);
         }
       });
@@ -154,15 +154,15 @@ void main() async {
 
     group('.getKeys()', () {
       test('with cursor', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
+        final backend = _getBackend(db: db);
 
         expect(await backend.getKeys(cursor: true), ['key1', 'key2', 'key3']);
       });
 
       test('without cursor', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
+        final backend = _getBackend(db: db);
 
         expect(await backend.getKeys(), ['key1', 'key2', 'key3']);
       });
@@ -170,15 +170,15 @@ void main() async {
 
     group('.getValues()', () {
       test('with cursor', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
+        final backend = _getBackend(db: db);
 
         expect(await backend.getValues(cursor: true), [1, null, 3]);
       });
 
       test('without cursor', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
+        final backend = _getBackend(db: db);
 
         expect(await backend.getValues(), [1, null, 3]);
       });
@@ -186,14 +186,14 @@ void main() async {
 
     group('.initialize()', () {
       test('not lazy', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
+        final backend = _getBackend(db: db);
 
-        var keystore = Keystore.debug(notifier: ChangeNotifier());
+        final keystore = Keystore.debug(notifier: ChangeNotifier());
         expect(
             await backend.initialize(
-                TypeRegistryImpl.nullImpl, keystore, false),
-            0);
+                TypeRegistryImpl.nullImpl, keystore, false,),
+            0,);
         expect(keystore.frames, [
           Frame('key1', 1),
           Frame('key2', null),
@@ -202,13 +202,13 @@ void main() async {
       });
 
       test('lazy', () async {
-        var db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
-        var backend = _getBackend(db: db);
+        final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
+        final backend = _getBackend(db: db);
 
-        var keystore = Keystore.debug(notifier: ChangeNotifier());
+        final keystore = Keystore.debug(notifier: ChangeNotifier());
         expect(
             await backend.initialize(TypeRegistryImpl.nullImpl, keystore, true),
-            0);
+            0,);
         expect(keystore.frames, [
           Frame.lazy('key1'),
           Frame.lazy('key2'),
@@ -218,18 +218,18 @@ void main() async {
     });
 
     test('.readValue()', () async {
-      var db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
-      var backend = _getBackend(db: db);
+      final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
+      final backend = _getBackend(db: db);
 
       expect(await backend.readValue(Frame('key1', null)), 1);
       expect(await backend.readValue(Frame('key2', null)), null);
     });
 
     test('.writeFrames()', () async {
-      var db = await _getDbWith({});
-      var backend = _getBackend(db: db);
+      final db = await _getDbWith({});
+      final backend = _getBackend(db: db);
 
-      var frames = [Frame('key1', 123), Frame('key2', null)];
+      final frames = [Frame('key1', 123), Frame('key2', null)];
       await backend.writeFrames(frames);
       expect(frames, [Frame('key1', 123), Frame('key2', null)]);
       expect(await backend.getKeys(), ['key1', 'key2']);
@@ -239,8 +239,8 @@ void main() async {
     });
 
     test('.compact()', () async {
-      var db = await _getDbWith({});
-      var backend = _getBackend(db: db);
+      final db = await _getDbWith({});
+      final backend = _getBackend(db: db);
       expect(
         () async => await backend.compact({}),
         throwsUnsupportedError,
@@ -248,15 +248,15 @@ void main() async {
     });
 
     test('.clear()', () async {
-      var db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
-      var backend = _getBackend(db: db);
+      final db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
+      final backend = _getBackend(db: db);
       await backend.clear();
       expect(await backend.getKeys(), []);
     });
 
     test('.close()', () async {
-      var db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
-      var backend = _getBackend(db: db);
+      final db = await _getDbWith({'key1': 1, 'key2': 2, 'key3': 3});
+      final backend = _getBackend(db: db);
       await backend.close();
 
       await expectLater(() async => await backend.getKeys(), throwsA(anything));

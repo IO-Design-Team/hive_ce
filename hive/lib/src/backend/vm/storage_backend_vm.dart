@@ -51,13 +51,13 @@ class StorageBackendVm extends StorageBackend {
 
   /// Not part of public API
   StorageBackendVm(
-      this._file, this._lockFile, this._crashRecovery, this._cipher)
+      this._file, this._lockFile, this._crashRecovery, this._cipher,)
       : _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
   /// Not part of public API
   StorageBackendVm.debug(this._file, this._lockFile, this._crashRecovery,
-      this._cipher, this._frameHelper, this._sync);
+      this._cipher, this._frameHelper, this._sync,);
 
   @override
   String get path => _file.path;
@@ -74,7 +74,7 @@ class StorageBackendVm extends StorageBackend {
 
   @override
   Future<void> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy) async {
+      TypeRegistry registry, Keystore keystore, bool lazy,) async {
     this.registry = registry;
 
     lockRaf = await _lockFile.open(mode: FileMode.write);
@@ -105,14 +105,14 @@ class StorageBackendVm extends StorageBackend {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
-      var bytes = await readRaf.read(frame.length!);
+      final bytes = await readRaf.read(frame.length!);
 
-      var reader = BinaryReaderImpl(bytes, registry);
-      var readFrame = reader.readFrame(cipher: _cipher, lazy: false);
+      final reader = BinaryReaderImpl(bytes, registry);
+      final readFrame = reader.readFrame(cipher: _cipher, lazy: false);
 
       if (readFrame == null) {
         throw HiveError(
-            'Could not read value from box. Maybe your box is corrupted.');
+            'Could not read value from box. Maybe your box is corrupted.',);
       }
 
       return readFrame.value;
@@ -122,9 +122,9 @@ class StorageBackendVm extends StorageBackend {
   @override
   Future<void> writeFrames(List<Frame> frames) {
     return _sync.syncWrite(() async {
-      var writer = BinaryWriterImpl(registry);
+      final writer = BinaryWriterImpl(registry);
 
-      for (var frame in frames) {
+      for (final frame in frames) {
         frame.length = writer.writeFrame(frame, cipher: _cipher);
       }
 
@@ -135,7 +135,7 @@ class StorageBackendVm extends StorageBackend {
         rethrow;
       }
 
-      for (var frame in frames) {
+      for (final frame in frames) {
         frame.offset = writeOffset;
         writeOffset += frame.length!;
       }
@@ -149,20 +149,20 @@ class StorageBackendVm extends StorageBackend {
 
     return _sync.syncReadWrite(() async {
       await readRaf.setPosition(0);
-      var reader = BufferedFileReader(readRaf);
+      final reader = BufferedFileReader(readRaf);
 
-      var fileDirectory = path.substring(0, path.length - 5);
-      var compactFile = File('$fileDirectory.hivec');
-      var compactRaf = await compactFile.open(mode: FileMode.write);
-      var writer = BufferedFileWriter(compactRaf);
+      final fileDirectory = path.substring(0, path.length - 5);
+      final compactFile = File('$fileDirectory.hivec');
+      final compactRaf = await compactFile.open(mode: FileMode.write);
+      final writer = BufferedFileWriter(compactRaf);
 
-      var sortedFrames = frames.toList();
+      final sortedFrames = frames.toList();
       sortedFrames.sort((a, b) => a.offset.compareTo(b.offset));
       try {
-        for (var frame in sortedFrames) {
+        for (final frame in sortedFrames) {
           if (frame.offset == -1) continue; // Frame has not been written yet
           if (frame.offset != reader.offset) {
-            var skip = frame.offset - reader.offset;
+            final skip = frame.offset - reader.offset;
             if (reader.remainingInBuffer < skip) {
               if (await reader.loadBytes(skip) < skip) {
                 throw HiveError('Could not compact box: Unexpected EOF.');
@@ -189,7 +189,7 @@ class StorageBackendVm extends StorageBackend {
       await open();
 
       var offset = 0;
-      for (var frame in sortedFrames) {
+      for (final frame in sortedFrames) {
         if (frame.offset == -1) continue;
         frame.offset = offset;
         offset += frame.length!;

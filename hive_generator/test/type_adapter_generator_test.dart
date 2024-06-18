@@ -6,7 +6,7 @@ void main() {
     test('.generateName()', () {
       expect(TypeAdapterGenerator.generateName(r'_$User'), 'UserAdapter');
       expect(TypeAdapterGenerator.generateName(r'_$_SomeClass'),
-          'SomeClassAdapter');
+          'SomeClassAdapter',);
     });
   });
 }

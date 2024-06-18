@@ -12,14 +12,14 @@ class BackendManager implements BackendManagerInterface {
 
   @override
   Future<StorageBackend> open(String name, String? path, bool crashRecovery,
-      HiveCipher? cipher, String? collection) async {
+      HiveCipher? cipher, String? collection,) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;
 
     final request = indexedDB!.open(databaseName, 1);
-    request.onupgradeneeded = (IDBVersionChangeEvent e) {
-      var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+    request.onupgradeneeded = (e) {
+      final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
       if (!db.objectStoreNames.contains(objectStoreName)) {
         db.createObjectStore(objectStoreName);
       }
@@ -30,10 +30,10 @@ class BackendManager implements BackendManagerInterface {
     // update version
     if (!db.objectStoreNames.contains(objectStoreName)) {
       print(
-          'Creating objectStore $objectStoreName in database $databaseName...');
+          'Creating objectStore $objectStoreName in database $databaseName...',);
       final request = indexedDB!.open(databaseName, db.version + 1);
-      request.onupgradeneeded = (IDBVersionChangeEvent e) {
-        var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+      request.onupgradeneeded = (e) {
+        final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (!db.objectStoreNames.contains(objectStoreName)) {
           db.createObjectStore(objectStoreName);
         }
@@ -59,8 +59,8 @@ class BackendManager implements BackendManagerInterface {
       await indexedDB!.deleteDatabase(databaseName).asFuture();
     } else {
       final request = indexedDB!.open(databaseName, 1);
-      request.onupgradeneeded = (IDBVersionChangeEvent e) {
-        var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+      request.onupgradeneeded = (e) {
+        final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
           db.deleteObjectStore(objectStoreName);
         }
@@ -79,24 +79,24 @@ class BackendManager implements BackendManagerInterface {
     final objectStoreName = collection == null ? 'box' : name;
     // https://stackoverflow.com/a/17473952
     try {
-      var _exists = true;
+      var exists = true;
       if (collection == null) {
         final request = indexedDB!.open(databaseName, 1);
-        request.onupgradeneeded = (IDBVersionChangeEvent e) {
+        request.onupgradeneeded = (e) {
           (e.target as IDBOpenDBRequest).transaction!.abort();
-          _exists = false;
+          exists = false;
         }.toJS;
         await request.asFuture();
       } else {
         final request = indexedDB!.open(collection, 1);
-        request.onupgradeneeded = (IDBVersionChangeEvent e) {
-          var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
-          _exists = db.objectStoreNames.contains(objectStoreName);
+        request.onupgradeneeded = (e) {
+          final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+          exists = db.objectStoreNames.contains(objectStoreName);
         }.toJS;
         final db = await request.asFuture<IDBDatabase>();
-        _exists = db.objectStoreNames.contains(objectStoreName);
+        exists = db.objectStoreNames.contains(objectStoreName);
       }
-      return _exists;
+      return exists;
     } catch (error) {
       return false;
     }

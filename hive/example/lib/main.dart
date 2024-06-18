@@ -24,14 +24,14 @@ class Person {
 }
 
 void main() async {
-  var path = Directory.current.path;
+  final path = Directory.current.path;
   Hive
     ..init(path)
     ..registerAdapter(PersonAdapter());
 
-  var box = await Hive.openBox('testBox');
+  final box = await Hive.openBox('testBox');
 
-  var person = Person(
+  final person = Person(
     name: 'Dave',
     age: 22,
     friends: ['Linda', 'Marc', 'Anne'],

@@ -38,7 +38,7 @@ class _NullTypeRegistry implements TypeRegistryImpl {
 
   @override
   Never registerAdapter<T>(TypeAdapter<T> adapter,
-          {bool internal = false, bool override = false}) =>
+          {bool internal = false, bool override = false,}) =>
       throw UnimplementedError();
 
   @override
@@ -59,7 +59,7 @@ class TypeRegistryImpl implements TypeRegistry {
   /// Not part of public API
   ResolvedAdapter? findAdapterForValue(dynamic value) {
     ResolvedAdapter? match;
-    for (var adapter in _typeAdapters.values) {
+    for (final adapter in _typeAdapters.values) {
       if (adapter.matchesRuntimeType(value)) {
         return adapter;
       }
@@ -98,7 +98,7 @@ class TypeRegistryImpl implements TypeRegistry {
       }
       typeId = typeId + reservedTypeIds;
 
-      var oldAdapter = findAdapterForTypeId(typeId);
+      final oldAdapter = findAdapterForTypeId(typeId);
       if (oldAdapter != null) {
         if (override) {
           print(
@@ -115,7 +115,7 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
 
-    var resolved = ResolvedAdapter<T>(adapter, typeId);
+    final resolved = ResolvedAdapter<T>(adapter, typeId);
     _typeAdapters[typeId] = resolved;
   }
 

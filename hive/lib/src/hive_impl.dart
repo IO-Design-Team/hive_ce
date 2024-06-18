@@ -16,7 +16,7 @@ import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
-import 'backend/storage_backend.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
@@ -71,7 +71,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   ) async {
     assert(path == null || bytes == null);
     assert(name.length <= 255 && name.isAscii,
-        'Box names need to be ASCII Strings with a max length of 255.');
+        'Box names need to be ASCII Strings with a max length of 255.',);
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
       if (lazy) {
@@ -89,7 +89,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
         }
       }
 
-      var completer = Completer();
+      final completer = Completer();
       _openingBoxes[name] = completer.future;
 
       BoxBaseImpl<E>? newBox;
@@ -99,7 +99,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
           backend = StorageBackendMemory(bytes, cipher);
         } else {
           backend = await _manager.open(
-              name, path ?? homePath, recovery, cipher, collection);
+              name, path ?? homePath, recovery, cipher, collection,);
         }
 
         if (lazy) {
@@ -140,7 +140,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       encryptionCipher = HiveAesCipher(encryptionKey);
     }
     return await _openBox<E>(name, false, encryptionCipher, keyComparator,
-        compactionStrategy, crashRecovery, path, bytes, collection) as Box<E>;
+        compactionStrategy, crashRecovery, path, bytes, collection,) as Box<E>;
   }
 
   @override
@@ -166,17 +166,17 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
         crashRecovery,
         path,
         null,
-        collection) as LazyBox<E>;
+        collection,) as LazyBox<E>;
   }
 
   BoxBase<E> _getBoxInternal<E>(String name, [bool? lazy]) {
-    var lowerCaseName = name.toLowerCase();
-    var box = _boxes[lowerCaseName];
+    final lowerCaseName = name.toLowerCase();
+    final box = _boxes[lowerCaseName];
     if (box != null) {
       if ((lazy == null || box.lazy == lazy) && box.valueType == E) {
         return box as BoxBase<E>;
       } else {
-        var typeName = box is LazyBox
+        final typeName = box is LazyBox
             ? 'LazyBox<${box.valueType}>'
             : 'Box<${box.valueType}>';
         throw HiveError('The box "$lowerCaseName" is already open '
@@ -189,7 +189,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   /// Not part of public API
   BoxBase? getBoxWithoutCheckInternal(String name) {
-    var lowerCaseName = name.toLowerCase();
+    final lowerCaseName = name.toLowerCase();
     return _boxes[lowerCaseName];
   }
 
@@ -207,7 +207,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> close() {
-    var closeFutures = _boxes.values.map((box) {
+    final closeFutures = _boxes.values.map((box) {
       return box.close();
     });
 
@@ -223,9 +223,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> deleteBoxFromDisk(String name,
-      {String? path, String? collection}) async {
-    var lowerCaseName = name.toLowerCase();
-    var box = _boxes[lowerCaseName];
+      {String? path, String? collection,}) async {
+    final lowerCaseName = name.toLowerCase();
+    final box = _boxes[lowerCaseName];
     if (box != null) {
       await box.deleteFromDisk();
     } else {
@@ -235,7 +235,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> deleteFromDisk() {
-    var deleteFutures = _boxes.values.toList().map((box) {
+    final deleteFutures = _boxes.values.toList().map((box) {
       return box.deleteFromDisk();
     });
 
@@ -249,9 +249,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<bool> boxExists(String name,
-      {String? path, String? collection}) async {
-    var lowerCaseName = name.toLowerCase();
+      {String? path, String? collection,}) async {
+    final lowerCaseName = name.toLowerCase();
     return await _manager.boxExists(
-        lowerCaseName, path ?? homePath, collection);
+        lowerCaseName, path ?? homePath, collection,);
   }
 }

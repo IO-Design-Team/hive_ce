@@ -25,14 +25,14 @@ class _TestAdapter extends TypeAdapter<int> {
 void main() {
   group('HiveImpl', () {
     Future<HiveImpl> initHive() async {
-      var tempDir = await getTempDir();
-      var hive = HiveImpl();
+      final tempDir = await getTempDir();
+      final hive = HiveImpl();
       hive.init(tempDir.path);
       return hive;
     }
 
     test('.init()', () {
-      var hive = HiveImpl();
+      final hive = HiveImpl();
 
       expect(() => hive.init('MYPATH'), returnsNormally);
       expect(hive.homePath, 'MYPATH');
@@ -47,17 +47,17 @@ void main() {
     group('.openBox()', () {
       group('box already open', () {
         test('opened box is returned if it exists', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
-          var testBox = await hive.openBox('TESTBOX');
-          var testBox2 = await hive.openBox('testBox');
+          final testBox = await hive.openBox('TESTBOX');
+          final testBox2 = await hive.openBox('testBox');
           expect(testBox == testBox2, true);
 
           await hive.close();
         });
 
         test('throw HiveError if opened box is lazy', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
           await hive.openLazyBox('LAZYBOX');
           await expectLater(
@@ -69,23 +69,23 @@ void main() {
         });
 
         test('throw HiveError if already opening box is lazy', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
           await Future.wait([
             hive.openLazyBox('TESTBOX'),
             expectLater(hive.openBox('testbox'),
-                throwsHiveError('is already open and of type LazyBox<dynamic>'))
+                throwsHiveError('is already open and of type LazyBox<dynamic>'),),
           ]);
         });
 
         test('same box returned if it is already opening', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
           Box? box1;
           Box? box2;
           await Future.wait([
             hive.openBox('TESTBOX').then((value) => box1 = value),
-            hive.openBox('testbox').then((value) => box2 = value)
+            hive.openBox('testbox').then((value) => box2 = value),
           ]);
 
           expect(box1 == box2, true);
@@ -96,10 +96,10 @@ void main() {
     group('.openLazyBox()', () {
       group('box already open', () {
         test('opened box is returned if it exists', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
-          var testBox = await hive.openLazyBox('TESTBOX');
-          var testBox2 = await hive.openLazyBox('testBox');
+          final testBox = await hive.openLazyBox('TESTBOX');
+          final testBox2 = await hive.openLazyBox('testBox');
           expect(testBox == testBox2, true);
 
           await hive.close();
@@ -109,17 +109,17 @@ void main() {
           LazyBox? box1;
           LazyBox? box2;
 
-          var hive = await initHive();
+          final hive = await initHive();
           await Future.wait([
             hive.openLazyBox('LAZYBOX').then((value) => box1 = value),
-            hive.openLazyBox('lazyBox').then((value) => box2 = value)
+            hive.openLazyBox('lazyBox').then((value) => box2 = value),
           ]);
 
           expect(box1 == box2, true);
         });
 
         test('throw HiveError if opened box is not lazy', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
           await hive.openBox('LAZYBOX');
           await expectLater(
@@ -131,12 +131,12 @@ void main() {
         });
 
         test('throw HiveError if already opening box is not lazy', () async {
-          var hive = await initHive();
+          final hive = await initHive();
 
           await Future.wait([
             hive.openBox('LAZYBOX'),
             expectLater(hive.openLazyBox('lazyBox'),
-                throwsHiveError('is already open and of type Box<dynamic>'))
+                throwsHiveError('is already open and of type Box<dynamic>'),),
           ]);
         });
       });
@@ -144,9 +144,9 @@ void main() {
 
     group('.box()', () {
       test('returns already opened box', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
-        var box = await hive.openBox('TESTBOX');
+        final box = await hive.openBox('TESTBOX');
         expect(hive.box('testBox'), box);
         expect(() => hive.box('other'), throwsHiveError('not found'));
 
@@ -154,7 +154,7 @@ void main() {
       });
 
       test('throws HiveError if box type does not match', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
         await hive.openBox<int>('INTBOX');
         expect(
@@ -180,9 +180,9 @@ void main() {
 
     group('.lazyBox()', () {
       test('returns already opened box', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
-        var box = await hive.openLazyBox('TESTBOX');
+        final box = await hive.openLazyBox('TESTBOX');
         expect(hive.lazyBox('testBox'), box);
         expect(() => hive.lazyBox('other'), throwsHiveError('not found'));
 
@@ -190,7 +190,7 @@ void main() {
       });
 
       test('throws HiveError if box type does not match', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
         await hive.openLazyBox<int>('INTBOX');
         expect(
@@ -215,7 +215,7 @@ void main() {
     });
 
     test('isBoxOpen()', () async {
-      var hive = await initHive();
+      final hive = await initHive();
 
       await hive.openBox('testBox');
 
@@ -226,10 +226,10 @@ void main() {
     });
 
     test('.close()', () async {
-      var hive = await initHive();
+      final hive = await initHive();
 
-      var box1 = await hive.openBox('box1');
-      var box2 = await hive.openBox('box2');
+      final box1 = await hive.openBox('box1');
+      final box2 = await hive.openBox('box2');
       expect(box1.isOpen, true);
       expect(box2.isOpen, true);
 
@@ -239,10 +239,10 @@ void main() {
     });
 
     test('.generateSecureKey()', () {
-      var hive = HiveImpl();
+      final hive = HiveImpl();
 
-      var key1 = hive.generateSecureKey();
-      var key2 = hive.generateSecureKey();
+      final key1 = hive.generateSecureKey();
+      final key2 = hive.generateSecureKey();
 
       expect(key1.length, 32);
       expect(key2.length, 32);
@@ -251,11 +251,11 @@ void main() {
 
     group('.deleteBoxFromDisk()', () {
       test('deletes open box', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
-        var box1 = await hive.openBox('testBox1');
+        final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        var box1File = File(box1.path!);
+        final box1File = File(box1.path!);
 
         await hive.deleteBoxFromDisk('testBox1');
         expect(await box1File.exists(), false);
@@ -265,13 +265,13 @@ void main() {
       });
 
       test('deletes closed box', () async {
-        var hive = await initHive();
+        final hive = await initHive();
 
-        var box1 = await hive.openBox('testBox1');
+        final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        var path = box1.path!;
+        final path = box1.path!;
         await box1.close();
-        var box1File = File(path);
+        final box1File = File(path);
 
         await hive.deleteBoxFromDisk('testBox1');
         expect(await box1File.exists(), false);
@@ -281,22 +281,22 @@ void main() {
       });
 
       test('does nothing if files do not exist', () async {
-        var hive = await initHive();
+        final hive = await initHive();
         await hive.deleteBoxFromDisk('testBox1');
         await hive.close();
       });
     });
 
     test('.deleteFromDisk()', () async {
-      var hive = await initHive();
+      final hive = await initHive();
 
-      var box1 = await hive.openBox('testBox1');
+      final box1 = await hive.openBox('testBox1');
       await box1.put('key', 'value');
-      var box1File = File(box1.path!);
+      final box1File = File(box1.path!);
 
-      var box2 = await hive.openBox('testBox2');
+      final box2 = await hive.openBox('testBox2');
       await box2.put('key', 'value');
-      var box2File = File(box1.path!);
+      final box2File = File(box1.path!);
 
       await hive.deleteFromDisk();
       expect(await box1File.exists(), false);
@@ -309,20 +309,20 @@ void main() {
 
     group('.boxExists()', () {
       test('returns true if a box was created', () async {
-        var hive = await initHive();
+        final hive = await initHive();
         await hive.openBox('testBox1');
         expect(await hive.boxExists('testBox1'), true);
         await hive.close();
       });
 
       test('returns false if no box was created', () async {
-        var hive = await initHive();
+        final hive = await initHive();
         expect(await hive.boxExists('testBox1'), false);
         await hive.close();
       });
 
       test('returns false if box was created and then deleted', () async {
-        var hive = await initHive();
+        final hive = await initHive();
         await hive.openBox('testBox1');
         await hive.deleteBoxFromDisk('testBox1');
         expect(await hive.boxExists('testBox1'), false);

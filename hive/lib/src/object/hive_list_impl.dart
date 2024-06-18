@@ -52,10 +52,10 @@ class HiveListImpl<E extends HiveObjectMixin>
   @override
   Box get box {
     if (_box == null) {
-      var box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
+      final box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
       if (box == null) {
         throw HiveError(
-            'To use this list, you have to open the box "$boxName" first.');
+            'To use this list, you have to open the box "$boxName" first.',);
       } else if (box is! Box) {
         throw HiveError('The box "$boxName" is a lazy box. '
             'You can only use HiveLists with normal boxes.');
@@ -73,8 +73,8 @@ class HiveListImpl<E extends HiveObjectMixin>
     }
 
     if (_invalidated) {
-      var retained = <E>[];
-      for (var obj in _delegate!) {
+      final retained = <E>[];
+      for (final obj in _delegate!) {
         if (obj.isInHiveList(this)) {
           retained.add(obj);
         }
@@ -82,10 +82,10 @@ class HiveListImpl<E extends HiveObjectMixin>
       _delegate = retained;
       _invalidated = false;
     } else if (_delegate == null) {
-      var list = <E>[];
-      for (var key in _keys!) {
+      final list = <E>[];
+      for (final key in _keys!) {
         if (box.containsKey(key)) {
-          var obj = box.get(key) as E;
+          final obj = box.get(key) as E;
           obj.linkHiveList(this);
           list.add(obj);
         }
@@ -99,7 +99,7 @@ class HiveListImpl<E extends HiveObjectMixin>
   @override
   void dispose() {
     if (_delegate != null) {
-      for (var element in _delegate!) {
+      for (final element in _delegate!) {
         element.unlinkHiveList(this);
       }
       _delegate = null;
@@ -136,7 +136,7 @@ class HiveListImpl<E extends HiveObjectMixin>
     _checkElementIsValid(value);
     value.linkHiveList(this);
 
-    var oldValue = delegate[index];
+    final oldValue = delegate[index];
     delegate[index] = value;
 
     oldValue.unlinkHiveList(this);
@@ -151,7 +151,7 @@ class HiveListImpl<E extends HiveObjectMixin>
 
   @override
   void addAll(Iterable<E> iterable) {
-    for (var element in iterable) {
+    for (final element in iterable) {
       _checkElementIsValid(element);
       element.linkHiveList(this);
     }

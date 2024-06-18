@@ -69,7 +69,7 @@ void main() {
       final values = await box.getAllValues();
       expect(values, {
         'fluffy': {'name': 'Fluffy', 'age': 4},
-        'loki': {'name': 'Loki', 'age': 2}
+        'loki': {'name': 'Loki', 'age': 2},
       });
     });
 
@@ -85,7 +85,7 @@ void main() {
       final values = await box.getAll(['fluffy', 'loki']);
       expect(values, [
         {'name': 'Fluffy', 'age': 4},
-        {'name': 'Loki', 'age': 2}
+        {'name': 'Loki', 'age': 2},
       ]);
     });
 

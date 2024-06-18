@@ -11,7 +11,7 @@ void main() {
     late int totalMinutes;
 
     setUp(() {
-      time = TimeOfDay(hour: 8, minute: 0);
+      time = const TimeOfDay(hour: 8, minute: 0);
       totalMinutes = time.hour * 60 + time.minute;
     });
 

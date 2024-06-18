@@ -117,7 +117,7 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   double readDouble() {
     _requireBytes(8);
-    var value = _byteData.getFloat64(_offset, Endian.little);
+    final value = _byteData.getFloat64(_offset, Endian.little);
     _offset += 8;
     return value;
   }
@@ -130,9 +130,9 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   String readString(
       [int? byteCount,
-      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder]) {
+      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,]) {
     byteCount ??= readUint32();
-    var view = viewBytes(byteCount);
+    final view = viewBytes(byteCount);
     return decoder.convert(view);
   }
 
@@ -140,7 +140,7 @@ class BinaryReaderImpl extends BinaryReader {
   Uint8List readByteList([int? length]) {
     length ??= readUint32();
     _requireBytes(length);
-    var byteList = _buffer.sublist(_offset, _offset + length);
+    final byteList = _buffer.sublist(_offset, _offset + length);
     _offset += length;
     return byteList;
   }
@@ -149,8 +149,8 @@ class BinaryReaderImpl extends BinaryReader {
   List<int> readIntList([int? length]) {
     length ??= readUint32();
     _requireBytes(length * 8);
-    var byteData = _byteData;
-    var list = List<int>.filled(length, 0, growable: true);
+    final byteData = _byteData;
+    final list = List<int>.filled(length, 0, growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = byteData.getFloat64(_offset, Endian.little).toInt();
       _offset += 8;
@@ -162,8 +162,8 @@ class BinaryReaderImpl extends BinaryReader {
   List<double> readDoubleList([int? length]) {
     length ??= readUint32();
     _requireBytes(length * 8);
-    var byteData = _byteData;
-    var list = List<double>.filled(length, 0.0, growable: true);
+    final byteData = _byteData;
+    final list = List<double>.filled(length, 0.0, growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = byteData.getFloat64(_offset, Endian.little);
       _offset += 8;
@@ -175,7 +175,7 @@ class BinaryReaderImpl extends BinaryReader {
   List<bool> readBoolList([int? length]) {
     length ??= readUint32();
     _requireBytes(length);
-    var list = List<bool>.filled(length, false, growable: true);
+    final list = List<bool>.filled(length, false, growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = _buffer[_offset++] > 0;
     }
@@ -185,9 +185,9 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   List<String> readStringList(
       [int? length,
-      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder]) {
+      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,]) {
     length ??= readUint32();
-    var list = List<String>.filled(length, '', growable: true);
+    final list = List<String>.filled(length, '', growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = readString(null, decoder);
     }
@@ -197,7 +197,7 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   List readList([int? length]) {
     length ??= readUint32();
-    var list = List<dynamic>.filled(length, null, growable: true);
+    final list = List<dynamic>.filled(length, null, growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = read();
     }
@@ -207,7 +207,7 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   Map readMap([int? length]) {
     length ??= readUint32();
-    var map = <dynamic, dynamic>{};
+    final map = <dynamic, dynamic>{};
     for (var i = 0; i < length; i++) {
       map[read()] = read();
     }
@@ -216,11 +216,11 @@ class BinaryReaderImpl extends BinaryReader {
 
   /// Not part of public API
   dynamic readKey() {
-    var keyType = readByte();
+    final keyType = readByte();
     if (keyType == FrameKeyType.uintT) {
       return readUint32();
     } else if (keyType == FrameKeyType.utf8StringT) {
-      var byteCount = readByte();
+      final byteCount = readByte();
       return BinaryReader.utf8Decoder.convert(viewBytes(byteCount));
     } else {
       throw HiveError('Unsupported key type. Frame might be corrupted.');
@@ -230,9 +230,9 @@ class BinaryReaderImpl extends BinaryReader {
   @override
   HiveList readHiveList([int? length]) {
     length ??= readUint32();
-    var boxNameLength = readByte();
-    var boxName = String.fromCharCodes(viewBytes(boxNameLength));
-    var keys = List<dynamic>.filled(length, null, growable: true);
+    final boxNameLength = readByte();
+    final boxName = String.fromCharCodes(viewBytes(boxNameLength));
+    final keys = List<dynamic>.filled(length, null, growable: true);
     for (var i = 0; i < length; i++) {
       keys[i] = readKey();
     }
@@ -242,19 +242,19 @@ class BinaryReaderImpl extends BinaryReader {
 
   /// Not part of public API
   Frame? readFrame(
-      {HiveCipher? cipher, bool lazy = false, int frameOffset = 0}) {
+      {HiveCipher? cipher, bool lazy = false, int frameOffset = 0,}) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;
 
     // frame length should be at least 8 bytes
-    var frameLength = readUint32();
+    final frameLength = readUint32();
     if (frameLength < 8) return null;
 
     // frame is bigger than avaible bytes
     if (availableBytes < frameLength - 4) return null;
 
-    var crc = _buffer.readUint32(_offset + frameLength - 8);
-    var computedCrc = Crc32.compute(
+    final crc = _buffer.readUint32(_offset + frameLength - 8);
+    final computedCrc = Crc32.compute(
       _buffer,
       offset: _offset - 4,
       length: frameLength - 4,
@@ -266,7 +266,7 @@ class BinaryReaderImpl extends BinaryReader {
 
     _limitAvailableBytes(frameLength - 8);
     Frame frame;
-    dynamic key = readKey();
+    final dynamic key = readKey();
 
     if (availableBytes == 0) {
       frame = Frame.deleted(key);
@@ -320,7 +320,7 @@ class BinaryReaderImpl extends BinaryReader {
       case FrameValueType.hiveListT:
         return readHiveList();
       default:
-        var resolved = _typeRegistry.findAdapterForTypeId(typeId);
+        final resolved = _typeRegistry.findAdapterForTypeId(typeId);
         if (resolved == null) {
           throw HiveError('Cannot read, unknown typeId: $typeId. '
               'Did you forget to register an adapter?');
@@ -333,12 +333,12 @@ class BinaryReaderImpl extends BinaryReader {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   dynamic readEncrypted(HiveCipher cipher) {
-    var inpLength = availableBytes;
-    var out = Uint8List(inpLength);
-    var outLength = cipher.decrypt(_buffer, _offset, inpLength, out, 0);
+    final inpLength = availableBytes;
+    final out = Uint8List(inpLength);
+    final outLength = cipher.decrypt(_buffer, _offset, inpLength, out, 0);
     _offset += inpLength;
 
-    var valueReader = BinaryReaderImpl(out, _typeRegistry, outLength);
+    final valueReader = BinaryReaderImpl(out, _typeRegistry, outLength);
     return valueReader.read();
   }
 }

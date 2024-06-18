@@ -25,7 +25,7 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   StorageBackendJs(this._db, this._cipher, this.objectStoreName,
-      [this._registry = TypeRegistryImpl.nullImpl]);
+      [this._registry = TypeRegistryImpl.nullImpl,]);
 
   @override
   String? get path => null;
@@ -42,7 +42,7 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   JSAny? encodeValue(Frame frame) {
-    var value = frame.value;
+    final value = frame.value;
     if (_cipher == null) {
       if (value == null) {
         return null;
@@ -60,17 +60,17 @@ class StorageBackendJs extends StorageBackend {
       }
     }
 
-    var frameWriter = BinaryWriterImpl(_registry);
+    final frameWriter = BinaryWriterImpl(_registry);
     frameWriter.writeByteList(_bytePrefix, writeLength: false);
 
     if (_cipher == null) {
       frameWriter.write(value);
     } else {
-      frameWriter.writeEncrypted(value, _cipher!);
+      frameWriter.writeEncrypted(value, _cipher);
     }
 
-    var bytes = frameWriter.toBytes();
-    var sublist = bytes.sublist(0, bytes.length);
+    final bytes = frameWriter.toBytes();
+    final sublist = bytes.sublist(0, bytes.length);
     return sublist.buffer.toJS;
   }
 
@@ -79,14 +79,14 @@ class StorageBackendJs extends StorageBackend {
   Object? decodeValue(JSAny? value) {
     if (value.isA<JSArrayBuffer>()) {
       value as JSArrayBuffer;
-      var bytes = Uint8List.view(value.toDart);
+      final bytes = Uint8List.view(value.toDart);
       if (_isEncoded(bytes)) {
-        var reader = BinaryReaderImpl(bytes, _registry);
+        final reader = BinaryReaderImpl(bytes, _registry);
         reader.skip(2);
         if (_cipher == null) {
           return reader.read();
         } else {
-          return reader.readEncrypted(_cipher!);
+          return reader.readEncrypted(_cipher);
         }
       } else {
         return bytes;
@@ -107,7 +107,7 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   Future<List<Object?>> getKeys({bool cursor = false}) async {
-    var store = getStore(false);
+    final store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture<JSArray>();
@@ -128,7 +128,7 @@ class StorageBackendJs extends StorageBackend {
   /// Not part of public API
   @visibleForTesting
   Future<Iterable<Object?>> getValues({bool cursor = false}) async {
-    var store = getStore(false);
+    final store = getStore(false);
 
     if (store.has('getAll') && !cursor) {
       final result = await store.getAll(null).asFuture<JSArray>();
@@ -140,18 +140,18 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<int> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy) async {
+      TypeRegistry registry, Keystore keystore, bool lazy,) async {
     _registry = registry;
-    var keys = await getKeys();
+    final keys = await getKeys();
     if (!lazy) {
       var i = 0;
-      var values = await getValues();
-      for (var value in values) {
-        var key = keys[i++];
+      final values = await getValues();
+      for (final value in values) {
+        final key = keys[i++];
         keystore.insert(Frame(key, value), notify: false);
       }
     } else {
-      for (var key in keys) {
+      for (final key in keys) {
         keystore.insert(Frame.lazy(key), notify: false);
       }
     }
@@ -167,8 +167,8 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<void> writeFrames(List<Frame> frames) async {
-    var store = getStore(true);
-    for (var frame in frames) {
+    final store = getStore(true);
+    for (final frame in frames) {
       if (frame.deleted) {
         await store.delete(frame.key.jsify()).asFuture();
       } else {
@@ -204,8 +204,8 @@ class StorageBackendJs extends StorageBackend {
       await indexDB.deleteDatabase(_db.name).asFuture();
     } else {
       final request = indexDB.open(_db.name, 1);
-      request.onupgradeneeded = (IDBVersionChangeEvent e) {
-        var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
+      request.onupgradeneeded = (e) {
+        final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
           db.deleteObjectStore(objectStoreName);
         }

@@ -45,8 +45,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   void _increaseBufferSize(int count) {
 // We will create a list in the range of 2-4 times larger than required.
-    var newSize = _pow2roundup((_offset + count) * 2);
-    var newBuffer = Uint8List(newSize);
+    final newSize = _pow2roundup((_offset + count) * 2);
+    final newBuffer = Uint8List(newSize);
     newBuffer.setRange(0, _offset, _buffer);
     _buffer = newBuffer;
     _byteDataInstance = null;
@@ -57,7 +57,7 @@ class BinaryWriterImpl extends BinaryWriter {
   void _addBytes(List<int> bytes) {
     ArgumentError.checkNotNull(bytes);
 
-    var length = bytes.length;
+    final length = bytes.length;
     _reserveBytes(length);
     _buffer.setRange(_offset, _offset + length, bytes);
     _offset += length;
@@ -131,7 +131,7 @@ class BinaryWriterImpl extends BinaryWriter {
   }) {
     ArgumentError.checkNotNull(value);
 
-    var bytes = encoder.convert(value);
+    final bytes = encoder.convert(value);
     if (writeByteCount) {
       writeUint32(bytes.length);
     }
@@ -152,12 +152,12 @@ class BinaryWriterImpl extends BinaryWriter {
   void writeIntList(List<int> list, {bool writeLength = true}) {
     ArgumentError.checkNotNull(list);
 
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
     _reserveBytes(length * 8);
-    var byteData = _byteData;
+    final byteData = _byteData;
     for (var i = 0; i < length; i++) {
       byteData.setFloat64(_offset, list[i].toDouble(), Endian.little);
       _offset += 8;
@@ -168,12 +168,12 @@ class BinaryWriterImpl extends BinaryWriter {
   void writeDoubleList(List<double> list, {bool writeLength = true}) {
     ArgumentError.checkNotNull(list);
 
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
     _reserveBytes(length * 8);
-    var byteData = _byteData;
+    final byteData = _byteData;
     for (var i = 0; i < length; i++) {
       byteData.setFloat64(_offset, list[i], Endian.little);
       _offset += 8;
@@ -184,7 +184,7 @@ class BinaryWriterImpl extends BinaryWriter {
   void writeBoolList(List<bool> list, {bool writeLength = true}) {
     ArgumentError.checkNotNull(list);
 
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
@@ -205,8 +205,8 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(list.length);
     }
-    for (var str in list) {
-      var strBytes = encoder.convert(str);
+    for (final str in list) {
+      final strBytes = encoder.convert(str);
       writeUint32(strBytes.length);
       _addBytes(strBytes);
     }
@@ -231,7 +231,7 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(map.length);
     }
-    for (var key in map.keys) {
+    for (final key in map.keys) {
       write(key);
       write(map[key]);
     }
@@ -243,7 +243,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
     if (key is String) {
       writeByte(FrameKeyType.utf8StringT);
-      var bytes = BinaryWriter.utf8Encoder.convert(key);
+      final bytes = BinaryWriter.utf8Encoder.convert(key);
       writeByte(bytes.length);
       _addBytes(bytes);
     } else {
@@ -259,10 +259,10 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(list.length);
     }
-    var boxName = (list as HiveListImpl).boxName;
+    final boxName = (list as HiveListImpl).boxName;
     writeByte(boxName.length);
     _addBytes(boxName.codeUnits);
-    for (var obj in list) {
+    for (final obj in list) {
       writeKey(obj.key);
     }
   }
@@ -271,7 +271,7 @@ class BinaryWriterImpl extends BinaryWriter {
   int writeFrame(Frame frame, {HiveCipher? cipher}) {
     ArgumentError.checkNotNull(frame);
 
-    var startOffset = _offset;
+    final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
 
@@ -285,10 +285,10 @@ class BinaryWriterImpl extends BinaryWriter {
       }
     }
 
-    var frameLength = _offset - startOffset + 4;
+    final frameLength = _offset - startOffset + 4;
     _buffer.writeUint32(startOffset, frameLength);
 
-    var crc = Crc32.compute(
+    final crc = Crc32.compute(
       _buffer,
       offset: startOffset,
       length: frameLength - 4,
@@ -333,7 +333,7 @@ class BinaryWriterImpl extends BinaryWriter {
       }
       writeMap(value);
     } else {
-      var resolved = _typeRegistry.findAdapterForValue(value);
+      final resolved = _typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
@@ -395,15 +395,15 @@ class BinaryWriterImpl extends BinaryWriter {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void writeEncrypted(dynamic value, HiveCipher cipher,
-      {bool writeTypeId = true}) {
-    var valueWriter = BinaryWriterImpl(_typeRegistry)
+      {bool writeTypeId = true,}) {
+    final valueWriter = BinaryWriterImpl(_typeRegistry)
       ..write(value, writeTypeId: writeTypeId);
-    var inp = valueWriter._buffer;
-    var inpLength = valueWriter._offset;
+    final inp = valueWriter._buffer;
+    final inpLength = valueWriter._offset;
 
     _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    var len = cipher.encrypt(inp, 0, inpLength, _buffer, _offset);
+    final len = cipher.encrypt(inp, 0, inpLength, _buffer, _offset);
 
     _offset += len;
   }

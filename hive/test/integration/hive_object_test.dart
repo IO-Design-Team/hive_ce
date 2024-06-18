@@ -31,7 +31,7 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 }
 
 Future _performTest(bool lazy) async {
-  var hive = await createHive();
+  final hive = await createHive();
   hive.registerAdapter<_TestObject>(_TestObjectAdapter());
   var box = await openBox(lazy, hive: hive);
 
@@ -67,5 +67,5 @@ void main() {
     test('normal box', () => _performTest(false));
 
     test('lazy box', () => _performTest(true));
-  }, timeout: longTimeout);
+  }, timeout: longTimeout,);
 }

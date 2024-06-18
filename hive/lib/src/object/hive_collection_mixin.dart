@@ -5,7 +5,7 @@ mixin HiveCollectionMixin<E extends HiveObjectMixin>
     implements HiveCollection<E> {
   @override
   Iterable<dynamic> get keys sync* {
-    for (var value in this) {
+    for (final value in this) {
       yield value.key;
     }
   }
@@ -32,8 +32,8 @@ mixin HiveCollectionMixin<E extends HiveObjectMixin>
 
   @override
   Map<dynamic, E> toMap() {
-    var map = <dynamic, E>{};
-    for (var item in this) {
+    final map = <dynamic, E>{};
+    for (final item in this) {
       map[item.key] = item;
     }
     return map;

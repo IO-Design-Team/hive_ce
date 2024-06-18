@@ -29,14 +29,14 @@ int _subWord(int x) {
 @pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
 int _invMcol(int x) {
-  var f2 = ((x & _m2) << 1) ^ (((x & _m1) >> 7) * _m3);
-  var f4 = ((f2 & _m2) << 1) ^ (((f2 & _m1) >> 7) * _m3);
-  var f8 = ((f4 & _m2) << 1) ^ (((f4 & _m1) >> 7) * _m3);
-  var f9 = x ^ f8;
+  final f2 = ((x & _m2) << 1) ^ (((x & _m1) >> 7) * _m3);
+  final f4 = ((f2 & _m2) << 1) ^ (((f2 & _m1) >> 7) * _m3);
+  final f8 = ((f4 & _m2) << 1) ^ (((f4 & _m1) >> 7) * _m3);
+  final f9 = x ^ f8;
 
-  var s1 = ((f2 ^ f9) >> 8) | ((((f2 ^ f9) & _mask8) << 24) & _mask32);
-  var s2 = ((f4 ^ f9) >> 16) | ((((f4 ^ f9) & _mask16) << 16) & _mask32);
-  var s3 = (f9 >> 24) | (((f9 & _mask32) << 8) & _mask32);
+  final s1 = ((f2 ^ f9) >> 8) | ((((f2 ^ f9) & _mask8) << 24) & _mask32);
+  final s2 = ((f4 ^ f9) >> 16) | ((((f4 ^ f9) & _mask16) << 16) & _mask32);
+  final s3 = (f9 >> 24) | (((f9 & _mask32) << 8) & _mask32);
 
   return f2 ^ f4 ^ f8 ^ s1 ^ s2 ^ s3;
 }
@@ -45,8 +45,8 @@ int _invMcol(int x) {
 class AesEngine {
   /// Expand an encryption or decryption key.
   static List<Uint32List> generateWorkingKey(
-      List<int> key, bool forEncryption) {
-    var w = List.generate(rounds + 1, (_) => Uint32List(4));
+      List<int> key, bool forEncryption,) {
+    final w = List.generate(rounds + 1, (_) => Uint32List(4));
     var t0 = key.readUint32(0);
     var t1 = key.readUint32(4);
     var t2 = key.readUint32(8);
@@ -113,7 +113,7 @@ class AesEngine {
 
   /// Encrypt a single block with the [workingKey].
   static void encryptBlock(List<List<int>> workingKey, Uint8List inp,
-      int inpOff, Uint8List out, int outOff) {
+      int inpOff, Uint8List out, int outOff,) {
     var c0 = inp.readUint32(inpOff) ^ workingKey[0][0];
     var c1 = inp.readUint32(inpOff + 4) ^ workingKey[0][1];
     var c2 = inp.readUint32(inpOff + 8) ^ workingKey[0][2];
@@ -219,7 +219,7 @@ class AesEngine {
 
   /// Decrypt a single block with [workingKey].
   static void decryptBlock(List<List<int>> workingKey, Uint8List inp,
-      int inpOff, Uint8List out, int outOff) {
+      int inpOff, Uint8List out, int outOff,) {
     var c0 = inp.readUint32(inpOff) ^ workingKey[rounds][0];
     var c1 = inp.readUint32(inpOff + 4) ^ workingKey[rounds][1];
     var c2 = inp.readUint32(inpOff + 8) ^ workingKey[rounds][2];

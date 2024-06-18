@@ -12,7 +12,7 @@ import '../util/is_browser.dart';
 Future<HiveImpl> createHive() async {
   final hive = HiveImpl();
   if (!isBrowser) {
-    var dir = await getTempDir();
+    final dir = await getTempDir();
     hive.init(dir.path);
   } else {
     hive.init(null);
@@ -21,36 +21,36 @@ Future<HiveImpl> createHive() async {
 }
 
 Future<BoxBase<T>> openBox<T>(bool lazy,
-    {HiveInterface? hive, List<int>? encryptionKey}) async {
+    {HiveInterface? hive, List<int>? encryptionKey,}) async {
   hive ??= await createHive();
-  var id = Random.secure().nextInt(99999999);
+  final id = Random.secure().nextInt(99999999);
   HiveCipher? cipher;
   if (encryptionKey != null) {
     cipher = HiveAesCipher(encryptionKey);
   }
   if (lazy) {
     return await hive.openLazyBox<T>('box$id',
-        crashRecovery: false, encryptionCipher: cipher);
+        crashRecovery: false, encryptionCipher: cipher,);
   } else {
     return await hive.openBox<T>('box$id',
-        crashRecovery: false, encryptionCipher: cipher);
+        crashRecovery: false, encryptionCipher: cipher,);
   }
 }
 
 extension BoxBaseX<T> on BoxBase<T?> {
   Future<BoxBase<T>> reopen({List<int>? encryptionKey}) async {
     await close();
-    var hive = (this as BoxBaseImpl).hive;
+    final hive = (this as BoxBaseImpl).hive;
     HiveCipher? cipher;
     if (encryptionKey != null) {
       cipher = HiveAesCipher(encryptionKey);
     }
     if (this is LazyBoxImpl) {
       return await hive.openLazyBox<T>(name,
-          crashRecovery: false, encryptionCipher: cipher);
+          crashRecovery: false, encryptionCipher: cipher,);
     } else {
       return await hive.openBox<T>(name,
-          crashRecovery: false, encryptionCipher: cipher);
+          crashRecovery: false, encryptionCipher: cipher,);
     }
   }
 

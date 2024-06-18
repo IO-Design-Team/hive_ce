@@ -29,10 +29,10 @@ String revivableToString(DartObject? object, List<String> typeInformation) {
     final prefix = kConstConstructors ? 'const ' : '';
     final ctor = revivable.accessor.isEmpty ? '' : '.${revivable.accessor}';
     final arguments = <String>[
-      for (var arg in revivable.positionalArguments)
+      for (final arg in revivable.positionalArguments)
         constantToString(arg, nextTypeInformation),
-      for (var kv in revivable.namedArguments.entries)
-        '${kv.key}: ${constantToString(kv.value, nextTypeInformation)}'
+      for (final kv in revivable.namedArguments.entries)
+        '${kv.key}: ${constantToString(kv.value, nextTypeInformation)}',
     ];
 
     return '$prefix${revivable.source.fragment}$ctor(${arguments.join(', ')})';

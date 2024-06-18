@@ -2,22 +2,20 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
-import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 
 /// Not part of public API
 class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   /// Not part of public API
   LazyBoxImpl(
-    HiveImpl hive,
-    String name,
-    KeyComparator? keyComparator,
-    CompactionStrategy compactionStrategy,
-    StorageBackend backend,
-  ) : super(hive, name, keyComparator, compactionStrategy, backend);
+    super.hive,
+    super.name,
+    super.keyComparator,
+    super.compactionStrategy,
+    super.backend,
+  );
 
   @override
   final bool lazy = true;
@@ -26,10 +24,10 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<E?> get(dynamic key, {E? defaultValue}) async {
     checkOpen();
 
-    var frame = keystore.get(key);
+    final frame = keystore.get(key);
 
     if (frame != null) {
-      var value = await backend.readValue(frame);
+      final value = await backend.readValue(frame);
       if (value is HiveObjectMixin) {
         value.init(key, this);
       }
@@ -51,8 +49,8 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<void> putAll(Map<dynamic, dynamic> kvPairs) async {
     checkOpen();
 
-    var frames = <Frame>[];
-    for (var key in kvPairs.keys) {
+    final frames = <Frame>[];
+    for (final key in kvPairs.keys) {
       frames.add(Frame(key, kvPairs[key]));
       if (key is int) {
         keystore.updateAutoIncrement(key);
@@ -62,7 +60,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     if (frames.isEmpty) return;
     await backend.writeFrames(frames);
 
-    for (var frame in frames) {
+    for (final frame in frames) {
       if (frame.value is HiveObjectMixin) {
         (frame.value as HiveObjectMixin).init(frame.key, this);
       }
@@ -76,8 +74,8 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<void> deleteAll(Iterable<dynamic> keys) async {
     checkOpen();
 
-    var frames = <Frame>[];
-    for (var key in keys) {
+    final frames = <Frame>[];
+    for (final key in keys) {
       if (keystore.containsKey(key)) {
         frames.add(Frame.deleted(key));
       }
@@ -86,7 +84,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     if (frames.isEmpty) return;
     await backend.writeFrames(frames);
 
-    for (var frame in frames) {
+    for (final frame in frames) {
       keystore.insert(frame);
     }
 

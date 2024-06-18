@@ -35,9 +35,9 @@ class IndexableSkipList<K, V> {
 
   /// Not part of public API
   V? insert(K key, V? value) {
-    var existingNode = _getNode(key);
+    final existingNode = _getNode(key);
     if (existingNode != null) {
-      var oldValue = existingNode.value;
+      final oldValue = existingNode.value;
       existingNode.value = value;
       return oldValue;
     }
@@ -51,7 +51,7 @@ class IndexableSkipList<K, V> {
       newLevel = _height++;
     }
 
-    var newNode = _Node<K, V>(
+    final newNode = _Node<K, V>(
       key,
       value,
       List.filled(newLevel + 1, null),
@@ -62,14 +62,14 @@ class IndexableSkipList<K, V> {
     // Next & Down
     for (var level = _height - 1; level >= 0; level--) {
       while (true) {
-        var next = current.next[level];
-        if (next == null || _comparator(key, next.key!) < 0) break;
+        final next = current.next[level];
+        if (next == null || _comparator(key, next.key as K) < 0) break;
         current = next;
       }
 
       // CHANGE 1 - Increase all the above node's width by 1
       if (level > newLevel) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next != null) {
           next.width[level]++;
         }
@@ -83,7 +83,7 @@ class IndexableSkipList<K, V> {
         // CHANGE 3 - Calculate the width of the level
         var width = 0;
         var node = current.next[level - 1];
-        while (node != null && _comparator(key, node.key!) >= 0) {
+        while (node != null && _comparator(key, node.key as K) >= 0) {
           width += node.width[level - 1];
           node = node.next[level - 1];
         }
@@ -101,7 +101,7 @@ class IndexableSkipList<K, V> {
 
     // CHANGE 4 - Adjust the width of all next nodes
     for (var i = 1; i <= newLevel; i++) {
-      var next = newNode.next[i];
+      final next = newNode.next[i];
       if (next != null) {
         next.width[i] -= newNode.width[i] - 1;
       }
@@ -113,25 +113,25 @@ class IndexableSkipList<K, V> {
 
   /// Not part of public API
   V? delete(K key) {
-    var node = _getNode(key);
+    final node = _getNode(key);
     if (node == null) return null;
 
     var current = _head;
     // Next & Down
     for (var level = _height - 1; level >= 0; level--) {
       while (true) {
-        var next = current.next[level];
-        if (next == null || _comparator(key, next.key!) <= 0) break;
+        final next = current.next[level];
+        if (next == null || _comparator(key, next.key as K) <= 0) break;
         current = next;
       }
 
       if (level > node.level) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next != null) {
           next.width[level]--;
         }
       } else {
-        var next = node.next[level];
+        final next = node.next[level];
         current.next[level] = next;
         if (next != null) {
           next.width[level] += node.width[level] - 1;
@@ -159,8 +159,8 @@ class IndexableSkipList<K, V> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Iterable<V> valuesFromKey(K key) {
-    var node = _getNode(key);
-    var virtualHead = _Node(null, null, [node], [0]);
+    final node = _getNode(key);
+    final virtualHead = _Node(null, null, [node], [0]);
     return _ValueIterable(virtualHead);
   }
 
@@ -170,13 +170,13 @@ class IndexableSkipList<K, V> {
     for (var i = _height - 1; i >= 0; i--) {
       node = prev.next[i];
 
-      while (node != null && _comparator(key, node.key!) > 0) {
+      while (node != null && _comparator(key, node.key as K) > 0) {
         prev = node;
         node = node.next[i];
       }
     }
 
-    if (node != null && _comparator(key, node.key!) == 0) {
+    if (node != null && _comparator(key, node.key as K) == 0) {
       return node;
     }
     return null;
@@ -245,7 +245,7 @@ abstract class _Iterator<K, V, E> implements Iterator<E> {
 }
 
 class _KeyIterator<K, V> extends _Iterator<K, V, K> {
-  _KeyIterator(_Node<K?, V?> node) : super(node);
+  _KeyIterator(_Node<K?, V?> super.node);
 
   @override
   K get current => node!.key!;
@@ -261,7 +261,7 @@ class _KeyIterable<K, V> extends IterableBase<K> {
 }
 
 class _ValueIterator<K, V> extends _Iterator<K, V, V> {
-  _ValueIterator(_Node<K?, V?> node) : super(node);
+  _ValueIterator(_Node<K?, V?> super.node);
 
   @override
   V get current => node!.value!;

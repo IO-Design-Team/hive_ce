@@ -27,7 +27,7 @@ void main() {
     });
 
     test('.cast()', () {
-      List dynamicList = testList;
+      final List dynamicList = testList;
       expect(dynamicList.cast<String>(), isA<List<String>>());
     });
 
@@ -272,7 +272,7 @@ class _TestList<T> with DelegatingListViewMixin<T> {
 
   @override
   void setRange(int start, int end, Iterable<T> iterable,
-          [int skipCount = 0]) =>
+          [int skipCount = 0,]) =>
       throw UnimplementedError();
 
   @override

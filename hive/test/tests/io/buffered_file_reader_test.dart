@@ -5,9 +5,9 @@ import 'package:test/test.dart';
 import '../common.dart';
 
 Future<BufferedFileReader> openReader(List<int> bytes,
-    [int chunkSize = BufferedFileReader.defaultChunkSize]) async {
-  var file = await getTempFile(bytes);
-  var raf = await file.open();
+    [int chunkSize = BufferedFileReader.defaultChunkSize,]) async {
+  final file = await getTempFile(bytes);
+  final raf = await file.open();
   return BufferedFileReader(raf, chunkSize);
 }
 
@@ -23,7 +23,7 @@ void main() {
 
     group('.skip()', () {
       test('increases offset', () async {
-        var reader = await openReader([1, 2, 3, 4, 5]);
+        final reader = await openReader([1, 2, 3, 4, 5]);
         await reader.loadBytes(5);
         expect(reader.remainingInBuffer, 5);
         expect(reader.offset, 0);
@@ -40,7 +40,7 @@ void main() {
       });
 
       test('fails if not enough bytes available', () async {
-        var reader = await openReader([1, 2, 3]);
+        final reader = await openReader([1, 2, 3]);
         await reader.loadBytes(5);
         expect(reader.remainingInBuffer, 3);
         expect(reader.offset, 0);
@@ -53,7 +53,7 @@ void main() {
 
     group('.viewBytes()', () {
       test('returns a view with the requested size', () async {
-        var reader = await openReader([1, 2, 3, 4, 5]);
+        final reader = await openReader([1, 2, 3, 4, 5]);
         await reader.loadBytes(5);
         expect(reader.offset, 0);
 
@@ -67,7 +67,7 @@ void main() {
       });
 
       test('fails if not enough bytes available', () async {
-        var reader = await openReader([1, 2, 3, 4, 5]);
+        final reader = await openReader([1, 2, 3, 4, 5]);
         await reader.loadBytes(5);
 
         expect(() => reader.viewBytes(6), throwsA(anything));
@@ -78,7 +78,7 @@ void main() {
 
     group('.loadBytes()', () {
       test('returns remaining bytes if enough bytes available', () async {
-        var reader = await openReader([1, 2, 3, 4, 5], 3);
+        final reader = await openReader([1, 2, 3, 4, 5], 3);
         expect(await reader.loadBytes(3), 3);
         expect(await reader.loadBytes(2), 3);
 
@@ -89,7 +89,7 @@ void main() {
       });
 
       test('increases the buffer if it is too small', () async {
-        var reader = await openReader([1, 2, 3, 4, 5], 2);
+        final reader = await openReader([1, 2, 3, 4, 5], 2);
         await reader.loadBytes(2);
         expect(reader.viewBytes(2), [1, 2]);
 
@@ -100,7 +100,7 @@ void main() {
       });
 
       test('copies unused bytes', () async {
-        var reader = await openReader([1, 2, 3, 4, 5, 6, 7], 3);
+        final reader = await openReader([1, 2, 3, 4, 5, 6, 7], 3);
         await reader.loadBytes(3);
         expect(reader.viewBytes(1), [1]);
 

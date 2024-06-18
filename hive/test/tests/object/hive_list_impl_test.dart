@@ -10,17 +10,17 @@ import '../common.dart';
 import '../mocks.dart';
 
 HiveObject _getHiveObject(String key, MockBox box) {
-  var hiveObject = TestHiveObject();
+  final hiveObject = TestHiveObject();
   hiveObject.init(key, box);
   when(() => box.get(key,
-          defaultValue: captureAny(that: isNotNull, named: 'defaultValue')))
+          defaultValue: captureAny(that: isNotNull, named: 'defaultValue'),),)
       .thenReturn(hiveObject);
   when(() => box.get(key)).thenReturn(hiveObject);
   return hiveObject;
 }
 
 MockBox _mockBox() {
-  var box = MockBox();
+  final box = MockBox();
   // The HiveListImpl constructor sets the boxName property to box.name,
   // therefore we need to return an valid String on sound null safety.
   when(() => box.name).thenReturn('testBox');
@@ -30,49 +30,49 @@ MockBox _mockBox() {
 void main() {
   group('HiveListImpl', () {
     test('HiveListImpl()', () {
-      var box = _mockBox();
+      final box = _mockBox();
 
-      var item1 = _getHiveObject('item1', box);
-      var item2 = _getHiveObject('item2', box);
-      var list = HiveListImpl(box, objects: [item1, item2, item1]);
+      final item1 = _getHiveObject('item1', box);
+      final item2 = _getHiveObject('item2', box);
+      final list = HiveListImpl(box, objects: [item1, item2, item1]);
 
       expect(item1.debugHiveLists, {list: 2});
       expect(item2.debugHiveLists, {list: 1});
     });
 
     test('HiveListImpl.lazy()', () {
-      var list = HiveListImpl.lazy('testBox', ['key1', 'key2']);
+      final list = HiveListImpl.lazy('testBox', ['key1', 'key2']);
       expect(list.boxName, 'testBox');
       expect(list.keys, ['key1', 'key2']);
     });
 
     group('.box', () {
       test('throws HiveError if box is not open', () async {
-        var hive = await createHive();
-        var hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
+        final hive = await createHive();
+        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
         expect(() => hiveList.box, throwsHiveError('you have to open the box'));
       });
 
       test('returns the box', () async {
-        var hive = await createHive();
-        var box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
-        var hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
+        final hive = await createHive();
+        final box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
+        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
         expect(hiveList.box, box);
       });
     });
 
     group('.delegate', () {
       test('throws exception if HiveList is disposed', () {
-        var list = HiveListImpl.lazy('box', []);
+        final list = HiveListImpl.lazy('box', []);
         list.dispose();
         expect(() => list.delegate, throwsHiveError('already been disposed'));
       });
 
       test('removes correct elements if invalidated', () {
-        var box = _mockBox();
-        var item1 = _getHiveObject('item1', box);
-        var item2 = _getHiveObject('item2', box);
-        var list = HiveListImpl(box, objects: [item1, item2, item1]);
+        final box = _mockBox();
+        final item1 = _getHiveObject('item1', box);
+        final item2 = _getHiveObject('item2', box);
+        final list = HiveListImpl(box, objects: [item1, item2, item1]);
 
         item1.debugHiveLists.clear();
         expect(list.delegate, [item1, item2, item1]);
@@ -81,17 +81,17 @@ void main() {
       });
 
       test('creates delegate and links HiveList if delegate == null', () {
-        var hive = MockHiveImpl();
-        var box = _mockBox();
+        final hive = MockHiveImpl();
+        final box = _mockBox();
         when(() => box.containsKey('item1')).thenReturn(true);
         when(() => box.containsKey('item2')).thenReturn(true);
         when(() => box.containsKey('none')).thenReturn(false);
         when(() => hive.getBoxWithoutCheckInternal('box')).thenReturn(box);
 
-        var item1 = _getHiveObject('item1', box);
-        var item2 = _getHiveObject('item2', box);
+        final item1 = _getHiveObject('item1', box);
+        final item2 = _getHiveObject('item2', box);
 
-        var list = HiveListImpl.lazy('box', ['item1', 'none', 'item2', 'item1'])
+        final list = HiveListImpl.lazy('box', ['item1', 'none', 'item2', 'item1'])
           ..debugHive = hive;
         expect(list.delegate, [item1, item2, item1]);
         expect(item1.debugHiveLists, {list: 2});
@@ -101,11 +101,11 @@ void main() {
 
     group('.dispose()', () {
       test('unlinks remote HiveObjects if delegate exists', () {
-        var box = _mockBox();
-        var item1 = _getHiveObject('item1', box);
-        var item2 = _getHiveObject('item2', box);
+        final box = _mockBox();
+        final item1 = _getHiveObject('item1', box);
+        final item2 = _getHiveObject('item2', box);
 
-        var list = HiveListImpl(box, objects: [item1, item2, item1]);
+        final list = HiveListImpl(box, objects: [item1, item2, item1]);
         list.dispose();
 
         expect(item1.debugHiveLists, {});
@@ -114,11 +114,11 @@ void main() {
     });
 
     test('set length', () {
-      var box = _mockBox();
-      var item1 = _getHiveObject('item1', box);
-      var item2 = _getHiveObject('item2', box);
+      final box = _mockBox();
+      final item1 = _getHiveObject('item1', box);
+      final item2 = _getHiveObject('item2', box);
 
-      var list = HiveListImpl(box, objects: [item1, item2]);
+      final list = HiveListImpl(box, objects: [item1, item2]);
       list.length = 1;
 
       expect(item2.debugHiveLists, {});
@@ -127,11 +127,11 @@ void main() {
 
     group('operator []=', () {
       test('sets key at index', () {
-        var box = _mockBox();
-        var oldItem = _getHiveObject('old', box);
-        var newItem = _getHiveObject('new', box);
+        final box = _mockBox();
+        final oldItem = _getHiveObject('old', box);
+        final newItem = _getHiveObject('new', box);
 
-        var list = HiveListImpl(box, objects: [oldItem]);
+        final list = HiveListImpl(box, objects: [oldItem]);
         list[0] = newItem;
 
         expect(oldItem.debugHiveLists, {});
@@ -140,22 +140,22 @@ void main() {
       });
 
       test('throws HiveError if HiveObject is not valid', () {
-        var box = _mockBox();
-        var oldItem = _getHiveObject('old', box);
-        var newItem = _getHiveObject('new', MockBox());
+        final box = _mockBox();
+        final oldItem = _getHiveObject('old', box);
+        final newItem = _getHiveObject('new', MockBox());
 
-        var list = HiveListImpl(box, objects: [oldItem]);
+        final list = HiveListImpl(box, objects: [oldItem]);
         expect(() => list[0] = newItem, throwsHiveError());
       });
     });
 
     group('.add()', () {
       test('adds key', () {
-        var box = _mockBox();
-        var item1 = _getHiveObject('item1', box);
-        var item2 = _getHiveObject('item2', box);
+        final box = _mockBox();
+        final item1 = _getHiveObject('item1', box);
+        final item2 = _getHiveObject('item2', box);
 
-        var list = HiveListImpl(box, objects: [item1]);
+        final list = HiveListImpl(box, objects: [item1]);
         list.add(item2);
 
         expect(item2.debugHiveLists, {list: 1});
@@ -163,20 +163,20 @@ void main() {
       });
 
       test('throws HiveError if HiveObject is not valid', () {
-        var box = _mockBox();
-        var item = _getHiveObject('item', MockBox());
-        var list = HiveListImpl(box);
+        final box = _mockBox();
+        final item = _getHiveObject('item', MockBox());
+        final list = HiveListImpl(box);
         expect(() => list.add(item), throwsHiveError('needs to be in the box'));
       });
     });
 
     group('.addAll()', () {
       test('adds keys', () {
-        var box = _mockBox();
-        var item1 = _getHiveObject('item1', box);
-        var item2 = _getHiveObject('item2', box);
+        final box = _mockBox();
+        final item1 = _getHiveObject('item1', box);
+        final item2 = _getHiveObject('item2', box);
 
-        var list = HiveListImpl(box, objects: [item1]);
+        final list = HiveListImpl(box, objects: [item1]);
         list.addAll([item2, item2]);
 
         expect(item2.debugHiveLists, {list: 2});
@@ -184,12 +184,12 @@ void main() {
       });
 
       test('throws HiveError if HiveObject is not valid', () {
-        var box = _mockBox();
-        var item = _getHiveObject('item', MockBox());
+        final box = _mockBox();
+        final item = _getHiveObject('item', MockBox());
 
-        var list = HiveListImpl(box);
+        final list = HiveListImpl(box);
         expect(() => list.addAll([item]),
-            throwsHiveError('needs to be in the box'));
+            throwsHiveError('needs to be in the box'),);
       });
     });
   });

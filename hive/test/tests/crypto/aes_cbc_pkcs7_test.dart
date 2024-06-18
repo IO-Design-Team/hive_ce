@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'message.dart';
 
 PaddedBlockCipherImpl getCipher() {
-  var pcCipher = PaddedBlockCipherImpl(
+  final pcCipher = PaddedBlockCipherImpl(
     PKCS7Padding(),
     CBCBlockCipher(AESEngine()),
   );
@@ -25,24 +25,24 @@ PaddedBlockCipherImpl getCipher() {
 void main() {
   group('AesCbcPkcs7', () {
     test('.encrypt()', () {
-      var out = Uint8List(1100);
-      var cipher = AesCbcPkcs7(key);
+      final out = Uint8List(1100);
+      final cipher = AesCbcPkcs7(key);
       for (var i = 1; i < 1000; i++) {
-        var input = message.view(0, i);
-        var outLen = cipher.encrypt(iv, input, 0, i, out, 0);
-        var pcOut = getCipher().process(input);
+        final input = message.view(0, i);
+        final outLen = cipher.encrypt(iv, input, 0, i, out, 0);
+        final pcOut = getCipher().process(input);
 
         expect(out.view(0, outLen), pcOut);
       }
     });
 
     test('.decrypt()', () {
-      var out = Uint8List(1100);
-      var cipher = AesCbcPkcs7(key);
+      final out = Uint8List(1100);
+      final cipher = AesCbcPkcs7(key);
       for (var i = 1; i < 1000; i++) {
-        var input = message.view(0, i);
-        var encrypted = getCipher().process(input);
-        var outLen = cipher.decrypt(iv, encrypted, 0, encrypted.length, out, 0);
+        final input = message.view(0, i);
+        final encrypted = getCipher().process(input);
+        final outLen = cipher.decrypt(iv, encrypted, 0, encrypted.length, out, 0);
         expect(out.view(0, outLen), input);
       }
     });

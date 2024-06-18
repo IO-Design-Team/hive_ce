@@ -13,12 +13,12 @@ class FrameHelper {
     TypeRegistry registry,
     HiveCipher? cipher,
   ) {
-    var reader = BinaryReaderImpl(bytes, registry);
+    final reader = BinaryReaderImpl(bytes, registry);
 
     while (reader.availableBytes != 0) {
-      var frameOffset = reader.usedBytes;
+      final frameOffset = reader.usedBytes;
 
-      var frame = reader.readFrame(
+      final frame = reader.readFrame(
         cipher: cipher,
         lazy: false,
         frameOffset: frameOffset,

@@ -6,8 +6,8 @@ import 'package:test/test.dart';
 void main() {
   group('IndexableSkipList', () {
     List<int> getRandomList() {
-      var rand = Random();
-      var data = List.generate(1000, (i) => i);
+      final rand = Random();
+      final data = List.generate(1000, (i) => i);
       data.addAll(List.generate(500, (i) => rand.nextInt(1000)));
       data.addAll(List.generate(250, (i) => 1000 - i % 50));
       data.addAll(List.generate(250, (i) => i));
@@ -16,36 +16,36 @@ void main() {
     }
 
     void checkList(IndexableSkipList list, List<Comparable> keys) {
-      var sortedKeys = keys.toSet().toList()..sort();
+      final sortedKeys = keys.toSet().toList()..sort();
       expect(list.keys, sortedKeys);
       for (var n = 0; n < sortedKeys.length; n++) {
-        var key = sortedKeys[n];
+        final key = sortedKeys[n];
         expect(list.get(key), '$key');
         expect(list.getAt(n), '$key');
       }
     }
 
     test('.insert() puts value at the correct position', () {
-      var list = IndexableSkipList(Comparable.compare);
-      var data = getRandomList();
+      final list = IndexableSkipList(Comparable.compare);
+      final data = getRandomList();
 
       for (var i = 0; i < data.length; i++) {
         list.insert(data[i], '${data[i]}');
-        var alreadyAdded = data.sublist(0, i + 1);
+        final alreadyAdded = data.sublist(0, i + 1);
         checkList(list, alreadyAdded);
       }
     });
 
     test('.delete() removes key', () {
-      var list = IndexableSkipList(Comparable.compare);
-      var data = getRandomList();
-      for (var key in data) {
+      final list = IndexableSkipList(Comparable.compare);
+      final data = getRandomList();
+      for (final key in data) {
         list.insert(key, '$key');
       }
 
-      var keys = data.toSet().toList()..shuffle();
+      final keys = data.toSet().toList()..shuffle();
       while (keys.isNotEmpty) {
-        var key = keys.first;
+        final key = keys.first;
         expect(list.delete(key), '$key');
         keys.remove(key);
         checkList(list, keys);

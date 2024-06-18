@@ -5,7 +5,7 @@ import 'dart:typed_data';
 extension StringX on String {
   /// Not part of public API
   bool get isAscii {
-    for (var cu in codeUnits) {
+    for (final cu in codeUnits) {
       if (cu > 127) return false;
     }
     return true;
@@ -49,7 +49,7 @@ extension Uint8ListX on Uint8List {
 extension RandomX on Random {
   /// Not part of public API
   Uint8List nextBytes(int bytes) {
-    var buffer = Uint8List(bytes);
+    final buffer = Uint8List(bytes);
     for (var i = 0; i < bytes; i++) {
       buffer[i] = nextInt(0xFF + 1);
     }

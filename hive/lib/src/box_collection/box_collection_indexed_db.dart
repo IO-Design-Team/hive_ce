@@ -22,17 +22,17 @@ class BoxCollection implements implementation.BoxCollection {
     HiveCipher? key,
   }) async {
     final request = window.self.indexedDB.open(name, 1);
-    request.onupgradeneeded = (IDBVersionChangeEvent event) {
-      final _db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
+    request.onupgradeneeded = (event) {
+      final db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
       for (final name in boxNames) {
-        _db.createObjectStore(
+        db.createObjectStore(
           name,
           IDBObjectStoreParameters(autoIncrement: true),
         );
       }
     }.toJS;
-    final _db = await request.asFuture<IDBDatabase>();
-    return BoxCollection(_db, boxNames);
+    final db = await request.asFuture<IDBDatabase>();
+    return BoxCollection(db, boxNames);
   }
 
   @override
@@ -42,10 +42,10 @@ class BoxCollection implements implementation.BoxCollection {
   Future<CollectionBox<V>> openBox<V>(String name,
       {bool preload = false,
       implementation.CollectionBox<V> Function(String, BoxCollection)?
-          boxCreator}) async {
+          boxCreator,}) async {
     if (!boxNames.contains(name)) {
       throw Exception(
-          'Box with name $name is not in the known box names of this collection.');
+          'Box with name $name is not in the known box names of this collection.',);
     }
     final i = _openBoxes.indexWhere((box) => box.name == name);
     if (i != -1) {
@@ -89,7 +89,7 @@ class BoxCollection implements implementation.BoxCollection {
       fun(txn);
     }
     final completer = Completer<void>();
-    txn.oncomplete = (Event e) {
+    txn.oncomplete = (e) {
       completer.complete();
     }.toJS;
     return;
@@ -126,7 +126,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
         V is Map<String, Object?> ||
         V is double)) {
       throw Exception(
-          'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.');
+          'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.',);
     }
   }
 
@@ -137,8 +137,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final result = await store.getAllKeys(null).asFuture<JSArray>();
-    final List<String> keys =
-        List.from(result.toDart.cast<JSString>().map((e) => e.toDart));
+    final keys =
+        List<String>.from(result.toDart.cast<JSString>().map((e) => e.toDart));
     _cachedKeys = keys.toSet();
     return keys;
   }
@@ -227,7 +227,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => deleteAll(keys, txn));
-      for (var key in keys) {
+      for (final key in keys) {
         _cache[key] = null;
       }
       _cachedKeys?.removeAll(keys);

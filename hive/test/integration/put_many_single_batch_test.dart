@@ -5,11 +5,11 @@ import '../util/is_browser.dart';
 import 'integration.dart';
 
 Future _performTest(bool lazy) async {
-  var repeat = isBrowser ? 20 : 1000;
+  final repeat = isBrowser ? 20 : 1000;
   var box = await openBox(lazy);
-  var entries = <String, dynamic>{};
+  final entries = <String, dynamic>{};
   for (var i = 0; i < repeat; i++) {
-    for (var frame in valueTestFrames) {
+    for (final frame in valueTestFrames) {
       entries['${frame.key}n$i'] = frame.value;
     }
   }
@@ -17,7 +17,7 @@ Future _performTest(bool lazy) async {
 
   box = await box.reopen();
   for (var i = 0; i < repeat; i++) {
-    for (var frame in valueTestFrames) {
+    for (final frame in valueTestFrames) {
       expect(await await box.get('${frame.key}n$i'), frame.value);
     }
   }
@@ -29,5 +29,5 @@ void main() {
     test('normal box', () => _performTest(false));
 
     test('lazy box', () => _performTest(true));
-  }, timeout: longTimeout);
+  }, timeout: longTimeout,);
 }

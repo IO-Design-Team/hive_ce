@@ -18,11 +18,11 @@ class AesCbcPkcs7 {
 
   /// Not part of public API
   int encrypt(Uint8List iv, Uint8List inp, int inpOff, int inpLength,
-      Uint8List out, int outOff) {
-    var cbcV = Uint8List.fromList(iv);
+      Uint8List out, int outOff,) {
+    final cbcV = Uint8List.fromList(iv);
 
-    var inputBlocks = (inpLength + aesBlockSize) ~/ aesBlockSize;
-    var remaining = inpLength % aesBlockSize;
+    final inputBlocks = (inpLength + aesBlockSize) ~/ aesBlockSize;
+    final remaining = inpLength % aesBlockSize;
 
     var offset = 0;
     for (var i = 0; i < inputBlocks - 1; i++) {
@@ -38,7 +38,7 @@ class AesCbcPkcs7 {
       offset += aesBlockSize;
     }
 
-    var lastInputBlock = _lastInputBlockBuffer;
+    final lastInputBlock = _lastInputBlockBuffer;
     lastInputBlock.setRange(0, remaining, inp, inpOff + offset);
     lastInputBlock.fillRange(remaining, aesBlockSize, aesBlockSize - remaining);
 
@@ -52,8 +52,8 @@ class AesCbcPkcs7 {
 
   /// Not part of public API
   int decrypt(Uint8List iv, Uint8List inp, int inpOff, int inpLength,
-      Uint8List out, int outOff) {
-    var inputBlocks = (inpLength + aesBlockSize - 1) ~/ aesBlockSize;
+      Uint8List out, int outOff,) {
+    final inputBlocks = (inpLength + aesBlockSize - 1) ~/ aesBlockSize;
 
     var offset = 0;
 
@@ -65,14 +65,14 @@ class AesCbcPkcs7 {
 
     for (var i = 0; i < inputBlocks - 1; i++) {
       AesEngine.decryptBlock(
-          _decryptionKey, inp, inpOff + offset, out, outOff + offset);
+          _decryptionKey, inp, inpOff + offset, out, outOff + offset,);
       for (var i = 0; i < aesBlockSize; i++) {
         out[outOff + offset + i] ^= inp[inpOff - aesBlockSize + offset + i];
       }
       offset += aesBlockSize;
     }
 
-    var lastDecryptedByte = out[outOff + offset - 1];
+    final lastDecryptedByte = out[outOff + offset - 1];
     if (lastDecryptedByte > aesBlockSize) {
       throw ArgumentError('Invalid or corrupted pad block');
     }

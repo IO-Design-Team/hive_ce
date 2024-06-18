@@ -13,17 +13,13 @@ class StreamControllerMock<T> extends Mock implements StreamController<T> {}
 void main() {
   group('ChangeNotifier', () {
     test('.watch()', () async {
-      var notifier = ChangeNotifier();
+      final notifier = ChangeNotifier();
 
-      var allEvents = <BoxEvent>[];
-      notifier.watch().listen((e) {
-        allEvents.add(e);
-      });
+      final allEvents = <BoxEvent>[];
+      notifier.watch().listen(allEvents.add);
 
-      var filteredEvents = <BoxEvent>[];
-      notifier.watch(key: 'key1').listen((e) {
-        filteredEvents.add(e);
-      });
+      final filteredEvents = <BoxEvent>[];
+      notifier.watch(key: 'key1').listen(filteredEvents.add);
 
       notifier.notify(Frame.deleted('key1'));
       notifier.notify(Frame('key1', 'newVal'));
@@ -44,12 +40,12 @@ void main() {
     });
 
     test('close', () async {
-      var controller = StreamControllerMock<BoxEvent>();
-      returnFutureVoid(when(() => controller.close()));
-      var notifier = ChangeNotifier.debug(controller);
+      final controller = StreamControllerMock<BoxEvent>();
+      returnFutureVoid(when(controller.close));
+      final notifier = ChangeNotifier.debug(controller);
 
       await notifier.close();
-      verify(() => controller.close());
+      verify(controller.close);
     });
   });
 }

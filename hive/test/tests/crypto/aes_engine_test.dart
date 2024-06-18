@@ -15,10 +15,10 @@ void main() {
     });
 
     test('.encryptBlock()', () {
-      var out = Uint8List(message.length);
+      final out = Uint8List(message.length);
 
-      var pcEngine = AESEngine();
-      var outPc = Uint8List(message.length);
+      final pcEngine = AESEngine();
+      final outPc = Uint8List(message.length);
 
       for (var i = 0; i < message.length; i += aesBlockSize) {
         AesEngine.encryptBlock(encryptionKey, message, i, out, i);
@@ -29,10 +29,10 @@ void main() {
     });
 
     test('.decryptBlock()', () {
-      var out = Uint8List(message.length);
+      final out = Uint8List(message.length);
 
-      var pcEngine = AESEngine();
-      var encrypted = Uint8List(message.length);
+      final pcEngine = AESEngine();
+      final encrypted = Uint8List(message.length);
 
       for (var i = 0; i < message.length; i += aesBlockSize) {
         AesEngine.decryptBlock(encryptionKey, message, i, out, i);

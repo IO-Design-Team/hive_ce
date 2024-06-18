@@ -8,9 +8,9 @@ class ReadWriteSync {
 
   /// Run operation with read lock
   Future<T> syncRead<T>(Future<T> Function() task) {
-    var previousTask = _readTask;
+    final previousTask = _readTask;
 
-    var completer = Completer();
+    final completer = Completer();
     _readTask = completer.future;
 
     return previousTask.then((_) => task()).whenComplete(completer.complete);
@@ -18,9 +18,9 @@ class ReadWriteSync {
 
   /// Run operation with write lock
   Future<T> syncWrite<T>(Future<T> Function() task) {
-    var previousTask = _writeTask;
+    final previousTask = _writeTask;
 
-    var completer = Completer();
+    final completer = Completer();
     _writeTask = completer.future;
 
     return previousTask.then((_) => task()).whenComplete(completer.complete);
@@ -28,11 +28,11 @@ class ReadWriteSync {
 
   /// Run operation with read and write lock
   Future<T> syncReadWrite<T>(FutureOr<T> Function() task) {
-    var previousReadTask = _readTask;
-    var previousWriteTask = _writeTask;
+    final previousReadTask = _readTask;
+    final previousWriteTask = _writeTask;
 
-    var completer = Completer();
-    var future = completer.future;
+    final completer = Completer();
+    final future = completer.future;
     _readTask = future;
     _writeTask = future;
 

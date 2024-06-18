@@ -45,7 +45,7 @@ abstract class StorageBackend {
 abstract class BackendManagerInterface {
   /// Opens database connection and creates StorageBackend
   Future<StorageBackend> open(String name, String? path, bool crashRecovery,
-      HiveCipher? cipher, String? collection);
+      HiveCipher? cipher, String? collection,);
 
   /// Deletes database
   Future<void> deleteBox(String name, String? path, String? collection);

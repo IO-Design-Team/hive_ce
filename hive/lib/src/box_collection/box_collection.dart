@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:hive_ce/hive.dart';
 
-import 'box_collection_stub.dart' as implementation;
+import 'package:hive_ce/src/box_collection/box_collection_stub.dart' as implementation;
 
 class BoxCollection implements implementation.BoxCollection {
   @override
@@ -42,10 +42,10 @@ class BoxCollection implements implementation.BoxCollection {
   Future<CollectionBox<V>> openBox<V>(String name,
       {bool preload = false,
       implementation.CollectionBox<V> Function(String, BoxCollection)?
-          boxCreator}) async {
+          boxCreator,}) async {
     if (!boxNames.contains(name)) {
       throw Exception(
-          'Box with name $name is not in the known box names of this collection.');
+          'Box with name $name is not in the known box names of this collection.',);
     }
     final i = _openBoxes.indexWhere((box) => box.name == name);
     if (i != -1) {
@@ -132,7 +132,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
         V is Map<String, Object?> ||
         V is double)) {
       throw Exception(
-          'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.');
+          'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.',);
     }
   }
 
@@ -159,7 +159,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       final values = await Future.wait(keys.map(box.get));
       return {
         for (var i = 0; i < values.length; i++)
-          Uri.decodeComponent(keys[i] as String): values[i] as V
+          Uri.decodeComponent(keys[i] as String): values[i] as V,
       };
     }
     return (box as Box)

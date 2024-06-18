@@ -1,27 +1,25 @@
-import 'package:analyzer/dart/element/element.dart';
 import 'package:hive_ce_generator/src/builder.dart';
 import 'package:hive_ce_generator/src/helper.dart';
 
 class EnumBuilder extends Builder {
-  EnumBuilder(InterfaceElement cls, List<AdapterField> getters)
-      : super(cls, getters);
+  EnumBuilder(super.cls, super.getters);
 
   @override
   String buildRead() {
     check(getters.isNotEmpty, '${cls.name} does not have any enum value.');
 
-    var code = StringBuffer();
+    final code = StringBuffer();
     code.writeln('switch (reader.readByte()) {');
 
-    for (var field in getters) {
+    for (final field in getters) {
       code.writeln('''
         case ${field.index}:
           return ${cls.name}.${field.name};''');
     }
 
-    var defaultField = getters.firstWhere(
+    final defaultField = getters.firstWhere(
         (it) => it.defaultValue?.toBoolValue() == true,
-        orElse: () => getters.first);
+        orElse: () => getters.first,);
     code.writeln('''
       default:
         return ${cls.name}.${defaultField.name};
@@ -32,10 +30,10 @@ class EnumBuilder extends Builder {
 
   @override
   String buildWrite() {
-    var code = StringBuffer();
+    final code = StringBuffer();
     code.writeln('switch (obj) {');
 
-    for (var field in getters) {
+    for (final field in getters) {
       code.writeln('''
         case ${cls.name}.${field.name}:
           writer.writeByte(${field.index});

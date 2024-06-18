@@ -53,7 +53,7 @@ void main() {
     });
 
     test('.writeInt32()', () {
-      var bd = ByteData(4);
+      final bd = ByteData(4);
 
       var bw = getWriter();
       bw.writeInt32(0);
@@ -92,7 +92,7 @@ void main() {
     });
 
     test('.writeUint32()', () {
-      var bd = ByteData(4);
+      final bd = ByteData(4);
 
       var bw = getWriter();
       bw.writeUint32(0);
@@ -116,7 +116,7 @@ void main() {
     });
 
     test('.writeInt()', () {
-      var bd = ByteData(8);
+      final bd = ByteData(8);
 
       var bw = getWriter();
       bw.writeInt(0);
@@ -145,7 +145,7 @@ void main() {
     });
 
     test('.writeDouble()', () {
-      var bd = ByteData(8);
+      final bd = ByteData(8);
 
       var bw = getWriter();
       bw.writeDouble(0);
@@ -206,7 +206,7 @@ void main() {
       bw.writeString('𠁠🇬🇵');
       expect(bw.toBytes(), [
         12, 0, 0, 0, 0xf0, 0xa0, 0x81, 0xa0, 0xf0, //
-        0x9f, 0x87, 0xac, 0xf0, 0x9f, 0x87, 0xb5 //
+        0x9f, 0x87, 0xac, 0xf0, 0x9f, 0x87, 0xb5, //
       ]);
 
       bw = getWriter();
@@ -214,7 +214,7 @@ void main() {
       expect(bw.toBytes(), [
         0xf0, 0x9f, 0x91, 0xa8, 0xe2, 0x80, 0x8d, 0xf0, 0x9f, 0x91, 0xa8, //
         0xe2, 0x80, 0x8d, 0xf0, 0x9f, 0x91, 0xa7, 0xe2, 0x80, 0x8d, 0xf0, //
-        0x9f, 0x91, 0xa6 //
+        0x9f, 0x91, 0xa6, //
       ]);
     });
 
@@ -248,12 +248,12 @@ void main() {
       bw = getWriter();
       bw.writeIntList([1, 2]);
       expect(bw.toBytes(),
-          [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64]);
+          [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],);
 
       bw = getWriter();
       bw.writeIntList([1, 2], writeLength: false);
       expect(
-          bw.toBytes(), [0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64]);
+          bw.toBytes(), [0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],);
     });
 
     test('.writeDoubleList()', () {
@@ -305,7 +305,7 @@ void main() {
       bw.writeStringList(['a', '🧙‍♂️']);
       expect(bw.toBytes(), [
         2, 0, 0, 0, 1, 0, 0, 0, 97, 13, 0, 0, 0, 0xf0, 0x9f, 0xa7, //
-        0x99, 0xe2, 0x80, 0x8d, 0xe2, 0x99, 0x82, 0xef, 0xb8, 0x8f //
+        0x99, 0xe2, 0x80, 0x8d, 0xe2, 0x99, 0x82, 0xef, 0xb8, 0x8f, //
       ]);
 
       bw = getWriter();
@@ -319,14 +319,14 @@ void main() {
       expect(bw.toBytes(), [
         2, 0, 0, 0, //
         FrameValueType.stringT, 1, 0, 0, 0, 0x68, //
-        FrameValueType.boolT, 1 //
+        FrameValueType.boolT, 1, //
       ]);
 
       bw = getWriter();
       bw.writeList(<dynamic>['h', true], writeLength: false);
       expect(bw.toBytes(), [
         FrameValueType.stringT, 1, 0, 0, 0, 0x68, //
-        FrameValueType.boolT, 1 //
+        FrameValueType.boolT, 1, //
       ]);
     });
 
@@ -338,7 +338,7 @@ void main() {
         FrameValueType.boolT, 1, //
         FrameValueType.stringT, 1, 0, 0, 0, 0x68, //
         FrameValueType.stringT, 2, 0, 0, 0, 0x68, 0x69, //
-        FrameValueType.boolT, 1 //
+        FrameValueType.boolT, 1, //
       ]);
 
       bw = getWriter();
@@ -347,19 +347,19 @@ void main() {
         FrameValueType.boolT, 1, //
         FrameValueType.stringT, 1, 0, 0, 0, 0x68, //
         FrameValueType.stringT, 2, 0, 0, 0, 0x68, 0x69, //
-        FrameValueType.boolT, 1 //
+        FrameValueType.boolT, 1, //
       ]);
     });
 
     group('.writeHiveList()', () {
-      var box = MockBox();
+      final box = MockBox();
       when(() => box.name).thenReturn('Box');
 
-      var obj = TestHiveObject()..init('key', box);
+      final obj = TestHiveObject()..init('key', box);
 
       test('write length', () {
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.writeHiveList(list);
 
         expect(bw.toBytes(), [
@@ -369,8 +369,8 @@ void main() {
       });
 
       test('omit length', () {
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.writeHiveList(list, writeLength: false);
 
         expect(bw.toBytes(), [
@@ -384,7 +384,7 @@ void main() {
       test('normal', () {
         for (var i = 0; i < testFrames.length; i++) {
           final frame = testFrames[i];
-          var writer = BinaryWriterImpl(testRegistry);
+          final writer = BinaryWriterImpl(testRegistry);
           expect(writer.writeFrame(frame), frameBytes[i].length);
           expect(writer.toBytes(), frameBytes[i]);
         }
@@ -393,9 +393,9 @@ void main() {
       test('encrypted', () {
         for (var i = 0; i < testFrames.length; i++) {
           final frame = testFrames[i];
-          var writer = BinaryWriterImpl(testRegistry);
+          final writer = BinaryWriterImpl(testRegistry);
           expect(writer.writeFrame(frame, cipher: testCipher),
-              frameBytesEncrypted[i].length);
+              frameBytesEncrypted[i].length,);
           expect(writer.toBytes(), frameBytesEncrypted[i]);
         }
       });
@@ -413,7 +413,7 @@ void main() {
       });
 
       test('int', () {
-        var bd = ByteData(8)..setFloat64(0, 12345, Endian.little);
+        final bd = ByteData(8)..setFloat64(0, 12345, Endian.little);
 
         var bw = getWriter();
         bw.write(12345, writeTypeId: false);
@@ -425,7 +425,7 @@ void main() {
       });
 
       test('double', () {
-        var bd = ByteData(8)..setFloat64(0, 123.456, Endian.little);
+        final bd = ByteData(8)..setFloat64(0, 123.456, Endian.little);
 
         var bw = getWriter();
         bw.write(123.456, writeTypeId: false);
@@ -457,12 +457,12 @@ void main() {
       });
 
       test('HiveList', () {
-        var box = MockBox();
+        final box = MockBox();
         when(() => box.name).thenReturn('Box');
 
-        var obj = TestHiveObject()..init('key', box);
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final obj = TestHiveObject()..init('key', box);
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.write(list);
 
         expect(bw.toBytes(), [
@@ -480,11 +480,11 @@ void main() {
         bw = getWriter();
         bw.write(Uint8List.fromList([1, 2, 3, 4]), writeTypeId: true);
         expect(
-            bw.toBytes(), [FrameValueType.byteListT, 4, 0, 0, 0, 1, 2, 3, 4]);
+            bw.toBytes(), [FrameValueType.byteListT, 4, 0, 0, 0, 1, 2, 3, 4],);
       });
 
       test('int list', () {
-        var bd = ByteData(20)
+        final bd = ByteData(20)
           ..setUint32(0, 2, Endian.little)
           ..setFloat64(4, 123, Endian.little)
           ..setFloat64(12, 45, Endian.little);
@@ -499,7 +499,7 @@ void main() {
       });
 
       test('double list', () {
-        var bd = ByteData(20)
+        final bd = ByteData(20)
           ..setUint32(0, 2, Endian.little)
           ..setFloat64(4, 123.456, Endian.little)
           ..setFloat64(12, 456.321, Endian.little);
@@ -514,7 +514,7 @@ void main() {
       });
 
       test('bool list', () {
-        var bd = ByteData(6)
+        final bd = ByteData(6)
           ..setUint32(0, 2, Endian.little)
           ..setUint8(4, 0)
           ..setUint8(5, 1);
@@ -547,7 +547,7 @@ void main() {
       });
 
       test('list with null', () {
-        var bd = ByteData(23)
+        final bd = ByteData(23)
           ..setUint32(0, 3, Endian.little)
           ..setUint8(4, FrameValueType.intT)
           ..setFloat64(5, 123, Endian.little)
