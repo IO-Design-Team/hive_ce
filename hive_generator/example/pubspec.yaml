@@ -2,6 +2,7 @@ name: example
 dependencies:
   hive_ce: any
 dev_dependencies:
+  rexios_lints: ^7.0.0
   build_runner: any
   hive_ce_generator:
     path: ..

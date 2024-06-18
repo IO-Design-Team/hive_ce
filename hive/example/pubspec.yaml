@@ -4,6 +4,7 @@ dependencies:
   hive_ce: any
 
 dev_dependencies:
+  rexios_lints: ^7.0.0
   hive_ce_generator: any
   build_runner: any
 
