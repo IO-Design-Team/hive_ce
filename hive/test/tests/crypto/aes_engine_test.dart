@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:hive/src/crypto/aes_engine.dart';
+import 'package:hive_ce/src/crypto/aes_engine.dart';
 import 'package:pointycastle/api.dart';
 import 'package:pointycastle/block/aes.dart';
 import 'package:test/test.dart';

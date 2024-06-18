@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/binary/binary_writer_impl.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/object/hive_object.dart';
-import 'package:hive/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/object/hive_object.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

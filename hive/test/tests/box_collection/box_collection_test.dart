@@ -1,4 +1,4 @@
-import 'package:hive/src/box_collection/box_collection.dart';
+import 'package:hive_ce/src/box_collection/box_collection.dart';
 import 'package:test/test.dart';
 
 Future<BoxCollection> _openCollection({bool withData = false}) async {

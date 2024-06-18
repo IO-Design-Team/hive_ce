@@ -1,4 +1,4 @@
-import 'package:hive/src/backend/vm/read_write_sync.dart';
+import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:test/test.dart';
 
 Future _asyncRead(ReadWriteSync rw, int id, List<String> history,

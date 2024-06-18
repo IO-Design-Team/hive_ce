@@ -1,12 +1,12 @@
 // ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/storage_backend.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/box/box_base_impl.dart';
-import 'package:hive/src/hive_impl.dart';
-import 'package:hive/src/object/hive_object.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/box_base_impl.dart';
+import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/object/hive_object.dart';
 
 /// Not part of public API
 class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:hive/src/crypto/crc32.dart';
+import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:test/test.dart';
 
 void main() {

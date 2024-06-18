@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/adapters/date_time_adapter.dart';
-import 'package:hive/src/binary/binary_writer_impl.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/hive_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/adapters/date_time_adapter.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
 export '../generated/frame_values.g.dart';

@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:hive/src/util/delegating_list_view_mixin.dart';
+import 'package:hive_ce/src/util/delegating_list_view_mixin.dart';
 import 'package:test/test.dart';
 
 import '../common.dart';

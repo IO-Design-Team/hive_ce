@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/box/change_notifier.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 

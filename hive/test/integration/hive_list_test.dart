@@ -1,5 +1,5 @@
-import 'package:hive/hive.dart';
-import 'package:hive/src/object/hive_list_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:test/test.dart';
 
 import 'integration.dart';

@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/box/keystore.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/keystore.dart';
 
-export 'package:hive/src/backend/stub/backend_manager.dart'
-    if (dart.library.io) 'package:hive/src/backend/vm/backend_manager.dart'
-    if (dart.library.js_interop) 'package:hive/src/backend/js/backend_manager.dart';
+export 'package:hive_ce/src/backend/stub/backend_manager.dart'
+    if (dart.library.io) 'package:hive_ce/src/backend/vm/backend_manager.dart'
+    if (dart.library.js_interop) 'package:hive_ce/src/backend/js/backend_manager.dart';
 
 /// Abstract storage backend
 abstract class StorageBackend {

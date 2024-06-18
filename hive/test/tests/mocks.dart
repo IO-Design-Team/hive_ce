@@ -2,13 +2,13 @@ library hive.test.mocks;
 
 import 'dart:io';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/storage_backend.dart';
-import 'package:hive/src/box/change_notifier.dart';
-import 'package:hive/src/box/keystore.dart';
-import 'package:hive/src/hive_impl.dart';
-import 'package:hive/src/io/frame_io_helper.dart';
-import 'package:hive/src/object/hive_list_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/box/change_notifier.dart';
+import 'package:hive_ce/src/box/keystore.dart';
+import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/io/frame_io_helper.dart';
+import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Mocks

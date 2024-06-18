@@ -3,14 +3,14 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/js/native/utils.dart';
-import 'package:hive/src/backend/storage_backend.dart';
-import 'package:hive/src/binary/binary_reader_impl.dart';
-import 'package:hive/src/binary/binary_writer_impl.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/box/keystore.dart';
-import 'package:hive/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/keystore.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart';
 

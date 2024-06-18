@@ -2,8 +2,8 @@
 
 import 'dart:js_interop';
 
-import 'package:hive/src/backend/js/backend_manager.dart';
-import 'package:hive/src/backend/js/native/utils.dart';
+import 'package:hive_ce/src/backend/js/backend_manager.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:test/test.dart';
 import 'package:web/web.dart';
 

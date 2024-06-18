@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/binary/binary_reader_impl.dart';
-import 'package:hive/src/binary/frame_helper.dart';
-import 'package:hive/src/box/keystore.dart';
-import 'package:hive/src/io/buffered_file_reader.dart';
-import 'package:hive/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/frame_helper.dart';
+import 'package:hive_ce/src/box/keystore.dart';
+import 'package:hive_ce/src/io/buffered_file_reader.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API

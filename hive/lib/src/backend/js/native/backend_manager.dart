@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:js_interop';
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/js/native/storage_backend_js.dart';
-import 'package:hive/src/backend/js/native/utils.dart';
-import 'package:hive/src/backend/storage_backend.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:web/web.dart';
 
 /// Opens IndexedDB databases
@@ -32,7 +32,7 @@ class BackendManager implements BackendManagerInterface {
       print(
           'Creating objectStore $objectStoreName in database $databaseName...');
       final request = indexedDB!.open(databaseName, db.version + 1);
-      request.onupgradeneeded = (IDBVersionChangeEvent  e) {
+      request.onupgradeneeded = (IDBVersionChangeEvent e) {
         var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (!db.objectStoreNames.contains(objectStoreName)) {
           db.createObjectStore(objectStoreName);
@@ -59,7 +59,7 @@ class BackendManager implements BackendManagerInterface {
       await indexedDB!.deleteDatabase(databaseName).asFuture();
     } else {
       final request = indexedDB!.open(databaseName, 1);
-      request.onupgradeneeded = (IDBVersionChangeEvent  e) {
+      request.onupgradeneeded = (IDBVersionChangeEvent e) {
         var db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
           db.deleteObjectStore(objectStoreName);

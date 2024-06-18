@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:hive/src/crypto/aes_tables.dart';
-import 'package:hive/src/util/extensions.dart';
+import 'package:hive_ce/src/crypto/aes_tables.dart';
+import 'package:hive_ce/src/util/extensions.dart';
 
 /// The block size of an AES block
 const aesBlockSize = 16;

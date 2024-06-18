@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/storage_backend.dart';
-import 'package:hive/src/binary/frame.dart';
-import 'package:hive/src/binary/frame_helper.dart';
-import 'package:hive/src/box/keystore.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/binary/frame_helper.dart';
+import 'package:hive_ce/src/box/keystore.dart';
 
 /// In-memory Storage backend
 class StorageBackendMemory extends StorageBackend {

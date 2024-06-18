@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:hive/src/adapters/big_int_adapter.dart';
-import 'package:hive/src/binary/binary_reader_impl.dart';
-import 'package:hive/src/binary/binary_writer_impl.dart';
-import 'package:hive/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/adapters/big_int_adapter.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
 
 void main() {

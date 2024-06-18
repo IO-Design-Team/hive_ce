@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/backend/js/native/utils.dart';
-import 'package:hive/src/box_collection/box_collection_stub.dart'
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
+import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
 import 'package:web/web.dart';
 

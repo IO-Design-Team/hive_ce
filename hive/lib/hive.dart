@@ -8,19 +8,19 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:hive/src/box/default_compaction_strategy.dart';
-import 'package:hive/src/box/default_key_comparator.dart';
-import 'package:hive/src/crypto/aes_cbc_pkcs7.dart';
-import 'package:hive/src/crypto/crc32.dart';
-import 'package:hive/src/hive_impl.dart';
-import 'package:hive/src/object/hive_list_impl.dart';
-import 'package:hive/src/object/hive_object.dart';
-import 'package:hive/src/util/extensions.dart';
+import 'package:hive_ce/src/box/default_compaction_strategy.dart';
+import 'package:hive_ce/src/box/default_key_comparator.dart';
+import 'package:hive_ce/src/crypto/aes_cbc_pkcs7.dart';
+import 'package:hive_ce/src/crypto/crc32.dart';
+import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/object/hive_list_impl.dart';
+import 'package:hive_ce/src/object/hive_object.dart';
+import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 export 'src/box_collection/box_collection_stub.dart'
-    if (dart.library.js_interop) 'package:hive/src/box_collection/box_collection_indexed_db.dart'
-    if (dart.library.io) 'package:hive/src/box_collection/box_collection.dart';
+    if (dart.library.js_interop) 'package:hive_ce/src/box_collection/box_collection_indexed_db.dart'
+    if (dart.library.io) 'package:hive_ce/src/box_collection/box_collection.dart';
 export 'src/object/hive_object.dart' show HiveObject, HiveObjectMixin;
 
 part 'src/annotations/hive_field.dart';

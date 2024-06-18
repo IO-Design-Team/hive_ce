@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/box/box_base_impl.dart';
-import 'package:hive/src/box/lazy_box_impl.dart';
-import 'package:hive/src/hive_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/box/box_base_impl.dart';
+import 'package:hive_ce/src/box/lazy_box_impl.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
 import '../tests/common.dart';

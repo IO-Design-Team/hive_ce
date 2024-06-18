@@ -1,6 +1,6 @@
 import 'dart:ui' show Color;
 
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive_ce_flutter/adapters.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 

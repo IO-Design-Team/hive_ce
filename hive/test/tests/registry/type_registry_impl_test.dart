@@ -1,6 +1,6 @@
-import 'package:hive/hive.dart';
-import 'package:hive/src/adapters/ignored_type_adapter.dart';
-import 'package:hive/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
 
 import '../common.dart';

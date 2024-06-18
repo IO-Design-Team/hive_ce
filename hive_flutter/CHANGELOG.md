@@ -4,7 +4,7 @@
 - Fixed null safety score fail - [#698](https://github.com/hivedb/hive/pull/698)
 - Fixed minor linter warnings
 - Replaced `package:pedantic` with `package:linter`
-- Exports `package:hive/hive.dart`
+- Exports `package:hive_ce/hive.dart`
 
 ## 1.0.0
 

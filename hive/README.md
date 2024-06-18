@@ -101,7 +101,6 @@ BoxCollections might be useful for some box hierarchy and development experience
   );
 ```
 
-
 ## Store objects
 
 Hive not only supports primitives, lists and maps but also any Dart object you like. You need to generate a type adapter before you can store objects.
@@ -141,8 +140,8 @@ print(box.getAt(0)) // Dave - 30
 Hive was written with Flutter in mind. It is a perfect fit if you need a lightweight datastore for your app. After adding the required dependencies and initializing Hive, you can use Hive in your project:
 
 ```dart
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 class SettingsPage extends StatelessWidget {
   @override

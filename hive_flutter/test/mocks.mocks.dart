@@ -5,8 +5,8 @@
 import 'dart:convert' as _i5;
 import 'dart:typed_data' as _i4;
 
-import 'package:hive/hive.dart' as _i3;
-import 'package:hive/src/object/hive_object.dart' as _i1;
+import 'package:hive_ce/hive.dart' as _i3;
+import 'package:hive_ce/src/object/hive_object.dart' as _i1;
 import 'package:mockito/mockito.dart' as _i2;
 
 // ignore_for_file: avoid_redundant_argument_values

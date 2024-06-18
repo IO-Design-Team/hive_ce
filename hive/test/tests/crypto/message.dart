@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive/src/util/extensions.dart';
+import 'package:hive_ce/src/util/extensions.dart';
 
 final key = Uint8List.fromList(List.generate(32, (i) => i));
 

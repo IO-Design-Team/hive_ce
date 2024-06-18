@@ -1,10 +1,10 @@
 import 'dart:collection';
 
-import 'package:hive/hive.dart';
-import 'package:hive/src/hive_impl.dart';
-import 'package:hive/src/object/hive_collection_mixin.dart';
-import 'package:hive/src/object/hive_object.dart';
-import 'package:hive/src/util/delegating_list_view_mixin.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/object/hive_collection_mixin.dart';
+import 'package:hive_ce/src/object/hive_object.dart';
+import 'package:hive_ce/src/util/delegating_list_view_mixin.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
