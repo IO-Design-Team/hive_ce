@@ -24,7 +24,8 @@ class BoxCollection implements implementation.BoxCollection {
     HiveCipher? key,
   }) async {
     final request = window.self.indexedDB.open(name, 1);
-    request.onupgradeneeded = (event) {
+    // ignore: avoid_types_on_closure_parameters
+    request.onupgradeneeded = (IDBVersionChangeEvent event) {
       final db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
       for (final name in boxNames) {
         db.createObjectStore(
@@ -93,7 +94,8 @@ class BoxCollection implements implementation.BoxCollection {
       unawaited(fun(txn));
     }
     final completer = Completer<void>();
-    txn.oncomplete = (e) {
+    // ignore: avoid_types_on_closure_parameters
+    txn.oncomplete = (Event e) {
       completer.complete();
     }.toJS;
     return;

@@ -24,7 +24,8 @@ class BackendManager implements BackendManagerInterface {
     final objectStoreName = collection == null ? 'box' : name;
 
     final request = indexedDB!.open(databaseName, 1);
-    request.onupgradeneeded = (e) {
+    // ignore: avoid_types_on_closure_parameters
+    request.onupgradeneeded = (IDBVersionChangeEvent e) {
       final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
       if (!db.objectStoreNames.contains(objectStoreName)) {
         db.createObjectStore(objectStoreName);
@@ -39,7 +40,8 @@ class BackendManager implements BackendManagerInterface {
         'Creating objectStore $objectStoreName in database $databaseName...',
       );
       final request = indexedDB!.open(databaseName, db.version + 1);
-      request.onupgradeneeded = (e) {
+      // ignore: avoid_types_on_closure_parameters
+      request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (!db.objectStoreNames.contains(objectStoreName)) {
           db.createObjectStore(objectStoreName);
@@ -66,7 +68,8 @@ class BackendManager implements BackendManagerInterface {
       await indexedDB!.deleteDatabase(databaseName).asFuture();
     } else {
       final request = indexedDB!.open(databaseName, 1);
-      request.onupgradeneeded = (e) {
+      // ignore: avoid_types_on_closure_parameters
+      request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
           db.deleteObjectStore(objectStoreName);
@@ -89,14 +92,16 @@ class BackendManager implements BackendManagerInterface {
       var exists = true;
       if (collection == null) {
         final request = indexedDB!.open(databaseName, 1);
-        request.onupgradeneeded = (e) {
+        // ignore: avoid_types_on_closure_parameters
+        request.onupgradeneeded = (IDBVersionChangeEvent e) {
           (e.target as IDBOpenDBRequest).transaction!.abort();
           exists = false;
         }.toJS;
         await request.asFuture();
       } else {
         final request = indexedDB!.open(collection, 1);
-        request.onupgradeneeded = (e) {
+        // ignore: avoid_types_on_closure_parameters
+        request.onupgradeneeded = (IDBVersionChangeEvent e) {
           final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
           exists = db.objectStoreNames.contains(objectStoreName);
         }.toJS;
