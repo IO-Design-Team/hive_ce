@@ -11,7 +11,7 @@ dependencies:
   build: ^2.0.0
   source_gen: ^1.0.0
   hive_ce: ^2.3.0
-  analyzer: ^6.0.0
+  analyzer: ^6.5.0
   source_helper: ^1.1.0
 
 dev_dependencies:
