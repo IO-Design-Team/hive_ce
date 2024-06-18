@@ -6,7 +6,6 @@ part of 'main.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
-/// TODO: Document this!
 class PersonAdapter extends TypeAdapter<Person> {
   @override
   final int typeId = 1;
@@ -19,7 +18,7 @@ class PersonAdapter extends TypeAdapter<Person> {
     };
     return Person(
       name: fields[0] as String,
-      age: fields[1] as int,
+      age: (fields[1] as num).toInt(),
       friends: (fields[2] as List).cast<String>(),
     );
   }
