@@ -271,8 +271,12 @@ class _TestList<T> with DelegatingListViewMixin<T> {
   void setAll(int index, Iterable<T> iterable) => throw UnimplementedError();
 
   @override
-  void setRange(int start, int end, Iterable<T> iterable,
-          [int skipCount = 0,]) =>
+  void setRange(
+    int start,
+    int end,
+    Iterable<T> iterable, [
+    int skipCount = 0,
+  ]) =>
       throw UnimplementedError();
 
   @override

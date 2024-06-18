@@ -37,8 +37,11 @@ class _NullTypeRegistry implements TypeRegistryImpl {
       throw UnimplementedError();
 
   @override
-  Never registerAdapter<T>(TypeAdapter<T> adapter,
-          {bool internal = false, bool override = false,}) =>
+  Never registerAdapter<T>(
+    TypeAdapter<T> adapter, {
+    bool internal = false,
+    bool override = false,
+  }) =>
       throw UnimplementedError();
 
   @override

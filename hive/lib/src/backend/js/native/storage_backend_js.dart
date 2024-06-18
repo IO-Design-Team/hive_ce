@@ -24,8 +24,12 @@ class StorageBackendJs extends StorageBackend {
   TypeRegistry _registry;
 
   /// Not part of public API
-  StorageBackendJs(this._db, this._cipher, this.objectStoreName,
-      [this._registry = TypeRegistryImpl.nullImpl,]);
+  StorageBackendJs(
+    this._db,
+    this._cipher,
+    this.objectStoreName, [
+    this._registry = TypeRegistryImpl.nullImpl,
+  ]);
 
   @override
   String? get path => null;
@@ -140,7 +144,10 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<int> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy,) async {
+    TypeRegistry registry,
+    Keystore keystore,
+    bool lazy,
+  ) async {
     _registry = registry;
     final keys = await getKeys();
     if (!lazy) {

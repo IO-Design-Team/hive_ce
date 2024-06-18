@@ -30,9 +30,13 @@ void main() {
       final keys = ['key1', 'key2', 'key3'];
       final box = MockBox();
       final hiveList = _getTestList(box);
-      returnFutureVoid(when(() => box.deleteAll(
+      returnFutureVoid(
+        when(
+          () => box.deleteAll(
             keys.map((e) => e), // Turn the List into an regular Iterable
-          ),),);
+          ),
+        ),
+      );
 
       hiveList.deleteAllFromHive();
       verify(() => box.deleteAll(keys));

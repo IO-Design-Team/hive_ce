@@ -5,8 +5,13 @@ import 'package:test/test.dart';
 
 import 'integration.dart';
 
-Future<void> expectNextEvent(Stream<BoxEvent> stream, FutureOr Function() cb,
-    {Object? key, Object? value, bool? deleted,}) async {
+Future<void> expectNextEvent(
+  Stream<BoxEvent> stream,
+  FutureOr Function() cb, {
+  Object? key,
+  Object? value,
+  bool? deleted,
+}) async {
   late StreamSubscription subscription;
   final completer = Completer();
 

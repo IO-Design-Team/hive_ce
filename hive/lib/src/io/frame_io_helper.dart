@@ -25,7 +25,10 @@ class FrameIoHelper extends FrameHelper {
 
   /// Not part of public API
   Future<int> keysFromFile(
-      String path, Keystore keystore, HiveCipher? cipher,) async {
+    String path,
+    Keystore keystore,
+    HiveCipher? cipher,
+  ) async {
     final raf = await openFile(path);
     final fileReader = BufferedFileReader(raf);
     try {
@@ -36,8 +39,12 @@ class FrameIoHelper extends FrameHelper {
   }
 
   /// Not part of public API
-  Future<int> framesFromFile(String path, Keystore keystore,
-      TypeRegistry registry, HiveCipher? cipher,) async {
+  Future<int> framesFromFile(
+    String path,
+    Keystore keystore,
+    TypeRegistry registry,
+    HiveCipher? cipher,
+  ) async {
     final bytes = await readFile(path);
     return framesFromBytes(bytes as Uint8List, keystore, registry, cipher);
   }

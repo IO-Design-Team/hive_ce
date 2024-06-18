@@ -8,10 +8,13 @@ import 'package:test/test.dart';
 
 Matcher isAHiveError([String? contains]) {
   return allOf(
-      isA<HiveError>(),
-      predicate((e) =>
+    isA<HiveError>(),
+    predicate(
+      (e) =>
           contains == null ||
-          e.toString().toLowerCase().contains(contains.toLowerCase()),),);
+          e.toString().toLowerCase().contains(contains.toLowerCase()),
+    ),
+  );
 }
 
 Matcher throwsHiveError([String? contains]) {
@@ -35,8 +38,10 @@ Future<File> getTempFile([List<int>? bytes]) async {
   return file;
 }
 
-Future<RandomAccessFile> getTempRaf(List<int> bytes,
-    {FileMode mode = FileMode.read,}) async {
+Future<RandomAccessFile> getTempRaf(
+  List<int> bytes, {
+  FileMode mode = FileMode.read,
+}) async {
   final file = await getTempFile(bytes);
   return await file.open(mode: mode);
 }
@@ -55,16 +60,24 @@ File getAssetFile(String part1, [String? part2, String? part3, String? part4]) {
   return File(path.join(assetsPath, part1, part2, part3, part4));
 }
 
-Future<File> getTempAssetFile(String part1,
-    [String? part2, String? part3, String? part4,]) async {
+Future<File> getTempAssetFile(
+  String part1, [
+  String? part2,
+  String? part3,
+  String? part4,
+]) async {
   final assetFile = getAssetFile(part1, part2, part3, part4);
   final tempFile = await getTempFile();
 
   return await assetFile.copy(tempFile.path);
 }
 
-Future<Directory> getAssetDir(String part1,
-    [String? part2, String? part3, String? part4,]) async {
+Future<Directory> getAssetDir(
+  String part1, [
+  String? part2,
+  String? part3,
+  String? part4,
+]) async {
   final assetDir = Directory(path.join(assetsPath, part1, part2, part3, part4));
   final tempDir = await getTempDir();
 
@@ -85,7 +98,10 @@ Future<void> expectDirsEqual(Directory dir1, Directory dir2) {
 }
 
 Future<void> _expectDirsEqual(
-    Directory dir1, Directory dir2, bool round2,) async {
+  Directory dir1,
+  Directory dir2,
+  bool round2,
+) async {
   await for (final entity in dir1.list(recursive: true)) {
     if (entity is File) {
       final fileName = path.basename(entity.path);
@@ -106,8 +122,13 @@ Future<void> _expectDirsEqual(
   }
 }
 
-Future<void> expectDirEqualsAssetDir(Directory dir1, String part1,
-    [String? part2, String? part3, String? part4,]) {
+Future<void> expectDirEqualsAssetDir(
+  Directory dir1,
+  String part1, [
+  String? part2,
+  String? part3,
+  String? part4,
+]) {
   final assetDir = Directory(path.join(assetsPath, part1, part2, part3, part4));
   return expectDirsEqual(dir1, assetDir);
 }

@@ -11,8 +11,13 @@ class BackendManager implements BackendManagerInterface {
   IDBFactory? get indexedDB => window.self.indexedDB;
 
   @override
-  Future<StorageBackend> open(String name, String? path, bool crashRecovery,
-      HiveCipher? cipher, String? collection,) async {
+  Future<StorageBackend> open(
+    String name,
+    String? path,
+    bool crashRecovery,
+    HiveCipher? cipher,
+    String? collection,
+  ) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;
@@ -30,7 +35,8 @@ class BackendManager implements BackendManagerInterface {
     // update version
     if (!db.objectStoreNames.contains(objectStoreName)) {
       print(
-          'Creating objectStore $objectStoreName in database $databaseName...',);
+        'Creating objectStore $objectStoreName in database $databaseName...',
+      );
       final request = indexedDB!.open(databaseName, db.version + 1);
       request.onupgradeneeded = (e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;

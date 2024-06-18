@@ -73,8 +73,10 @@ void main() {
 
           await Future.wait([
             hive.openLazyBox('TESTBOX'),
-            expectLater(hive.openBox('testbox'),
-                throwsHiveError('is already open and of type LazyBox<dynamic>'),),
+            expectLater(
+              hive.openBox('testbox'),
+              throwsHiveError('is already open and of type LazyBox<dynamic>'),
+            ),
           ]);
         });
 
@@ -135,8 +137,10 @@ void main() {
 
           await Future.wait([
             hive.openBox('LAZYBOX'),
-            expectLater(hive.openLazyBox('lazyBox'),
-                throwsHiveError('is already open and of type Box<dynamic>'),),
+            expectLater(
+              hive.openLazyBox('lazyBox'),
+              throwsHiveError('is already open and of type Box<dynamic>'),
+            ),
           ]);
         });
       });

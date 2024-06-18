@@ -52,8 +52,11 @@ class Keystore<E> {
     ChangeNotifier? notifier,
     KeyComparator keyComparator = defaultKeyComparator,
   }) {
-    final keystore = Keystore<E>(box ?? BoxBaseImpl.nullImpl<E>(),
-        notifier ?? ChangeNotifier(), keyComparator,);
+    final keystore = Keystore<E>(
+      box ?? BoxBaseImpl.nullImpl<E>(),
+      notifier ?? ChangeNotifier(),
+      keyComparator,
+    );
     for (final frame in frames) {
       keystore.insert(frame);
     }

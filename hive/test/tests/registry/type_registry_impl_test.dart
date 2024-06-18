@@ -82,17 +82,23 @@ void main() {
 
       test('unsupported typeId', () {
         final registry = TypeRegistryImpl();
-        expect(() => registry.registerAdapter(TestAdapter(-1)),
-            throwsHiveError('not allowed'),);
-        expect(() => registry.registerAdapter(TestAdapter(224)),
-            throwsHiveError('not allowed'),);
+        expect(
+          () => registry.registerAdapter(TestAdapter(-1)),
+          throwsHiveError('not allowed'),
+        );
+        expect(
+          () => registry.registerAdapter(TestAdapter(224)),
+          throwsHiveError('not allowed'),
+        );
       });
 
       test('duplicate typeId', () {
         final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter());
-        expect(() => registry.registerAdapter(TestAdapter()),
-            throwsHiveError('already a TypeAdapter for typeId'),);
+        expect(
+          () => registry.registerAdapter(TestAdapter()),
+          throwsHiveError('already a TypeAdapter for typeId'),
+        );
       });
 
       test('dynamic type', () {
@@ -185,10 +191,14 @@ void main() {
 
       test('unsupported typeId', () {
         final registry = TypeRegistryImpl();
-        expect(() => registry.isAdapterRegistered(-1),
-            throwsHiveError('not allowed'),);
-        expect(() => registry.isAdapterRegistered(224),
-            throwsHiveError('not allowed'),);
+        expect(
+          () => registry.isAdapterRegistered(-1),
+          throwsHiveError('not allowed'),
+        );
+        expect(
+          () => registry.isAdapterRegistered(224),
+          throwsHiveError('not allowed'),
+        );
       });
     });
 
@@ -203,8 +213,10 @@ void main() {
       test('duplicte typeId', () {
         final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter());
-        expect(() => registry.ignoreTypeId(0),
-            throwsHiveError('already a TypeAdapter for typeId'),);
+        expect(
+          () => registry.ignoreTypeId(0),
+          throwsHiveError('already a TypeAdapter for typeId'),
+        );
       });
     });
   });

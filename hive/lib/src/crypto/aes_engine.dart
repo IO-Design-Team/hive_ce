@@ -45,7 +45,9 @@ int _invMcol(int x) {
 class AesEngine {
   /// Expand an encryption or decryption key.
   static List<Uint32List> generateWorkingKey(
-      List<int> key, bool forEncryption,) {
+    List<int> key,
+    bool forEncryption,
+  ) {
     final w = List.generate(rounds + 1, (_) => Uint32List(4));
     var t0 = key.readUint32(0);
     var t1 = key.readUint32(4);
@@ -112,8 +114,13 @@ class AesEngine {
   }
 
   /// Encrypt a single block with the [workingKey].
-  static void encryptBlock(List<List<int>> workingKey, Uint8List inp,
-      int inpOff, Uint8List out, int outOff,) {
+  static void encryptBlock(
+    List<List<int>> workingKey,
+    Uint8List inp,
+    int inpOff,
+    Uint8List out,
+    int outOff,
+  ) {
     var c0 = inp.readUint32(inpOff) ^ workingKey[0][0];
     var c1 = inp.readUint32(inpOff + 4) ^ workingKey[0][1];
     var c2 = inp.readUint32(inpOff + 8) ^ workingKey[0][2];
@@ -218,8 +225,13 @@ class AesEngine {
   }
 
   /// Decrypt a single block with [workingKey].
-  static void decryptBlock(List<List<int>> workingKey, Uint8List inp,
-      int inpOff, Uint8List out, int outOff,) {
+  static void decryptBlock(
+    List<List<int>> workingKey,
+    Uint8List inp,
+    int inpOff,
+    Uint8List out,
+    int outOff,
+  ) {
     var c0 = inp.readUint32(inpOff) ^ workingKey[rounds][0];
     var c1 = inp.readUint32(inpOff + 4) ^ workingKey[rounds][1];
     var c2 = inp.readUint32(inpOff + 8) ^ workingKey[rounds][2];

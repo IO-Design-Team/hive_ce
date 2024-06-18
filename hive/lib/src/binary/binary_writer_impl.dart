@@ -394,8 +394,11 @@ class BinaryWriterImpl extends BinaryWriter {
   /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  void writeEncrypted(dynamic value, HiveCipher cipher,
-      {bool writeTypeId = true,}) {
+  void writeEncrypted(
+    dynamic value,
+    HiveCipher cipher, {
+    bool writeTypeId = true,
+  }) {
     final valueWriter = BinaryWriterImpl(_typeRegistry)
       ..write(value, writeTypeId: writeTypeId);
     final inp = valueWriter._buffer;

@@ -59,10 +59,12 @@ void main() {
     });
 
     test('.getAt()', () async {
-      final keystore = Keystore.debug(frames: [
-        Frame.lazy(0),
-        Frame.lazy('a'),
-      ],);
+      final keystore = Keystore.debug(
+        frames: [
+          Frame.lazy(0),
+          Frame.lazy('a'),
+        ],
+      );
       final backend = MockStorageBackend();
       when(() => backend.readValue(any())).thenAnswer((i) {
         return Future.value('A');
@@ -116,10 +118,12 @@ void main() {
           ),
           throwsA(theError),
         );
-        verify(() => backend.writeFrames([
-              Frame('key1', 'value1'),
-              Frame('key2', 'value2'),
-            ]),);
+        verify(
+          () => backend.writeFrames([
+            Frame('key1', 'value1'),
+            Frame('key2', 'value2'),
+          ]),
+        );
         verifyNoMoreInteractions(keystore);
       });
     });

@@ -60,9 +60,13 @@ Future _performTestWithoutOutput(bool lazy) {
 }
 
 void main() {
-  group('test recovery', () {
-    test('normal box', () => _performTestWithoutOutput(false));
+  group(
+    'test recovery',
+    () {
+      test('normal box', () => _performTestWithoutOutput(false));
 
-    test('lazy box', () => _performTestWithoutOutput(true));
-  }, timeout: longTimeout,);
+      test('lazy box', () => _performTestWithoutOutput(true));
+    },
+    timeout: longTimeout,
+  );
 }

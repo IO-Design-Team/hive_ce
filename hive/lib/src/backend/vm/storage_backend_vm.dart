@@ -51,13 +51,22 @@ class StorageBackendVm extends StorageBackend {
 
   /// Not part of public API
   StorageBackendVm(
-      this._file, this._lockFile, this._crashRecovery, this._cipher,)
-      : _frameHelper = FrameIoHelper(),
+    this._file,
+    this._lockFile,
+    this._crashRecovery,
+    this._cipher,
+  )   : _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
   /// Not part of public API
-  StorageBackendVm.debug(this._file, this._lockFile, this._crashRecovery,
-      this._cipher, this._frameHelper, this._sync,);
+  StorageBackendVm.debug(
+    this._file,
+    this._lockFile,
+    this._crashRecovery,
+    this._cipher,
+    this._frameHelper,
+    this._sync,
+  );
 
   @override
   String get path => _file.path;
@@ -74,7 +83,10 @@ class StorageBackendVm extends StorageBackend {
 
   @override
   Future<void> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy,) async {
+    TypeRegistry registry,
+    Keystore keystore,
+    bool lazy,
+  ) async {
     this.registry = registry;
 
     lockRaf = await _lockFile.open(mode: FileMode.write);
@@ -112,7 +124,8 @@ class StorageBackendVm extends StorageBackend {
 
       if (readFrame == null) {
         throw HiveError(
-            'Could not read value from box. Maybe your box is corrupted.',);
+          'Could not read value from box. Maybe your box is corrupted.',
+        );
       }
 
       return readFrame.value;

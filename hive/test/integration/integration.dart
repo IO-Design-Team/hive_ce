@@ -20,8 +20,11 @@ Future<HiveImpl> createHive() async {
   return hive;
 }
 
-Future<BoxBase<T>> openBox<T>(bool lazy,
-    {HiveInterface? hive, List<int>? encryptionKey,}) async {
+Future<BoxBase<T>> openBox<T>(
+  bool lazy, {
+  HiveInterface? hive,
+  List<int>? encryptionKey,
+}) async {
   hive ??= await createHive();
   final id = Random.secure().nextInt(99999999);
   HiveCipher? cipher;
@@ -29,11 +32,17 @@ Future<BoxBase<T>> openBox<T>(bool lazy,
     cipher = HiveAesCipher(encryptionKey);
   }
   if (lazy) {
-    return await hive.openLazyBox<T>('box$id',
-        crashRecovery: false, encryptionCipher: cipher,);
+    return await hive.openLazyBox<T>(
+      'box$id',
+      crashRecovery: false,
+      encryptionCipher: cipher,
+    );
   } else {
-    return await hive.openBox<T>('box$id',
-        crashRecovery: false, encryptionCipher: cipher,);
+    return await hive.openBox<T>(
+      'box$id',
+      crashRecovery: false,
+      encryptionCipher: cipher,
+    );
   }
 }
 
@@ -46,11 +55,17 @@ extension BoxBaseX<T> on BoxBase<T?> {
       cipher = HiveAesCipher(encryptionKey);
     }
     if (this is LazyBoxImpl) {
-      return await hive.openLazyBox<T>(name,
-          crashRecovery: false, encryptionCipher: cipher,);
+      return await hive.openLazyBox<T>(
+        name,
+        crashRecovery: false,
+        encryptionCipher: cipher,
+      );
     } else {
-      return await hive.openBox<T>(name,
-          crashRecovery: false, encryptionCipher: cipher,);
+      return await hive.openBox<T>(
+        name,
+        crashRecovery: false,
+        encryptionCipher: cipher,
+      );
     }
   }
 

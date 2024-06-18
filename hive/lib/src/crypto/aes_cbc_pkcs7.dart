@@ -17,8 +17,14 @@ class AesCbcPkcs7 {
   AesCbcPkcs7(this._keyBytes);
 
   /// Not part of public API
-  int encrypt(Uint8List iv, Uint8List inp, int inpOff, int inpLength,
-      Uint8List out, int outOff,) {
+  int encrypt(
+    Uint8List iv,
+    Uint8List inp,
+    int inpOff,
+    int inpLength,
+    Uint8List out,
+    int outOff,
+  ) {
     final cbcV = Uint8List.fromList(iv);
 
     final inputBlocks = (inpLength + aesBlockSize) ~/ aesBlockSize;
@@ -51,8 +57,14 @@ class AesCbcPkcs7 {
   }
 
   /// Not part of public API
-  int decrypt(Uint8List iv, Uint8List inp, int inpOff, int inpLength,
-      Uint8List out, int outOff,) {
+  int decrypt(
+    Uint8List iv,
+    Uint8List inp,
+    int inpOff,
+    int inpLength,
+    Uint8List out,
+    int outOff,
+  ) {
     final inputBlocks = (inpLength + aesBlockSize - 1) ~/ aesBlockSize;
 
     var offset = 0;
@@ -65,7 +77,12 @@ class AesCbcPkcs7 {
 
     for (var i = 0; i < inputBlocks - 1; i++) {
       AesEngine.decryptBlock(
-          _decryptionKey, inp, inpOff + offset, out, outOff + offset,);
+        _decryptionKey,
+        inp,
+        inpOff + offset,
+        out,
+        outOff + offset,
+      );
       for (var i = 0; i < aesBlockSize; i++) {
         out[outOff + offset + i] ^= inp[inpOff - aesBlockSize + offset + i];
       }

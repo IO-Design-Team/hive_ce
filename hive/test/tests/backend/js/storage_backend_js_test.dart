@@ -68,7 +68,8 @@ void main() async {
         }
 
         final bytes = Uint8List.fromList([1, 2, 3]);
-        final buffer = backend.encodeValue(Frame('key', bytes)) as JSArrayBuffer;
+        final buffer =
+            backend.encodeValue(Frame('key', bytes)) as JSArrayBuffer;
         expect(Uint8List.view(buffer.toDart), [1, 2, 3]);
       });
 
@@ -79,8 +80,10 @@ void main() async {
         for (final frame in testFrames) {
           final buffer = backend.encodeValue(frame) as JSArrayBuffer;
           final bytes = Uint8List.view(buffer.toDart);
-          expect(bytes.sublist(28),
-              [0x90, 0xA9, ...frameValuesBytesEncrypted[i]].sublist(28),);
+          expect(
+            bytes.sublist(28),
+            [0x90, 0xA9, ...frameValuesBytesEncrypted[i]].sublist(28),
+          );
           i++;
         }
       });
@@ -93,7 +96,8 @@ void main() async {
           });
           final backend = StorageBackendJs(_nullDatabase, null, 'box');
           final encoded = Uint8List.view(
-              (backend.encodeValue(frame) as JSArrayBuffer).toDart,);
+            (backend.encodeValue(frame) as JSArrayBuffer).toDart,
+          );
 
           final writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl)
             ..write(frame.value);
@@ -191,9 +195,13 @@ void main() async {
 
         final keystore = Keystore.debug(notifier: ChangeNotifier());
         expect(
-            await backend.initialize(
-                TypeRegistryImpl.nullImpl, keystore, false,),
-            0,);
+          await backend.initialize(
+            TypeRegistryImpl.nullImpl,
+            keystore,
+            false,
+          ),
+          0,
+        );
         expect(keystore.frames, [
           Frame('key1', 1),
           Frame('key2', null),
@@ -207,8 +215,9 @@ void main() async {
 
         final keystore = Keystore.debug(notifier: ChangeNotifier());
         expect(
-            await backend.initialize(TypeRegistryImpl.nullImpl, keystore, true),
-            0,);
+          await backend.initialize(TypeRegistryImpl.nullImpl, keystore, true),
+          0,
+        );
         expect(keystore.frames, [
           Frame.lazy('key1'),
           Frame.lazy('key2'),

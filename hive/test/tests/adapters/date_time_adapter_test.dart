@@ -30,8 +30,7 @@ void main() {
       test('local', () {
         final now = DateTime.now();
         final binaryReader = MockBinaryReader();
-        when(binaryReader.readInt)
-            .thenReturn(now.millisecondsSinceEpoch);
+        when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(false);
 
         final date = DateTimeWithTimezoneAdapter().read(binaryReader);
@@ -45,8 +44,7 @@ void main() {
       test('UTC', () {
         final now = DateTime.now().toUtc();
         final binaryReader = MockBinaryReader();
-        when(binaryReader.readInt)
-            .thenReturn(now.millisecondsSinceEpoch);
+        when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(true);
 
         final date = DateTimeWithTimezoneAdapter().read(binaryReader);

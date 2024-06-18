@@ -33,7 +33,9 @@ void main() {
     test('.readValue() throws UnsupportedError', () {
       final backend = StorageBackendMemory(null, null);
       expect(
-          () => backend.readValue(Frame('key', 'val')), throwsUnsupportedError,);
+        () => backend.readValue(Frame('key', 'val')),
+        throwsUnsupportedError,
+      );
     });
 
     test('.writeFrames() does nothing', () async {

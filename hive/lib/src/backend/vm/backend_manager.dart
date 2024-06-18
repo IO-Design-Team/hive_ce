@@ -10,13 +10,19 @@ import 'package:meta/meta.dart';
 class BackendManager implements BackendManagerInterface {
   final _delimiter = Platform.isWindows ? '\\' : '/';
 
-  static BackendManager select(
-          [HiveStorageBackendPreference? backendPreference,]) =>
+  static BackendManager select([
+    HiveStorageBackendPreference? backendPreference,
+  ]) =>
       BackendManager();
 
   @override
-  Future<StorageBackend> open(String name, String? path, bool crashRecovery,
-      HiveCipher? cipher, String? collection,) async {
+  Future<StorageBackend> open(
+    String name,
+    String? path,
+    bool crashRecovery,
+    HiveCipher? cipher,
+    String? collection,
+  ) async {
     if (path == null) {
       throw HiveError('You need to initialize Hive or '
           'provide a path to store the box.');

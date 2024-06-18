@@ -32,9 +32,13 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group('delete many entries in a single batch', () {
-    test('normal box', () => _performTest(false));
+  group(
+    'delete many entries in a single batch',
+    () {
+      test('normal box', () => _performTest(false));
 
-    test('lazy box', () => _performTest(true));
-  }, timeout: longTimeout,);
+      test('lazy box', () => _performTest(true));
+    },
+    timeout: longTimeout,
+  );
 }

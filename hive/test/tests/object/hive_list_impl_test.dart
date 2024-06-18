@@ -12,9 +12,12 @@ import '../mocks.dart';
 HiveObject _getHiveObject(String key, MockBox box) {
   final hiveObject = TestHiveObject();
   hiveObject.init(key, box);
-  when(() => box.get(key,
-          defaultValue: captureAny(that: isNotNull, named: 'defaultValue'),),)
-      .thenReturn(hiveObject);
+  when(
+    () => box.get(
+      key,
+      defaultValue: captureAny(that: isNotNull, named: 'defaultValue'),
+    ),
+  ).thenReturn(hiveObject);
   when(() => box.get(key)).thenReturn(hiveObject);
   return hiveObject;
 }
@@ -91,8 +94,9 @@ void main() {
         final item1 = _getHiveObject('item1', box);
         final item2 = _getHiveObject('item2', box);
 
-        final list = HiveListImpl.lazy('box', ['item1', 'none', 'item2', 'item1'])
-          ..debugHive = hive;
+        final list =
+            HiveListImpl.lazy('box', ['item1', 'none', 'item2', 'item1'])
+              ..debugHive = hive;
         expect(list.delegate, [item1, item2, item1]);
         expect(item1.debugHiveLists, {list: 2});
         expect(item2.debugHiveLists, {list: 1});
@@ -188,8 +192,10 @@ void main() {
         final item = _getHiveObject('item', MockBox());
 
         final list = HiveListImpl(box);
-        expect(() => list.addAll([item]),
-            throwsHiveError('needs to be in the box'),);
+        expect(
+          () => list.addAll([item]),
+          throwsHiveError('needs to be in the box'),
+        );
       });
     });
   });

@@ -22,17 +22,21 @@ Future _performTest(bool encrypted, bool lazy) async {
 }
 
 void main() {
-  group('different frame types', () {
-    group('encrypted', () {
-      test('normal box', () => _performTest(true, false));
+  group(
+    'different frame types',
+    () {
+      group('encrypted', () {
+        test('normal box', () => _performTest(true, false));
 
-      test('lazy box', () => _performTest(true, true));
-    });
+        test('lazy box', () => _performTest(true, true));
+      });
 
-    group('not encrypted', () {
-      test('normal box', () => _performTest(false, false));
+      group('not encrypted', () {
+        test('normal box', () => _performTest(false, false));
 
-      test('lazy box', () => _performTest(false, true));
-    });
-  }, timeout: longTimeout,);
+        test('lazy box', () => _performTest(false, true));
+      });
+    },
+    timeout: longTimeout,
+  );
 }

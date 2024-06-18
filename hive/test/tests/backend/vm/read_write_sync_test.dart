@@ -1,8 +1,12 @@
 import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:test/test.dart';
 
-Future _asyncRead(ReadWriteSync rw, int id, List<String> history,
-    {bool? throwError = false,}) {
+Future _asyncRead(
+  ReadWriteSync rw,
+  int id,
+  List<String> history, {
+  bool? throwError = false,
+}) {
   return rw.syncRead(() async {
     history.add('startread$id');
     await Future.delayed(Duration(milliseconds: 10));
@@ -13,8 +17,12 @@ Future _asyncRead(ReadWriteSync rw, int id, List<String> history,
   });
 }
 
-Future _asyncWrite(ReadWriteSync rw, int id, List<String> history,
-    {bool? throwError = false,}) {
+Future _asyncWrite(
+  ReadWriteSync rw,
+  int id,
+  List<String> history, {
+  bool? throwError = false,
+}) {
   return rw.syncWrite(() async {
     history.add('startwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
@@ -25,8 +33,12 @@ Future _asyncWrite(ReadWriteSync rw, int id, List<String> history,
   });
 }
 
-Future _asyncReadWrite(ReadWriteSync rw, int id, List<String> history,
-    {bool? throwError = false,}) {
+Future _asyncReadWrite(
+  ReadWriteSync rw,
+  int id,
+  List<String> history, {
+  bool? throwError = false,
+}) {
   return rw.syncReadWrite(() async {
     history.add('startreadwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
@@ -45,8 +57,12 @@ typedef _Operation = Future Function(
 });
 
 Future _asyncOperation(
-    ReadWriteSync rw, _Operation operation, int id, List<String> history,
-    {bool throwError = false,}) async {
+  ReadWriteSync rw,
+  _Operation operation,
+  int id,
+  List<String> history, {
+  bool throwError = false,
+}) async {
   history.add('before$id');
   try {
     await operation(rw, id, history, throwError: throwError);
@@ -93,7 +109,8 @@ void main() {
         final rw = ReadWriteSync();
         final history = <String>[];
         final r1 = _asyncOperation(rw, _asyncRead, 0, history);
-        final r2 = _asyncOperation(rw, _asyncRead, 1, history, throwError: true);
+        final r2 =
+            _asyncOperation(rw, _asyncRead, 1, history, throwError: true);
         final r3 = _asyncOperation(rw, _asyncRead, 2, history);
         await Future.wait([r1, r2, r3]);
 
@@ -142,7 +159,8 @@ void main() {
         final rw = ReadWriteSync();
         final history = <String>[];
         final r1 = _asyncOperation(rw, _asyncWrite, 0, history);
-        final r2 = _asyncOperation(rw, _asyncWrite, 1, history, throwError: true);
+        final r2 =
+            _asyncOperation(rw, _asyncWrite, 1, history, throwError: true);
         final r3 = _asyncOperation(rw, _asyncWrite, 2, history);
         await Future.wait([r1, r2, r3]);
 

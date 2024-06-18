@@ -4,8 +4,10 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 
-Future<BufferedFileReader> openReader(List<int> bytes,
-    [int chunkSize = BufferedFileReader.defaultChunkSize,]) async {
+Future<BufferedFileReader> openReader(
+  List<int> bytes, [
+  int chunkSize = BufferedFileReader.defaultChunkSize,
+]) async {
   final file = await getTempFile(bytes);
   final raf = await file.open();
   return BufferedFileReader(raf, chunkSize);

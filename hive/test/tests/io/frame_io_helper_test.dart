@@ -88,7 +88,11 @@ void main() {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
         final recoveryOffset = await ioHelper.framesFromFile(
-            'null', keystore, testRegistry, testCipher,);
+          'null',
+          keystore,
+          testRegistry,
+          testCipher,
+        );
         expect(recoveryOffset, -1);
 
         final testKeystore = Keystore.debug(

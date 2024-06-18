@@ -8,8 +8,9 @@ abstract class BackendManager {
   BackendManager._();
 
   // dummy implementation as the WebWorker branch is not stable yet
-  static BackendManagerInterface select(
-      [HiveStorageBackendPreference? backendPreference,]) {
+  static BackendManagerInterface select([
+    HiveStorageBackendPreference? backendPreference,
+  ]) {
     switch (backendPreference) {
       default:
         return native.BackendManager();

@@ -247,13 +247,17 @@ void main() {
 
       bw = getWriter();
       bw.writeIntList([1, 2]);
-      expect(bw.toBytes(),
-          [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],);
+      expect(
+        bw.toBytes(),
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],
+      );
 
       bw = getWriter();
       bw.writeIntList([1, 2], writeLength: false);
       expect(
-          bw.toBytes(), [0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],);
+        bw.toBytes(),
+        [0, 0, 0, 0, 0, 0, 240, 63, 0, 0, 0, 0, 0, 0, 0, 64],
+      );
     });
 
     test('.writeDoubleList()', () {
@@ -394,8 +398,10 @@ void main() {
         for (var i = 0; i < testFrames.length; i++) {
           final frame = testFrames[i];
           final writer = BinaryWriterImpl(testRegistry);
-          expect(writer.writeFrame(frame, cipher: testCipher),
-              frameBytesEncrypted[i].length,);
+          expect(
+            writer.writeFrame(frame, cipher: testCipher),
+            frameBytesEncrypted[i].length,
+          );
           expect(writer.toBytes(), frameBytesEncrypted[i]);
         }
       });
@@ -480,7 +486,9 @@ void main() {
         bw = getWriter();
         bw.write(Uint8List.fromList([1, 2, 3, 4]), writeTypeId: true);
         expect(
-            bw.toBytes(), [FrameValueType.byteListT, 4, 0, 0, 0, 1, 2, 3, 4],);
+          bw.toBytes(),
+          [FrameValueType.byteListT, 4, 0, 0, 0, 1, 2, 3, 4],
+        );
       });
 
       test('int list', () {

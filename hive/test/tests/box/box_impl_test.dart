@@ -31,23 +31,27 @@ BoxImpl _getBox({
 void main() {
   group('BoxImpl', () {
     test('.values', () {
-      final keystore = Keystore.debug(frames: [
-        Frame(0, 123),
-        Frame('key1', 'value1'),
-        Frame(1, null),
-      ],);
+      final keystore = Keystore.debug(
+        frames: [
+          Frame(0, 123),
+          Frame('key1', 'value1'),
+          Frame(1, null),
+        ],
+      );
       final box = _getBox(keystore: keystore);
 
       expect(box.values, [123, null, 'value1']);
     });
 
     test('.valuesBetween()', () {
-      final keystore = Keystore.debug(frames: [
-        Frame(0, 0),
-        Frame(1, 1),
-        Frame('0', 2),
-        Frame('1', 3),
-      ],);
+      final keystore = Keystore.debug(
+        frames: [
+          Frame(0, 0),
+          Frame(1, 1),
+          Frame('0', 2),
+          Frame('1', 3),
+        ],
+      );
       final box = _getBox(keystore: keystore);
 
       expect(box.valuesBetween(startKey: 1, endKey: '0'), [1, 2]);
@@ -67,10 +71,12 @@ void main() {
         final backend = MockStorageBackend();
         final box = _getBox(
           backend: backend,
-          keystore: Keystore.debug(frames: [
-            Frame('testKey', 'testVal'),
-            Frame(123, 456),
-          ],),
+          keystore: Keystore.debug(
+            frames: [
+              Frame('testKey', 'testVal'),
+              Frame(123, 456),
+            ],
+          ),
         );
 
         expect(box.get('testKey'), 'testVal');
@@ -90,7 +96,10 @@ void main() {
 
     group('.putAll()', () {
       test('values', () async {
-        final frames = <Frame>[Frame('key1', 'value1'), Frame('key2', 'value2')];
+        final frames = <Frame>[
+          Frame('key1', 'value1'),
+          Frame('key2', 'value2'),
+        ];
         final keystoreFrames = <Frame>[Frame('keystoreFrames', 123)];
 
         final backend = MockStorageBackend();
@@ -202,11 +211,13 @@ void main() {
 
     test('.toMap()', () {
       final box = _getBox(
-        keystore: Keystore.debug(frames: [
-          Frame('key1', 1),
-          Frame('key2', 2),
-          Frame('key4', 444),
-        ],),
+        keystore: Keystore.debug(
+          frames: [
+            Frame('key1', 1),
+            Frame('key2', 2),
+            Frame('key4', 444),
+          ],
+        ),
       );
       expect(box.toMap(), {'key1': 1, 'key2': 2, 'key4': 444});
     });

@@ -128,9 +128,10 @@ class BinaryReaderImpl extends BinaryReader {
   }
 
   @override
-  String readString(
-      [int? byteCount,
-      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,]) {
+  String readString([
+    int? byteCount,
+    Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
+  ]) {
     byteCount ??= readUint32();
     final view = viewBytes(byteCount);
     return decoder.convert(view);
@@ -183,9 +184,10 @@ class BinaryReaderImpl extends BinaryReader {
   }
 
   @override
-  List<String> readStringList(
-      [int? length,
-      Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,]) {
+  List<String> readStringList([
+    int? length,
+    Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
+  ]) {
     length ??= readUint32();
     final list = List<String>.filled(length, '', growable: true);
     for (var i = 0; i < length; i++) {
@@ -241,8 +243,11 @@ class BinaryReaderImpl extends BinaryReader {
   }
 
   /// Not part of public API
-  Frame? readFrame(
-      {HiveCipher? cipher, bool lazy = false, int frameOffset = 0,}) {
+  Frame? readFrame({
+    HiveCipher? cipher,
+    bool lazy = false,
+    int frameOffset = 0,
+  }) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;
 

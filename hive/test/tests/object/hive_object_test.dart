@@ -35,8 +35,10 @@ void main() {
         final box2 = MockBox();
 
         obj.init('someKey', box1);
-        expect(() => obj.init('someKey', box2),
-            throwsHiveError('two different boxes'),);
+        expect(
+          () => obj.init('someKey', box2),
+          throwsHiveError('two different boxes'),
+        );
       });
 
       test('throws exception if object has already different key', () {
@@ -45,7 +47,9 @@ void main() {
 
         obj.init('key1', box);
         expect(
-            () => obj.init('key2', box), throwsHiveError('two different keys'),);
+          () => obj.init('key2', box),
+          throwsHiveError('two different keys'),
+        );
       });
     });
 

@@ -7,8 +7,8 @@ import 'integration.dart';
 Future _performTest(bool lazy) async {
   var box = await openBox(lazy);
 
-  final nullableStringList = List<String?>.filled(1000000, 'test', growable: true)
-    ..add(null);
+  final nullableStringList =
+      List<String?>.filled(1000000, 'test', growable: true)..add(null);
   final doubleList = List.filled(1000000, 1.212312);
   final byteList = Uint8List.fromList(List.filled(1000000, 123));
 
@@ -32,9 +32,13 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group('put large lists', () {
-    test('normal box', () => _performTest(false));
+  group(
+    'put large lists',
+    () {
+      test('normal box', () => _performTest(false));
 
-    test('lazy box', () => _performTest(true));
-  }, timeout: longTimeout,);
+      test('lazy box', () => _performTest(true));
+    },
+    timeout: longTimeout,
+  );
 }

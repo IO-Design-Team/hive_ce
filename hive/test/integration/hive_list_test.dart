@@ -36,38 +36,43 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 }
 
 void main() {
-  test('add and remove objects to / from HiveList', () async {
-    final hive = await createHive();
-    hive.registerAdapter(_TestObjectAdapter());
-    var box = await openBox<_TestObject>(false, hive: hive) as Box<_TestObject>;
+  test(
+    'add and remove objects to / from HiveList',
+    () async {
+      final hive = await createHive();
+      hive.registerAdapter(_TestObjectAdapter());
+      var box =
+          await openBox<_TestObject>(false, hive: hive) as Box<_TestObject>;
 
-    var obj = _TestObject('obj');
-    obj.list = HiveListImpl(box);
-    await box.put('obj', obj);
+      var obj = _TestObject('obj');
+      obj.list = HiveListImpl(box);
+      await box.put('obj', obj);
 
-    for (var i = 0; i < 100; i++) {
-      final element = _TestObject('element$i');
-      await box.add(element);
-      obj.list!.add(element);
-    }
+      for (var i = 0; i < 100; i++) {
+        final element = _TestObject('element$i');
+        await box.add(element);
+        obj.list!.add(element);
+      }
 
-    await obj.save();
+      await obj.save();
 
-    box = (await box.reopen()) as Box<_TestObject>;
-    obj = box.get('obj')!;
-    (obj.list as HiveListImpl).debugHive = hive;
+      box = (await box.reopen()) as Box<_TestObject>;
+      obj = box.get('obj')!;
+      (obj.list as HiveListImpl).debugHive = hive;
 
-    for (var i = 0; i < 100; i++) {
-      expect(obj.list![i].name, 'element$i');
-    }
+      for (var i = 0; i < 100; i++) {
+        expect(obj.list![i].name, 'element$i');
+      }
 
-    await obj.list![99].delete();
-    expect(obj.list!.length, 99);
+      await obj.list![99].delete();
+      expect(obj.list!.length, 99);
 
-    await obj.list![50].delete();
-    expect(obj.list![50].name, 'element51');
+      await obj.list![50].delete();
+      expect(obj.list![50].name, 'element51');
 
-    await obj.list![0].delete();
-    expect(obj.list![0].name, 'element1');
-  }, timeout: longTimeout,);
+      await obj.list![0].delete();
+      expect(obj.list![0].name, 'element1');
+    },
+    timeout: longTimeout,
+  );
 }

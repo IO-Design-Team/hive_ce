@@ -5,8 +5,10 @@ void main() {
   group('generateName', () {
     test('.generateName()', () {
       expect(TypeAdapterGenerator.generateName(r'_$User'), 'UserAdapter');
-      expect(TypeAdapterGenerator.generateName(r'_$_SomeClass'),
-          'SomeClassAdapter',);
+      expect(
+        TypeAdapterGenerator.generateName(r'_$_SomeClass'),
+        'SomeClassAdapter',
+      );
     });
   });
 }

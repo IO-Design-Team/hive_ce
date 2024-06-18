@@ -23,7 +23,10 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
   @override
   Future<String> generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep,) async {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) async {
     final cls = getClass(element);
     final library = await buildStep.inputLibrary;
     final gettersAndSetters = getAccessors(cls, library);
@@ -70,8 +73,10 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   InterfaceElement getClass(Element element) {
-    check(element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
-        'Only classes or enums are allowed to be annotated with @HiveType.',);
+    check(
+      element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
+      'Only classes or enums are allowed to be annotated with @HiveType.',
+    );
 
     return element as InterfaceElement;
   }
@@ -95,7 +100,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   List<List<AdapterField>> getAccessors(
-      InterfaceElement cls, LibraryElement library,) {
+    InterfaceElement cls,
+    LibraryElement library,
+  ) {
     final accessorNames = getAllAccessorNames(cls);
 
     final getters = <AdapterField>[];
@@ -107,12 +114,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
             getHiveFieldAnn(getter.variable) ?? getHiveFieldAnn(getter);
         if (getterAnn != null) {
           final field = getter.variable;
-          getters.add(AdapterField(
-            getterAnn.index,
-            field.name,
-            field.type,
-            getterAnn.defaultValue,
-          ),);
+          getters.add(
+            AdapterField(
+              getterAnn.index,
+              field.name,
+              field.type,
+              getterAnn.defaultValue,
+            ),
+          );
         }
       }
 
@@ -122,12 +131,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
             getHiveFieldAnn(setter.variable) ?? getHiveFieldAnn(setter);
         if (setterAnn != null) {
           final field = setter.variable;
-          setters.add(AdapterField(
-            setterAnn.index,
-            field.name,
-            field.type,
-            setterAnn.defaultValue,
-          ),);
+          setters.add(
+            AdapterField(
+              setterAnn.index,
+              field.name,
+              field.type,
+              setterAnn.defaultValue,
+            ),
+          );
         }
       }
     }
@@ -137,8 +148,10 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
   void verifyFieldIndices(List<AdapterField> fields) {
     for (final field in fields) {
-      check(field.index >= 0 && field.index <= 255,
-          'Field numbers can only be in the range 0-255.',);
+      check(
+        field.index >= 0 && field.index <= 255,
+        'Field numbers can only be in the range 0-255.',
+      );
 
       for (final otherField in fields) {
         if (otherField == field) continue;

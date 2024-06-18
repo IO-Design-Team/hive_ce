@@ -119,17 +119,21 @@ void main() {
 
       FrameIoHelper getFrameIoHelper(int recoveryOffset) {
         final helper = MockFrameIoHelper();
-        when(() => helper.framesFromFile(
-              any(),
-              any(),
-              any(),
-              any(),
-            ),).thenAnswer((i) => Future.value(recoveryOffset));
-        when(() => helper.keysFromFile(
-              any(),
-              any(),
-              any(),
-            ),).thenAnswer((i) => Future.value(recoveryOffset));
+        when(
+          () => helper.framesFromFile(
+            any(),
+            any(),
+            any(),
+            any(),
+          ),
+        ).thenAnswer((i) => Future.value(recoveryOffset));
+        when(
+          () => helper.keysFromFile(
+            any(),
+            any(),
+            any(),
+          ),
+        ).thenAnswer((i) => Future.value(recoveryOffset));
         return helper;
       }
 
@@ -148,7 +152,10 @@ void main() {
           when(() => backend.path).thenReturn('nullPath');
 
           await backend.initialize(
-              TypeRegistryImpl.nullImpl, MockKeystore(), lazy,);
+            TypeRegistryImpl.nullImpl,
+            MockKeystore(),
+            lazy,
+          );
           verify(lockRaf.lock);
         });
 
@@ -173,7 +180,10 @@ void main() {
               .thenAnswer((i) => Future.value(writeRaf));
 
           await backend.initialize(
-              TypeRegistryImpl.nullImpl, MockKeystore(), lazy,);
+            TypeRegistryImpl.nullImpl,
+            MockKeystore(),
+            lazy,
+          );
           verify(() => writeRaf.truncate(20));
           verify(() => writeRaf.setPosition(20));
         });
@@ -193,9 +203,13 @@ void main() {
           when(lockRaf.lock).thenAnswer((i) => Future.value(lockRaf));
 
           await expectLater(
-              () => backend.initialize(
-                  TypeRegistryImpl.nullImpl, MockKeystore(), lazy,),
-              throwsHiveError('corrupted'),);
+            () => backend.initialize(
+              TypeRegistryImpl.nullImpl,
+              MockKeystore(),
+              lazy,
+            ),
+            throwsHiveError('corrupted'),
+          );
         });
       }
 
@@ -236,7 +250,9 @@ void main() {
 
         final frame = Frame('test', 123, length: frameBytes.length, offset: 0);
         await expectLater(
-            () => backend.readValue(frame), throwsHiveError('corrupted'),);
+          () => backend.readValue(frame),
+          throwsHiveError('corrupted'),
+        );
 
         await readRaf.close();
       });
@@ -297,8 +313,10 @@ void main() {
           ..registry = TypeRegistryImpl.nullImpl;
         backend.writeOffset = 123;
 
-        await expectLater(() => backend.writeFrames([Frame('key1', 'value')]),
-            throwsA(anything),);
+        await expectLater(
+          () => backend.writeFrames([Frame('key1', 'value')]),
+          throwsA(anything),
+        );
         verify(() => writeRaf.setPosition(123));
         expect(backend.writeOffset, 123);
       });

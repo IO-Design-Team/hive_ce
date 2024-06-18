@@ -39,13 +39,15 @@ class BoxCollection implements implementation.BoxCollection {
   String get name => _db.name;
 
   @override
-  Future<CollectionBox<V>> openBox<V>(String name,
-      {bool preload = false,
-      implementation.CollectionBox<V> Function(String, BoxCollection)?
-          boxCreator,}) async {
+  Future<CollectionBox<V>> openBox<V>(
+    String name, {
+    bool preload = false,
+    implementation.CollectionBox<V> Function(String, BoxCollection)? boxCreator,
+  }) async {
     if (!boxNames.contains(name)) {
       throw Exception(
-          'Box with name $name is not in the known box names of this collection.',);
+        'Box with name $name is not in the known box names of this collection.',
+      );
     }
     final i = _openBoxes.indexWhere((box) => box.name == name);
     if (i != -1) {
@@ -126,7 +128,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
         V is Map<String, Object?> ||
         V is double)) {
       throw Exception(
-          'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.',);
+        'Value type ${V.runtimeType} is not one of the allowed value types {String, int, double, List<Object?>, Map<String, Object?>}.',
+      );
     }
   }
 

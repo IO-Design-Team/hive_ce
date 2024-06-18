@@ -55,11 +55,13 @@ class ClassBuilder extends Builder {
         if (param.isNamed) {
           code.write('${param.name}: ');
         }
-        code.write(_value(
-          param.type,
-          'fields[${field.index}]',
-          field.defaultValue,
-        ),);
+        code.write(
+          _value(
+            param.type,
+            'fields[${field.index}]',
+            field.defaultValue,
+          ),
+        );
         code.writeln(',');
         fields.remove(field);
       }
@@ -71,11 +73,13 @@ class ClassBuilder extends Builder {
     // as initializing formals. We do so using cascades.
     for (final field in fields) {
       code.write('..${field.name} = ');
-      code.writeln(_value(
-        field.type,
-        'fields[${field.index}]',
-        field.defaultValue,
-      ),);
+      code.writeln(
+        _value(
+          field.type,
+          'fields[${field.index}]',
+          field.defaultValue,
+        ),
+      );
     }
 
     code.writeln(';');

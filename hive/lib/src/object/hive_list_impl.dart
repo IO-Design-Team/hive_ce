@@ -55,7 +55,8 @@ class HiveListImpl<E extends HiveObjectMixin>
       final box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
       if (box == null) {
         throw HiveError(
-            'To use this list, you have to open the box "$boxName" first.',);
+          'To use this list, you have to open the box "$boxName" first.',
+        );
       } else if (box is! Box) {
         throw HiveError('The box "$boxName" is a lazy box. '
             'You can only use HiveLists with normal boxes.');

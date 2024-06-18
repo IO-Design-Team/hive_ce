@@ -70,8 +70,10 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     String? collection,
   ) async {
     assert(path == null || bytes == null);
-    assert(name.length <= 255 && name.isAscii,
-        'Box names need to be ASCII Strings with a max length of 255.',);
+    assert(
+      name.length <= 255 && name.isAscii,
+      'Box names need to be ASCII Strings with a max length of 255.',
+    );
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
       if (lazy) {
@@ -99,7 +101,12 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
           backend = StorageBackendMemory(bytes, cipher);
         } else {
           backend = await _manager.open(
-              name, path ?? homePath, recovery, cipher, collection,);
+            name,
+            path ?? homePath,
+            recovery,
+            cipher,
+            collection,
+          );
         }
 
         if (lazy) {
@@ -139,8 +146,17 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     if (encryptionKey != null) {
       encryptionCipher = HiveAesCipher(encryptionKey);
     }
-    return await _openBox<E>(name, false, encryptionCipher, keyComparator,
-        compactionStrategy, crashRecovery, path, bytes, collection,) as Box<E>;
+    return await _openBox<E>(
+      name,
+      false,
+      encryptionCipher,
+      keyComparator,
+      compactionStrategy,
+      crashRecovery,
+      path,
+      bytes,
+      collection,
+    ) as Box<E>;
   }
 
   @override
@@ -158,15 +174,16 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       encryptionCipher = HiveAesCipher(encryptionKey);
     }
     return await _openBox<E>(
-        name,
-        true,
-        encryptionCipher,
-        keyComparator,
-        compactionStrategy,
-        crashRecovery,
-        path,
-        null,
-        collection,) as LazyBox<E>;
+      name,
+      true,
+      encryptionCipher,
+      keyComparator,
+      compactionStrategy,
+      crashRecovery,
+      path,
+      null,
+      collection,
+    ) as LazyBox<E>;
   }
 
   BoxBase<E> _getBoxInternal<E>(String name, [bool? lazy]) {
@@ -222,8 +239,11 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   }
 
   @override
-  Future<void> deleteBoxFromDisk(String name,
-      {String? path, String? collection,}) async {
+  Future<void> deleteBoxFromDisk(
+    String name, {
+    String? path,
+    String? collection,
+  }) async {
     final lowerCaseName = name.toLowerCase();
     final box = _boxes[lowerCaseName];
     if (box != null) {
@@ -248,10 +268,16 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   }
 
   @override
-  Future<bool> boxExists(String name,
-      {String? path, String? collection,}) async {
+  Future<bool> boxExists(
+    String name, {
+    String? path,
+    String? collection,
+  }) async {
     final lowerCaseName = name.toLowerCase();
     return await _manager.boxExists(
-        lowerCaseName, path ?? homePath, collection,);
+      lowerCaseName,
+      path ?? homePath,
+      collection,
+    );
   }
 }

@@ -16,7 +16,11 @@ void main() {
             .findHiveFileAndCleanUp('testBox', hiveFileDir.path);
         expect(hiveFile.path, path.join(hiveFileDir.path, 'testBox.hive'));
         await expectDirEqualsAssetDir(
-            hiveFileDir, 'findHiveFileAndCleanUp', folder, 'after',);
+          hiveFileDir,
+          'findHiveFileAndCleanUp',
+          folder,
+          'after',
+        );
       }
 
       test('no hive file', () async {

@@ -38,8 +38,10 @@ List<Frame> get testFrames => <Frame>[
       Frame('Bool true', true),
       Frame('Bool false', false),
       Frame('Float', 12312.991283),
-      Frame('Unicode string',
-          'A few characters which are not ASCII: 🇵🇬 😀 🐝 걟 ＄ 乽 👨‍🚀',),
+      Frame(
+        'Unicode string',
+        'A few characters which are not ASCII: 🇵🇬 😀 🐝 걟 ＄ 乽 👨‍🚀',
+      ),
       Frame('Empty list', []),
       Frame('Byte list', Uint8List.fromList([1, 12, 123, 1234])),
       Frame('Byte list with mask', Uint8List.fromList([0x90, 0xA9, 1, 2, 3])),
@@ -82,8 +84,10 @@ List<Frame> get testFrames => <Frame>[
         DateTimeWithoutTZ.fromMillisecondsSinceEpoch(0),
         DateTimeWithoutTZ.fromMillisecondsSinceEpoch(1566656623020),
       ]),
-      Frame('BigInt Test',
-          BigInt.parse('1234567890123456789012345678901234567890'),),
+      Frame(
+        'BigInt Test',
+        BigInt.parse('1234567890123456789012345678901234567890'),
+      ),
     ];
 
 List<Frame> framesSetLengthOffset(List<Frame> frames, List<Uint8List> bytes) {
@@ -159,8 +163,11 @@ void expectFrames(Iterable<Frame> f1, Iterable<Frame> f2) {
 }
 
 void buildGoldens() async {
-  Future<void> generate(String fileName, String varName,
-      Uint8List Function(Frame frame) transformer,) async {
+  Future<void> generate(
+    String fileName,
+    String varName,
+    Uint8List Function(Frame frame) transformer,
+  ) async {
     final file = File('test/generated/$fileName.g.dart');
     await file.create();
     final code = StringBuffer();

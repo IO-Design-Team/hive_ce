@@ -92,10 +92,12 @@ void main() {
       });
 
       test('non empty box', () {
-        final keystore = Keystore.debug(frames: [
-          Frame('key1', null),
-          Frame('key2', null),
-        ],);
+        final keystore = Keystore.debug(
+          frames: [
+            Frame('key1', null),
+            Frame('key2', null),
+          ],
+        );
         final box = _openBoxBaseMock(keystore: keystore);
         expect(box.length, 2);
         expect(box.isEmpty, false);
@@ -245,7 +247,9 @@ void main() {
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(
-            () async => await box.putAt(-1, 'test'), throwsRangeError,);
+          () async => await box.putAt(-1, 'test'),
+          throwsRangeError,
+        );
       });
 
       test('throws RangeError for index out of bounds', () async {
@@ -253,7 +257,9 @@ void main() {
         box.keystore.insert(Frame.lazy('a'));
 
         await expectLater(
-            () async => await box.putAt(1, 'test'), throwsRangeError,);
+          () async => await box.putAt(1, 'test'),
+          throwsRangeError,
+        );
       });
     });
 
@@ -344,14 +350,16 @@ void main() {
         when(() => keystore.deletedEntries).thenReturn(1);
         returnFutureVoid(
           when(
-              () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),),
+            () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),
+          ),
         );
 
         final box = _openBoxBaseMock(backend: backend, keystore: keystore);
 
         await box.compact();
         verify(
-            () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),);
+          () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),
+        );
         verify(keystore.resetDeletedEntries);
       });
 
