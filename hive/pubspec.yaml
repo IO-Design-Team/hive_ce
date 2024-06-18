@@ -1,7 +1,7 @@
 name: hive_ce
-description: Lightweight and blazing fast key-value database written in pure Dart. Strongly encrypted using AES-256.
-version: 2.2.3
-homepage: https://github.com/hivedb/hive/tree/master/hive
+description: Hive Community Edition - A spiritual continuation of Hive v2
+version: 2.3.0
+homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive
 documentation: https://docs.hivedb.dev/
 
 environment:
