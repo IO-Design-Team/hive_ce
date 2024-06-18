@@ -1,12 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unnecessary_const, require_trailing_commas, unnecessary_breaks
+
 part of 'types.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-/// TODO: Document this!
 class Class1Adapter extends TypeAdapter<Class1> {
   @override
   final int typeId = 1;
@@ -22,13 +23,13 @@ class Class1Adapter extends TypeAdapter<Class1> {
           ? const Class2(4, 'param', {
               5: {
                 'magic': [
-                  Class1(Class2(5, 'sad')),
-                  Class1(Class2(5, 'sad'), Enum1.emumValue1),
-                ],
+                  const Class1(const Class2(5, 'sad')),
+                  const Class1(const Class2(5, 'sad'), Enum1.emumValue1)
+                ]
               },
               67: {
-                'hold': [Class1(Class2(42, 'meaning of life'))],
-              },
+                'hold': [const Class1(const Class2(42, 'meaning of life'))]
+              }
             })
           : fields[0] as Class2,
     );
@@ -53,7 +54,6 @@ class Class1Adapter extends TypeAdapter<Class1> {
           typeId == other.typeId;
 }
 
-/// TODO: Document this!
 class Class2Adapter extends TypeAdapter<Class2> {
   @override
   final int typeId = 2;
@@ -67,15 +67,10 @@ class Class2Adapter extends TypeAdapter<Class2> {
     return Class2(
       fields[0] == null ? 0 : (fields[0] as num).toInt(),
       fields[1] as String,
-      (fields[6] as Map?)?.map(
-        (dynamic k, dynamic v) => MapEntry(
+      (fields[6] as Map?)?.map((dynamic k, dynamic v) => MapEntry(
           (k as num).toInt(),
-          (v as Map).map(
-            (dynamic k, dynamic v) =>
-                MapEntry(k as String, (v as List).cast<Class1>()),
-          ),
-        ),
-      ),
+          (v as Map).map((dynamic k, dynamic v) =>
+              MapEntry(k as String, (v as List).cast<Class1>())))),
     );
   }
 
@@ -102,7 +97,6 @@ class Class2Adapter extends TypeAdapter<Class2> {
           typeId == other.typeId;
 }
 
-/// TODO: Document this!
 class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
   @override
   final int typeId = 4;
@@ -128,7 +122,6 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
           typeId == other.typeId;
 }
 
-/// TODO: Document this!
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
   final int typeId = 3;
@@ -152,10 +145,13 @@ class Enum1Adapter extends TypeAdapter<Enum1> {
     switch (obj) {
       case Enum1.emumValue1:
         writer.writeByte(0);
+        break;
       case Enum1.emumValue2:
         writer.writeByte(1);
+        break;
       case Enum1.emumValue3:
         writer.writeByte(2);
+        break;
     }
   }
 
