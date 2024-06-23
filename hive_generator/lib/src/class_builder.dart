@@ -240,5 +240,7 @@ String _suffixFromType(DartType type) {
 
 String _displayString(DartType e) {
   final suffix = _suffixFromType(e);
-  return '${e.getDisplayString()}$suffix';
+  // TODO: Update when Flutter supports analyser 6.5.0
+  // ignore: deprecated_member_use
+  return '${e.getDisplayString(withNullability: false)}$suffix';
 }

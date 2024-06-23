@@ -113,12 +113,18 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
-      final getter = cls.augmented.lookUpGetter(name: name, library: library);
+      // TODO: Update when Flutter supports analyser 6.5.0
+      // ignore: deprecated_member_use
+      final getter = cls.lookUpGetter(name, library);
       if (getter != null) {
         final getterAnn =
-            getHiveFieldAnn(getter.variable2) ?? getHiveFieldAnn(getter);
+            // TODO: Update when Flutter supports analyser 6.5.0
+            // ignore: deprecated_member_use
+            getHiveFieldAnn(getter.variable) ?? getHiveFieldAnn(getter);
         if (getterAnn != null) {
-          final field = getter.variable2!;
+          // TODO: Update when Flutter supports analyser 6.5.0
+          // ignore: deprecated_member_use
+          final field = getter.variable;
           getters.add(
             AdapterField(
               getterAnn.index,
@@ -130,13 +136,18 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         }
       }
 
-      final setter =
-          cls.augmented.lookUpSetter(name: '$name=', library: library);
+      // TODO: Update when Flutter supports analyser 6.5.0
+      // ignore: deprecated_member_use
+      final setter = cls.lookUpSetter('$name=', library);
       if (setter != null) {
         final setterAnn =
-            getHiveFieldAnn(setter.variable2) ?? getHiveFieldAnn(setter);
+            // TODO: Update when Flutter supports analyser 6.5.0
+            // ignore: deprecated_member_use
+            getHiveFieldAnn(setter.variable) ?? getHiveFieldAnn(setter);
         if (setterAnn != null) {
-          final field = setter.variable2!;
+          // TODO: Update when Flutter supports analyser 6.5.0
+          // ignore: deprecated_member_use
+          final field = setter.variable;
           setters.add(
             AdapterField(
               setterAnn.index,
