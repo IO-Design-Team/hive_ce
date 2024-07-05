@@ -325,8 +325,8 @@ class BinaryWriterImpl extends BinaryWriter {
         writeByte(FrameValueType.stringT);
       }
       writeString(value);
-    } else if (value is List) {
-      _writeList(value, writeTypeId: writeTypeId);
+    } else if (value is List || value is Set) {
+      _writeList(value as Iterable, writeTypeId: writeTypeId);
     } else if (value is Map) {
       if (writeTypeId) {
         writeByte(FrameValueType.mapT);
@@ -347,17 +347,12 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  void _writeList(List value, {bool writeTypeId = true}) {
+  void _writeList(Iterable value, {bool writeTypeId = true}) {
     if (value is HiveList) {
       if (writeTypeId) {
         writeByte(FrameValueType.hiveListT);
       }
       writeHiveList(value);
-    } else if (value.contains(null)) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.listT);
-      }
-      writeList(value);
     } else if (value is Uint8List) {
       if (writeTypeId) {
         writeByte(FrameValueType.byteListT);
@@ -383,11 +378,36 @@ class BinaryWriterImpl extends BinaryWriter {
         writeByte(FrameValueType.stringListT);
       }
       writeStringList(value);
-    } else {
+    } else if (value is List) {
       if (writeTypeId) {
         writeByte(FrameValueType.listT);
       }
       writeList(value);
+    } else if (value is Set<int>) {
+      if (writeTypeId) {
+        writeByte(FrameValueType.intSetT);
+      }
+      writeIntList(value.toList());
+    } else if (value is Set<double>) {
+      if (writeTypeId) {
+        writeByte(FrameValueType.doubleSetT);
+      }
+      writeDoubleList(value.toList());
+    } else if (value is Set<bool>) {
+      if (writeTypeId) {
+        writeByte(FrameValueType.boolSetT);
+      }
+      writeBoolList(value.toList());
+    } else if (value is List<String>) {
+      if (writeTypeId) {
+        writeByte(FrameValueType.stringSetT);
+      }
+      writeStringList(value.toList());
+    } else if (value is Set) {
+      if (writeTypeId) {
+        writeByte(FrameValueType.setT);
+      }
+      writeList(value.toList());
     }
   }
 

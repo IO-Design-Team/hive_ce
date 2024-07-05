@@ -71,6 +71,19 @@ List<Frame> get testFrames => <Frame>[
         12341234,
         {'t': true, 'f': false},
       ]),
+      Frame('Empty set', {}),
+      Frame('Int set', {1, 2, 3, 4, 5}),
+      Frame('Double set', {1.2, 3.4, 5.6}),
+      Frame('String set', {'Hello', 'World', '👨‍👨‍👧‍👦', '🧙‍♂️'}),
+      Frame('Set with null', {1, 2, 3, null}),
+      Frame('Set with different types', {
+        'Set',
+        {1, 2, 3},
+        5.8,
+        true,
+        12341234,
+        {'t': true, 'f': false},
+      }),
       Frame('Map', {
         'Bool': true,
         'Int': 1234,
@@ -202,4 +215,8 @@ void buildGoldens() async {
       ..writeEncrypted(f.value, testCipher, writeTypeId: false);
     return writer.toBytes();
   });
+}
+
+void main() {
+  buildGoldens();
 }

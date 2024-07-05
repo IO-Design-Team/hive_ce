@@ -153,4 +153,19 @@ class FrameValueType {
 
   /// List<HiveObject>
   static const hiveListT = 12;
+
+  /// Set<int>
+  static const intSetT = 13;
+
+  /// Set<double>
+  static const doubleSetT = 14;
+
+  /// Set<bool>
+  static const boolSetT = 15;
+
+  /// Set<String>
+  static const stringSetT = 16;
+
+  /// Set<dynamic>
+  static const setT = 17;
 }

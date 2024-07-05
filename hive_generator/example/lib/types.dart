@@ -61,3 +61,14 @@ enum Enum1 {
 class EmptyClass {
   EmptyClass();
 }
+
+@HiveType(typeId: 5)
+class IterableClass {
+  IterableClass(this.list, this.set);
+
+  @HiveField(0)
+  final List<String> list;
+
+  @HiveField(1)
+  final Set<String> set;
+}
