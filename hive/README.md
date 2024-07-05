@@ -151,6 +151,30 @@ class Person extends HiveObject {
 }
 ```
 
+Add the following to your pubspec.yaml
+```yaml
+dev_dependencies:
+  build_runner: latest
+  hive_ce_generator: latest
+```
+
+And run the following command to generate the type adapter
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+```dart
+import 'package:your_package/hive_registrar.g.dart';
+
+void main() {
+  final path = Directory.current.path;
+  Hive
+    ..init(path)
+    ..registerAdapters();
+}
+```
+
 Extending `HiveObject` is optional but it provides handy methods like `save()` and `delete()`.
 
 ```dart

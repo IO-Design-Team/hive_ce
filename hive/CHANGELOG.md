@@ -1,6 +1,7 @@
 ## 2.4.0+1
 
 - Adds a guide to migrate from `hive`
+- Adds documentation for the new `HiveRegistrar` extension created by `hive_ce_generator`
 
 ## 2.4.0
 

@@ -35,11 +35,11 @@ class RegistrarBuilder implements Builder {
     buffer.write('''
 
 extension HiveRegistrar on HiveInterface {
-  static void registerAdapters() {
+  void registerAdapters() {
 ''');
 
     for (final adapter in adapters) {
-      buffer.writeln('    Hive.registerAdapter($adapter());');
+      buffer.writeln('    registerAdapter($adapter());');
     }
 
     buffer.write('''
