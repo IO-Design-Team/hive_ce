@@ -134,7 +134,7 @@ class TypeRegistryImpl implements TypeRegistry {
             'You are trying to override $oldAdapterType '
             'with $newAdapterType for typeId: $typeId. '
             'Please note that overriding adapters might '
-            'cause weird errors. Try to avoid overriding adapters unless not '
+            'cause weird errors. Try to avoid overriding adapters unless '
             'required.',
           );
         } else {
