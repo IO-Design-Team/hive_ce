@@ -4,7 +4,7 @@ import 'package:hive_ce_generator/src/registrar_intermediate_generator.dart';
 import 'package:hive_ce_generator/src/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
 
-/// The [SharedPartBuilder] for hive_generator
+/// Builds Hive TypeAdapters
 Builder getTypeAdapterBuilder(BuilderOptions options) =>
     SharedPartBuilder([TypeAdapterGenerator()], 'hive_generator');
 
@@ -12,5 +12,5 @@ Builder getTypeAdapterBuilder(BuilderOptions options) =>
 Builder getRegistrarIntermediateBuilder(BuilderOptions options) =>
     RegistrarIntermediateBuilder();
 
-/// The registrar builder for hive_generator
+/// Builds the HiveRegistrar extension
 Builder getRegistrarBuilder(BuilderOptions options) => RegistrarBuilder();
