@@ -15,6 +15,8 @@ class RegistrarIntermediateBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    if (!await buildStep.resolver.isLibrary(buildStep.inputId)) return;
+
     final library = await buildStep.inputLibrary;
     final annotatedElements =
         LibraryReader(library).annotatedWith(TypeChecker.fromRuntime(HiveType));
