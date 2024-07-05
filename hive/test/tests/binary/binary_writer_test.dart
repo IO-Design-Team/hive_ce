@@ -602,21 +602,6 @@ void main() {
         expect(bw.toBytes(), [FrameValueType.doubleSetT, ...bytes(bd)]);
       });
 
-      test('bool set', () {
-        final bd = ByteData(6)
-          ..setUint32(0, 2, Endian.little)
-          ..setUint8(4, 0)
-          ..setUint8(5, 1);
-
-        var bw = getWriter();
-        bw.write({false, true}, writeTypeId: false);
-        expect(bw.toBytes(), bytes(bd));
-
-        bw = getWriter();
-        bw.write({false, true}, writeTypeId: true);
-        expect(bw.toBytes(), [FrameValueType.boolSetT, ...bytes(bd)]);
-      });
-
       test('string set', () {
         var bw = getWriter();
         bw.write({'h', 'hi'}, writeTypeId: false);

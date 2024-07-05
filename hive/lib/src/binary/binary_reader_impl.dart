@@ -328,8 +328,6 @@ class BinaryReaderImpl extends BinaryReader {
         return readIntList().toSet();
       case FrameValueType.doubleSetT:
         return readDoubleList().toSet();
-      case FrameValueType.boolSetT:
-        return readBoolList().toSet();
       case FrameValueType.stringSetT:
         return readStringList().toSet();
       case FrameValueType.setT:

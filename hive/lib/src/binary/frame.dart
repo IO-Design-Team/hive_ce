@@ -166,8 +166,8 @@ final class FrameValueType {
   /// Set<double>
   static const doubleSetT = 14;
 
-  /// Set<bool>
-  static const boolSetT = 15;
+  /// Set<String>
+  static const stringSetT = 15;
 
   /// DateTimeAdapter
   static const dateTime = 16;
@@ -178,12 +178,9 @@ final class FrameValueType {
   /// DateTimeWithTimezoneAdapter
   static const dateTimeWithTimezone = 18;
 
-  /// Set<String>
-  static const stringSetT = 19;
-
   /// Set<dynamic>
-  static const setT = 20;
+  static const setT = 19;
 
   /// DurationAdapter
-  static const duration = 21;
+  static const duration = 20;
 }
