@@ -7,20 +7,23 @@ import 'package:meta/meta.dart';
 /// Needed to codegen the TypeRegistry mock
 @visibleForTesting
 class ResolvedAdapter<T> {
-  /// TODO: Document this!
+  /// The [TypeAdapter] for type [T]
   final TypeAdapter adapter;
 
-  /// TODO: Document this!
+  /// The [adapter]'s [typeId]
   final int typeId;
 
-  /// TODO: Document this!
+  /// A wrapper for a [TypeAdapter] and its [typeId]
   ResolvedAdapter(this.adapter, this.typeId);
 
-  /// TODO: Document this!
+  /// Checks if the given value's [runtimeType] is of type [T]
   bool matchesRuntimeType(dynamic value) => value.runtimeType == T;
 
-  /// TODO: Document this!
+  /// Checks if the given value is of type [T]
   bool matchesType(dynamic value) => value is T;
+
+  /// Checks if the given type is of type [T]
+  bool isForType<U>() => T == U;
 }
 
 class _NullTypeRegistry implements TypeRegistryImpl {
@@ -34,6 +37,9 @@ class _NullTypeRegistry implements TypeRegistryImpl {
 
   @override
   Never findAdapterForValue(value) => throw UnimplementedError();
+
+  @override
+  ResolvedAdapter? findAdapterForType<T>() => throw UnimplementedError();
 
   @override
   Never ignoreTypeId<T>(int typeId) => throw UnimplementedError();
@@ -84,6 +90,16 @@ class TypeRegistryImpl implements TypeRegistry {
     return _typeAdapters[typeId];
   }
 
+  /// Not part of public API
+  ResolvedAdapter? findAdapterForType<T>() {
+    for (final adapter in _typeAdapters.values) {
+      if (adapter.isForType<T>()) {
+        return adapter;
+      }
+    }
+    return null;
+  }
+
   @override
   void registerAdapter<T>(
     TypeAdapter<T> adapter, {
@@ -103,17 +119,21 @@ class TypeRegistryImpl implements TypeRegistry {
     var typeId = adapter.typeId;
     if (!internal) {
       if (typeId < 0 || typeId > 223) {
-        throw HiveError('TypeId $typeId not allowed.');
+        throw HiveError('TypeId $typeId not allowed. Type ids must be in the '
+            'range 0 <= typeId <= 223.');
       }
       typeId = typeId + reservedTypeIds;
 
-      final oldAdapter = findAdapterForTypeId(typeId);
+      final oldAdapter = findAdapterForTypeId(typeId)?.adapter;
       if (oldAdapter != null) {
         if (override) {
+          final oldAdapterType = oldAdapter.runtimeType;
+          final newAdapterType = adapter.runtimeType;
+          final typeId = adapter.typeId;
           print(
-            'You are trying to override ${oldAdapter.runtimeType.toString()}'
-            'with ${adapter.runtimeType.toString()} for typeId: '
-            '${adapter.typeId}. Please note that overriding adapters might '
+            'You are trying to override $oldAdapterType '
+            'with $newAdapterType for typeId: $typeId. '
+            'Please note that overriding adapters might '
             'cause weird errors. Try to avoid overriding adapters unless not '
             'required.',
           );
@@ -121,6 +141,18 @@ class TypeRegistryImpl implements TypeRegistry {
           throw HiveError('There is already a TypeAdapter for '
               'typeId ${typeId - reservedTypeIds}.');
         }
+      }
+
+      final adapterForSameType = findAdapterForType<T>()?.adapter;
+      if (adapterForSameType != null) {
+        final adapterType = adapter.runtimeType;
+        final existingAdapterType = adapterForSameType.runtimeType;
+        print(
+          'WARNING: You are trying to register $adapterType for '
+          'type $T but there is already a TypeAdapter for this '
+          'type: $existingAdapterType. Note that $adapterType will '
+          'have no effect as $existingAdapterType takes precedence.',
+        );
       }
     }
 

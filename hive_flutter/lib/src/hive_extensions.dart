@@ -6,7 +6,7 @@ extension HiveX on HiveInterface {
   ///
   /// You can provide a [subDir] where the boxes should be stored.
   /// 
-  /// Also registers the flutter type adapters
+  /// Also registers the flutter type adapters.
   Future<void> initFlutter([
     String? subDir,
     HiveStorageBackendPreference backendPreference =
