@@ -64,11 +64,17 @@ class EmptyClass {
 
 @HiveType(typeId: 5)
 class IterableClass {
-  IterableClass(this.list, this.set);
+  IterableClass(this.list, this.set, this.nestedList, this.nestedSet);
 
   @HiveField(0)
   final List<String> list;
 
   @HiveField(1)
   final Set<String> set;
+
+  @HiveField(2)
+  final List<Set<String>> nestedList;
+
+  @HiveField(3)
+  final Set<List<String>> nestedSet;
 }

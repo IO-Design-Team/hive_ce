@@ -134,18 +134,24 @@ class IterableClassAdapter extends TypeAdapter<IterableClass> {
     };
     return IterableClass(
       (fields[0] as List).cast<String>(),
-      (fields[1] as List).cast<String>(),
+      (fields[1] as Set).cast<String>(),
+      (fields[2] as List).map((e) => (e as Set).cast<String>()).toList(),
+      (fields[3] as Set).map((e) => (e as List).cast<String>()).toSet(),
     );
   }
 
   @override
   void write(BinaryWriter writer, IterableClass obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.list)
       ..writeByte(1)
-      ..write(obj.set.toList());
+      ..write(obj.set.toList())
+      ..writeByte(2)
+      ..write(obj.nestedList)
+      ..writeByte(3)
+      ..write(obj.nestedSet.toList());
   }
 
   @override
