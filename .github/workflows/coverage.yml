@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: dart:latest
+      image: cirrusci/flutter:latest
 
     steps:
       - uses: actions/checkout@v4
       - name: Collect coverage
         run: |
           dart pub get
-          dart test --coverage coverage/lcov.info
+          flutter test --coverage
         working-directory: hive
       - uses: codecov/codecov-action@v4
         with:
