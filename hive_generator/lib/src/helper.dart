@@ -30,17 +30,6 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
 }
 
 /// TODO: Document this!
-bool isLibraryNNBD(Element element) {
-  final dartVersion = element.library!.languageVersion.effective;
-  // Libraries with the dart version >= 2.12 are nnbd
-  if (dartVersion.major >= 2 && dartVersion.minor >= 12) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/// TODO: Document this!
 void check(bool condition, Object error) {
   if (!condition) {
     // ignore: only_throw_errors

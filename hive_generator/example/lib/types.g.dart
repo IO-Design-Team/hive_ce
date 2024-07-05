@@ -122,6 +122,49 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
           typeId == other.typeId;
 }
 
+class IterableClassAdapter extends TypeAdapter<IterableClass> {
+  @override
+  final int typeId = 5;
+
+  @override
+  IterableClass read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return IterableClass(
+      (fields[0] as List).cast<String>(),
+      (fields[1] as Set).cast<String>(),
+      (fields[2] as List).map((e) => (e as Set).cast<String>()).toList(),
+      (fields[3] as Set).map((e) => (e as List).cast<String>()).toSet(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, IterableClass obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.list)
+      ..writeByte(1)
+      ..write(obj.set)
+      ..writeByte(2)
+      ..write(obj.nestedList)
+      ..writeByte(3)
+      ..write(obj.nestedSet);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IterableClassAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
   final int typeId = 3;
