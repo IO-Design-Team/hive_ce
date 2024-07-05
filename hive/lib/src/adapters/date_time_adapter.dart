@@ -1,9 +1,10 @@
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/frame.dart';
 
 /// Adapter for DateTime
 class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
   @override
-  final typeId = 16;
+  final typeId = FrameValueType.dateTime;
 
   @override
   T read(BinaryReader reader) {
@@ -27,7 +28,7 @@ class DateTimeWithoutTZ extends DateTime {
 /// Alternative adapter for DateTime with time zone info
 class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
   @override
-  final typeId = 18;
+  final typeId = FrameValueType.dateTimeWithTimezone;
 
   @override
   DateTime read(BinaryReader reader) {

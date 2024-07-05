@@ -1,9 +1,10 @@
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/frame.dart';
 
 /// Adapter for BigInt
 class BigIntAdapter extends TypeAdapter<BigInt> {
   @override
-  final typeId = 17;
+  final typeId = FrameValueType.bigInt;
 
   @override
   BigInt read(BinaryReader reader) {
