@@ -1,3 +1,7 @@
+## 2.4.0+1
+
+- Adds a guide to migrate from `hive`
+
 ## 2.4.0
 
 - Adds support for Sets
