@@ -176,7 +176,7 @@ void expectFrames(Iterable<Frame> f1, Iterable<Frame> f2) {
   }
 }
 
-void buildGoldens() async {
+Future<void> buildGoldens() async {
   Future<void> generate(
     String fileName,
     String varName,
@@ -218,6 +218,7 @@ void buildGoldens() async {
   });
 }
 
-void main() {
-  buildGoldens();
+void main() async {
+  await buildGoldens();
+  Process.runSync('dart', ['format', '.']);
 }
