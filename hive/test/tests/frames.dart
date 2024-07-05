@@ -71,6 +71,19 @@ List<Frame> get testFrames => <Frame>[
         12341234,
         {'t': true, 'f': false},
       ]),
+      Frame('Empty set', {}),
+      Frame('Int set', {1, 2, 3, 4, 5}),
+      Frame('Double set', {1.2, 3.4, 5.6}),
+      Frame('String set', {'Hello', 'World', '👨‍👨‍👧‍👦', '🧙‍♂️'}),
+      Frame('Set with null', {1, 2, 3, null}),
+      Frame('Set with different types', {
+        'Set',
+        {1, 2, 3},
+        5.8,
+        true,
+        12341234,
+        {'t': true, 'f': false},
+      }),
       Frame('Map', {
         'Bool': true,
         'Int': 1234,
@@ -88,6 +101,7 @@ List<Frame> get testFrames => <Frame>[
         'BigInt Test',
         BigInt.parse('1234567890123456789012345678901234567890'),
       ),
+      Frame('Duration Test', Duration(milliseconds: 1234567890)),
     ];
 
 List<Frame> framesSetLengthOffset(List<Frame> frames, List<Uint8List> bytes) {
@@ -162,7 +176,7 @@ void expectFrames(Iterable<Frame> f1, Iterable<Frame> f2) {
   }
 }
 
-void buildGoldens() async {
+Future<void> buildGoldens() async {
   Future<void> generate(
     String fileName,
     String varName,
@@ -176,7 +190,8 @@ void buildGoldens() async {
     for (final frame in testFrames) {
       code.writeln('// ${frame.key}');
       final bytes = transformer(frame);
-      code.writeln('Uint8List.fromList(${bytes.toString()}),');
+      final joinedBytes = bytes.join(',');
+      code.writeln('Uint8List.fromList([$joinedBytes,]),');
     }
     code.writeln('];');
     file.writeAsStringSync(code.toString(), flush: true);
@@ -188,8 +203,7 @@ void buildGoldens() async {
     return writer.toBytes();
   });
   await generate('frame_values', 'frameValuesBytes', (f) {
-    final writer = BinaryWriterImpl(HiveImpl())
-      ..write(f.value, writeTypeId: false);
+    final writer = BinaryWriterImpl(HiveImpl())..write(f.value);
     return writer.toBytes();
   });
   await generate('frames_encrypted', 'frameBytesEncrypted', (f) {
@@ -199,7 +213,12 @@ void buildGoldens() async {
   });
   await generate('frame_values_encrypted', 'frameValuesBytesEncrypted', (f) {
     final writer = BinaryWriterImpl(HiveImpl())
-      ..writeEncrypted(f.value, testCipher, writeTypeId: false);
+      ..writeEncrypted(f.value, testCipher);
     return writer.toBytes();
   });
+}
+
+void main() async {
+  await buildGoldens();
+  Process.runSync('dart', ['format', '.']);
 }

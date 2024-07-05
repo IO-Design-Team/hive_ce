@@ -105,7 +105,9 @@ class Frame {
 }
 
 /// Possible Key types
-class FrameKeyType {
+final class FrameKeyType {
+  FrameKeyType._();
+
   /// Integer key
   static const uintT = 0;
 
@@ -114,7 +116,11 @@ class FrameKeyType {
 }
 
 /// Possible value types
-class FrameValueType {
+///
+/// ! Only 32 type ids are reserved
+final class FrameValueType {
+  FrameValueType._();
+
   /// null
   static const nullT = 0;
 
@@ -153,4 +159,28 @@ class FrameValueType {
 
   /// List<HiveObject>
   static const hiveListT = 12;
+
+  /// Set<int>
+  static const intSetT = 13;
+
+  /// Set<double>
+  static const doubleSetT = 14;
+
+  /// Set<String>
+  static const stringSetT = 15;
+
+  /// DateTimeAdapter
+  static const dateTime = 16;
+
+  /// BigIntAdapter
+  static const bigInt = 17;
+
+  /// DateTimeWithTimezoneAdapter
+  static const dateTimeWithTimezone = 18;
+
+  /// Set<dynamic>
+  static const setT = 19;
+
+  /// DurationAdapter
+  static const duration = 20;
 }
