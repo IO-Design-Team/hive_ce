@@ -176,7 +176,7 @@ class ClassBuilder extends Builder {
     code.writeln('writer');
     code.writeln('..writeByte(${getters.length})');
     for (final field in getters) {
-      final value = _convertIterable(field.type, 'obj.${field.name}');
+      final value = 'obj.${field.name}';
       code.writeln('''
       ..writeByte(${field.index})
       ..write($value)''');
@@ -184,21 +184,6 @@ class ClassBuilder extends Builder {
     code.writeln(';');
 
     return code.toString();
-  }
-
-  String _convertIterable(DartType type, String accessor) {
-    if (listChecker.isAssignableFromType(type)) {
-      return accessor;
-    } else
-    // Using assignable because Set? and Iterable? are not exactly Set and
-    // Iterable
-    if (setChecker.isAssignableFromType(type) ||
-        iterableChecker.isAssignableFromType(type)) {
-      final suffix = _accessorSuffixFromType(type);
-      return '$accessor$suffix.toList()';
-    } else {
-      return accessor;
-    }
   }
 }
 

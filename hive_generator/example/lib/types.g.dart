@@ -147,11 +147,11 @@ class IterableClassAdapter extends TypeAdapter<IterableClass> {
       ..writeByte(0)
       ..write(obj.list)
       ..writeByte(1)
-      ..write(obj.set.toList())
+      ..write(obj.set)
       ..writeByte(2)
       ..write(obj.nestedList)
       ..writeByte(3)
-      ..write(obj.nestedSet.toList());
+      ..write(obj.nestedSet);
   }
 
   @override
