@@ -398,7 +398,7 @@ class BinaryWriterImpl extends BinaryWriter {
         writeByte(FrameValueType.boolSetT);
       }
       writeBoolList(value.toList());
-    } else if (value is List<String>) {
+    } else if (value is Set<String>) {
       if (writeTypeId) {
         writeByte(FrameValueType.stringSetT);
       }
