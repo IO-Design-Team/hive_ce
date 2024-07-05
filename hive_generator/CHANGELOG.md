@@ -1,3 +1,7 @@
+## 1.3.0
+
+- Adds support for Sets
+
 ## 1.2.1
 
 - Fix `analyzer` dependency conflicts with Flutter

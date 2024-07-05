@@ -19,23 +19,23 @@ class ClassBuilder extends Builder {
     super.setters,
   );
 
-  /// TODO: Document this!
-  var hiveListChecker = const TypeChecker.fromRuntime(HiveList);
+  /// [TypeChecker] for [HiveList].
+  final hiveListChecker = const TypeChecker.fromRuntime(HiveList);
 
-  /// TODO: Document this!
-  var listChecker = const TypeChecker.fromRuntime(List);
+  /// [TypeChecker] for [List].
+  final listChecker = const TypeChecker.fromRuntime(List);
 
-  /// TODO: Document this!
-  var mapChecker = const TypeChecker.fromRuntime(Map);
+  /// [TypeChecker] for [Map].
+  final mapChecker = const TypeChecker.fromRuntime(Map);
 
-  /// TODO: Document this!
-  var setChecker = const TypeChecker.fromRuntime(Set);
+  /// [TypeChecker] for [Set].
+  final setChecker = const TypeChecker.fromRuntime(Set);
 
-  /// TODO: Document this!
-  var iterableChecker = const TypeChecker.fromRuntime(Iterable);
+  /// [TypeChecker] for [Iterable].
+  final iterableChecker = const TypeChecker.fromRuntime(Iterable);
 
-  /// TODO: Document this!
-  var uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
+  /// [TypeChecker] for [Uint8List].
+  final uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
 
   @override
   String buildRead() {
@@ -110,9 +110,10 @@ class ClassBuilder extends Builder {
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
-    } else if (iterableChecker.isAssignableFromType(type) &&
-        !isUint8List(type)) {
+    } else if (listChecker.isAssignableFromType(type) && !isUint8List(type)) {
       return '($variable as List$suffix)${_castIterable(type)}';
+    } else if (setChecker.isAssignableFromType(type)) {
+      return '($variable as Set$suffix)${_castIterable(type)}';
     } else if (mapChecker.isAssignableFromType(type)) {
       return '($variable as Map$suffix)${_castMap(type)}';
     } else if (type.isDartCoreInt) {
@@ -148,10 +149,8 @@ class ClassBuilder extends Builder {
       } else if (setChecker.isAssignableFromType(type)) {
         cast = '.toSet()';
       }
-      // The suffix is not needed with nnbd on $cast becauuse it short circuits,
-      // otherwise it is needed.
-      final castWithSuffix = isLibraryNNBD(cls) ? cast : '$suffix$cast';
-      return '$suffix.map((dynamic e)=> ${_cast(arg, 'e')})$castWithSuffix';
+
+      return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
       return '$suffix.cast<${_displayString(arg)}>()';
     }
@@ -177,29 +176,13 @@ class ClassBuilder extends Builder {
     code.writeln('writer');
     code.writeln('..writeByte(${getters.length})');
     for (final field in getters) {
-      final value = _convertIterable(field.type, 'obj.${field.name}');
       code.writeln('''
       ..writeByte(${field.index})
-      ..write($value)''');
+      ..write(obj.${field.name})''');
     }
     code.writeln(';');
 
     return code.toString();
-  }
-
-  String _convertIterable(DartType type, String accessor) {
-    if (listChecker.isAssignableFromType(type)) {
-      return accessor;
-    } else
-    // Using assignable because Set? and Iterable? are not exactly Set and
-    // Iterable
-    if (setChecker.isAssignableFromType(type) ||
-        iterableChecker.isAssignableFromType(type)) {
-      final suffix = _accessorSuffixFromType(type);
-      return '$accessor$suffix.toList()';
-    } else {
-      return accessor;
-    }
   }
 }
 
