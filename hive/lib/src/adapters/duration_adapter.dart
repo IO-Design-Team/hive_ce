@@ -1,9 +1,10 @@
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/frame.dart';
 
-/// Adapter for DateTime
+/// Adapter for Duration
 class DurationAdapter extends TypeAdapter<Duration> {
   @override
-  final typeId = 16;
+  final typeId = FrameValueType.duration;
 
   @override
   Duration read(BinaryReader reader) {

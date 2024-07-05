@@ -1077,7 +1077,7 @@ final frameValuesBytes = [
     0,
     0,
     0,
-    18,
+    16,
     0,
     0,
     0,
@@ -1086,8 +1086,7 @@ final frameValuesBytes = [
     0,
     0,
     0,
-    0,
-    18,
+    16,
     0,
     192,
     26,
@@ -1096,7 +1095,6 @@ final frameValuesBytes = [
     204,
     118,
     66,
-    0,
   ]),
 // BigInt Test
   Uint8List.fromList([
@@ -1145,7 +1143,7 @@ final frameValuesBytes = [
   ]),
 // Duration Test
   Uint8List.fromList([
-    16,
+    21,
     0,
     0,
     128,
