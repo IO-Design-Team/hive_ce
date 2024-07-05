@@ -14,11 +14,9 @@ jobs:
   coverage-hive:
     runs-on: ubuntu-latest
 
-    container:
-      image: instrumentisto/flutter:latest
-
     steps:
       - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
       - name: Collect coverage
         run: |
           dart pub get
