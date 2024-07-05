@@ -176,10 +176,9 @@ class ClassBuilder extends Builder {
     code.writeln('writer');
     code.writeln('..writeByte(${getters.length})');
     for (final field in getters) {
-      final value = 'obj.${field.name}';
       code.writeln('''
       ..writeByte(${field.index})
-      ..write($value)''');
+      ..write(obj.${field.name})''');
     }
     code.writeln(';');
 
