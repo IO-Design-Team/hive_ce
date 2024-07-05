@@ -190,7 +190,8 @@ void buildGoldens() async {
     for (final frame in testFrames) {
       code.writeln('// ${frame.key}');
       final bytes = transformer(frame);
-      code.writeln('Uint8List.fromList(${bytes.toString()}),');
+      final joinedBytes = bytes.join(',');
+      code.writeln('Uint8List.fromList([$joinedBytes,]),');
     }
     code.writeln('];');
     file.writeAsStringSync(code.toString(), flush: true);
