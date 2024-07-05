@@ -22,8 +22,7 @@ jobs:
       - name: Collect coverage
         run: |
           dart pub get
-          dart pub global activate test_coverage
-          dart pub global run test_coverage --exclude "**/js/**"
+          dart test --coverage coverage/lcov.info
         working-directory: hive
       - uses: codecov/codecov-action@v4
         with:
