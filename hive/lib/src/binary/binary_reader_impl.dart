@@ -324,6 +324,14 @@ class BinaryReaderImpl extends BinaryReader {
         return readMap();
       case FrameValueType.hiveListT:
         return readHiveList();
+      case FrameValueType.intSetT:
+        return readIntList().toSet();
+      case FrameValueType.doubleSetT:
+        return readDoubleList().toSet();
+      case FrameValueType.stringSetT:
+        return readStringList().toSet();
+      case FrameValueType.setT:
+        return readList().toSet();
       default:
         final resolved = _typeRegistry.findAdapterForTypeId(typeId);
         if (resolved == null) {

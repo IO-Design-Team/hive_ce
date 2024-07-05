@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
+import 'package:hive_ce/src/adapters/duration_adapter.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';
@@ -46,6 +47,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
     registerAdapter(DateTimeAdapter<DateTimeWithoutTZ>(), internal: true);
     registerAdapter(BigIntAdapter(), internal: true);
+    registerAdapter(DurationAdapter(), internal: true);
   }
 
   @override
