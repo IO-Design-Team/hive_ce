@@ -707,7 +707,7 @@ final frameValuesBytes = [
   ]),
 // String set
   Uint8List.fromList([
-    19,
+    15,
     4,
     0,
     0,
@@ -779,7 +779,7 @@ final frameValuesBytes = [
   ]),
 // Set with null
   Uint8List.fromList([
-    20,
+    19,
     4,
     0,
     0,
@@ -815,7 +815,7 @@ final frameValuesBytes = [
   ]),
 // Set with different types
   Uint8List.fromList([
-    20,
+    19,
     6,
     0,
     0,
@@ -1139,7 +1139,7 @@ final frameValuesBytes = [
   ]),
 // Duration Test
   Uint8List.fromList([
-    21,
+    20,
     0,
     0,
     128,
