@@ -29,7 +29,7 @@ class RegistrarIntermediateBuilder implements Builder {
     }
 
     await buildStep.writeAsString(
-      AssetId.resolve(library.source.uri),
+      buildStep.allowedOutputs.first,
       jsonEncode({
         'uri': library.source.uri.toString(),
         'adapters': adapters,

@@ -1,9 +1,6 @@
 import 'dart:convert';
 
 import 'package:glob/glob.dart';
-import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_generator/src/helper.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:build/build.dart';
 import 'dart:async';
 import 'package:path/path.dart' as p;
