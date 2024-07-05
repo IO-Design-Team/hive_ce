@@ -101,6 +101,7 @@ List<Frame> get testFrames => <Frame>[
         'BigInt Test',
         BigInt.parse('1234567890123456789012345678901234567890'),
       ),
+      Frame('Duration Test', Duration(milliseconds: 1234567890)),
     ];
 
 List<Frame> framesSetLengthOffset(List<Frame> frames, List<Uint8List> bytes) {
