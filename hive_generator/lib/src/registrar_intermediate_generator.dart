@@ -28,6 +28,8 @@ class RegistrarIntermediateBuilder implements Builder {
       adapters.add(adapterName);
     }
 
+    if (adapters.isEmpty) return;
+
     await buildStep.writeAsString(
       buildStep.allowedOutputs.first,
       jsonEncode({
