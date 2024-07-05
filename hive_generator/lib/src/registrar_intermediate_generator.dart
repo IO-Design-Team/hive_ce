@@ -19,6 +19,8 @@ class RegistrarIntermediateBuilder implements Builder {
     final annotatedElements =
         LibraryReader(library).annotatedWith(TypeChecker.fromRuntime(HiveType));
 
+    if (annotatedElements.isEmpty) return;
+
     final adapters = <String>[];
     for (final annotatedElement in annotatedElements) {
       final annotation = annotatedElement.annotation;
@@ -27,8 +29,6 @@ class RegistrarIntermediateBuilder implements Builder {
       final adapterName = getAdapterName(cls.name, annotation);
       adapters.add(adapterName);
     }
-
-    if (adapters.isEmpty) return;
 
     await buildStep.writeAsString(
       buildStep.allowedOutputs.first,
