@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_flutter/adapters.dart';
 import 'package:path/path.dart'
     if (dart.library.js_interop) 'src/stub/path.dart' as path_helper;
 import 'package:path_provider/path_provider.dart'
