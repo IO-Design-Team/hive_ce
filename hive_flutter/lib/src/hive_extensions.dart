@@ -5,7 +5,7 @@ extension HiveX on HiveInterface {
   /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
   ///
   /// You can provide a [subDir] where the boxes should be stored.
-  /// 
+  ///
   /// Also registers the flutter type adapters.
   Future<void> initFlutter([
     String? subDir,
