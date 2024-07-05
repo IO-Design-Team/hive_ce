@@ -1,12 +1,12 @@
-import 'package:hive_ce_generator/src/type_adapter_generator.dart';
+import 'package:hive_ce_generator/src/helper.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('generateName', () {
     test('.generateName()', () {
-      expect(TypeAdapterGenerator.generateName(r'_$User'), 'UserAdapter');
+      expect(generateAdapterName(r'_$User'), 'UserAdapter');
       expect(
-        TypeAdapterGenerator.generateName(r'_$_SomeClass'),
+        generateAdapterName(r'_$_SomeClass'),
         'SomeClassAdapter',
       );
     });

@@ -13,6 +13,8 @@ dependencies:
   hive_ce: ^2.3.0
   analyzer: ^6.0.0
   source_helper: ^1.1.0
+  glob: ^2.1.2
+  path: ^1.9.0
 
 dev_dependencies:
   test: ^1.17.11
