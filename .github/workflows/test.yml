@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        flutter-channel: [stable, beta]
         include:
           - test-platform: vm
             compiler: kernel
@@ -25,9 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: 3.4.0
+          channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
         working-directory: hive
@@ -39,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [beta, stable]
+        flutter-channel: [stable, beta]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -56,18 +57,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dart-channel: ["3.4.0"]
+        flutter-channel: [stable, beta]
     steps:
       - uses: actions/checkout@v4
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: ${{ matrix.dart-channel }}
+          channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
         working-directory: hive_generator/example
       - name: Generate build_runner output
         run: dart pub run build_runner build --delete-conflicting-outputs
         working-directory: hive_generator/example
+
+  ensure-codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - run: |
+          dart pub global activate puby
+          puby link
+          puby gen
+          git diff --exit-code
 
   check-score:
     runs-on: ubuntu-latest
