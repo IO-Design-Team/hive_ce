@@ -1,13 +1,12 @@
 part of '../../hive.dart';
 
 /// Annotate all fields you want to persist with [HiveField].
-// TODO: Enable when Flutter supports analyser 6.5.0
-// @Target({
-//   TargetKind.field,
-//   TargetKind.getter,
-//   TargetKind.setter,
-//   TargetKind.enumValue,
-// })
+@Target({
+  TargetKind.field,
+  TargetKind.getter,
+  TargetKind.setter,
+  TargetKind.enumValue,
+})
 class HiveField {
   /// The index of this field.
   final int index;

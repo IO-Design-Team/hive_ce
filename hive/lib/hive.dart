@@ -17,6 +17,7 @@ import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
+import 'package:meta/meta_meta.dart';
 
 export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.js_interop) 'package:hive_ce/src/box_collection/box_collection_indexed_db.dart'
