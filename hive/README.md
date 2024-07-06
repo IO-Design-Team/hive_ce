@@ -11,6 +11,40 @@ Hive is a lightweight and blazing fast key-value database written in pure Dart. 
 
 If you need queries, multi-isolate support or links between objects check out [Isar Database](https://github.com/isar/isar).
 
+## Migrating from Hive
+
+The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
+
+pubspec.yaml
+```yaml
+# old
+dependencies:
+  hive: ^2.0.0
+  hive_flutter: ^1.0.0
+
+dev_dependencies:
+  hive_generator: ^1.0.0
+
+# new
+dependencies:
+  hive_ce: latest
+  hive_ce_flutter: latest
+
+dev_dependencies:
+  hive_ce_generator: latest
+```
+
+Dart files
+```dart
+// old
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+// new
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+```
+
 ## Features
 
 - 🚀 Cross platform: mobile, desktop, browser
@@ -114,6 +148,30 @@ class Person extends HiveObject {
 
   @HiveField(1)
   int age;
+}
+```
+
+Add the following to your pubspec.yaml
+```yaml
+dev_dependencies:
+  build_runner: latest
+  hive_ce_generator: latest
+```
+
+And run the following command to generate the type adapter
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+```dart
+import 'package:your_package/hive_registrar.g.dart';
+
+void main() {
+  final path = Directory.current.path;
+  Hive
+    ..init(path)
+    ..registerAdapters();
 }
 ```
 

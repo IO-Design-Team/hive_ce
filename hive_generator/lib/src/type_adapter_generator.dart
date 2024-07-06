@@ -10,19 +10,6 @@ import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
-  /// TODO: Document this!
-  static String generateName(String typeName) {
-    var adapterName =
-        '${typeName}Adapter'.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '');
-    if (adapterName.startsWith('_')) {
-      adapterName = adapterName.substring(1);
-    }
-    if (adapterName.startsWith(r'$')) {
-      adapterName = adapterName.substring(1);
-    }
-    return adapterName;
-  }
-
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
@@ -72,16 +59,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
               typeId == other.typeId;
     }
     ''';
-  }
-
-  /// TODO: Document this!
-  InterfaceElement getClass(Element element) {
-    check(
-      element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
-      'Only classes or enums are allowed to be annotated with @HiveType.',
-    );
-
-    return element as InterfaceElement;
   }
 
   /// TODO: Document this!
@@ -180,16 +157,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
           );
         }
       }
-    }
-  }
-
-  /// TODO: Document this!
-  String getAdapterName(String typeName, ConstantReader annotation) {
-    final annAdapterName = annotation.read('adapterName');
-    if (annAdapterName.isNull) {
-      return generateName(typeName);
-    } else {
-      return annAdapterName.stringValue;
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:example/hive_registrar.g.dart';
 import 'package:hive_ce/hive.dart';
 
 part 'main.g.dart';
@@ -27,7 +28,7 @@ void main() async {
   final path = Directory.current.path;
   Hive
     ..init(path)
-    ..registerAdapter(PersonAdapter());
+    ..registerAdapters();
 
   final box = await Hive.openBox('testBox');
 
