@@ -14,8 +14,6 @@ class RegistrarBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    print('Generating HiveRegistrar');
-
     final buffer = StringBuffer("import 'package:hive_ce/hive.dart';\n");
 
     final uris = <String>[];
