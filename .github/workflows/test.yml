@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [stable, beta]
         include:
           - test-platform: vm
             compiler: kernel
@@ -26,9 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
-      - uses: subosito/flutter-action@v2
+      - uses: dart-lang/setup-dart@v1
         with:
-          channel: ${{ matrix.flutter-channel }}
+          sdk: 3.4.0
       - name: Install dependencies
         run: dart pub get
         working-directory: hive
