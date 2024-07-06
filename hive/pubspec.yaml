@@ -8,7 +8,7 @@ environment:
   sdk: ^3.4.0
 
 dependencies:
-  meta: ^1.3.0
+  meta: ^1.14.0
   crypto: ^3.0.0
   web: ^0.5.1
 
@@ -17,5 +17,5 @@ dev_dependencies:
   mocktail: ^1.0.4
   rexios_lints: ^7.0.0
   path: ^1.7.0
-  pointycastle: ^3.0.1
+  pointycastle: ^3.4.0
   build_runner: ^2.1.2
