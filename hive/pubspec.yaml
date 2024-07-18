@@ -10,7 +10,7 @@ environment:
 dependencies:
   meta: ^1.14.0
   crypto: ^3.0.0
-  web: ^0.5.1
+  web: ^1.0.0
 
 dev_dependencies:
   test: ^1.17.12
