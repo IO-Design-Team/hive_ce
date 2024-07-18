@@ -1,3 +1,7 @@
+## 2.4.1
+
+- Upgrades `package:web` to `1.0.0`
+
 ## 2.4.0+1
 
 - Adds a guide to migrate from `hive`
