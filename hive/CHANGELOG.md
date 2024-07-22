@@ -1,3 +1,7 @@
+## 2.4.2
+
+- Only show the adapter with same type warning if the adapters have different type ids
+
 ## 2.4.1
 
 - Upgrades `package:web` to `1.0.0`
