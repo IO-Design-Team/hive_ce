@@ -136,9 +136,8 @@ void main() {
         final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter());
 
-        final output = captureOutput(
-          () => registry.registerAdapter(TestAdapter(1), override: true),
-        );
+        final output =
+            captureOutput(() => registry.registerAdapter(TestAdapter(1)));
         expect(
           output,
           contains('WARNING: You are trying to register TestAdapter'),
