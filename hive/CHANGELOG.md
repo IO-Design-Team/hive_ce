@@ -1,3 +1,7 @@
+## 2.4.3
+
+- Loosen constraint on `meta`
+
 ## 2.4.2
 
 - Only show the adapter with same type warning if the adapters have different type ids
