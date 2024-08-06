@@ -1,3 +1,7 @@
+## 2.4.4
+
+- Loosens constraint on `web`
+
 ## 2.4.3
 
 - Loosens constraint on `meta`
