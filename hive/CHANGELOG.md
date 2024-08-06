@@ -1,3 +1,9 @@
+## 2.5.0
+
+- Adds `Target` annotations to `HiveField` and `HiveType` to prevent invalid usage
+- Bumps `analyzer` to `^6.5.0` to deal with deprecations
+- Bumps `meta` to `^1.14.0` for `TargetKind.enumValue`
+
 ## 2.4.4
 
 - Loosens constraint on `web`
