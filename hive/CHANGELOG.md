@@ -1,3 +1,19 @@
+## 2.4.4
+
+- Loosens constraint on `web`
+
+## 2.4.3
+
+- Loosens constraint on `meta`
+
+## 2.4.2
+
+- Only shows the adapter with same type warning if the adapters have different type ids
+
+## 2.4.1
+
+- Upgrades `package:web` to `1.0.0`
+
 ## 2.4.0+1
 
 - Adds a guide to migrate from `hive`

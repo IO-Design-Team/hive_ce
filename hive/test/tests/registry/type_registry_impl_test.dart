@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
@@ -67,6 +69,16 @@ class ChildAdapter extends TypeAdapter<Child> {
   void write(BinaryWriter writer, Child obj) {}
 }
 
+String captureOutput(void Function() fn) {
+  final output = StringBuffer();
+  final spec = ZoneSpecification(
+    print: (self, parent, zone, message) => output.write(message),
+  );
+
+  Zone.current.fork(specification: spec).run(fn);
+  return output.toString();
+}
+
 void main() {
   group('TypeRegistryImpl', () {
     group('.registerAdapter()', () {
@@ -104,6 +116,32 @@ void main() {
       test('dynamic type', () {
         final registry = TypeRegistryImpl();
         registry.registerAdapter<dynamic>(TestAdapter());
+      });
+
+      test('override', () {
+        final registry = TypeRegistryImpl();
+        registry.registerAdapter(TestAdapter());
+
+        final output = captureOutput(
+          () => registry.registerAdapter(TestAdapter(), override: true),
+        );
+        expect(output, contains('You are trying to override TestAdapter'));
+        expect(
+          output,
+          isNot(contains('WARNING: You are trying to register TestAdapter')),
+        );
+      });
+
+      test('adapter with same type warning', () {
+        final registry = TypeRegistryImpl();
+        registry.registerAdapter(TestAdapter());
+
+        final output =
+            captureOutput(() => registry.registerAdapter(TestAdapter(1)));
+        expect(
+          output,
+          contains('WARNING: You are trying to register TestAdapter'),
+        );
       });
     });
 
