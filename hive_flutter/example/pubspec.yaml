@@ -17,5 +17,9 @@ dev_dependencies:
   hive_ce_generator:
     path: ../../hive_generator
 
+# dependency_overrides:
+#   hive_ce:
+#     path: ../../hive
+
 flutter:
   uses-material-design: true
