@@ -1,6 +1,12 @@
 part of '../../hive.dart';
 
 /// Annotate all fields you want to persist with [HiveField].
+@Target({
+  TargetKind.field,
+  TargetKind.getter,
+  TargetKind.setter,
+  TargetKind.enumValue,
+})
 class HiveField {
   /// The index of this field.
   final int index;

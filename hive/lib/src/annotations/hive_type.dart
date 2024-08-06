@@ -1,6 +1,7 @@
 part of '../../hive.dart';
 
 /// Annotate classes with [HiveType] to generate a `TypeAdapter`.
+@Target({TargetKind.type})
 class HiveType {
   /// The typeId of the annotated class.
   final int typeId;
