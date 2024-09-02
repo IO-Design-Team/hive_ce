@@ -193,6 +193,58 @@ person.save();
 print(box.getAt(0)) // Dave - 30
 ```
 
+## Modifying Objects
+
+When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
+
+For example, consider an existing database with a Person object:
+
+```dart
+@HiveType(typeId: 0)
+class Person extends HiveObject {
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  int age;
+}
+```
+
+If you want to add a "balance" field:
+
+```dart
+@HiveType(typeId: 0)
+class Person extends HiveObject {
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  int age;
+
+  @HiveField(2)
+  int balance;
+}
+```
+
+Without proper handling, this change will cause null errors in the existing application when accessing the new field.
+
+To resolve this issue, you can set a default value:
+
+```dart
+@HiveField(2, defaultValue: 0)
+int balance;
+```
+
+Alternatively, you can write custom migration code to handle the transition.
+
+After modifying the schema, remember to run the build runner to generate the necessary code:
+
+```bash
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+This will update your Hive adapters to reflect the changes in your object structure.
+
 ## Hive ❤️ Flutter
 
 Hive was written with Flutter in mind. It is a perfect fit if you need a lightweight datastore for your app. After adding the required dependencies and initializing Hive, you can use Hive in your project:
