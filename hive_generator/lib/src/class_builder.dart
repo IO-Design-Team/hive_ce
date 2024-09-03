@@ -214,11 +214,8 @@ String _accessorSuffixFromType(DartType type) {
 /// Suffix to use when casting a value to [type].
 /// $variable as $type$suffix
 String _suffixFromType(DartType type) {
-  if (type.nullabilitySuffix == NullabilitySuffix.star) {
-    return '';
-  }
-  if (type.nullabilitySuffix == NullabilitySuffix.question) {
-    return '?';
-  }
-  return '';
+  return switch (type.nullabilitySuffix) {
+    NullabilitySuffix.question => '?',
+    _ => '',
+  };
 }
