@@ -81,7 +81,12 @@ class IterableClass {
 
 @HiveType(typeId: 6)
 class ConstructorDefaults {
-  ConstructorDefaults({this.a = 42, this.b = '42', this.c = true});
+  ConstructorDefaults({
+    this.a = 42,
+    this.b = '42',
+    this.c = true,
+    DateTime? d,
+  }) : d = d ?? DateTime.now();
 
   @HiveField(0)
   final int a;
@@ -91,6 +96,9 @@ class ConstructorDefaults {
 
   @HiveField(2)
   final bool c;
+
+  @HiveField(3)
+  final DateTime d;
 }
 
 @HiveType(typeId: 7)

@@ -179,19 +179,22 @@ class ConstructorDefaultsAdapter extends TypeAdapter<ConstructorDefaults> {
       a: fields[0] == null ? 42 : (fields[0] as num).toInt(),
       b: fields[1] == null ? '6 * 7' : fields[1] as String,
       c: fields[2] == null ? true : fields[2] as bool,
+      d: fields[3] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, ConstructorDefaults obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.a)
       ..writeByte(1)
       ..write(obj.b)
       ..writeByte(2)
-      ..write(obj.c);
+      ..write(obj.c)
+      ..writeByte(3)
+      ..write(obj.d);
   }
 
   @override
