@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:hive_ce/hive.dart';
@@ -68,13 +67,7 @@ class ClassBuilder extends Builder {
         if (param.isNamed) {
           code.write('${param.name}: ');
         }
-        code.write(
-          _value(
-            param.type,
-            'fields[${field.index}]',
-            field.annotationDefault,
-          ),
-        );
+        code.write(_value(param.type, field));
         code.writeln(',');
         fields.remove(field);
       }
@@ -86,13 +79,7 @@ class ClassBuilder extends Builder {
     // as initializing formals. We do so using cascades.
     for (final field in fields) {
       code.write('..${field.name} = ');
-      code.writeln(
-        _value(
-          field.type,
-          'fields[${field.index}]',
-          field.annotationDefault,
-        ),
-      );
+      code.writeln(_value(field.type, field));
     }
 
     code.writeln(';');
@@ -100,10 +87,25 @@ class ClassBuilder extends Builder {
     return code.toString();
   }
 
-  String _value(DartType type, String variable, DartObject? defaultValue) {
+  String _value(DartType type, AdapterField field) {
+    final variable = 'fields[${field.index}]';
     final value = _cast(type, variable);
-    if (defaultValue?.isNull != false) return value;
-    return '$variable == null ? ${constantToString(defaultValue!)} : $value';
+
+    final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
+    final constructorDefaultIsNull = field.constructorDefault == null;
+
+    final String? defaultValue;
+    if (!annotationDefaultIsNull) {
+      defaultValue = constantToString(field.annotationDefault);
+    } else if (!constructorDefaultIsNull) {
+      defaultValue = field.constructorDefault;
+    } else {
+      defaultValue = null;
+    }
+
+    if (defaultValue == null) return value;
+
+    return '$variable == null ? $defaultValue : $value';
   }
 
   String _cast(DartType type, String variable) {

@@ -1,4 +1,3 @@
-import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
@@ -94,45 +93,34 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         param.name: param.defaultValueCode,
     };
 
+    AdapterField? accessorToField(PropertyAccessorElement? element) {
+      if (element == null) return null;
+
+      final annotation =
+          getHiveFieldAnn(element.variable2) ?? getHiveFieldAnn(element);
+      if (annotation == null) return null;
+
+      final field = element.variable2!;
+      return AdapterField(
+        annotation.index,
+        field.name,
+        field.type,
+        annotation.defaultValue,
+        parameterDefaults[field.name],
+      );
+    }
+
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
       final getter = cls.augmented.lookUpGetter(name: name, library: library);
-      if (getter != null) {
-        final getterAnn =
-            getHiveFieldAnn(getter.variable2) ?? getHiveFieldAnn(getter);
-        if (getterAnn != null) {
-          final field = getter.variable2!;
-          getters.add(
-            AdapterField(
-              getterAnn.index,
-              field.name,
-              field.type,
-              getterAnn.defaultValue,
-              parameterDefaults[field.name],
-            ),
-          );
-        }
-      }
+      final getterField = accessorToField(getter);
+      if (getterField != null) getters.add(getterField);
 
       final setter =
           cls.augmented.lookUpSetter(name: '$name=', library: library);
-      if (setter != null) {
-        final setterAnn =
-            getHiveFieldAnn(setter.variable2) ?? getHiveFieldAnn(setter);
-        if (setterAnn != null) {
-          final field = setter.variable2!;
-          setters.add(
-            AdapterField(
-              setterAnn.index,
-              field.name,
-              field.type,
-              setterAnn.defaultValue,
-              parameterDefaults[field.name],
-            ),
-          );
-        }
-      }
+      final setterField = accessorToField(setter);
+      if (setterField != null) setters.add(setterField);
     }
 
     return [getters, setters];
