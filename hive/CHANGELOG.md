@@ -1,3 +1,7 @@
+## NEXT
+
+- Documentation updates for `HiveField` in support of `hive_ce_generator` changes
+
 ## 2.5.0
 
 - Adds `Target` annotations to `HiveField` and `HiveType` to prevent invalid usage
