@@ -165,6 +165,46 @@ class IterableClassAdapter extends TypeAdapter<IterableClass> {
           typeId == other.typeId;
 }
 
+class ConstructorDefaultsAdapter extends TypeAdapter<ConstructorDefaults> {
+  @override
+  final int typeId = 6;
+
+  @override
+  ConstructorDefaults read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ConstructorDefaults(
+      a: fields[0] == null ? 42 : (fields[0] as num).toInt(),
+      b: fields[1] == null ? '6 * 7' : fields[1] as String,
+      c: fields[2] == null ? true : fields[2] as bool,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ConstructorDefaults obj) {
+    writer
+      ..writeByte(3)
+      ..writeByte(0)
+      ..write(obj.a)
+      ..writeByte(1)
+      ..write(obj.b)
+      ..writeByte(2)
+      ..write(obj.c);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ConstructorDefaultsAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
   final int typeId = 3;

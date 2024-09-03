@@ -7,6 +7,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(Class2Adapter());
     registerAdapter(EmptyClassAdapter());
     registerAdapter(IterableClassAdapter());
+    registerAdapter(ConstructorDefaultsAdapter());
     registerAdapter(Enum1Adapter());
   }
 }

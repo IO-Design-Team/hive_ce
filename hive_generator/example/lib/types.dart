@@ -78,3 +78,17 @@ class IterableClass {
   @HiveField(3)
   final Set<List<String>> nestedSet;
 }
+
+@HiveType(typeId: 6)
+class ConstructorDefaults {
+  ConstructorDefaults({this.a = 42, this.b = '42', this.c = true});
+
+  @HiveField(0)
+  final int a;
+
+  @HiveField(1, defaultValue: '6 * 7')
+  final String b;
+
+  @HiveField(2)
+  final bool c;
+}
