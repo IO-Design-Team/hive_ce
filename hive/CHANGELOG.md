@@ -1,4 +1,4 @@
-## NEXT
+## 2.5.0+1
 
 - Documentation updates for `HiveField` in support of `hive_ce_generator` changes
 

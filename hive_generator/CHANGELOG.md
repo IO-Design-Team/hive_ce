@@ -1,4 +1,4 @@
-## NEXT
+## 1.5.0
 
 - Supports constructor parameter default values
 - No longer generates the `HiveRegistrar` if there are no adapters
