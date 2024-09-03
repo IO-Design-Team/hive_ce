@@ -12,6 +12,8 @@ class HiveField {
   final int index;
 
   /// The default value of this field for class hive types.
+  /// 
+  /// This value takes precedence over constructor parameter default values.
   ///
   /// In enum hive types set `true` to use this enum value as default value
   /// instead of null in null-safety.
