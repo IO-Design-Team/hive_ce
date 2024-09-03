@@ -78,3 +78,39 @@ class IterableClass {
   @HiveField(3)
   final Set<List<String>> nestedSet;
 }
+
+@HiveType(typeId: 6)
+class ConstructorDefaults {
+  ConstructorDefaults({
+    this.a = 42,
+    this.b = '42',
+    this.c = true,
+    DateTime? d,
+  }) : d = d ?? DateTime.now();
+
+  @HiveField(0)
+  final int a;
+
+  @HiveField(1, defaultValue: '6 * 7')
+  final String b;
+
+  @HiveField(2)
+  final bool c;
+
+  @HiveField(3)
+  final DateTime d;
+}
+
+@HiveType(typeId: 7)
+class NullableTypes {
+  NullableTypes({this.a, this.b, this.c});
+
+  @HiveField(0)
+  final int? a;
+
+  @HiveField(1)
+  final String? b;
+
+  @HiveField(2)
+  final bool? c;
+}
