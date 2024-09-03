@@ -123,7 +123,7 @@ class ClassBuilder extends Builder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      return '$variable as ${_displayString(type)}';
+      return '$variable as ${type.getDisplayString()}';
     }
   }
 
@@ -154,7 +154,7 @@ class ClassBuilder extends Builder {
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
-      return '$suffix.cast<${_displayString(arg)}>()';
+      return '$suffix.cast<${arg.getDisplayString()}>()';
     }
   }
 
@@ -167,8 +167,8 @@ class ClassBuilder extends Builder {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
-      return '$suffix.cast<${_displayString(arg1)}, '
-          '${_displayString(arg2)}>()';
+      return '$suffix.cast<${arg1.getDisplayString()}, '
+          '${arg2.getDisplayString()}>()';
     }
   }
 
@@ -221,9 +221,4 @@ String _suffixFromType(DartType type) {
     return '?';
   }
   return '';
-}
-
-String _displayString(DartType e) {
-  final suffix = _suffixFromType(e);
-  return '${e.getDisplayString()}$suffix';
 }

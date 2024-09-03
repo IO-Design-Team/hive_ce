@@ -92,3 +92,17 @@ class ConstructorDefaults {
   @HiveField(2)
   final bool c;
 }
+
+@HiveType(typeId: 7)
+class NullableTypes {
+  NullableTypes({this.a, this.b, this.c});
+
+  @HiveField(0)
+  final int? a;
+
+  @HiveField(1)
+  final String? b;
+
+  @HiveField(2)
+  final bool? c;
+}

@@ -2,6 +2,8 @@
 
 - Supports constructor parameter default values
 - No longer generates the `HiveRegistrar` if there are no adapters
+- Removes unnecessary print statement in `HiveRegistrar` generator
+- Bumps `analyzer` to `^6.5.0` to deal with deprecations
 
 ## 1.4.0
 
