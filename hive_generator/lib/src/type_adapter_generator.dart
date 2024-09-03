@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
@@ -87,6 +88,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   ) {
     final accessorNames = getAllAccessorNames(cls);
 
+    final constructor = cls.constructors.firstWhere((e) => e.name.isEmpty);
+    final parameterDefaults = {
+      for (final param in constructor.parameters)
+        param.name: param.defaultValueCode,
+    };
+
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
@@ -102,6 +109,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
               field.name,
               field.type,
               getterAnn.defaultValue,
+              parameterDefaults[field.name],
             ),
           );
         }
@@ -120,6 +128,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
               field.name,
               field.type,
               setterAnn.defaultValue,
+              parameterDefaults[field.name],
             ),
           );
         }

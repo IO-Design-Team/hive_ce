@@ -72,7 +72,7 @@ class ClassBuilder extends Builder {
           _value(
             param.type,
             'fields[${field.index}]',
-            field.defaultValue,
+            field.annotationDefault,
           ),
         );
         code.writeln(',');
@@ -90,7 +90,7 @@ class ClassBuilder extends Builder {
         _value(
           field.type,
           'fields[${field.index}]',
-          field.defaultValue,
+          field.annotationDefault,
         ),
       );
     }

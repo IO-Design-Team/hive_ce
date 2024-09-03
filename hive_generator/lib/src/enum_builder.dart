@@ -20,7 +20,7 @@ class EnumBuilder extends Builder {
     }
 
     final defaultField = getters.firstWhere(
-      (it) => it.defaultValue?.toBoolValue() == true,
+      (it) => it.annotationDefault?.toBoolValue() == true,
       orElse: () => getters.first,
     );
     code.writeln('''
