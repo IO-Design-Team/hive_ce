@@ -1,3 +1,8 @@
+## 2.5.0+2
+
+- Adds documentation for adding new fields (@vizakenjack)
+- Updates README badges
+
 ## 2.5.0+1
 
 - Documentation updates for `HiveField` in support of `hive_ce_generator` changes
