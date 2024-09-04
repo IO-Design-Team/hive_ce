@@ -193,7 +193,7 @@ person.save();
 print(box.getAt(0)) // Dave - 30
 ```
 
-## Modifying Objects
+## Add fields to objects
 
 When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
 
@@ -202,6 +202,8 @@ For example, consider an existing database with a Person object:
 ```dart
 @HiveType(typeId: 0)
 class Person extends HiveObject {
+  Person({required this.name, required this.age});
+
   @HiveField(0)
   String name;
 
@@ -215,6 +217,8 @@ If you want to add a "balance" field:
 ```dart
 @HiveType(typeId: 0)
 class Person extends HiveObject {
+  Person({required this.name, required this.age, required this.balance});
+
   @HiveField(0)
   String name;
 
@@ -228,7 +232,25 @@ class Person extends HiveObject {
 
 Without proper handling, this change will cause null errors in the existing application when accessing the new field.
 
-To resolve this issue, you can set a default value:
+To resolve this issue, you can set a default value in a Constructor (make sure that you have hive_ce_generator 1.5.0+)
+
+```dart
+@HiveType(typeId: 0)
+class Person extends HiveObject {
+  Person({required this.name, required this.age, this.balance = 0});
+
+  @HiveField(0)
+  String name;
+
+  @HiveField(1)
+  int age;
+
+  @HiveField(2)
+  int balance;
+}
+```
+
+Or specify it in a HiveField annotation:
 
 ```dart
 @HiveField(2, defaultValue: 0)
