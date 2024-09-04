@@ -2,22 +2,33 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 
-/// TODO: Document this!
+/// Metadata about a field in a class adapter
 class AdapterField {
-  /// TODO: Document this!
+  /// The index of the field
+  ///
+  /// Determines the order fields are read and written
   final int index;
 
-  /// TODO: Document this!
+  /// The name of the field
   final String name;
 
-  /// TODO: Document this!
+  /// The type of the field
   final DartType type;
 
-  /// TODO: Document this!
-  final DartObject? defaultValue;
+  /// A default value provided by the field annotation
+  final DartObject? annotationDefault;
 
-  /// TODO: Document this!
-  AdapterField(this.index, this.name, this.type, this.defaultValue);
+  /// A default value provided by the constructor
+  final String? constructorDefault;
+
+  /// Constructor
+  AdapterField(
+    this.index,
+    this.name,
+    this.type,
+    this.annotationDefault,
+    this.constructorDefault,
+  );
 }
 
 /// TODO: Document this!

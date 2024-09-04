@@ -14,8 +14,6 @@ class RegistrarBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    final buffer = StringBuffer("import 'package:hive_ce/hive.dart';\n");
-
     final uris = <String>[];
     final adapters = <String>[];
     await for (final input
@@ -25,6 +23,11 @@ class RegistrarBuilder implements Builder {
       uris.add(data['uri'] as String);
       adapters.addAll((data['adapters'] as List).cast<String>());
     }
+
+    // Do not create the registrar if there are no adapters
+    if (adapters.isEmpty) return;
+
+    final buffer = StringBuffer("import 'package:hive_ce/hive.dart';\n");
 
     for (final uri in uris) {
       buffer.writeln("import '$uri';");
