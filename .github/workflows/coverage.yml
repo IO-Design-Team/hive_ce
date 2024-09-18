@@ -13,7 +13,9 @@ concurrency:
 jobs:
   coverage-hive:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: hive
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -21,9 +23,8 @@ jobs:
         run: |
           dart pub get
           flutter test --coverage
-        working-directory: hive
       - uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: hive/coverage/lcov.info
+          file: coverage/lcov.info
