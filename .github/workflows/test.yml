@@ -21,11 +21,14 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
+      # TODO: Use custom_lint from hosted when https://github.com/invertase/dart_custom_lint/pull/272 lands
       - run: |
           dart pub global activate puby
+          dart pub global activate -sgit https://github.com/Rexios80/dart_custom_lint --git-ref f62fe2e1dc03162d1bb55dbba7e6b37bc08d81a1 --git-path packages/custom_lint
           puby link
           dart format . --set-exit-if-changed
           dart analyze --fatal-infos
+          custom_lint
 
   test-hive:
     runs-on: ubuntu-latest
