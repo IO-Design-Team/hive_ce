@@ -20,4 +20,4 @@ dev_dependencies:
   test: ^1.17.11
   build_test: any
   build_runner: any
-  rexios_lints: ^7.0.0
+  rexios_lints: ^8.2.0

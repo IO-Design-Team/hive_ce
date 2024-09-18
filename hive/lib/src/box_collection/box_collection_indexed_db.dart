@@ -24,7 +24,6 @@ class BoxCollection implements implementation.BoxCollection {
     HiveCipher? key,
   }) async {
     final request = window.self.indexedDB.open(name, 1);
-    // ignore: avoid_types_on_closure_parameters
     request.onupgradeneeded = (IDBVersionChangeEvent event) {
       final db = (event.target as IDBOpenDBRequest).result as IDBDatabase;
       for (final name in boxNames) {
@@ -94,7 +93,6 @@ class BoxCollection implements implementation.BoxCollection {
       unawaited(fun(txn));
     }
     final completer = Completer<void>();
-    // ignore: avoid_types_on_closure_parameters
     txn.oncomplete = (Event e) {
       completer.complete();
     }.toJS;
@@ -180,8 +178,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   @override
   Future<void> put(String key, V val, [Object? transaction]) async {
     IDBTransaction? txn;
-    if (transaction is IDBTransaction) {
-      txn = transaction;
+    if ((transaction as JSAny?).isA<IDBTransaction>()) {
+      txn = transaction as IDBTransaction;
     }
     if (val == null) {
       return delete(key, txn);
