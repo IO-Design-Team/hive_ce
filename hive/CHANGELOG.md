@@ -1,3 +1,7 @@
+## 2.6.0
+
+- Adds `TargetKind.parameter` to `HiveField` to support `freezed`
+
 ## 2.5.0+2
 
 - Adds documentation for adding new fields (@vizakenjack)

@@ -1,5 +1,6 @@
 ## 1.6.0
 
+- Adds `.freezed.dart` to `required_inputs` to support `freezed`
 - Sorts adapters and uris in `HiveRegistrar`
 
 ## 1.5.0
