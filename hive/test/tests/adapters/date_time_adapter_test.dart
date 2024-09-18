@@ -1,3 +1,5 @@
+// This is a test
+// ignore_for_file: prefer_timestamps
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -7,7 +9,7 @@ import '../mocks.dart';
 void main() {
   group('DateTimeAdapter', () {
     test('.read()', () {
-      final now = DateTime.timestamp();
+      final now = DateTime.now();
       final binaryReader = MockBinaryReader();
       when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
 
@@ -17,7 +19,7 @@ void main() {
     });
 
     test('.write()', () {
-      final now = DateTime.timestamp();
+      final now = DateTime.now();
       final binaryWriter = MockBinaryWriter();
 
       DateTimeAdapter().write(binaryWriter, now);
@@ -28,7 +30,7 @@ void main() {
   group('DateTimeWithTimezoneAdapter', () {
     group('.read()', () {
       test('local', () {
-        final now = DateTime.timestamp();
+        final now = DateTime.now();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(false);
@@ -42,7 +44,7 @@ void main() {
       });
 
       test('UTC', () {
-        final now = DateTime.timestamp().toUtc();
+        final now = DateTime.now().toUtc();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(true);
@@ -59,7 +61,7 @@ void main() {
 
     group('.write()', () {
       test('local', () {
-        final now = DateTime.timestamp();
+        final now = DateTime.now();
         final binaryWriter = MockBinaryWriter();
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);
@@ -70,7 +72,7 @@ void main() {
       });
 
       test('UTC', () {
-        final now = DateTime.timestamp().toUtc();
+        final now = DateTime.now().toUtc();
         final binaryWriter = MockBinaryWriter();
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);
