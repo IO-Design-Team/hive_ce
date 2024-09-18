@@ -16,8 +16,6 @@ class ReadWriteSync {
     await previousTask;
     try {
       return await task();
-    } catch (e) {
-      rethrow;
     } finally {
       completer.complete();
     }
@@ -33,8 +31,6 @@ class ReadWriteSync {
     await previousTask;
     try {
       return await task();
-    } catch (e) {
-      rethrow;
     } finally {
       completer.complete();
     }
@@ -54,8 +50,6 @@ class ReadWriteSync {
     await previousWriteTask;
     try {
       return await task();
-    } catch (e) {
-      rethrow;
     } finally {
       completer.complete();
     }
