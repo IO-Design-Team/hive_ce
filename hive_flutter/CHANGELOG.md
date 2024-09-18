@@ -1,3 +1,7 @@
+## 2.1.0
+
+- Fixes deprecation of `Color.value`
+
 ## 2.0.0
 
 - BREAKING: Registers `ColorAdapter` and `TimeOfDayAdapter` in `Hive.initFlutter`

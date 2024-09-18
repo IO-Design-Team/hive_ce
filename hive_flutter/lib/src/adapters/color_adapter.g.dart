@@ -23,7 +23,7 @@ class HiveColorAdapter extends TypeAdapter<HiveColor> {
       r: (fields[1] as num).toDouble(),
       g: (fields[2] as num).toDouble(),
       b: (fields[3] as num).toDouble(),
-      colorSpace: (fields[4] as num).toInt(),
+      colorSpace: fields[4] as String,
     );
   }
 

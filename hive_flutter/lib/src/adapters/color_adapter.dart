@@ -31,18 +31,6 @@ class ColorAdapter extends TypeAdapter<Color> {
 /// Hive wrapper for the fields in [Color]
 @HiveType(typeId: 200)
 class HiveColor {
-  static const _colorSpaceToInt = {
-    ColorSpace.sRGB: 0,
-    ColorSpace.extendedSRGB: 1,
-    ColorSpace.displayP3: 2,
-  };
-
-  static const _intToColorSpace = {
-    0: ColorSpace.sRGB,
-    1: ColorSpace.extendedSRGB,
-    2: ColorSpace.displayP3,
-  };
-
   /// alpha
   @HiveField(0)
   final double a;
@@ -61,7 +49,7 @@ class HiveColor {
 
   /// color space
   @HiveField(4)
-  final int colorSpace;
+  final String colorSpace;
 
   /// Constructor
   const HiveColor({
@@ -78,7 +66,7 @@ class HiveColor {
         r = color.r,
         g = color.g,
         b = color.b,
-        colorSpace = _colorSpaceToInt[color.colorSpace]!;
+        colorSpace = color.colorSpace.name;
 
   /// Convert a [HiveColor] to a [Color]
   Color toColor() => Color.from(
@@ -86,6 +74,6 @@ class HiveColor {
         red: r,
         green: g,
         blue: b,
-        colorSpace: _intToColorSpace[colorSpace]!,
+        colorSpace: ColorSpace.values.byName(colorSpace),
       );
 }
