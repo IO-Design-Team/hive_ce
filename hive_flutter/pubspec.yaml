@@ -20,3 +20,4 @@ dev_dependencies:
   rexios_lints: ^7.0.0
   mockito: ^5.4.1
   build_runner: ^2.1.11
+  hive_ce_generator: ^1.5.0
