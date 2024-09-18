@@ -1,3 +1,6 @@
+// TODO: Remove with https://github.com/IO-Design-Team/hive_ce/pull/27
+// ignore_for_file: deprecated_member_use
+
 import 'dart:ui' show Color;
 
 import 'package:hive_ce_flutter/adapters.dart';

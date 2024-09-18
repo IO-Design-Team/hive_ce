@@ -32,7 +32,6 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
 /// TODO: Document this!
 void check(bool condition, Object error) {
   if (!condition) {
-    // ignore: only_throw_errors
     throw error;
   }
 }
