@@ -47,7 +47,6 @@ class _WatchBoxBuilderState extends State<WatchBoxBuilder> {
   }
 
   @override
-  // ignore: deprecated_member_use
   void didUpdateWidget(WatchBoxBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
 
