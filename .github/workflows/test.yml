@@ -38,6 +38,9 @@ jobs:
             compiler: dart2js
           - test-platform: chrome
             compiler: dart2wasm
+    defaults:
+      run:
+        working-directory: hive
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
@@ -46,16 +49,17 @@ jobs:
           sdk: 3.4.0
       - name: Install dependencies
         run: dart pub get
-        working-directory: hive
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
-        working-directory: hive
 
   test-hive-flutter:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         flutter-channel: [stable, beta]
+    defaults:
+      run:
+        working-directory: hive_flutter
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -63,16 +67,17 @@ jobs:
           channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: flutter pub get
-        working-directory: hive_flutter
       - name: Run tests
         run: flutter test
-        working-directory: hive_flutter
 
   test-hive_generator:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         flutter-channel: [stable, beta]
+    defaults:
+      run:
+        working-directory: hive_generator
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -80,10 +85,8 @@ jobs:
           channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
-        working-directory: hive_generator/example
       - name: Generate build_runner output
         run: dart pub run build_runner build --delete-conflicting-outputs
-        working-directory: hive_generator/example
 
   ensure-codegen:
     runs-on: ubuntu-latest
