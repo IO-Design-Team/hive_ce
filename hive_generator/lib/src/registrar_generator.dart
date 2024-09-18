@@ -27,6 +27,9 @@ class RegistrarBuilder implements Builder {
     // Do not create the registrar if there are no adapters
     if (adapters.isEmpty) return;
 
+    adapters.sort();
+    uris.sort();
+
     final buffer = StringBuffer("import 'package:hive_ce/hive.dart';\n");
 
     for (final uri in uris) {

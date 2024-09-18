@@ -5,10 +5,10 @@ extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(Class1Adapter());
     registerAdapter(Class2Adapter());
-    registerAdapter(EmptyClassAdapter());
-    registerAdapter(IterableClassAdapter());
     registerAdapter(ConstructorDefaultsAdapter());
-    registerAdapter(NullableTypesAdapter());
+    registerAdapter(EmptyClassAdapter());
     registerAdapter(Enum1Adapter());
+    registerAdapter(IterableClassAdapter());
+    registerAdapter(NullableTypesAdapter());
   }
 }
