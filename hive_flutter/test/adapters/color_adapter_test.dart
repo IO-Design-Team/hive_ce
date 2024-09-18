@@ -45,7 +45,7 @@ void main() {
       verify(writer.write(color.r));
       verify(writer.write(color.g));
       verify(writer.write(color.b));
-      verify(writer.write(color.colorSpace.index));
+      verify(writer.write(color.colorSpace.name));
     });
   });
 }
