@@ -1,5 +1,3 @@
-// ignore_for_file: overridden_fields
-
 import 'dart:ui';
 
 import 'package:hive_ce/hive.dart';

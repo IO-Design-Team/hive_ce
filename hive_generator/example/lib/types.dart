@@ -86,7 +86,7 @@ class ConstructorDefaults {
     this.b = '42',
     this.c = true,
     DateTime? d,
-  }) : d = d ?? DateTime.now();
+  }) : d = d ?? DateTime.timestamp();
 
   @HiveField(0)
   final int a;

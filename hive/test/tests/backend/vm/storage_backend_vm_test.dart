@@ -70,6 +70,8 @@ void main() {
 
   group('StorageBackendVm', () {
     test('.path returns path for of open box file', () {
+      // This is a test
+      // ignore: do_not_use_raw_paths
       final file = File('some/path');
       final backend = _getBackend(file: file);
       expect(backend.path, 'some/path');
