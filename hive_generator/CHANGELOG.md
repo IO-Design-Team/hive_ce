@@ -1,3 +1,7 @@
+## 1.6.0
+
+- Sorts adapters and uris in `HiveRegistrar`
+
 ## 1.5.0
 
 - Supports constructor parameter default values
