@@ -14,11 +14,7 @@ class ReadWriteSync {
     _readTask = completer.future;
 
     await previousTask;
-    try {
-      return await task();
-    } finally {
-      completer.complete();
-    }
+    return task().whenComplete(completer.complete);
   }
 
   /// Run operation with write lock
@@ -29,15 +25,11 @@ class ReadWriteSync {
     _writeTask = completer.future;
 
     await previousTask;
-    try {
-      return await task();
-    } finally {
-      completer.complete();
-    }
+    return task().whenComplete(completer.complete);
   }
 
   /// Run operation with read and write lock
-  Future<T> syncReadWrite<T>(FutureOr<T> Function() task) async {
+  Future<T> syncReadWrite<T>(Future<T> Function() task) async {
     final previousReadTask = _readTask;
     final previousWriteTask = _writeTask;
 
@@ -48,10 +40,6 @@ class ReadWriteSync {
 
     await previousReadTask;
     await previousWriteTask;
-    try {
-      return await task();
-    } finally {
-      completer.complete();
-    }
+    return task().whenComplete(completer.complete);
   }
 }
