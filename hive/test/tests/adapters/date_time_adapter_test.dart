@@ -7,7 +7,7 @@ import '../mocks.dart';
 void main() {
   group('DateTimeAdapter', () {
     test('.read()', () {
-      final now = DateTime.now();
+      final now = DateTime.timestamp();
       final binaryReader = MockBinaryReader();
       when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
 
@@ -17,7 +17,7 @@ void main() {
     });
 
     test('.write()', () {
-      final now = DateTime.now();
+      final now = DateTime.timestamp();
       final binaryWriter = MockBinaryWriter();
 
       DateTimeAdapter().write(binaryWriter, now);
@@ -28,7 +28,7 @@ void main() {
   group('DateTimeWithTimezoneAdapter', () {
     group('.read()', () {
       test('local', () {
-        final now = DateTime.now();
+        final now = DateTime.timestamp();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(false);
@@ -42,7 +42,7 @@ void main() {
       });
 
       test('UTC', () {
-        final now = DateTime.now().toUtc();
+        final now = DateTime.timestamp().toUtc();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
         when(binaryReader.readBool).thenReturn(true);
@@ -59,7 +59,7 @@ void main() {
 
     group('.write()', () {
       test('local', () {
-        final now = DateTime.now();
+        final now = DateTime.timestamp();
         final binaryWriter = MockBinaryWriter();
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);
@@ -70,7 +70,7 @@ void main() {
       });
 
       test('UTC', () {
-        final now = DateTime.now().toUtc();
+        final now = DateTime.timestamp().toUtc();
         final binaryWriter = MockBinaryWriter();
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);

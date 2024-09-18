@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: unnecessary_const, require_trailing_commas, unnecessary_breaks
+// ignore_for_file: unnecessary_const, require_trailing_commas, unnecessary_breaks, document_ignores
 
 part of 'types.dart';
 

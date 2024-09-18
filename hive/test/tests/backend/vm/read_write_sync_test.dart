@@ -11,7 +11,7 @@ Future _asyncRead(
     history.add('startread$id');
     await Future.delayed(Duration(milliseconds: 10));
     if (throwError!) {
-      throw 'error$id'; // ignore: only_throw_errors
+      throw 'error$id';
     }
     history.add('stopread$id');
   });
@@ -27,7 +27,7 @@ Future _asyncWrite(
     history.add('startwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
     if (throwError!) {
-      throw 'error$id'; // ignore: only_throw_errors
+      throw 'error$id';
     }
     history.add('stopwrite$id');
   });
@@ -43,7 +43,7 @@ Future _asyncReadWrite(
     history.add('startreadwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
     if (throwError!) {
-      throw 'error$id'; // ignore: only_throw_errors
+      throw 'error$id';
     }
     history.add('stopreadwrite$id');
   });

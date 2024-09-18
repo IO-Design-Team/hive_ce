@@ -39,7 +39,7 @@ void main() {
       expect(hive.homePath, 'MYPATH');
 
       expect(
-        hive.findAdapterForValue(DateTime.now())!.adapter,
+        hive.findAdapterForValue(DateTime.timestamp())!.adapter,
         isA<DateTimeWithTimezoneAdapter>(),
       );
       expect(hive.findAdapterForTypeId(16)!.adapter, isA<DateTimeAdapter>());
