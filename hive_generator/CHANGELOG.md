@@ -1,3 +1,7 @@
+## 1.6.0
+
+- Adds `.freezed.dart` to `required_inputs` to support `freezed`
+
 ## 1.5.0
 
 - Supports constructor parameter default values

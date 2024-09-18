@@ -6,6 +6,7 @@ part of '../../hive.dart';
   TargetKind.getter,
   TargetKind.setter,
   TargetKind.enumValue,
+  TargetKind.parameter,
 })
 class HiveField {
   /// The index of this field.
