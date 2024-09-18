@@ -10,7 +10,6 @@ import 'package:web/web.dart';
 
 Future<IDBDatabase> _openDb() {
   final request = window.self.indexedDB.open('testBox', 1);
-  // ignore: avoid_types_on_closure_parameters
   request.onupgradeneeded = (IDBVersionChangeEvent e) {
     final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {
@@ -32,7 +31,8 @@ void main() {
 
       test('returns false', () async {
         final backendManager = BackendManager.select();
-        final boxName = 'notexists-${DateTime.now().millisecondsSinceEpoch}';
+        final boxName =
+            'notexists-${DateTime.timestamp().millisecondsSinceEpoch}';
         expect(await backendManager.boxExists(boxName, null, null), isFalse);
       });
     });

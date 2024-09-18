@@ -29,7 +29,6 @@ StorageBackendJs _getBackend({
 
 Future<IDBDatabase> _openDb([String name = 'testBox']) async {
   final request = window.self.indexedDB.open(name, 1);
-  // ignore: avoid_types_on_closure_parameters
   request.onupgradeneeded = (IDBVersionChangeEvent e) {
     final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
     if (!db.objectStoreNames.contains('box')) {

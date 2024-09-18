@@ -18,7 +18,7 @@ void main() {
       });
 
       test('uses DateTimeWithTimeZoneAdapter for writing new values', () {
-        final result = registry.findAdapterForValue(DateTime.now())!;
+        final result = registry.findAdapterForValue(DateTime.timestamp())!;
         expect(result, isNotNull);
         expect(result.adapter, isA<DateTimeWithTimezoneAdapter>());
       });
