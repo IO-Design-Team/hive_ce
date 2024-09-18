@@ -7,7 +7,7 @@ dependencies:
 dev_dependencies:
   rexios_lints: ^7.0.0
   hive_ce_generator: any
-  build_runner: ^2.4.12
+  build_runner: any
   freezed: ^2.5.7
 
 environment:
