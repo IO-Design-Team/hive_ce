@@ -25,7 +25,14 @@ extension HiveX on HiveInterface {
       backendPreference: backendPreference,
     );
 
-    registerAdapter(ColorAdapter());
-    registerAdapter(TimeOfDayAdapter());
+    final colorAdapter = ColorAdapter();
+    if (!isAdapterRegistered(colorAdapter.typeId)) {
+      registerAdapter(colorAdapter);
+    }
+
+    final timeOfDayAdapter = TimeOfDayAdapter();
+    if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
+      registerAdapter(timeOfDayAdapter);
+    }
   }
 }
