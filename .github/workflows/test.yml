@@ -48,6 +48,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.4.0
+      # rexios_lints requires a newer SDK
+      - name: Remove rexios_lints
+        run: |
+          sed -i "" "/rexios_lints: \.+/d" pubspec.yaml
       - name: Install dependencies
         run: dart pub get
       - name: Run tests
