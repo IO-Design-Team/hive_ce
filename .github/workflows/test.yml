@@ -47,6 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
+        if: ${{ matrix.test-platform == 'chrome' }}
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: 3.4.0
