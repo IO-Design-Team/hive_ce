@@ -248,6 +248,49 @@ class NullableTypesAdapter extends TypeAdapter<NullableTypes> {
           typeId == other.typeId;
 }
 
+class NamedImportsAdapter extends TypeAdapter<NamedImports> {
+  @override
+  final int typeId = 8;
+
+  @override
+  NamedImports read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return NamedImports(
+      fields[0] as named.NamedImportType,
+      (fields[1] as List).cast<named.NamedImportType>(),
+      fields[2] as named.NamedImportType?,
+      (fields[3] as Map).cast<named.NamedImportType, named.NamedImportType>(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, NamedImports obj) {
+    writer
+      ..writeByte(4)
+      ..writeByte(0)
+      ..write(obj.namedImportType)
+      ..writeByte(1)
+      ..write(obj.namedImportTypeList)
+      ..writeByte(2)
+      ..write(obj.namedImportTypeNullable)
+      ..writeByte(3)
+      ..write(obj.namedImportTypeMap);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NamedImportsAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
   final int typeId = 3;
