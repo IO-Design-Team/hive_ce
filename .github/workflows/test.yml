@@ -56,7 +56,7 @@ jobs:
         run: |
           sed -i '/rexios_lints:/d' pubspec.yaml
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --no-example
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
 
