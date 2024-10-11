@@ -230,12 +230,10 @@ extension on DartType {
     if (definingLibrary == currentLibrary) return getDisplayString();
 
     for (final import in currentLibrary.libraryImports) {
-      if (import.importedLibrary == definingLibrary) {
-        final prefix = import.prefix;
-        if (prefix != null) {
-          return '${prefix.element.name}.${getDisplayString()}';
-        } else {
-          return getDisplayString();
+      for (final MapEntry(:key, :value)
+          in import.namespace.definedNames.entries) {
+        if (value == element) {
+          return '$key${_suffixFromType(this)}';
         }
       }
     }
