@@ -54,7 +54,7 @@ jobs:
       # rexios_lints requires a newer SDK
       - name: Remove rexios_lints
         run: |
-          sed -i '/^  rexios_lints: .*$/d' pubspec.yaml
+          sed -i '/^[[:space:]]*rexios_lints: \^.*$/d' pubspec.yaml
       - name: Install dependencies
         run: dart pub get
       - name: Run tests
