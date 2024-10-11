@@ -1,4 +1,5 @@
 import 'package:hive_ce/hive.dart';
+import 'package:example/named_import.dart' as named;
 
 part 'types.g.dart';
 
@@ -113,4 +114,26 @@ class NullableTypes {
 
   @HiveField(2)
   final bool? c;
+}
+
+@HiveType(typeId: 8)
+class NamedImports {
+  NamedImports(
+    this.namedImportType,
+    this.namedImportTypeList,
+    this.namedImportTypeNullable,
+    this.namedImportTypeMap,
+  );
+
+  @HiveField(0)
+  final named.NamedImportType namedImportType;
+
+  @HiveField(1)
+  final List<named.NamedImportType> namedImportTypeList;
+
+  @HiveField(2)
+  final named.NamedImportType? namedImportTypeNullable;
+
+  @HiveField(3)
+  final Map<named.NamedImportType, named.NamedImportType> namedImportTypeMap;
 }
