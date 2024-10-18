@@ -1,6 +1,6 @@
 import 'package:build/build.dart';
 import 'package:hive_ce_generator/src/generate_adapters_generator.dart';
-import 'package:hive_ce_generator/src/schema_generator.dart';
+import 'package:hive_ce_generator/src/schema_builder.dart';
 import 'package:hive_ce_generator/src/registrar_builder.dart';
 import 'package:hive_ce_generator/src/registrar_intermediate_builder.dart';
 import 'package:hive_ce_generator/src/type_adapter_generator.dart';
@@ -25,7 +25,4 @@ Builder getGenerateAdaptersBuilder(BuilderOptions options) => SharedPartBuilder(
     );
 
 /// Copies `.hive_schema.cache.yaml` files from cache to source
-Builder getSchemaBuilder(BuilderOptions options) => LibraryBuilder(
-      SchemaGenerator(),
-      generatedExtension: '.hive_schema.yaml',
-    );
+Builder getSchemaBuilder(BuilderOptions options) => SchemaBuilder();

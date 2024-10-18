@@ -22,6 +22,7 @@ Map<String, dynamic> _$HiveSchemaToJson(HiveSchema instance) =>
 
 HiveSchemaType _$HiveSchemaTypeFromJson(Map<String, dynamic> json) =>
     HiveSchemaType(
+      typeId: (json['typeId'] as num).toInt(),
       nextIndex: (json['nextIndex'] as num).toInt(),
       fields: (json['fields'] as Map<String, dynamic>).map(
         (k, e) =>
@@ -31,6 +32,7 @@ HiveSchemaType _$HiveSchemaTypeFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$HiveSchemaTypeToJson(HiveSchemaType instance) =>
     <String, dynamic>{
+      'typeId': instance.typeId,
       'nextIndex': instance.nextIndex,
       'fields': instance.fields,
     };

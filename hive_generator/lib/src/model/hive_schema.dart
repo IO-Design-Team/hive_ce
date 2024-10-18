@@ -13,14 +13,29 @@ class HiveSchema {
       _$HiveSchemaFromJson(json);
 
   Map<String, dynamic> toJson() => _$HiveSchemaToJson(this);
+
+  HiveSchema copyWith({
+    int? nextTypeId,
+    Map<String, HiveSchemaType>? types,
+  }) {
+    return HiveSchema(
+      nextTypeId: nextTypeId ?? this.nextTypeId,
+      types: types ?? this.types,
+    );
+  }
 }
 
 @JsonSerializable()
 class HiveSchemaType {
+  final int typeId;
   final int nextIndex;
   final Map<String, HiveSchemaField> fields;
 
-  const HiveSchemaType({required this.nextIndex, required this.fields});
+  const HiveSchemaType({
+    required this.typeId,
+    required this.nextIndex,
+    required this.fields,
+  });
 
   factory HiveSchemaType.fromJson(Map<String, dynamic> json) =>
       _$HiveSchemaTypeFromJson(json);

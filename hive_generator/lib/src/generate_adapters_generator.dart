@@ -33,11 +33,17 @@ class GenerateAdaptersGenerator
     for (final spec in revived.specs) {
       final typeKey = spec.type.getDisplayString();
       final schemaType = schema.types[typeKey];
+      final typeId = schemaType?.typeId ?? nextTypeId++;
       final result = TypeAdapterGenerator.generateTypeAdapter(
         element: spec.type.element!,
         library: library,
-        typeId: nextTypeId++,
-        schema: schemaType ?? HiveSchemaType(nextIndex: 0, fields: {}),
+        typeId: typeId,
+        schema: schemaType ??
+            HiveSchemaType(
+              typeId: typeId,
+              nextIndex: 0,
+              fields: {},
+            ),
       );
 
       content.write(result.content);
@@ -46,7 +52,7 @@ class GenerateAdaptersGenerator
 
     await buildStep.writeAsString(
       schemaFile.changeExtension('.cache.yaml'),
-      YamlWriter().write(schema.toJson()),
+      YamlWriter().write(schema.copyWith(nextTypeId: nextTypeId).toJson()),
     );
 
     return content.toString();
