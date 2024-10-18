@@ -53,7 +53,9 @@ class GenerateAdaptersBuilder extends Builder {
     final HiveSchema? schema;
     if (await buildStep.canRead(schemaAsset)) {
       final schemaContent = await buildStep.readAsString(schemaAsset);
-      schema = HiveSchema.fromJson(loadYaml(schemaContent));
+      schema = HiveSchema.fromJson(
+        _convertYamlMap(loadYaml(schemaContent) as YamlMap),
+      );
       print(schemaContent);
     } else {
       print('AHHHHHH');
@@ -108,4 +110,30 @@ $yaml
       DartFormatter().format(content.toString()),
     );
   }
+}
+
+Map<String, dynamic> _convertYamlMap(YamlMap yamlMap) {
+  return yamlMap.cast<String, dynamic>().map((key, value) {
+    final Object newValue;
+    if (value is YamlMap) {
+      newValue = _convertYamlMap(value);
+    } else if (value is YamlList) {
+      newValue = _convertYamlList(value);
+    } else {
+      newValue = value;
+    }
+    return MapEntry(key, newValue);
+  });
+}
+
+List<dynamic> _convertYamlList(YamlList yamlList) {
+  return yamlList.map((item) {
+    if (item is YamlMap) {
+      return _convertYamlMap(item);
+    } else if (item is YamlList) {
+      return _convertYamlList(item);
+    } else {
+      return item;
+    }
+  }).toList();
 }
