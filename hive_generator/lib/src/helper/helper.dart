@@ -59,12 +59,17 @@ String generateAdapterName(String typeName) {
   return adapterName;
 }
 
-/// Get the adapter name from the annotation or generate a default name
-String getAdapterName(String typeName, ConstantReader annotation) {
-  final annAdapterName = annotation.read('adapterName');
-  if (annAdapterName.isNull) {
-    return generateAdapterName(typeName);
-  } else {
-    return annAdapterName.stringValue;
-  }
+/// Read the adapter name from the annotation
+String? readAdapterName(ConstantReader annotation) {
+  final adapterNameField = annotation.read('adapterName');
+  return adapterNameField.isNull ? null : adapterNameField.stringValue;
+}
+
+/// Read the typeId from the annotation
+int readTypeId(ConstantReader annotation) {
+  check(
+    !annotation.read('typeId').isNull,
+    'You have to provide a non-null typeId.',
+  );
+  return annotation.read('typeId').intValue;
 }

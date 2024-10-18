@@ -5,8 +5,8 @@ import 'package:build/build.dart';
 import 'dart:async';
 import 'package:path/path.dart' as p;
 
-/// Generate the HiveRegistrar for the entire project
-class RegistrarBuilder implements Builder {
+/// Copy `.hive_schema.yaml` files from cache to source
+class HiveSchemaGenerator implements Builder {
   @override
   final Map<String, List<String>> buildExtensions = const {
     r'$lib$': ['hive_registrar.g.dart'],

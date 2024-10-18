@@ -1,0 +1,11 @@
+nextTypeId: 0
+types:
+  ClassSpec1:
+    nextIndex: 0
+    fields:
+      value:
+        index: 0
+      hashCode:
+        index: 1
+      runtimeType:
+        index: 2

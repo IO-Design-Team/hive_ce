@@ -5,10 +5,10 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/builder.dart';
-import 'package:hive_ce_generator/src/helper.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
-import 'package:hive_ce_generator/src/type_helper.dart';
+import 'package:hive_ce_generator/src/helper/type_helper.dart';
 
 /// TODO: Document this!
 class ClassBuilder extends Builder {
