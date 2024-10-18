@@ -2,7 +2,7 @@ builders:
   hive_type_adapter_generator:
     import: "package:hive_ce_generator/hive_generator.dart"
     builder_factories: ["getTypeAdapterBuilder"]
-    build_extensions: { ".dart": ["hive_generator.g.part"] }
+    build_extensions: { ".dart": ["hive_generator_type_adapter.g.part"] }
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
@@ -25,14 +25,20 @@ builders:
     import: "package:hive_ce_generator/hive_generator.dart"
     builder_factories: ["getGenerateAdaptersBuilder"]
     build_extensions:
-      { ".dart": ["hive_generator.g.part", ".hive_schema.yaml"] }
+      {
+        ".dart":
+          [
+            "hive_generate_adapters_generator.g.part",
+            ".hive_schema.cache.yaml",
+          ],
+      }
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
     runs_before: ["hive_schema_generator"]
   hive_schema_generator:
     import: "package:hive_ce_generator/hive_generator.dart"
-    builder_factories: ["getHiveSchemaBuilder"]
-    build_extensions: { ".hive_schema.yaml": [".hive_schema.yaml"] }
+    builder_factories: ["getSchemaBuilder"]
+    build_extensions: { ".hive_schema.cache.yaml": [".hive_schema.yaml"] }
     auto_apply: dependents
     build_to: source

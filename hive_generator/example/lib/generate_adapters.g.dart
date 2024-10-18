@@ -26,13 +26,9 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
   @override
   void write(BinaryWriter writer, ClassSpec1 obj) {
     writer
-      ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.value)
       ..writeByte(1)
-      ..write(obj.hashCode)
-      ..writeByte(2)
-      ..write(obj.runtimeType);
+      ..writeByte(0)
+      ..write(obj.value);
   }
 
   @override

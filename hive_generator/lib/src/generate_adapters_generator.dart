@@ -45,7 +45,7 @@ class GenerateAdaptersGenerator
     }
 
     await buildStep.writeAsString(
-      schemaFile,
+      schemaFile.changeExtension('.cache.yaml'),
       YamlWriter().write(schema.toJson()),
     );
 

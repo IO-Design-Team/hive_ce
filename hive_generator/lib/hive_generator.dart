@@ -1,7 +1,8 @@
 import 'package:build/build.dart';
 import 'package:hive_ce_generator/src/generate_adapters_generator.dart';
-import 'package:hive_ce_generator/src/registrar_generator.dart';
-import 'package:hive_ce_generator/src/registrar_intermediate_generator.dart';
+import 'package:hive_ce_generator/src/schema_generator.dart';
+import 'package:hive_ce_generator/src/registrar_builder.dart';
+import 'package:hive_ce_generator/src/registrar_intermediate_builder.dart';
 import 'package:hive_ce_generator/src/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -20,5 +21,11 @@ Builder getRegistrarBuilder(BuilderOptions options) => RegistrarBuilder();
 Builder getGenerateAdaptersBuilder(BuilderOptions options) => SharedPartBuilder(
       [GenerateAdaptersGenerator()],
       'hive_generator_generate_adapters',
-      additionalOutputExtensions: ['.hive_schema.yaml'],
+      additionalOutputExtensions: ['.hive_schema.cache.yaml'],
+    );
+
+/// Copies `.hive_schema.cache.yaml` files from cache to source
+Builder getSchemaBuilder(BuilderOptions options) => LibraryBuilder(
+      SchemaGenerator(),
+      generatedExtension: '.hive_schema.yaml',
     );

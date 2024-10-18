@@ -5,8 +5,8 @@ import 'package:build/build.dart';
 import 'dart:async';
 import 'package:path/path.dart' as p;
 
-/// Copy `.hive_schema.yaml` files from cache to source
-class HiveSchemaGenerator implements Builder {
+/// Generate the HiveRegistrar for the entire project
+class RegistrarBuilder implements Builder {
   @override
   final Map<String, List<String>> buildExtensions = const {
     r'$lib$': ['hive_registrar.g.dart'],
@@ -16,9 +16,9 @@ class HiveSchemaGenerator implements Builder {
   Future<void> build(BuildStep buildStep) async {
     final uris = <String>[];
     final adapters = <String>[];
-    await for (final asset
+    await for (final input
         in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
-      final content = await buildStep.readAsString(asset);
+      final content = await buildStep.readAsString(input);
       final data = jsonDecode(content) as Map<String, dynamic>;
       uris.add(data['uri'] as String);
       adapters.addAll((data['adapters'] as List).cast<String>());

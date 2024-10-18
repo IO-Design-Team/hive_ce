@@ -11,6 +11,8 @@ import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
+  static const _ignoredFields = {'hashCode', 'runtimeType'};
+
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
@@ -121,6 +123,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final field = element.variable2!;
       final name = field.name;
+      if (_ignoredFields.contains(name)) return null;
+
       final index =
           annotation?.index ?? schema?.fields[name]?.index ?? nextIndex++;
       schema?.fields[name] = HiveSchemaField(index: index);
