@@ -151,14 +151,17 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (setterField != null) setters.add(setterField);
     }
 
-    return _GetAccessorsResult(
-      getters,
-      setters,
-      schema?.copyWith(
-        nextIndex: nextIndex,
-        fields: newSchemaFields,
+    // Sort by index for deterministic output
+    getters.sort((a, b) => a.index.compareTo(b.index));
+    setters.sort((a, b) => a.index.compareTo(b.index));
+    final newSchema = schema?.copyWith(
+      nextIndex: nextIndex,
+      fields: Map.fromEntries(
+        newSchemaFields.entries.toList()
+          ..sort((a, b) => a.value.index.compareTo(b.value.index)),
       ),
     );
+    return _GetAccessorsResult(getters, setters, newSchema);
   }
 
   /// TODO: Document this!

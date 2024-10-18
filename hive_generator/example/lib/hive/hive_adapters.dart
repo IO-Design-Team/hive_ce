@@ -9,13 +9,15 @@ part 'hive_adapters.hive.dart';
 _() {}
 
 class ClassSpec1 {
+  final int value2;
   final int value;
 
-  ClassSpec1(this.value);
+  ClassSpec1(this.value, this.value2);
 }
 
 class ClassSpec2 {
   final String value;
+  final String value2;
 
-  ClassSpec2(this.value);
+  ClassSpec2(this.value, this.value2);
 }

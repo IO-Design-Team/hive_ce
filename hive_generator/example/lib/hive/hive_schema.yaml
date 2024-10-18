@@ -6,13 +6,17 @@ nextTypeId: 2
 types: 
   ClassSpec1: 
     typeId: 0
-    nextIndex: 1
+    nextIndex: 2
     fields: 
       value: 
         index: 0
+      value2: 
+        index: 1
   ClassSpec2: 
     typeId: 1
-    nextIndex: 1
+    nextIndex: 2
     fields: 
       value: 
         index: 0
+      value2: 
+        index: 1

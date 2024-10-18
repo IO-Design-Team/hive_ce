@@ -16,15 +16,18 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
     };
     return ClassSpec1(
       (fields[0] as num).toInt(),
+      (fields[1] as num).toInt(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ClassSpec1 obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.value);
+      ..write(obj.value)
+      ..writeByte(1)
+      ..write(obj.value2);
   }
 
   @override
@@ -50,15 +53,18 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
     };
     return ClassSpec2(
       fields[0] as String,
+      fields[1] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, ClassSpec2 obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.value);
+      ..write(obj.value)
+      ..writeByte(1)
+      ..write(obj.value2);
   }
 
   @override
