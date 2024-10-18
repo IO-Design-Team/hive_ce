@@ -1,3 +1,7 @@
+## 2.0.0
+
+- **BREAKING**: Moves `hive_registrar.g.dart` to `hive/hive_registrar.hive.dart`
+
 ## 1.7.0
 
 - Supports named imports

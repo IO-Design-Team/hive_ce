@@ -1,5 +1,5 @@
 import 'package:hive_ce/hive.dart';
-import 'package:example/generate_adapters.dart';
+import 'package:example/hive/hive_adapters.dart';
 import 'package:example/named_import.dart';
 import 'package:example/types.dart';
 

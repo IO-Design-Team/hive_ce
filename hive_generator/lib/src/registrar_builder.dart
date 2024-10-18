@@ -3,13 +3,12 @@ import 'dart:convert';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
 import 'dart:async';
-import 'package:path/path.dart' as p;
 
 /// Generate the HiveRegistrar for the entire project
 class RegistrarBuilder implements Builder {
   @override
   final Map<String, List<String>> buildExtensions = const {
-    r'$lib$': ['hive_registrar.g.dart'],
+    r'$lib$': ['hive/hive_registrar.hive.dart'],
   };
 
   @override
@@ -20,7 +19,7 @@ class RegistrarBuilder implements Builder {
         in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
       final content = await buildStep.readAsString(input);
       final data = jsonDecode(content) as Map<String, dynamic>;
-      uris.add(data['uri'] as String);
+      uris.addAll((data['uris'] as List).cast<String>());
       adapters.addAll((data['adapters'] as List).cast<String>());
     }
 
@@ -54,7 +53,7 @@ extension HiveRegistrar on HiveInterface {
     await buildStep.writeAsString(
       AssetId(
         buildStep.inputId.package,
-        p.join('lib', 'hive_registrar.g.dart'),
+        'lib/hive/hive_registrar.hive.dart',
       ),
       buffer.toString(),
     );

@@ -1,4 +1,4 @@
-    class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
+part of 'hive_adapters.dart';    class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
       @override
       final int typeId = 0;
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:build/build.dart';
-import 'package:glob/glob.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
@@ -13,42 +12,55 @@ import 'package:yaml_writer/yaml_writer.dart';
 class GenerateAdaptersBuilder extends Builder {
   @override
   final Map<String, List<String>> buildExtensions = const {
-    '.dart': ['.hive.dart', '.hive_schema.yaml'],
-    '.yaml': ['.hive_schema.yaml'],
+    r'$lib$': ['hive/hive_adapters.hive.dart', 'hive/hive_schema.yaml'],
   };
 
   @override
   FutureOr<void> build(BuildStep buildStep) async {
-    final inputId = buildStep.inputId;
-    final infoFileId = inputId.changeExtension('.hive_generate_adapters.info');
-    if (!await buildStep.canRead(infoFileId)) return;
+    final dartAsset = AssetId(
+      buildStep.inputId.package,
+      'lib/hive/hive_adapters.dart',
+    );
+    if (!await buildStep.canRead(dartAsset)) return;
+    final dartContent = await buildStep.readAsString(dartAsset);
 
-    // Reading these files tells the generator to notify us of changes
-    // But we don't actually need the contents here
-    await buildStep.readAsString(infoFileId);
-
-    final library = await buildStep.inputLibrary;
-    final annotations = LibraryReader(library)
-        .annotatedWith(TypeChecker.fromRuntime(GenerateAdapters));
-    if (annotations.isEmpty) return;
-    if (annotations.length > 1) {
+    if (!dartContent.contains(
+      RegExp(r"^part 'hive_adapters\.hive\.dart';$", multiLine: true),
+    )) {
       throw HiveError(
-        'Only one GenerateAdapters annotation is allowed per file',
+        'The file $dartAsset has to contain the part statement '
+        "'part 'hive_adapters.hive.dart';'",
       );
     }
+
+    final library = await buildStep.resolver.libraryFor(dartAsset);
+    final annotations = LibraryReader(library)
+        .annotatedWith(TypeChecker.fromRuntime(GenerateAdapters));
+    if (annotations.length > 1) {
+      throw HiveError(
+        'Only one GenerateAdapters annotation is allowed per project',
+      );
+    }
+    if (annotations.isEmpty) return;
+
     final revived = RevivedGenerateAdapters(annotations.single.annotation);
 
-    final schemaFile = inputId.changeExtension('.hive_schema.yaml');
+    final schemaAsset = AssetId(
+      buildStep.inputId.package,
+      'lib/hive/hive_schema.yaml',
+    );
     final HiveSchema? schema;
-    if (await buildStep.canRead(schemaFile)) {
-      final schemaContent = await buildStep.readAsString(schemaFile);
+    if (await buildStep.canRead(schemaAsset)) {
+      final schemaContent = await buildStep.readAsString(schemaAsset);
       schema = HiveSchema.fromJson(loadYaml(schemaContent));
+      print(schemaContent);
     } else {
+      print('AHHHHHH');
       schema = HiveSchema(nextTypeId: revived.firstTypeId, types: {});
     }
 
     var nextTypeId = schema.nextTypeId;
-    final content = StringBuffer();
+    final content = StringBuffer("part of 'hive_adapters.dart';");
     for (final spec in revived.specs) {
       final typeKey = spec.type.getDisplayString();
       final schemaType = schema.types[typeKey];
@@ -70,12 +82,15 @@ class GenerateAdaptersBuilder extends Builder {
     }
 
     await buildStep.writeAsString(
-      schemaFile,
+      schemaAsset,
       YamlWriter().write(schema.copyWith(nextTypeId: nextTypeId).toJson()),
     );
 
     await buildStep.writeAsString(
-      inputId.changeExtension('.hive.dart'),
+      AssetId(
+        buildStep.inputId.package,
+        'lib/hive/hive_adapters.hive.dart',
+      ),
       content.toString(),
     );
   }
