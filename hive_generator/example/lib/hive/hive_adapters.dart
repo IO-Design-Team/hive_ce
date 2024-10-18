@@ -3,8 +3,8 @@ import 'package:hive_ce/hive.dart';
 part 'hive_adapters.hive.dart';
 
 @GenerateAdapters([
-  AdapterSpec<ClassSpec2>(),
   AdapterSpec<ClassSpec1>(),
+  AdapterSpec<ClassSpec2>(),
 ])
 _() {}
 

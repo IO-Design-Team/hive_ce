@@ -3,13 +3,13 @@
 # Check into version control
 nextTypeId: 2
 types: 
-  ClassSpec2: 
+  ClassSpec1: 
     typeId: 0
     nextIndex: 0
     fields: 
       value: 
         index: 0
-  ClassSpec1: 
+  ClassSpec2: 
     typeId: 1
     nextIndex: 0
     fields: 

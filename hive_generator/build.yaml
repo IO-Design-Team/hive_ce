@@ -21,9 +21,9 @@ builders:
     build_extensions: { "$lib$": ["hive/hive_registrar.hive.dart"] }
     auto_apply: dependents
     build_to: source
-  hive_generate_adapters_generator:
+  hive_adapters_generator:
     import: "package:hive_ce_generator/hive_generator.dart"
-    builder_factories: ["getGenerateAdaptersBuilder"]
+    builder_factories: ["getAdaptersBuilder"]
     build_extensions: { "$lib$": ["hive/hive_adapters.hive.dart", "hive/hive_schema.yaml"] }
     auto_apply: dependents
     build_to: source

@@ -10,7 +10,7 @@ import 'package:source_gen/source_gen.dart';
 /// Builds intermediate data required for the registrar builder
 class RegistrarIntermediateBuilder implements Builder {
   @override
-  final Map<String, List<String>> buildExtensions = const {
+  final buildExtensions = const {
     '.dart': ['.hive_registrar.info'],
   };
 

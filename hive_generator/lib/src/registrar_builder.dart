@@ -7,7 +7,7 @@ import 'dart:async';
 /// Generate the HiveRegistrar for the entire project
 class RegistrarBuilder implements Builder {
   @override
-  final Map<String, List<String>> buildExtensions = const {
+  final buildExtensions = const {
     r'$lib$': ['hive/hive_registrar.hive.dart'],
   };
 
