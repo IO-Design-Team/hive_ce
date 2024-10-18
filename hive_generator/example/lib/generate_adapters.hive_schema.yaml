@@ -1,12 +1,12 @@
 nextTypeId: 2
 types: 
-  ClassSpec1: 
+  ClassSpec2: 
     typeId: 0
     nextIndex: 0
     fields: 
       value: 
         index: 0
-  ClassSpec2: 
+  ClassSpec1: 
     typeId: 1
     nextIndex: 0
     fields: 

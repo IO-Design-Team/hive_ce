@@ -1,5 +1,7 @@
-import 'package:analyzer/dart/element/element.dart';
+import 'dart:async';
+
 import 'package:build/build.dart';
+import 'package:glob/glob.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
@@ -8,18 +10,35 @@ import 'package:source_gen/source_gen.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
-class GenerateAdaptersGenerator
-    extends GeneratorForAnnotation<GenerateAdapters> {
+class GenerateAdaptersBuilder extends Builder {
   @override
-  Future<String> generateForAnnotatedElement(
-    Element element,
-    ConstantReader annotation,
-    BuildStep buildStep,
-  ) async {
-    final revived = RevivedGenerateAdapters(annotation);
-    final library = await buildStep.inputLibrary;
+  final Map<String, List<String>> buildExtensions = const {
+    '.dart': ['.hive.dart', '.hive_schema.yaml'],
+    '.yaml': ['.hive_schema.yaml'],
+  };
 
-    final schemaFile = buildStep.inputId.changeExtension('.hive_schema.yaml');
+  @override
+  FutureOr<void> build(BuildStep buildStep) async {
+    final inputId = buildStep.inputId;
+    final infoFileId = inputId.changeExtension('.hive_generate_adapters.info');
+    if (!await buildStep.canRead(infoFileId)) return;
+
+    // Reading these files tells the generator to notify us of changes
+    // But we don't actually need the contents here
+    await buildStep.readAsString(infoFileId);
+
+    final library = await buildStep.inputLibrary;
+    final annotations = LibraryReader(library)
+        .annotatedWith(TypeChecker.fromRuntime(GenerateAdapters));
+    if (annotations.isEmpty) return;
+    if (annotations.length > 1) {
+      throw HiveError(
+        'Only one GenerateAdapters annotation is allowed per file',
+      );
+    }
+    final revived = RevivedGenerateAdapters(annotations.single.annotation);
+
+    final schemaFile = inputId.changeExtension('.hive_schema.yaml');
     final HiveSchema? schema;
     if (await buildStep.canRead(schemaFile)) {
       final schemaContent = await buildStep.readAsString(schemaFile);
@@ -51,10 +70,13 @@ class GenerateAdaptersGenerator
     }
 
     await buildStep.writeAsString(
-      schemaFile.changeExtension('.cache.yaml'),
+      schemaFile,
       YamlWriter().write(schema.copyWith(nextTypeId: nextTypeId).toJson()),
     );
 
-    return content.toString();
+    await buildStep.writeAsString(
+      inputId.changeExtension('.hive.dart'),
+      content.toString(),
+    );
   }
 }

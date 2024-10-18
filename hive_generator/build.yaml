@@ -21,24 +21,16 @@ builders:
     build_extensions: { "$lib$": ["hive_registrar.g.dart"] }
     auto_apply: dependents
     build_to: source
+  hive_generate_adapters_intermediate_generator:
+    import: "package:hive_ce_generator/hive_generator.dart"
+    builder_factories: ["getGenerateAdaptersIntermediateBuilder"]
+    build_extensions: { ".dart": [".hive_generate_adapters.info"] }
+    auto_apply: dependents
+    build_to: cache
+    runs_before: ["hive_generate_adapters_generator"]
   hive_generate_adapters_generator:
     import: "package:hive_ce_generator/hive_generator.dart"
     builder_factories: ["getGenerateAdaptersBuilder"]
-    build_extensions:
-      {
-        ".dart":
-          [
-            "hive_generate_adapters_generator.g.part",
-            ".hive_schema.cache.yaml",
-          ],
-      }
-    auto_apply: dependents
-    build_to: cache
-    applies_builders: ["source_gen|combining_builder"]
-    runs_before: ["hive_schema_generator"]
-  hive_schema_generator:
-    import: "package:hive_ce_generator/hive_generator.dart"
-    builder_factories: ["getSchemaBuilder"]
-    build_extensions: { ".hive_schema.cache.yaml": [".hive_schema.yaml"] }
+    build_extensions: { "$lib$": [".hive.dart", ".hive_schema.yaml"] }
     auto_apply: dependents
     build_to: source
