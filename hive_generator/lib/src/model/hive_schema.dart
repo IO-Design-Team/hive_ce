@@ -13,16 +13,6 @@ class HiveSchema {
       _$HiveSchemaFromJson(json);
 
   Map<String, dynamic> toJson() => _$HiveSchemaToJson(this);
-
-  HiveSchema copyWith({
-    int? nextTypeId,
-    Map<String, HiveSchemaType>? types,
-  }) {
-    return HiveSchema(
-      nextTypeId: nextTypeId ?? this.nextTypeId,
-      types: types ?? this.types,
-    );
-  }
 }
 
 @JsonSerializable()
@@ -41,6 +31,18 @@ class HiveSchemaType {
       _$HiveSchemaTypeFromJson(json);
 
   Map<String, dynamic> toJson() => _$HiveSchemaTypeToJson(this);
+
+  HiveSchemaType copyWith({
+    int? typeId,
+    int? nextIndex,
+    Map<String, HiveSchemaField>? fields,
+  }) {
+    return HiveSchemaType(
+      typeId: typeId ?? this.typeId,
+      nextIndex: nextIndex ?? this.nextIndex,
+      fields: fields ?? this.fields,
+    );
+  }
 }
 
 @JsonSerializable()

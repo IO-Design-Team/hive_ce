@@ -114,6 +114,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     };
 
     var nextIndex = schema?.nextIndex ?? 0;
+    final newSchemaFields = <String, HiveSchemaField>{};
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
@@ -127,7 +128,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final index =
           annotation?.index ?? schema?.fields[name]?.index ?? nextIndex++;
-      schema?.fields[name] = HiveSchemaField(index: index);
+      newSchemaFields[name] = HiveSchemaField(index: index);
       return AdapterField(
         index,
         name,
@@ -150,7 +151,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (setterField != null) setters.add(setterField);
     }
 
-    return _GetAccessorsResult(getters, setters, schema);
+    return _GetAccessorsResult(
+      getters,
+      setters,
+      schema?.copyWith(
+        nextIndex: nextIndex,
+        fields: newSchemaFields,
+      ),
+    );
   }
 
   /// TODO: Document this!
