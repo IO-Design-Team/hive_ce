@@ -9,8 +9,8 @@ part 'hive_adapters.hive.dart';
 _() {}
 
 class ClassSpec1 {
-  final int value2;
   final int value;
+  final int value2;
 
   ClassSpec1(this.value, this.value2);
 }
