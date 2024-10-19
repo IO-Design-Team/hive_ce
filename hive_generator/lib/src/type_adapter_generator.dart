@@ -132,7 +132,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         name,
         field.type,
         annotation?.defaultValue,
-        parameterDefaults[field.name],
+        parameterDefaults[name],
       );
     }
 
