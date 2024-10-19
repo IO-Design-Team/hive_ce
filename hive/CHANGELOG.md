@@ -1,3 +1,7 @@
+## 2.7.0
+
+- Adds `GenerateAdapters` annotation and relevant documentation
+
 ## 2.6.0
 
 - Adds `TargetKind.parameter` to `HiveField` to support `freezed`

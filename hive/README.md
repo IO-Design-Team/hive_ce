@@ -7,10 +7,6 @@
 
 Hive is a lightweight and blazing fast key-value database written in pure Dart. Inspired by [Bitcask](https://en.wikipedia.org/wiki/Bitcask).
 
-### [Documentation & Samples](https://docs.hivedb.dev/) 📖
-
-If you need queries, multi-isolate support or links between objects check out [Isar Database](https://github.com/isar/isar).
-
 ## Migrating from Hive
 
 The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
@@ -18,7 +14,7 @@ The `hive_ce` package is a drop in replacement for Hive v2. Make the following r
 pubspec.yaml
 
 ```yaml
-# old
+# old dependencies
 dependencies:
   hive: ^2.0.0
   hive_flutter: ^1.0.0
@@ -26,7 +22,7 @@ dependencies:
 dev_dependencies:
   hive_generator: ^1.0.0
 
-# new
+# new dependencies
 dependencies:
   hive_ce: latest
   hive_ce_flutter: latest
@@ -38,11 +34,11 @@ dev_dependencies:
 Dart files
 
 ```dart
-// old
+// old imports
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-// new
+// new imports
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 ```
@@ -56,22 +52,22 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 - 🎈 **NO** native dependencies
 - 🔋 Batteries included
 
-## Getting Started
-
-Check out the [Quick Start](https://docs.hivedb.dev) documentation to get started.
-
 ## Usage
 
 You can use Hive just like a map. It is not necessary to await `Futures`.
 
+<!-- embedme readme/usage.dart -->
+
 ```dart
-var box = Hive.box('myBox');
+import 'package:hive_ce/hive.dart';
 
-box.put('name', 'David');
+void example() {
+  final box = Hive.box('myBox');
+  box.put('name', 'David');
+  final name = box.get('name');
+  print('Name: $name');
+}
 
-var name = box.get('name');
-
-print('Name: $name');
 ```
 
 ## BoxCollections
@@ -86,17 +82,27 @@ transactions on web.
 On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
 BoxCollections might be useful for some box hierarchy and development experience.
 
+<!-- embedme readme/box_collections.dart -->
+
 ```dart
-// Create a box collection
+import 'package:hive_ce/hive.dart';
+import 'hive_cipher_impl.dart';
+
+void example() async {
+  // Create a box collection
   final collection = await BoxCollection.open(
-    'MyFirstFluffyBox', // Name of your database
-    {'cats', 'dogs'}, // Names of your boxes
-    path: './', // Path where to store your boxes (Only used in Flutter / Dart IO)
-    key: HiveCipher(), // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    // Name of your database
+    'MyFirstFluffyBox',
+    // Names of your boxes
+    {'cats', 'dogs'},
+    // Path where to store your boxes (Only used in Flutter / Dart IO)
+    path: './',
+    // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    key: HiveCipherImpl(),
   );
 
   // Open your boxes. Optional: Give it a type.
-  final catsBox = collection.openBox<Map>('cats');
+  final catsBox = await collection.openBox<Map>('cats');
 
   // Put something in
   await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
@@ -135,25 +141,51 @@ BoxCollections might be useful for some box hierarchy and development experience
     boxNames: ['cats'], // By default all boxes become blocked.
     readOnly: false,
   );
+}
+
 ```
 
 ## Store objects
 
-Hive not only supports primitives, lists and maps but also any Dart object you like. You need to generate a type adapter before you can store objects.
+Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
+
+Hive CE supports automatic type adapter generation using the `GenerateAdapters` annotation. This new method of generation has the following benefits:
+
+- No more manually adding annotations to every type and field
+- Generate adapters for classes outside the current package
+
+### Create model classes
+
+<!-- embedme readme/store_objects/person.dart -->
 
 ```dart
-@HiveType(typeId: 0)
+import 'package:hive_ce/hive.dart';
+
 class Person extends HiveObject {
+  Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
+
 ```
 
-Add the following to your pubspec.yaml
+### Create `lib/hive/hive_adapters.dart`
+
+<!-- embedme readme/store_objects/hive_adapters.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
+
+@GenerateAdapters([AdapterSpec<Person>()])
+// Annotations must be on some element
+// ignore: unused_element
+void _() {}
+
+```
+
+### Update `pubspec.yaml`
 
 ```yaml
 dev_dependencies:
@@ -161,42 +193,81 @@ dev_dependencies:
   hive_ce_generator: latest
 ```
 
-And run the following command to generate the type adapter
+### Run `build_runner`
 
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
+dart pub run build_runner build --delete-conflicting-outputs
 ```
 
-This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+This will generate the following:
+
+- TypeAdapters for the specified AdapterSpecs
+- TypeAdapters for all explicitly defined HiveTypes
+- A `lib/hive/hive_adapters.hive.dart` file containing all adapters generated from the `GenerateAdapters` annotation
+- A `lib/hive/hive_registrar.hive.dart` file containing an extension method to register all generated adapters
+- A `lib/hive/hive_schema.yaml` file
+
+All of the generated files should be checked into version control. These files are explained in more detail below.
+
+### Use the Hive registrar
 
 ```dart
-import 'package:your_package/hive_registrar.g.dart';
+import 'dart:io';
+import 'package:hive_ce/hive.dart';
+import 'package:your_package/hive/hive_registrar.hive.dart';
 
 void main() {
-  final path = Directory.current.path;
   Hive
-    ..init(path)
+    ..init(Directory.current.path)
     ..registerAdapters();
 }
 ```
 
+### Using HiveObject methods
+
 Extending `HiveObject` is optional but it provides handy methods like `save()` and `delete()`.
 
+<!-- embedme readme/store_objects/hive_object.dart -->
+
 ```dart
-var box = await Hive.openBox('myBox');
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
 
-var person = Person()
-  ..name = 'Dave'
-  ..age = 22;
-box.add(person);
+void example() async {
+  final box = await Hive.openBox('myBox');
 
-print(box.getAt(0)); // Dave - 22
+  final person = Person(name: 'Dave', age: 22);
+  await box.add(person);
 
-person.age = 30;
-person.save();
+  print(box.getAt(0)); // Dave - 22
 
-print(box.getAt(0)) // Dave - 30
+  person.age = 30;
+  await person.save();
+
+  print(box.getAt(0)); // Dave - 30
+}
+
 ```
+
+### About `hive_schema.yaml`
+
+The Hive schema is a generated file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
+
+Some migrations might require manual modifications to the `hive_schema.yaml` file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
+
+Another example is switching an existing app from explicit HiveTypes to the new `GenerateAdapters` method. Take the following steps in this case:
+
+1. Make sure your existing TypeAdapters are up to date
+2. Convert any `HiveType.defaultValue` values to constructor parameter defaults
+3. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
+4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes
+5. Make any necessary modifications to `hive_schema.yaml` so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
+
+The generator will not react to manual changes to the schema file. You must delete `hive_adapters.hive.dart` to force regeneration.
+
+### Explicitly defining HiveTypes
+
+The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
 
 ## Add fields to objects
 
@@ -204,73 +275,38 @@ When adding a new non-nullable field to an existing object, you need to specify 
 
 For example, consider an existing database with a `Person` object:
 
+<!-- embedme readme/add_fields/person.dart -->
+
 ```dart
-@HiveType(typeId: 0)
+import 'package:hive_ce/hive.dart';
+
 class Person extends HiveObject {
   Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
+
 ```
 
-If you want to add a `balance` field:
+If you want to add a `balance` field, you must specify a default value or else reading existing data will result in null errors:
+
+<!-- embedme readme/add_fields/person_2.dart -->
 
 ```dart
-@HiveType(typeId: 0)
-class Person extends HiveObject {
-  Person({required this.name, required this.age, required this.balance});
+import 'package:hive_ce/hive.dart';
 
-  @HiveField(0)
-  String name;
-
-  @HiveField(1)
-  int age;
-
-  @HiveField(2)
-  int balance;
-}
-```
-
-Without proper handling, this change will cause null errors in the existing application when accessing the new field.
-
-To resolve this issue, you can set a default value in the constructor (this requires hive_ce_generator 1.5.0+)
-
-```dart
-@HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age, this.balance = 0});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
-
-  @HiveField(2)
-  int balance;
+  double balance;
 }
+
 ```
 
-Or specify it in the `HiveField` annotation:
-
-```dart
-@HiveField(2, defaultValue: 0)
-int balance;
-```
-
-Alternatively, you can write custom migration code to handle the transition.
-
-After modifying the schema, remember to run the build runner to generate the necessary code:
-
-```console
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-This will update your Hive adapters to reflect the changes in your object structure.
+After modifying the model, remember to run `build_runner` to regenerate the TypeAdapters
 
 ## Hive ❤️ Flutter
 

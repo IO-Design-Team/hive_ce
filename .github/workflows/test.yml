@@ -107,6 +107,14 @@ jobs:
           puby gen
           git diff --exit-code
 
+  ensure-embedme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npx embedme **/*.md
+          git diff --exit-code
+
   check-score:
     runs-on: ubuntu-latest
     strategy:
