@@ -1,11 +1,15 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
+/// A revived GenerateAdapters annotation
 class RevivedGenerateAdapters {
+  /// The revived adapter specs
   final List<RevivedAdapterSpec> specs;
+
+  /// The first type ID to use
   final int firstTypeId;
 
-  /// Constructor
+  /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
       : specs = annotation
             .read('specs')
@@ -17,8 +21,11 @@ class RevivedGenerateAdapters {
         firstTypeId = annotation.read('firstTypeId').intValue;
 }
 
+/// A revived adapter spec
 class RevivedAdapterSpec {
+  /// The type of the adapter
   final DartType type;
 
+  /// Constructor
   const RevivedAdapterSpec({required this.type});
 }

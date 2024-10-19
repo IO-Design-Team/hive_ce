@@ -10,7 +10,9 @@ part 'hive_adapters.hive.dart';
   ],
   firstTypeId: 50,
 )
-_() {}
+// This is for code generation
+// ignore: unused_element
+void _() {}
 
 class ClassSpec1 {
   final int value;

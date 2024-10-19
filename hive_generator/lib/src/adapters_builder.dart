@@ -13,6 +13,7 @@ import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 import 'package:path/path.dart' as path;
 
+/// Builder that generates Hive adapters from a GenerateAdapters annotation
 class AdaptersBuilder extends Builder {
   @override
   final buildExtensions = const {

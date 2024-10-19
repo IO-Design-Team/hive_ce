@@ -26,6 +26,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     return result.content;
   }
 
+  /// Generate a type adapter with the given information
+  ///
+  /// If this is an incremental update, pass the existing [schema]
   static GenerateTypeAdapterResult generateTypeAdapter({
     required Element element,
     required LibraryElement library,
@@ -193,12 +196,17 @@ class _GetAccessorsResult {
   final List<AdapterField> setters;
   final HiveSchemaType? schema;
 
-  _GetAccessorsResult(this.getters, this.setters, this.schema);
+  const _GetAccessorsResult(this.getters, this.setters, this.schema);
 }
 
+/// Result of [TypeAdapterGenerator.generateTypeAdapter]
 class GenerateTypeAdapterResult {
+  /// The generated content
   final String content;
+
+  /// The generated schema
   final HiveSchemaType? schema;
 
-  GenerateTypeAdapterResult(this.content, this.schema);
+  /// Constructor
+  const GenerateTypeAdapterResult(this.content, this.schema);
 }
