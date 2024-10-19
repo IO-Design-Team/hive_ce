@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -72,4 +73,10 @@ int readTypeId(ConstantReader annotation) {
     'You have to provide a non-null typeId.',
   );
   return annotation.read('typeId').intValue;
+}
+
+/// Convenience extension for [BuildStep]
+extension BuildStepExtension on BuildStep {
+  /// Create an [AssetId] for the given [path] relative to the input package
+  AssetId asset(String path) => AssetId(inputId.package, path);
 }

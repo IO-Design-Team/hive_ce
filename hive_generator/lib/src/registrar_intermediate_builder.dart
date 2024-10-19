@@ -48,7 +48,7 @@ class RegistrarIntermediateBuilder implements Builder {
         'uris': [
           if (hiveTypeElements.isNotEmpty) library.source.uri.toString(),
           if (generateAdaptersElements.isNotEmpty)
-            'package:${buildStep.inputId.package}/hive/hive_adapters.dart',
+            buildStep.asset('lib/hive/hive_adapters.dart').uri.toString(),
         ],
         'adapters': adapters,
       }),

@@ -7,7 +7,7 @@ import 'package:source_gen/source_gen.dart';
 
 /// Builds Hive TypeAdapters
 Builder getTypeAdapterBuilder(BuilderOptions options) =>
-    SharedPartBuilder([TypeAdapterGenerator()], 'hive_generator_type_adapter');
+    SharedPartBuilder([TypeAdapterGenerator()], 'hive_type_adapter_generator');
 
 /// Builds intermediate data required for the registrar builder
 Builder getRegistrarIntermediateBuilder(BuilderOptions options) =>

@@ -4,6 +4,8 @@ import 'package:glob/glob.dart';
 import 'package:build/build.dart';
 import 'dart:async';
 
+import 'package:hive_ce_generator/src/helper/helper.dart';
+
 /// Generate the HiveRegistrar for the entire project
 class RegistrarBuilder implements Builder {
   @override
@@ -57,10 +59,7 @@ extension HiveRegistrar on HiveInterface {
 ''');
 
     await buildStep.writeAsString(
-      AssetId(
-        buildStep.inputId.package,
-        'lib/hive/hive_registrar.hive.dart',
-      ),
+      buildStep.asset('lib/hive/hive_registrar.hive.dart'),
       buffer.toString(),
     );
   }
