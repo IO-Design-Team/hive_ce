@@ -314,13 +314,10 @@ class Enum1Adapter extends TypeAdapter<Enum1> {
     switch (obj) {
       case Enum1.emumValue1:
         writer.writeByte(0);
-        break;
       case Enum1.emumValue2:
         writer.writeByte(1);
-        break;
       case Enum1.emumValue3:
         writer.writeByte(2);
-        break;
     }
   }
 

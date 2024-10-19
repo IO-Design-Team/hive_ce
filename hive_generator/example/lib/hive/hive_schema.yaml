@@ -2,10 +2,10 @@
 # Manual modifications may be necessary for certain migrations
 # If edited manually, delete `hive_adapters.hive.dart` before regenerating
 # Check into version control
-nextTypeId: 2
+nextTypeId: 53
 types: 
   ClassSpec1: 
-    typeId: 0
+    typeId: 50
     nextIndex: 2
     fields: 
       value: 
@@ -13,10 +13,18 @@ types:
       value2: 
         index: 1
   ClassSpec2: 
-    typeId: 1
+    typeId: 51
     nextIndex: 2
     fields: 
       value: 
+        index: 0
+      value2: 
+        index: 1
+  EnumSpec: 
+    typeId: 52
+    nextIndex: 3
+    fields: 
+      value1: 
         index: 0
       value2: 
         index: 1

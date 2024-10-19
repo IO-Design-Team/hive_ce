@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/builder.dart';
@@ -79,19 +80,24 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  static Set<String> _getAllAccessorNames(InterfaceElement cls) {
+  static Set<String> _getAllAccessorNames(InterfaceElement clazz) {
     final accessorNames = <String>{};
 
-    final supertypes = cls.allSupertypes.map((it) => it.element);
-    for (final type in [cls, ...supertypes]) {
-      // Ignore Object and Enum base members
-      if (type.name == 'Object' || type.name == 'Enum') continue;
+    final supertypes = clazz.allSupertypes.map((it) => it.element);
+    for (final type in [clazz, ...supertypes]) {
+      // Ignore Object base members
+      if (const TypeChecker.fromRuntime(Object).isExactly(type)) continue;
+
       for (final accessor in type.accessors) {
+        // Ignore any non-enum accessors on enums
+        if (clazz.thisType.isEnum && !accessor.returnType.isEnum) continue;
+
+        final name = accessor.name;
         if (accessor.isSetter) {
-          final name = accessor.name;
+          // Remove '=' from setter name
           accessorNames.add(name.substring(0, name.length - 1));
         } else {
-          accessorNames.add(accessor.name);
+          accessorNames.add(name);
         }
       }
     }

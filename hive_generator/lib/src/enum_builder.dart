@@ -39,8 +39,7 @@ class EnumBuilder extends Builder {
     for (final field in getters) {
       code.writeln('''
         case ${cls.name}.${field.name}:
-          writer.writeByte(${field.index});
-          break;''');
+          writer.writeByte(${field.index});''');
     }
 
     code.writeln('}');

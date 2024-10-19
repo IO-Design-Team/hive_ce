@@ -6,7 +6,7 @@ part of 'hive_adapters.dart';
 
 class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
   @override
-  final int typeId = 0;
+  final int typeId = 50;
 
   @override
   ClassSpec1 read(BinaryReader reader) {
@@ -43,7 +43,7 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
 
 class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
   @override
-  final int typeId = 1;
+  final int typeId = 51;
 
   @override
   ClassSpec2 read(BinaryReader reader) {
@@ -74,6 +74,43 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ClassSpec2Adapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class EnumSpecAdapter extends TypeAdapter<EnumSpec> {
+  @override
+  final int typeId = 52;
+
+  @override
+  EnumSpec read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return EnumSpec.value1;
+      case 1:
+        return EnumSpec.value2;
+      default:
+        return EnumSpec.value1;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, EnumSpec obj) {
+    switch (obj) {
+      case EnumSpec.value1:
+        writer.writeByte(0);
+      case EnumSpec.value2:
+        writer.writeByte(1);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EnumSpecAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

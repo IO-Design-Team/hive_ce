@@ -16,6 +16,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(ConstructorDefaultsAdapter());
     registerAdapter(EmptyClassAdapter());
     registerAdapter(Enum1Adapter());
+    registerAdapter(EnumSpecAdapter());
     registerAdapter(IterableClassAdapter());
     registerAdapter(NamedImportTypeAdapter());
     registerAdapter(NamedImportsAdapter());

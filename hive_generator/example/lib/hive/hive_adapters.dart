@@ -2,10 +2,14 @@ import 'package:hive_ce/hive.dart';
 
 part 'hive_adapters.hive.dart';
 
-@GenerateAdapters([
-  AdapterSpec<ClassSpec1>(),
-  AdapterSpec<ClassSpec2>(),
-])
+@GenerateAdapters(
+  [
+    AdapterSpec<ClassSpec1>(),
+    AdapterSpec<ClassSpec2>(),
+    AdapterSpec<EnumSpec>(),
+  ],
+  firstTypeId: 50,
+)
 _() {}
 
 class ClassSpec1 {
@@ -21,3 +25,5 @@ class ClassSpec2 {
 
   ClassSpec2(this.value, this.value2);
 }
+
+enum EnumSpec { value1, value2 }
