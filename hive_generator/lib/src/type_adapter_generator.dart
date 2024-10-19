@@ -11,9 +11,6 @@ import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
-  static const _classIgnoredFields = {'hashCode', 'runtimeType'};
-  static const _enumIgnoredFields = {'values', 'value', 'index'};
-
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
@@ -87,6 +84,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
+      // Ignore Object and Enum base members
+      if (type.name == 'Object' || type.name == 'Enum') continue;
       for (final accessor in type.accessors) {
         if (accessor.isSetter) {
           final name = accessor.name;
@@ -106,8 +105,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     required LibraryElement library,
     HiveSchemaType? schema,
   }) {
-    final ignoredFields =
-        clazz.thisType.isEnum ? _enumIgnoredFields : _classIgnoredFields;
     final accessorNames = _getAllAccessorNames(clazz);
 
     final constructor = clazz.constructors.firstWhere((e) => e.name.isEmpty);
@@ -127,8 +124,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final field = element.variable2!;
       final name = field.name;
-      if (ignoredFields.contains(name)) return null;
-
       final index =
           annotation?.index ?? schema?.fields[name]?.index ?? nextIndex++;
       newSchemaFields[name] = HiveSchemaField(index: index);
