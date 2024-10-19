@@ -36,9 +36,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     String? adapterName,
     HiveSchemaType? schema,
   }) {
-    final clazz = getClass(element);
+    final cls = getClass(element);
     final getAccessorsResult =
-        _getAccessors(clazz: clazz, library: library, schema: schema);
+        _getAccessors(cls: cls, library: library, schema: schema);
 
     final getters = getAccessorsResult.getters;
     _verifyFieldIndices(getters);
@@ -46,23 +46,23 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final setters = getAccessorsResult.setters;
     _verifyFieldIndices(setters);
 
-    adapterName ??= generateAdapterName(clazz.name);
-    final builder = clazz.thisType.isEnum
-        ? EnumBuilder(clazz, getters)
-        : ClassBuilder(clazz, getters, setters);
+    adapterName ??= generateAdapterName(cls.name);
+    final builder = cls.thisType.isEnum
+        ? EnumBuilder(cls, getters)
+        : ClassBuilder(cls, getters, setters);
 
     final content = '''
-    class $adapterName extends TypeAdapter<${clazz.name}> {
+    class $adapterName extends TypeAdapter<${cls.name}> {
       @override
       final int typeId = $typeId;
 
       @override
-      ${clazz.name} read(BinaryReader reader) {
+      ${cls.name} read(BinaryReader reader) {
         ${builder.buildRead()}
       }
 
       @override
-      void write(BinaryWriter writer, ${clazz.name} obj) {
+      void write(BinaryWriter writer, ${cls.name} obj) {
         ${builder.buildWrite()}
       }
 
@@ -82,17 +82,17 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  static Set<String> _getAllAccessorNames(InterfaceElement clazz) {
+  static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final accessorNames = <String>{};
 
-    final supertypes = clazz.allSupertypes.map((it) => it.element);
-    for (final type in [clazz, ...supertypes]) {
+    final supertypes = cls.allSupertypes.map((it) => it.element);
+    for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
       if (const TypeChecker.fromRuntime(Object).isExactly(type)) continue;
 
       for (final accessor in type.accessors) {
         // Ignore any non-enum accessors on enums
-        if (clazz.thisType.isEnum && !accessor.returnType.isEnum) continue;
+        if (cls.thisType.isEnum && !accessor.returnType.isEnum) continue;
 
         final name = accessor.name;
         if (accessor.isSetter) {
@@ -109,13 +109,13 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
   /// TODO: Document this!
   static _GetAccessorsResult _getAccessors({
-    required InterfaceElement clazz,
+    required InterfaceElement cls,
     required LibraryElement library,
     HiveSchemaType? schema,
   }) {
-    final accessorNames = _getAllAccessorNames(clazz);
+    final accessorNames = _getAllAccessorNames(cls);
 
-    final constructor = clazz.constructors.firstWhere((e) => e.name.isEmpty);
+    final constructor = cls.constructors.firstWhere((e) => e.name.isEmpty);
     final parameterDefaults = {
       for (final param in constructor.parameters)
         param.name: param.defaultValueCode,
@@ -147,12 +147,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
-      final getter = clazz.augmented.lookUpGetter(name: name, library: library);
+      final getter = cls.augmented.lookUpGetter(name: name, library: library);
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
 
       final setter =
-          clazz.augmented.lookUpSetter(name: '$name=', library: library);
+          cls.augmented.lookUpSetter(name: '$name=', library: library);
       final setterField = accessorToField(setter);
       if (setterField != null) setters.add(setterField);
     }
