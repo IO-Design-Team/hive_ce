@@ -12,7 +12,7 @@ class GenerateAdapters {
   final int firstTypeId;
 }
 
-/// Configuration that specifies the genration of a TypeAdapter
+/// Configuration that specifies the generation of a TypeAdapter
 class AdapterSpec<T> {
   /// Constructor
   const AdapterSpec();
