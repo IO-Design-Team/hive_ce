@@ -60,7 +60,7 @@ jobs:
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
 
-  test-hive-flutter:
+  test-hive_flutter:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -85,7 +85,7 @@ jobs:
         flutter-channel: [stable, beta]
     defaults:
       run:
-        working-directory: hive_generator
+        working-directory: hive_generator/example
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
