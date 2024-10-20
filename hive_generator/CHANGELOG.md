@@ -1,5 +1,7 @@
 ## 2.0.0
 
+NOTE: This is a breaking change. See the [migration guide](MIGRATION.md) for more information.
+
 - **BREAKING**: Moves `hive_registrar.g.dart` to `hive/hive_registrar.hive.dart`
 
 ## 1.7.0
