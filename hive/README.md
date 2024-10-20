@@ -271,6 +271,8 @@ The generator will not react to manual changes to the schema file. You must dele
 
 The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
 
+Unfortunately it is not possible for `GenerateAdapters` to handle private fields. You can use `@protected` instead if necessary.
+
 ## Add fields to objects
 
 When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
