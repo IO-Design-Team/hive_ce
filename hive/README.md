@@ -260,7 +260,7 @@ Another example is switching an existing app from explicit HiveTypes to the new 
 1. Make sure your existing TypeAdapters are up to date
 2. Convert any `HiveType.defaultValue` values to constructor parameter defaults
 3. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
-4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes
+4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
 5. Make any necessary modifications to `hive_schema.yaml` so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
 
 The generator will not react to manual changes to the schema file. You must delete `hive_adapters.hive.dart` to force regeneration.
