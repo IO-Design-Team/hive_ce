@@ -36,17 +36,27 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       schema = HiveSchema(nextTypeId: revived.firstTypeId, types: {});
     }
 
-    // Sort by type id for deterministic output. Put new types at the end.
-    revived.specs.sort((a, b) {
-      final aTypeId = schema.types[a.type.getDisplayString()]?.typeId ?? 999999;
-      final bTypeId = schema.types[b.type.getDisplayString()]?.typeId ?? 999999;
-      return aTypeId.compareTo(bTypeId);
-    });
+    // Sort existing types by type ID
+    final existingSpecs = revived.specs
+        .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
+        .toList()
+      ..sort((a, b) {
+        final aTypeId = schema.types[a.type.getDisplayString()]!.typeId;
+        final bTypeId = schema.types[b.type.getDisplayString()]!.typeId;
+        return aTypeId.compareTo(bTypeId);
+      });
+
+    // Maintain order of new types
+    final newSpecs = revived.specs
+        .where(
+          (spec) => !schema.types.containsKey(spec.type.getDisplayString()),
+        )
+        .toList();
 
     var nextTypeId = schema.nextTypeId;
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
-    for (final spec in revived.specs) {
+    for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.getDisplayString();
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(typeId: nextTypeId++, nextIndex: 0, fields: {});
