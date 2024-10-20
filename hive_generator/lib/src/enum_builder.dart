@@ -1,5 +1,4 @@
 import 'package:hive_ce_generator/src/builder.dart';
-import 'package:hive_ce_generator/src/helper/helper.dart';
 
 /// TODO: Document this!
 class EnumBuilder extends Builder {
@@ -8,7 +7,9 @@ class EnumBuilder extends Builder {
 
   @override
   String buildRead() {
-    check(getters.isNotEmpty, '${cls.name} does not have any enum value.');
+    if (getters.isEmpty) {
+      throw '${cls.name} does not have any enum value.';
+    }
 
     final code = StringBuffer();
     code.writeln('switch (reader.readByte()) {');

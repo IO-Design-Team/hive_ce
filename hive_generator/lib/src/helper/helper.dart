@@ -1,6 +1,7 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -30,19 +31,20 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
   );
 }
 
-/// TODO: Document this!
-void check(bool condition, Object error) {
-  if (!condition) {
-    throw error;
+/// Get a classes default constructor or throw
+ConstructorElement getConstructor(InterfaceElement cls) {
+  final constr = cls.constructors.firstWhereOrNull((it) => it.name.isEmpty);
+  if (constr == null) {
+    throw 'Provide an unnamed constructor.';
   }
+  return constr;
 }
 
 /// Returns [element] as [InterfaceElement] if it is a class or enum
 InterfaceElement getClass(Element element) {
-  check(
-    element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
-    'Only classes or enums are allowed to be annotated with @HiveType.',
-  );
+  if (element.kind != ElementKind.CLASS && element.kind != ElementKind.ENUM) {
+    throw 'Only classes or enums are allowed to be annotated with @HiveType.';
+  }
 
   return element as InterfaceElement;
 }
@@ -68,10 +70,10 @@ String? readAdapterName(ConstantReader annotation) {
 
 /// Read the typeId from the annotation
 int readTypeId(ConstantReader annotation) {
-  check(
-    !annotation.read('typeId').isNull,
-    'You have to provide a non-null typeId.',
-  );
+  if (annotation.read('typeId').isNull) {
+    throw 'You have to provide a non-null typeId.';
+  }
+
   return annotation.read('typeId').intValue;
 }
 

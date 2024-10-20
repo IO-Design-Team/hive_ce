@@ -84,6 +84,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final isEnum = cls.thisType.isEnum;
+    final constructorFields =
+        getConstructor(cls).parameters.map((it) => it.name).toSet();
 
     final accessorNames = <String>{};
     final supertypes = cls.allSupertypes.map((it) => it.element);
@@ -101,7 +103,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         // Ignore getters without setters on classes
         if (!isEnum &&
             accessor.isGetter &&
-            accessor.correspondingSetter == null) continue;
+            accessor.correspondingSetter == null &&
+            !constructorFields.contains(accessor.name)) continue;
 
         final name = accessor.name;
         if (accessor.isSetter) {
@@ -124,10 +127,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }) {
     final accessorNames = _getAllAccessorNames(cls);
 
-    final constructor = cls.constructors.firstWhere((e) => e.name.isEmpty);
+    final constr = getConstructor(cls);
     final parameterDefaults = {
-      for (final param in constructor.parameters)
-        param.name: param.defaultValueCode,
+      for (final param in constr.parameters) param.name: param.defaultValueCode,
     };
 
     var nextIndex = schema?.nextIndex ?? 0;
@@ -190,10 +192,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static void _verifyFieldIndices(List<AdapterField> fields) {
     for (final field in fields) {
-      check(
-        field.index >= 0 && field.index <= 255,
-        'Field numbers can only be in the range 0-255.',
-      );
+      if (field.index < 0 || field.index > 255) {
+        throw 'Field numbers can only be in the range 0-255.';
+      }
 
       for (final otherField in fields) {
         if (otherField == field) continue;
