@@ -94,6 +94,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         // Ignore any non-enum accessors on enums
         if (cls.thisType.isEnum && !accessor.returnType.isEnum) continue;
 
+        // Ignore static fields
+        if (accessor.isStatic) continue;
+
         final name = accessor.name;
         if (accessor.isSetter) {
           // Remove '=' from setter name
