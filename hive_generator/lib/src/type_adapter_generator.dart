@@ -83,8 +83,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
   /// TODO: Document this!
   static Set<String> _getAllAccessorNames(InterfaceElement cls) {
-    final accessorNames = <String>{};
+    final isEnum = cls.thisType.isEnum;
 
+    final accessorNames = <String>{};
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
@@ -92,10 +93,15 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       for (final accessor in type.accessors) {
         // Ignore any non-enum accessors on enums
-        if (cls.thisType.isEnum && !accessor.returnType.isEnum) continue;
+        if (isEnum && !accessor.returnType.isEnum) continue;
 
         // Ignore static fields on non-enums (enum values are considered static)
-        if (!cls.thisType.isEnum && accessor.isStatic) continue;
+        if (!isEnum && accessor.isStatic) continue;
+
+        // Ignore getters without setters on classes
+        if (!isEnum &&
+            accessor.isGetter &&
+            accessor.correspondingSetter == null) continue;
 
         final name = accessor.name;
         if (accessor.isSetter) {
