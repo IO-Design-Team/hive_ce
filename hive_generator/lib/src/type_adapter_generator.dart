@@ -145,7 +145,10 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       final name = field.name;
       final int index;
       if (schema != null) {
-        index = schema.fields[name]?.index ?? nextIndex++;
+        // Only generate one id per field name
+        index = schema.fields[name]?.index ??
+            newSchemaFields[name]?.index ??
+            nextIndex++;
       } else if (annotation != null) {
         index = annotation.index;
       } else {
