@@ -132,8 +132,16 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final field = element.variable2!;
       final name = field.name;
-      final index =
-          annotation?.index ?? schema?.fields[name]?.index ?? nextIndex++;
+      final int index;
+      if (schema != null) {
+        index = schema.fields[name]?.index ?? nextIndex++;
+      } else if (annotation != null) {
+        index = annotation.index;
+      } else {
+        // This should be impossible
+        throw HiveError('No index found');
+      }
+
       newSchemaFields[name] = HiveSchemaField(index: index);
       return AdapterField(
         index,
