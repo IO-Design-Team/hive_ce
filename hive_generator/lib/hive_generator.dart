@@ -1,5 +1,5 @@
 import 'package:build/build.dart';
-import 'package:hive_ce_generator/src/adapters_builder.dart';
+import 'package:hive_ce_generator/src/adapters_generator.dart';
 import 'package:hive_ce_generator/src/registrar_builder.dart';
 import 'package:hive_ce_generator/src/registrar_intermediate_builder.dart';
 import 'package:hive_ce_generator/src/type_adapter_generator.dart';
@@ -17,4 +17,5 @@ Builder getRegistrarIntermediateBuilder(BuilderOptions options) =>
 Builder getRegistrarBuilder(BuilderOptions options) => RegistrarBuilder();
 
 /// Builds Hive TypeAdapters from the GenerateAdapters annotation
-Builder getAdaptersBuilder(BuilderOptions options) => AdaptersBuilder();
+Builder getAdaptersBuilder(BuilderOptions options) =>
+    SharedPartBuilder([AdaptersGenerator()], 'hive_adapters_generator');

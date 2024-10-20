@@ -178,7 +178,7 @@ class Person extends HiveObject {
 import 'package:hive_ce/hive.dart';
 import 'person.dart';
 
-part 'hive_adapters.hive.dart';
+part 'hive_adapters.g.dart';
 
 @GenerateAdapters([AdapterSpec<Person>()])
 // Annotations must be on some element
@@ -205,8 +205,8 @@ This will generate the following:
 
 - TypeAdapters for the specified AdapterSpecs
 - TypeAdapters for all explicitly defined HiveTypes
-- A `lib/hive/hive_adapters.hive.dart` file containing all adapters generated from the `GenerateAdapters` annotation
-- A `lib/hive/hive_registrar.hive.dart` file containing an extension method to register all generated adapters
+- A `lib/hive/hive_adapters.g.dart` file containing all adapters generated from the `GenerateAdapters` annotation
+- A `lib/hive/hive_registrar.g.dart` file containing an extension method to register all generated adapters
 - A `lib/hive/hive_schema.yaml` file
 
 All of the generated files should be checked into version control. These files are explained in more detail below.
@@ -216,7 +216,7 @@ All of the generated files should be checked into version control. These files a
 ```dart
 import 'dart:io';
 import 'package:hive_ce/hive.dart';
-import 'package:your_package/hive/hive_registrar.hive.dart';
+import 'package:your_package/hive/hive_registrar.g.dart';
 
 void main() {
   Hive
@@ -265,7 +265,7 @@ Another example is switching an existing app from explicit HiveTypes to the new 
 4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
 5. Make any necessary modifications to `hive_schema.yaml` so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
 
-The generator will not react to manual changes to the schema file. You must delete `hive_adapters.hive.dart` to force regeneration.
+The generator will not react to manual changes to the schema file. You must delete `hive_adapters.g.dart` to force regeneration.
 
 ### Explicitly defining HiveTypes
 

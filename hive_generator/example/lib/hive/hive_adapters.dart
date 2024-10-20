@@ -1,6 +1,6 @@
 import 'package:hive_ce/hive.dart';
 
-part 'hive_adapters.hive.dart';
+part 'hive_adapters.g.dart';
 
 @GenerateAdapters(
   [

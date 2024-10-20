@@ -10,7 +10,7 @@ import 'package:hive_ce_generator/src/helper/helper.dart';
 class RegistrarBuilder implements Builder {
   @override
   final buildExtensions = const {
-    r'$lib$': ['hive/hive_registrar.hive.dart'],
+    r'$lib$': ['hive/hive_registrar.g.dart'],
   };
 
   @override
@@ -59,7 +59,7 @@ extension HiveRegistrar on HiveInterface {
 ''');
 
     await buildStep.writeAsString(
-      buildStep.asset('lib/hive/hive_registrar.hive.dart'),
+      buildStep.asset('lib/hive/hive_registrar.g.dart'),
       buffer.toString(),
     );
   }
