@@ -28,4 +28,9 @@ class ClassSpec2 {
   ClassSpec2(this.value, this.value2);
 }
 
-enum EnumSpec { value1, value2 }
+enum EnumSpec {
+  value1,
+  value2;
+
+  EnumSpec get getter => EnumSpec.value2;
+}
