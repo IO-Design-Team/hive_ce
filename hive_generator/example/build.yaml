@@ -6,5 +6,4 @@ targets:
           ignore_for_file:
             - unnecessary_const
             - require_trailing_commas
-            - unnecessary_breaks
             - document_ignores
