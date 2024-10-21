@@ -21,7 +21,7 @@ class RegistrarBuilder implements Builder {
         in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
       final content = await buildStep.readAsString(input);
       final data = jsonDecode(content) as Map<String, dynamic>;
-      uris.addAll((data['uris'] as List).cast<String>());
+      uris.add(data['uri'] as String);
       adapters.addAll((data['adapters'] as List).cast<String>());
     }
 

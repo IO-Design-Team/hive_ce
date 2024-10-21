@@ -42,14 +42,12 @@ class RegistrarIntermediateBuilder implements Builder {
       }
     }
 
+    if (adapters.isEmpty) return;
+
     await buildStep.writeAsString(
       buildStep.allowedOutputs.first,
       jsonEncode({
-        'uris': [
-          if (hiveTypeElements.isNotEmpty) library.source.uri.toString(),
-          if (generateAdaptersElements.isNotEmpty)
-            buildStep.asset('lib/hive/hive_adapters.dart').uri.toString(),
-        ],
+        'uri': library.source.uri.toString(),
         'adapters': adapters,
       }),
     );

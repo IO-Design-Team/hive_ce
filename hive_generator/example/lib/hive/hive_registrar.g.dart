@@ -4,7 +4,6 @@
 
 import 'package:hive_ce/hive.dart';
 import 'package:example/hive/hive_adapters.dart';
-import 'package:example/named_import.dart';
 import 'package:example/types.dart';
 
 extension HiveRegistrar on HiveInterface {
@@ -18,7 +17,6 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(Enum1Adapter());
     registerAdapter(EnumSpecAdapter());
     registerAdapter(IterableClassAdapter());
-    registerAdapter(NamedImportTypeAdapter());
     registerAdapter(NamedImportsAdapter());
     registerAdapter(NullableTypesAdapter());
   }
