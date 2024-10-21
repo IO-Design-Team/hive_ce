@@ -9,15 +9,14 @@ const fileExists = '';
 ///
 /// About [output]
 /// - An empty content string will result in checking for file existence only
-/// - Files may contain additional content, but must contain the exact
-///   string specified
 void expectGeneration({
   required Map<String, String> input,
   required Map<String, String> output,
 }) {
   final projectRoot = createTestProject(input);
-  Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
-  Process.runSync(
+  final result1 =
+      Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
+  final result2 = Process.runSync(
     'dart',
     ['pub', 'run', 'build_runner', 'build'],
     workingDirectory: projectRoot,
@@ -30,7 +29,7 @@ void expectGeneration({
     // Do not check content if value is empty
     if (value.isNotEmpty) {
       final content = file.readAsStringSync();
-      expect(content, contains(value));
+      expect(content, value);
     }
   }
 }

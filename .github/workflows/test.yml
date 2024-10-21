@@ -85,7 +85,7 @@ jobs:
         flutter-channel: [stable, beta]
     defaults:
       run:
-        working-directory: hive_generator/example
+        working-directory: hive_generator
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -93,8 +93,8 @@ jobs:
           channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
-      - name: Generate build_runner output
-        run: dart pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        run: dart test
 
   ensure-codegen:
     runs-on: ubuntu-latest
