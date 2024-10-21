@@ -14,9 +14,8 @@ void expectGeneration({
   required Map<String, String> output,
 }) {
   final projectRoot = createTestProject(input);
-  final result1 =
-      Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
-  final result2 = Process.runSync(
+  Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
+  Process.runSync(
     'dart',
     ['pub', 'run', 'build_runner', 'build'],
     workingDirectory: projectRoot,
