@@ -79,10 +79,17 @@ jobs:
         run: flutter test
 
   test-hive_generator:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [stable, beta]
+        include:
+          - flutter-channel: stable
+            os: ubuntu-latest
+          - flutter-channel: stable
+            # Test on windows since the generator directly accesses the file system
+            os: windows-latest
+          - flutter-channel: beta
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: hive_generator

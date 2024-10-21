@@ -265,12 +265,6 @@ Another example is switching an existing app from explicit HiveTypes to the new 
 4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
 5. Make any necessary modifications to `hive_schema.yaml` so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
 
-The generator will not react to changes to the schema file. You must take the following steps to force regeneration:
-
-1. Delete `.dart_tool`
-2. Run a `pub get`
-3. Regenerate
-
 ### Explicitly defining HiveTypes
 
 The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
