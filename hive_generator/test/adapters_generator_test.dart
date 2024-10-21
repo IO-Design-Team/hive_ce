@@ -183,7 +183,7 @@ types:
       );
     });
 
-    test('replace field', () {
+    test('add and remove field', () {
       expectGeneration(
         input: {
           'pubspec.yaml': pubspec,
