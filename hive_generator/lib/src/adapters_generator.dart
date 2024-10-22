@@ -41,6 +41,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     } else {
       schema = HiveSchema(nextTypeId: revived.firstTypeId, types: {});
     }
+    _validateSchema(schema);
 
     // Sort existing types by type ID
     final existingSpecs = revived.specs
@@ -89,5 +90,41 @@ $yaml''',
     );
 
     return content.toString();
+  }
+
+  void _validateSchema(HiveSchema schema) {
+    void invalidSchema(String message) {
+      throw HiveError('Invalid schema: $message');
+    }
+
+    final typeIds = <int>{};
+    for (final type in schema.types.values) {
+      final typeId = type.typeId;
+      if (typeIds.contains(typeId)) {
+        invalidSchema('Duplicate type ID $typeId');
+      }
+      typeIds.add(typeId);
+
+      final fieldIndices = <int>{};
+      for (final field in type.fields.values) {
+        final index = field.index;
+        if (fieldIndices.contains(index)) {
+          invalidSchema('Duplicate field index $index for type ID $typeId');
+        }
+        fieldIndices.add(index);
+      }
+
+      final sortedIndices = fieldIndices.toList()..sort();
+      final lastIndex = sortedIndices.lastOrNull ?? -1;
+      if (lastIndex >= type.nextIndex) {
+        invalidSchema('Next index is invalid for type ID $typeId');
+      }
+    }
+
+    final sortedTypeIds = typeIds.toList()..sort();
+    final lastTypeId = sortedTypeIds.lastOrNull ?? -1;
+    if (lastTypeId >= schema.nextTypeId) {
+      invalidSchema('Next type ID is invalid');
+    }
   }
 }

@@ -217,5 +217,109 @@ types:
         },
       );
     });
+
+    group('validates schema', () {
+      test('with invalid next type ID', () {
+        expectGeneration(
+          input: {
+            'pubspec.yaml': pubspec,
+            'lib/hive/hive_adapters.dart': '''
+$directives
+
+@GenerateAdapters([])
+void _() {}
+''',
+            'lib/hive/hive_schema.yaml': '''
+nextTypeId: 0
+types:
+  Person:
+    typeId: 0
+    nextIndex: 0
+    fields: {}
+''',
+          },
+          throws: 'Invalid schema: Next type ID is invalid',
+        );
+      });
+
+      test('with invalid next field index', () {
+        expectGeneration(
+          input: {
+            'pubspec.yaml': pubspec,
+            'lib/hive/hive_adapters.dart': '''
+$directives
+
+@GenerateAdapters([])
+void _() {}
+''',
+            'lib/hive/hive_schema.yaml': '''
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 0
+    fields:
+      name:
+        index: 0
+''',
+          },
+          throws: 'Invalid schema: Next index is invalid for type ID 0',
+        );
+      });
+
+      test('with duplicate type ID', () {
+        expectGeneration(
+          input: {
+            'pubspec.yaml': pubspec,
+            'lib/hive/hive_adapters.dart': '''
+$directives
+
+@GenerateAdapters([])
+void _() {}
+''',
+            'lib/hive/hive_schema.yaml': '''
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 0
+    fields: {}
+  Person2:
+    typeId: 0
+    nextIndex: 0
+    fields: {}
+''',
+          },
+          throws: 'Invalid schema: Duplicate type ID 0',
+        );
+      });
+
+      test('with duplicate field index', () {
+        expectGeneration(
+          input: {
+            'pubspec.yaml': pubspec,
+            'lib/hive/hive_adapters.dart': '''
+$directives
+
+@GenerateAdapters([])
+void _() {}
+''',
+            'lib/hive/hive_schema.yaml': '''
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 0
+    fields:
+      name:
+        index: 0
+      age:
+        index: 0
+''',
+          },
+          throws: 'Invalid schema: Duplicate field index 0 for type ID 0',
+        );
+      });
+    });
   });
 }

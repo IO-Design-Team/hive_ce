@@ -9,17 +9,29 @@ const fileExists = '';
 ///
 /// About [output]
 /// - An empty content string will result in checking for file existence only
+///
+/// Passing a value for [throws] will expect the build_runner console output to
+/// contain the given string
 void expectGeneration({
   required Map<String, String> input,
-  required Map<String, String> output,
+  Map<String, String> output = const {},
+  String? throws,
 }) {
   final projectRoot = createTestProject(input);
   Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
-  Process.runSync(
+  final result = Process.runSync(
     'dart',
     ['pub', 'run', 'build_runner', 'build'],
     workingDirectory: projectRoot,
   );
+
+  if (throws != null) {
+    expect(result.exitCode, isNot(0));
+    expect(result.stdout, contains(throws));
+    return;
+  } else {
+    expect(result.exitCode, 0);
+  }
 
   for (final MapEntry(:key, :value) in output.entries) {
     final file = File(path.join(projectRoot, key));
