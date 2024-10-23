@@ -107,7 +107,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         if (!isEnum &&
             accessor.isGetter &&
             accessor.correspondingSetter == null &&
-            !constructorFields.contains(accessor.name)) continue;
+            !constructorFields.contains(accessor.name)) {
+          continue;
+        }
 
         final name = accessor.name;
         if (accessor.isSetter) {
