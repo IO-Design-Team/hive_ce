@@ -18,7 +18,7 @@ The `hive_ce` package is a drop in replacement for Hive v2. Make the following r
 pubspec.yaml
 
 ```yaml
-# old
+# old dependencies
 dependencies:
   hive: ^2.0.0
   hive_flutter: ^1.0.0
@@ -26,7 +26,7 @@ dependencies:
 dev_dependencies:
   hive_generator: ^1.0.0
 
-# new
+# new dependencies
 dependencies:
   hive_ce: latest
   hive_ce_flutter: latest
@@ -38,11 +38,11 @@ dev_dependencies:
 Dart files
 
 ```dart
-// old
+// old imports
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-// new
+// new imports
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 ```
