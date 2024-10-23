@@ -3,18 +3,22 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-const fileExists = '';
+const fileExists = true;
+const fileDoesNotExist = false;
 
 /// Expect the given input generates the given output
 ///
 /// About [output]
-/// - An empty content string will result in checking for file existence only
+/// - A [String] value will check if the file exists and contains the given
+///   content
+/// - [fileExists] will check if the file exists
+/// - [fileDoesNotExist] will check if the file does not exist
 ///
 /// Passing a value for [throws] will expect the build_runner console output to
 /// contain the given string
 void expectGeneration({
   required Map<String, String> input,
-  Map<String, String> output = const {},
+  Map<String, Object> output = const {},
   String? throws,
 }) {
   final projectRoot = createTestProject(input);
@@ -35,13 +39,10 @@ void expectGeneration({
 
   for (final MapEntry(:key, :value) in output.entries) {
     final file = File(path.join(projectRoot, key));
-    expect(file.existsSync(), true);
+    expect(file.existsSync(), value == true || value is String);
 
-    // Do not check content if value is empty
-    if (value.isNotEmpty) {
-      final content = file.readAsStringSync();
-      expect(content, value);
-    }
+    if (value is! String) continue;
+    expect(file.readAsStringSync(), value);
   }
 }
 

@@ -7,11 +7,6 @@ const directives = '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';''';
 
-const commonOutputs = {
-  'lib/hive/hive_adapters.g.dart': fileExists,
-  'lib/hive/hive_registrar.g.dart': fileExists,
-};
-
 const personSchema = '''
 $schemaComment
 nextTypeId: 1
@@ -45,8 +40,7 @@ class Person {
 ''',
         },
         output: {
-          ...commonOutputs,
-          'lib/hive/hive_schema.yaml': personSchema,
+          'lib/hive/hive_adapters.g.yaml': personSchema,
         },
       );
     });
@@ -75,11 +69,10 @@ class Person2 {
   final int age;
 }
 ''',
-          'lib/hive/hive_schema.yaml': personSchema,
+          'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          ...commonOutputs,
-          'lib/hive/hive_schema.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 2
 types: 
@@ -121,11 +114,10 @@ class Person2 {
   final int age;
 }
 ''',
-          'lib/hive/hive_schema.yaml': personSchema,
+          'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          ...commonOutputs,
-          'lib/hive/hive_schema.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 2
 types: 
@@ -159,11 +151,10 @@ class Person {
   final int age;
 }
 ''',
-          'lib/hive/hive_schema.yaml': personSchema,
+          'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          ...commonOutputs,
-          'lib/hive/hive_schema.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
 types: 
@@ -197,11 +188,10 @@ class Person {
   final double balance;
 }
 ''',
-          'lib/hive/hive_schema.yaml': personSchema,
+          'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          ...commonOutputs,
-          'lib/hive/hive_schema.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
 types: 
@@ -229,7 +219,7 @@ $directives
 @GenerateAdapters([])
 void _() {}
 ''',
-            'lib/hive/hive_schema.yaml': '''
+            'lib/hive/hive_adapters.g.yaml': '''
 nextTypeId: 0
 types:
   Person:
@@ -252,7 +242,7 @@ $directives
 @GenerateAdapters([])
 void _() {}
 ''',
-            'lib/hive/hive_schema.yaml': '''
+            'lib/hive/hive_adapters.g.yaml': '''
 nextTypeId: 1
 types:
   Person:
@@ -277,7 +267,7 @@ $directives
 @GenerateAdapters([])
 void _() {}
 ''',
-            'lib/hive/hive_schema.yaml': '''
+            'lib/hive/hive_adapters.g.yaml': '''
 nextTypeId: 1
 types:
   Person:
@@ -304,7 +294,7 @@ $directives
 @GenerateAdapters([])
 void _() {}
 ''',
-            'lib/hive/hive_schema.yaml': '''
+            'lib/hive/hive_adapters.g.yaml': '''
 nextTypeId: 1
 types:
   Person:
