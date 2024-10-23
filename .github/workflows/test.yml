@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [hive, hive_generator, hive_flutter]
+        package: [hive, hive_flutter, hive_generator]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
