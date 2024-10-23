@@ -15,19 +15,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        package: [hive, hive_flutter, hive_generator]
         flutter-channel: [stable, beta]
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
       - run: |
-          dart pub global activate puby
-          dart pub global activate custom_lint
-          puby link
+          dart pub get
           dart format . --set-exit-if-changed
           dart analyze --fatal-infos
-          custom_lint
+          dart pub run custom_lint
 
   test-hive:
     runs-on: ubuntu-latest
