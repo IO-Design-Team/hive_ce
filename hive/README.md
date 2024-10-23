@@ -259,13 +259,15 @@ The Hive schema is a generated yaml file that contains the information necessary
 
 Some migrations might require manual modifications to the Hive schema file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
 
-Another example is switching an existing app from explicit HiveTypes to the new `GenerateAdapters` method. Take the following steps in this case:
+### Migrating to `GenerateAdapters`
+
+Another example of manual modifications to the Hive schema is switching an existing app from explicit HiveTypes to the new `GenerateAdapters` method. Take the following steps in this case:
 
 1. Make sure your existing TypeAdapters are up to date
 2. Convert any `HiveType.defaultValue` values to constructor parameter defaults
-3. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
-4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
-5. Make any necessary modifications to the Hive schema so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
+3. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
+4. Make any necessary modifications to the Hive schema so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
+5. Finally, remove all explicit `HiveType` and `HiveField` annotations from your model classes
 
 ### Explicitly defining HiveTypes
 
