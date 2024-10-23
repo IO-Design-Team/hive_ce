@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -32,24 +33,36 @@ class RegistrarIntermediateBuilder implements Builder {
       adapters.add(adapterName);
     }
 
+    // If the registrar should be placed next to this file
+    final bool registrarLocation;
+
     final generateAdaptersElements = LibraryReader(library)
         .annotatedWith(TypeChecker.fromRuntime(GenerateAdapters));
-    for (final annotatedElement in generateAdaptersElements) {
-      final annotation = annotatedElement.annotation;
+    if (generateAdaptersElements.length > 1) {
+      throw HiveError(RegistrarIntermediate.multipleGenerateAdaptersError);
+    } else if (generateAdaptersElements.isNotEmpty) {
+      registrarLocation = true;
+
+      final annotation = generateAdaptersElements.single.annotation;
       final revived = RevivedGenerateAdapters(annotation);
       for (final spec in revived.specs) {
         adapters.add(generateAdapterName(spec.type.getDisplayString()));
       }
+    } else {
+      registrarLocation = false;
     }
 
     if (adapters.isEmpty) return;
 
     await buildStep.writeAsString(
       buildStep.allowedOutputs.first,
-      jsonEncode({
-        'uri': library.source.uri.toString(),
-        'adapters': adapters,
-      }),
+      jsonEncode(
+        RegistrarIntermediate(
+          uri: library.source.uri,
+          adapters: adapters,
+          registrarLocation: registrarLocation,
+        ),
+      ),
     );
   }
 }

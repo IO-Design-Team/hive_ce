@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
@@ -12,7 +11,6 @@ import 'package:hive_ce_generator/src/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';
-import 'package:path/path.dart' as path;
 
 /// The comment placed at the top of the schema file
 const schemaComment = '''
@@ -31,8 +29,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final library = await buildStep.inputLibrary;
     final revived = RevivedGenerateAdapters(annotation);
 
-    final schemaPath = path.join('lib', 'hive', 'hive_schema.yaml');
-    final schemaAsset = buildStep.asset(schemaPath);
+    final schemaAsset = buildStep.inputId.changeExtension('.g.yaml');
     final HiveSchema schema;
     if (await buildStep.canRead(schemaAsset)) {
       final schemaContent = await buildStep.readAsString(schemaAsset);
@@ -83,7 +80,8 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     // Do not output the schema file through the buildStep since conflicting
     // output handling will delete it before this generator runs
     // Not the safest thing to do, but there doesn't seem to be a better way
-    File(schemaPath).writeAsStringSync(
+    buildStep.forceWriteAsString(
+      schemaAsset,
       '''
 $schemaComment
 $yaml''',

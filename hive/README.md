@@ -170,7 +170,9 @@ class Person extends HiveObject {
 
 ```
 
-### Create `lib/hive/hive_adapters.dart`
+### Create a `GeneateAdapters` annotation
+
+Usually this is placed in `lib/hive/hive_adapters.dart`
 
 <!-- embedme readme/store_objects/hive_adapters.dart -->
 
@@ -205,9 +207,9 @@ This will generate the following:
 
 - TypeAdapters for the specified AdapterSpecs
 - TypeAdapters for all explicitly defined HiveTypes
-- A `lib/hive/hive_adapters.g.dart` file containing all adapters generated from the `GenerateAdapters` annotation
-- A `lib/hive/hive_registrar.g.dart` file containing an extension method to register all generated adapters
-- A `lib/hive/hive_schema.yaml` file
+- A `hive_adapters.g.dart` file containing all adapters generated from the `GenerateAdapters` annotation
+- A `hive_adapters.g.yaml` file
+- A `hive_registrar.g.dart` file containing an extension method to register all generated adapters
 
 All of the generated files should be checked into version control. These files are explained in more detail below.
 
@@ -251,11 +253,11 @@ void example() async {
 
 ```
 
-### About `hive_schema.yaml`
+### About `hive_adapters.g.yaml`
 
-The Hive schema is a generated file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
+The Hive schema is a generated yaml file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
 
-Some migrations might require manual modifications to the `hive_schema.yaml` file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
+Some migrations might require manual modifications to the Hive schema file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
 
 Another example is switching an existing app from explicit HiveTypes to the new `GenerateAdapters` method. Take the following steps in this case:
 
@@ -263,7 +265,7 @@ Another example is switching an existing app from explicit HiveTypes to the new 
 2. Convert any `HiveType.defaultValue` values to constructor parameter defaults
 3. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
 4. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
-5. Make any necessary modifications to `hive_schema.yaml` so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
+5. Make any necessary modifications to the Hive schema so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
 
 ### Explicitly defining HiveTypes
 

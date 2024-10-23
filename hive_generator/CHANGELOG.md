@@ -1,8 +1,5 @@
-## 2.0.0
+## 1.8.0
 
-NOTE: This is a breaking change. See the [migration guide](MIGRATION.md) for more information.
-
-- **BREAKING**: Moves `hive_registrar.g.dart` to `hive/hive_registrar.g.dart`
 - Adds support for the `GenerateAdapters` annotation. See the [hive_ce documentation](https://pub.dev/packages/hive_ce) for more information.
 
 ## 1.7.0

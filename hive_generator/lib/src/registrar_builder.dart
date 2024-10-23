@@ -2,27 +2,39 @@ import 'dart:convert';
 
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
+import 'package:hive_ce/hive.dart';
 import 'dart:async';
 
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 
 /// Generate the HiveRegistrar for the entire project
 class RegistrarBuilder implements Builder {
   @override
   final buildExtensions = const {
-    r'$lib$': ['hive/hive_registrar.g.dart'],
+    r'$lib$': ['hive_registrar.g.dart']
   };
 
   @override
   Future<void> build(BuildStep buildStep) async {
     final uris = <String>[];
     final adapters = <String>[];
+    String? registrarPath;
     await for (final input
         in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
       final content = await buildStep.readAsString(input);
-      final data = jsonDecode(content) as Map<String, dynamic>;
-      uris.add(data['uri'] as String);
-      adapters.addAll((data['adapters'] as List).cast<String>());
+      final data = RegistrarIntermediate.fromJson(jsonDecode(content));
+      final uri = data.uri;
+      uris.add(uri.toString());
+      adapters.addAll(data.adapters);
+      if (data.registrarLocation) {
+        if (registrarPath != null) {
+          throw HiveError(RegistrarIntermediate.multipleGenerateAdaptersError);
+        }
+        final segments = uri.pathSegments;
+        // Skip the package segment and remove the file segment
+        registrarPath = segments.sublist(1, segments.length - 1).join('/');
+      }
     }
 
     // Do not create the registrar if there are no adapters
@@ -58,8 +70,14 @@ extension HiveRegistrar on HiveInterface {
 }
 ''');
 
-    await buildStep.writeAsString(
-      buildStep.asset('lib/hive/hive_registrar.g.dart'),
+    var registrarLocation = 'lib';
+    if (registrarPath != null) {
+      registrarLocation += '/$registrarPath';
+    }
+    registrarLocation += '/hive_registrar.g.dart';
+
+    buildStep.forceWriteAsString(
+      buildStep.asset(registrarLocation),
       buffer.toString(),
     );
   }
