@@ -61,7 +61,7 @@ jobs:
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
 
-  test-hive-flutter:
+  test-hive_flutter:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -80,10 +80,17 @@ jobs:
         run: flutter test
 
   test-hive_generator:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [stable, beta]
+        include:
+          - flutter-channel: stable
+            os: ubuntu-latest
+          - flutter-channel: stable
+            # Test on windows since the generator directly accesses the file system
+            os: windows-latest
+          - flutter-channel: beta
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: hive_generator
@@ -94,8 +101,8 @@ jobs:
           channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
-      - name: Generate build_runner output
-        run: dart pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        run: dart test
 
   ensure-codegen:
     runs-on: ubuntu-latest
@@ -106,6 +113,14 @@ jobs:
           dart pub global activate puby
           puby link
           puby gen
+          git diff --exit-code
+
+  ensure-embedme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npx embedme **/*.md
           git diff --exit-code
 
   check-score:
