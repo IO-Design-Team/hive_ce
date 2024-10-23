@@ -12,7 +12,7 @@ import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 class RegistrarBuilder implements Builder {
   @override
   final buildExtensions = const {
-    r'$lib$': ['hive_registrar.g.dart']
+    r'$lib$': ['hive_registrar.g.dart'],
   };
 
   @override
