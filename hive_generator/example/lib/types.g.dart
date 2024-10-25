@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: unnecessary_const, require_trailing_commas, unnecessary_breaks, document_ignores
+// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores
 
 part of 'types.dart';
 
@@ -314,13 +314,10 @@ class Enum1Adapter extends TypeAdapter<Enum1> {
     switch (obj) {
       case Enum1.emumValue1:
         writer.writeByte(0);
-        break;
       case Enum1.emumValue2:
         writer.writeByte(1);
-        break;
       case Enum1.emumValue3:
         writer.writeByte(2);
-        break;
     }
   }
 

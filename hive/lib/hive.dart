@@ -24,6 +24,7 @@ export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.io) 'package:hive_ce/src/box_collection/box_collection.dart';
 export 'src/object/hive_object.dart' show HiveObject, HiveObjectMixin;
 
+part 'src/annotations/generate_adapters.dart';
 part 'src/annotations/hive_field.dart';
 part 'src/annotations/hive_type.dart';
 part 'src/binary/binary_reader.dart';

@@ -16,11 +16,8 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$FreezedPerson {
-  @HiveField(0)
   String get firstName => throw _privateConstructorUsedError;
-  @HiveField(1)
   String get lastName => throw _privateConstructorUsedError;
-  @HiveField(2)
   int get age => throw _privateConstructorUsedError;
 
   /// Create a copy of FreezedPerson
@@ -36,10 +33,7 @@ abstract class $FreezedPersonCopyWith<$Res> {
           FreezedPerson value, $Res Function(FreezedPerson) then) =
       _$FreezedPersonCopyWithImpl<$Res, FreezedPerson>;
   @useResult
-  $Res call(
-      {@HiveField(0) String firstName,
-      @HiveField(1) String lastName,
-      @HiveField(2) int age});
+  $Res call({String firstName, String lastName, int age});
 }
 
 /// @nodoc
@@ -86,10 +80,7 @@ abstract class _$$FreezedPersonImplCopyWith<$Res>
       __$$FreezedPersonImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {@HiveField(0) String firstName,
-      @HiveField(1) String lastName,
-      @HiveField(2) int age});
+  $Res call({String firstName, String lastName, int age});
 }
 
 /// @nodoc
@@ -130,18 +121,13 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
 
 class _$FreezedPersonImpl implements _FreezedPerson {
   const _$FreezedPersonImpl(
-      {@HiveField(0) required this.firstName,
-      @HiveField(1) required this.lastName,
-      @HiveField(2) required this.age});
+      {required this.firstName, required this.lastName, required this.age});
 
   @override
-  @HiveField(0)
   final String firstName;
   @override
-  @HiveField(1)
   final String lastName;
   @override
-  @HiveField(2)
   final int age;
 
   @override
@@ -175,18 +161,15 @@ class _$FreezedPersonImpl implements _FreezedPerson {
 
 abstract class _FreezedPerson implements FreezedPerson {
   const factory _FreezedPerson(
-      {@HiveField(0) required final String firstName,
-      @HiveField(1) required final String lastName,
-      @HiveField(2) required final int age}) = _$FreezedPersonImpl;
+      {required final String firstName,
+      required final String lastName,
+      required final int age}) = _$FreezedPersonImpl;
 
   @override
-  @HiveField(0)
   String get firstName;
   @override
-  @HiveField(1)
   String get lastName;
   @override
-  @HiveField(2)
   int get age;
 
   /// Create a copy of FreezedPerson

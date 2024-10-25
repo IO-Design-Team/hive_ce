@@ -4,6 +4,5 @@ targets:
       source_gen|combining_builder:
         options:
           ignore_for_file:
-            - unnecessary_const
-            - require_trailing_commas
             - document_ignores
+            - require_trailing_commas
