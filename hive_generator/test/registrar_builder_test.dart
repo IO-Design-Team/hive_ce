@@ -91,7 +91,7 @@ class Type {}
 ''',
           'lib/hive_adapters_2.dart': '''
 import 'package:hive_ce/hive.dart';
-part 'hive_adapters.g.dart';
+part 'hive_adapters_2.g.dart';
 
 @GenerateAdapters([AdapterSpec<Type2>()])
 class Type2 {}
@@ -99,8 +99,8 @@ class Type2 {}
         },
         throws: '''
 GenerateAdapters annotation found in more than one file:
-- package:hive_ce_generator_test/hive_adapters_2.dart
-- package:hive_ce_generator_test/hive_adapters.dart''',
+- package:hive_ce_generator_test/hive_adapters.dart
+- package:hive_ce_generator_test/hive_adapters_2.dart''',
       );
     });
   });

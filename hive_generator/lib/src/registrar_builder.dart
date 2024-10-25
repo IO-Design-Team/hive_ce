@@ -29,10 +29,12 @@ class RegistrarBuilder implements Builder {
       adapters.addAll(data.adapters);
       if (data.registrarLocation) {
         if (registrarUri != null) {
+          final sortedUris =
+              [registrarUri, uri].map((e) => e.toString()).toList()..sort();
+          final urisString = sortedUris.map((e) => '- $e').join('\n');
           throw HiveError('''
 GenerateAdapters annotation found in more than one file:
-- $registrarUri
-- $uri''');
+$urisString''');
         }
         registrarUri = uri;
       }
