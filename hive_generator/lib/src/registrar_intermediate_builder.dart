@@ -39,7 +39,9 @@ class RegistrarIntermediateBuilder implements Builder {
     final generateAdaptersElements = LibraryReader(library)
         .annotatedWith(TypeChecker.fromRuntime(GenerateAdapters));
     if (generateAdaptersElements.length > 1) {
-      throw HiveError(RegistrarIntermediate.multipleGenerateAdaptersError);
+      throw HiveError(
+        'Multiple GenerateAdapters annotations found in file: ${library.source.uri}',
+      );
     } else if (generateAdaptersElements.isNotEmpty) {
       registrarLocation = true;
 

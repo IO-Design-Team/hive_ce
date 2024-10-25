@@ -19,7 +19,7 @@ class RegistrarBuilder implements Builder {
   Future<void> build(BuildStep buildStep) async {
     final uris = <String>[];
     final adapters = <String>[];
-    String? registrarPath;
+    Uri? registrarUri;
     await for (final input
         in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
       final content = await buildStep.readAsString(input);
@@ -28,12 +28,13 @@ class RegistrarBuilder implements Builder {
       uris.add(uri.toString());
       adapters.addAll(data.adapters);
       if (data.registrarLocation) {
-        if (registrarPath != null) {
-          throw HiveError(RegistrarIntermediate.multipleGenerateAdaptersError);
+        if (registrarUri != null) {
+          throw HiveError('''
+GenerateAdapters annotation found in more than one file:
+- $registrarUri
+- $uri''');
         }
-        final segments = uri.pathSegments;
-        // Skip the package segment and remove the file segment
-        registrarPath = segments.sublist(1, segments.length - 1).join('/');
+        registrarUri = uri;
       }
     }
 
@@ -71,7 +72,10 @@ extension HiveRegistrar on HiveInterface {
 ''');
 
     var registrarLocation = 'lib';
-    if (registrarPath != null) {
+    if (registrarUri != null) {
+      final segments = registrarUri.pathSegments;
+      // Skip the package segment and remove the file segment
+      final registrarPath = segments.sublist(1, segments.length - 1).join('/');
       registrarLocation += '/$registrarPath';
     }
     registrarLocation += '/hive_registrar.g.dart';

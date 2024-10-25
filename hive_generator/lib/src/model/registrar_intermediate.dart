@@ -5,10 +5,6 @@ part 'registrar_intermediate.g.dart';
 /// Intermediate information to generate the Hive registrar
 @JsonSerializable()
 class RegistrarIntermediate {
-  /// Error when multiple GenerateAdapters annotations are found
-  static const multipleGenerateAdaptersError =
-      'Only one GenerateAdapters annotation is allowed';
-
   /// The URI of the file this intermediate describes
   final Uri uri;
 

@@ -1,4 +1,3 @@
-import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -74,7 +73,8 @@ class Type {}
 class Type2 {}
 ''',
         },
-        throws: RegistrarIntermediate.multipleGenerateAdaptersError,
+        throws:
+            'Multiple GenerateAdapters annotations found in file: package:hive_ce_generator_test/hive_adapters.dart',
       );
     });
 
@@ -97,7 +97,10 @@ part 'hive_adapters.g.dart';
 class Type2 {}
 ''',
         },
-        throws: RegistrarIntermediate.multipleGenerateAdaptersError,
+        throws: '''
+GenerateAdapters annotation found in more than one file:
+- package:hive_ce_generator_test/hive_adapters_2.dart
+- package:hive_ce_generator_test/hive_adapters.dart''',
       );
     });
   });
