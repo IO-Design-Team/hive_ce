@@ -10,14 +10,14 @@ part 'hive_adapters.g.dart';''';
 const personSchema = '''
 $schemaComment
 nextTypeId: 1
-types: 
-  Person: 
+types:
+  Person:
     typeId: 0
     nextIndex: 2
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
 ''';
 
@@ -75,22 +75,22 @@ class Person2 {
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 2
-types: 
-  Person: 
+types:
+  Person:
     typeId: 0
     nextIndex: 2
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
-  Person2: 
+  Person2:
     typeId: 1
     nextIndex: 2
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
 ''',
         },
@@ -120,14 +120,14 @@ class Person2 {
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 2
-types: 
-  Person2: 
+types:
+  Person2:
     typeId: 1
     nextIndex: 2
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
 ''',
         },
@@ -157,16 +157,16 @@ class Person {
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
-types: 
-  Person: 
+types:
+  Person:
     typeId: 0
     nextIndex: 3
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
-      balance: 
+      balance:
         index: 2
 ''',
         },
@@ -194,14 +194,14 @@ class Person {
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
-types: 
-  Person: 
+types:
+  Person:
     typeId: 0
     nextIndex: 3
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      balance: 
+      balance:
         index: 2
 ''',
         },

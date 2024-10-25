@@ -2,24 +2,24 @@
 # Manual modifications may be necessary for certain migrations
 # Check into version control
 nextTypeId: 2
-types: 
-  Person: 
+types:
+  Person:
     typeId: 0
     nextIndex: 3
-    fields: 
-      name: 
+    fields:
+      name:
         index: 0
-      age: 
+      age:
         index: 1
-      friends: 
+      friends:
         index: 2
-  FreezedPerson: 
+  FreezedPerson:
     typeId: 1
     nextIndex: 3
-    fields: 
-      firstName: 
+    fields:
+      firstName:
         index: 0
-      lastName: 
+      lastName:
         index: 1
-      age: 
+      age:
         index: 2
