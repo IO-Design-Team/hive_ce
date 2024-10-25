@@ -32,9 +32,9 @@ class RegistrarBuilder implements Builder {
           final sortedUris =
               [registrarUri, uri].map((e) => e.toString()).toList()..sort();
           final urisString = sortedUris.map((e) => '- $e').join('\n');
-          throw HiveError('''
-GenerateAdapters annotation found in more than one file:
-$urisString''');
+          throw HiveError(
+            'GenerateAdapters annotation found in more than one file:\n$urisString',
+          );
         }
         registrarUri = uri;
       }
