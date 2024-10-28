@@ -1,4 +1,4 @@
-/// TODO: Document this!
+/// Stub `path.join` method
 String join(
   String part1, [
   String? part2,

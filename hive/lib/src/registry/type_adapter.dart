@@ -1,4 +1,6 @@
-part of '../../hive.dart';
+import 'package:hive_ce/src/binary/binary_reader.dart';
+import 'package:hive_ce/src/binary/binary_writer.dart';
+import 'package:meta/meta.dart';
 
 /// Type adapters can be implemented to support non primitive values.
 @immutable

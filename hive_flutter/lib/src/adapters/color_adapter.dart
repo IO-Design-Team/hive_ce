@@ -1,4 +1,5 @@
-part of '../../adapters.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hive_ce/hive.dart';
 
 /// TODO: Document this!
 class ColorAdapter extends TypeAdapter<Color> {

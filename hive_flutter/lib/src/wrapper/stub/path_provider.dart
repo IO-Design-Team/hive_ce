@@ -1,10 +1,10 @@
-/// TODO: Document this!
+/// Stub directory
 abstract class Directory {
-  /// TODO: Document this!
+  /// Stub path
   String get path;
 }
 
-/// TODO: Document this!
+/// Stub call
 Future<Directory> getApplicationDocumentsDirectory() {
   throw UnimplementedError(
     '[Hive Error] Tried to use the `path_provider` package from Flutter Web.',

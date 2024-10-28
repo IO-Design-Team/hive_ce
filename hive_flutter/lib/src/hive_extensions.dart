@@ -1,4 +1,8 @@
-part of '../hive_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hive_ce_flutter/adapters.dart';
+import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
+import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 
 /// Flutter extensions for Hive.
 extension HiveX on HiveInterface {
