@@ -33,10 +33,14 @@ void main() {
         expect(collection.name, 'MyFirstFluffyBox');
         expect(collection.boxNames, {'cats', 'dogs'});
       });
-      test('initializes Hive', () async {
-        await _openCollection();
-        expect(hive.homePath, isNotNull);
-      });
+      test(
+        'initializes Hive',
+        () async {
+          await _openCollection();
+          expect(hive.homePath, isNotNull);
+        },
+        skip: isBrowser,
+      );
       test('does not reinitialize Hive', () async {
         hive.init('MYPATH');
         await _openCollection();
