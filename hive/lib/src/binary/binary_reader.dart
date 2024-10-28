@@ -1,4 +1,7 @@
-part of '../../hive.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:hive_ce/src/object/hive_list.dart';
 
 /// The [BinaryReader] is used to bring data back from the binary format on the
 /// disk.

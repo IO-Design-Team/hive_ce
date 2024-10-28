@@ -1,4 +1,4 @@
-part of '../../hive.dart';
+import 'package:meta/meta_meta.dart';
 
 /// Annotate all fields you want to persist with [HiveField].
 @Target({

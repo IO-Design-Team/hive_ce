@@ -1,4 +1,12 @@
-part of '../../hive.dart';
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:crypto/crypto.dart';
+import 'package:hive_ce/src/crypto/aes_cbc_pkcs7.dart';
+import 'package:hive_ce/src/crypto/crc32.dart';
+import 'package:hive_ce/src/crypto/hive_cipher.dart';
+import 'package:hive_ce/src/util/extensions.dart';
+import 'package:meta/meta.dart';
 
 /// Default encryption algorithm. Uses AES256 CBC with PKCS7 padding.
 class HiveAesCipher implements HiveCipher {

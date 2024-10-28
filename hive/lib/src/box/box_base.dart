@@ -1,5 +1,3 @@
-part of '../../hive.dart';
-
 /// A event representing a change in a box.
 class BoxEvent {
   /// The key of the changed entry
