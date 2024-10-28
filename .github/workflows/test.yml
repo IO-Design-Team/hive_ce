@@ -15,20 +15,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        package: [hive, hive_flutter, hive_generator]
         flutter-channel: [stable, beta]
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
-      # TODO: Use custom_lint from hosted when https://github.com/invertase/dart_custom_lint/pull/272 lands
       - run: |
-          dart pub global activate puby
-          dart pub global activate -sgit https://github.com/Rexios80/dart_custom_lint --git-ref f62fe2e1dc03162d1bb55dbba7e6b37bc08d81a1 --git-path packages/custom_lint
-          puby link
+          dart pub get
           dart format . --set-exit-if-changed
           dart analyze --fatal-infos
-          custom_lint
+          dart run custom_lint
 
   test-hive:
     runs-on: ubuntu-latest
@@ -60,7 +61,7 @@ jobs:
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
 
-  test-hive-flutter:
+  test-hive_flutter:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -79,10 +80,17 @@ jobs:
         run: flutter test
 
   test-hive_generator:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        flutter-channel: [stable, beta]
+        include:
+          - flutter-channel: stable
+            os: ubuntu-latest
+          - flutter-channel: stable
+            # Test on windows since the generator directly accesses the file system
+            os: windows-latest
+          - flutter-channel: beta
+            os: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: hive_generator
@@ -93,8 +101,8 @@ jobs:
           channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
-      - name: Generate build_runner output
-        run: dart pub run build_runner build --delete-conflicting-outputs
+      - name: Run tests
+        run: dart test
 
   ensure-codegen:
     runs-on: ubuntu-latest
@@ -107,11 +115,19 @@ jobs:
           puby gen
           git diff --exit-code
 
+  ensure-embedme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          npx embedme **/*.md
+          git diff --exit-code
+
   check-score:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [hive, hive_generator, hive_flutter]
+        package: [hive, hive_flutter, hive_generator]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
