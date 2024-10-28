@@ -1,4 +1,9 @@
-part of '../hive.dart';
+import 'dart:typed_data';
+
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/box/default_compaction_strategy.dart';
+import 'package:hive_ce/src/box/default_key_comparator.dart';
+import 'package:meta/meta.dart';
 
 /// The main API interface of Hive. Available through the `Hive` constant.
 abstract class HiveInterface implements TypeRegistry {

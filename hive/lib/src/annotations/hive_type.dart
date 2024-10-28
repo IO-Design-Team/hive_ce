@@ -1,4 +1,4 @@
-part of '../../hive.dart';
+import 'package:meta/meta_meta.dart';
 
 /// Annotate classes with [HiveType] to generate a `TypeAdapter`.
 @Target({TargetKind.type})

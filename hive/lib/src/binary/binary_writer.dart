@@ -1,4 +1,6 @@
-part of '../../hive.dart';
+import 'dart:convert';
+
+import 'package:hive_ce/src/object/hive_list.dart';
 
 /// The [BinaryWriter] is used to encode data to the binary format.
 abstract class BinaryWriter {

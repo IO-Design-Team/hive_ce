@@ -1,5 +1,3 @@
-part of '../../hive.dart';
-
 /// declares the preferred JS StorageBackend to be used
 ///
 /// - [native] causes almost no startup delay while being slow with huge DB
