@@ -2,6 +2,8 @@
 // Do not modify
 // Check in to version control
 
+// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores
+
 import 'package:hive_ce/hive.dart';
 import 'package:example/hive/hive_adapters.dart';
 import 'package:example/types.dart';
