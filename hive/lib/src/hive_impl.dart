@@ -33,6 +33,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   @visibleForTesting
   String? homePath;
 
+  @override
+  bool get isInitialized => homePath != null;
+
   /// Not part of public API
   HiveImpl() {
     _registerDefaultAdapters();

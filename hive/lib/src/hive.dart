@@ -11,6 +11,9 @@ abstract class HiveInterface implements TypeRegistry {
         HiveStorageBackendPreference.native,
   });
 
+  /// Returns true if Hive is initialized.
+  bool get isInitialized;
+
   /// Opens a box.
   ///
   /// If the box is already open, the instance is returned and all provided

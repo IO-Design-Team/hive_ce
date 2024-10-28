@@ -1,4 +1,5 @@
-import 'package:hive_ce/src/box_collection/box_collection.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
 Future<BoxCollection> _openCollection({bool withData = false}) async {
@@ -115,6 +116,12 @@ void main() {
       final box = await collection.openBox('cats');
       await box.clear();
       expect(await box.getAllKeys(), []);
+    });
+
+    test('Does not reinitialize Hive path', () async {
+      Hive.init('MYPATH');
+      await _openCollection();
+      expect((Hive as HiveImpl).homePath, 'MYPATH');
     });
   });
 }

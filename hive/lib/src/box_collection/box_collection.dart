@@ -18,8 +18,6 @@ class BoxCollection implements implementation.BoxCollection {
   /// TODO: Document this!
   BoxCollection(this.name, this.boxNames);
 
-  static bool _hiveInit = false;
-
   late Box<String> _badKeyBox;
 
   /// TODO: Document this!
@@ -29,9 +27,8 @@ class BoxCollection implements implementation.BoxCollection {
     String? path,
     HiveCipher? key,
   }) async {
-    if (!_hiveInit) {
+    if (!Hive.isInitialized) {
       Hive.init(path ?? './');
-      _hiveInit = true;
     }
     final collection = BoxCollection(name, boxNames);
     if (key != null) {
