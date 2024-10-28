@@ -1,5 +1,3 @@
-part of '../../hive.dart';
-
 /// Annotation to generate TypeAdapters for the given [specs]
 class GenerateAdapters {
   /// Constructor
