@@ -15,10 +15,17 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
 
 void main() {
   group('BoxCollection', () {
-    test('.open', () async {
-      final collection = await _openCollection();
-      expect(collection.name, 'MyFirstFluffyBox');
-      expect(collection.boxNames, {'cats', 'dogs'});
+    group('.open', () {
+      test('works', () async {
+        final collection = await _openCollection();
+        expect(collection.name, 'MyFirstFluffyBox');
+        expect(collection.boxNames, {'cats', 'dogs'});
+      });
+      test('does not reinitialize Hive', () async {
+        Hive.init('MYPATH');
+        await _openCollection();
+        expect((Hive as HiveImpl).homePath, 'MYPATH');
+      });
     });
     test('.openBox', () async {
       final collection = await _openCollection();
@@ -116,12 +123,6 @@ void main() {
       final box = await collection.openBox('cats');
       await box.clear();
       expect(await box.getAllKeys(), []);
-    });
-
-    test('Does not reinitialize Hive path', () async {
-      Hive.init('MYPATH');
-      await _openCollection();
-      expect((Hive as HiveImpl).homePath, 'MYPATH');
     });
   });
 }
