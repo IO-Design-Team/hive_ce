@@ -1,3 +1,7 @@
+## 1.7.0
+
+- Supports named imports
+
 ## 1.6.0
 
 - Adds `.freezed.dart` to `required_inputs` to support `freezed`

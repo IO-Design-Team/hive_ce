@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:hive_ce/hive.dart';
@@ -123,7 +124,7 @@ class ClassBuilder extends Builder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      return '$variable as ${type.getDisplayString()}';
+      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
   }
 
@@ -154,7 +155,7 @@ class ClassBuilder extends Builder {
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
-      return '$suffix.cast<${arg.getDisplayString()}>()';
+      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
     }
   }
 
@@ -167,8 +168,8 @@ class ClassBuilder extends Builder {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
-      return '$suffix.cast<${arg1.getDisplayString()}, '
-          '${arg2.getDisplayString()}>()';
+      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
+          '${arg2.getPrefixedDisplayString(cls.library)}>()';
     }
   }
 
@@ -218,4 +219,27 @@ String _suffixFromType(DartType type) {
     NullabilitySuffix.question => '?',
     _ => '',
   };
+}
+
+extension on DartType {
+  String getPrefixedDisplayString(LibraryElement currentLibrary) {
+    final element = this.element;
+    if (element == null) return getDisplayString();
+
+    final definingLibrary = element.library;
+    if (definingLibrary == currentLibrary) return getDisplayString();
+
+    // TODO: This is failing in beta (remove when fixed)
+    // ignore: deprecated_member_use
+    for (final import in currentLibrary.libraryImports) {
+      for (final MapEntry(:key, :value)
+          in import.namespace.definedNames.entries) {
+        if (value == element) {
+          return '$key${_suffixFromType(this)}';
+        }
+      }
+    }
+
+    return getDisplayString();
+  }
 }

@@ -1,4 +1,7 @@
-part of '../hive_flutter.dart';
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:hive_ce/hive.dart';
 
 /// Flutter extensions for boxes.
 extension BoxX<T> on Box<T> {

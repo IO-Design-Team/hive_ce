@@ -1,3 +1,7 @@
+## 2.7.0
+
+- No longer reinitializes `Hive` when opening a `BoxCollection`
+
 ## 2.6.0
 
 - Adds `TargetKind.parameter` to `HiveField` to support `freezed`

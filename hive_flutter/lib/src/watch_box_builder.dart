@@ -1,4 +1,7 @@
-part of '../hive_flutter.dart';
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
+import 'package:hive_ce/hive.dart';
 
 /// Signature for a function that builds a widget given a [Box].
 @Deprecated('Use [ValueListenableBuilder] and `box.listenable()` instead')

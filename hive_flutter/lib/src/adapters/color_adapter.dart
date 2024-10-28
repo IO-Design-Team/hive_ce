@@ -1,5 +1,4 @@
-import 'dart:ui';
-
+import 'package:flutter/widgets.dart';
 import 'package:hive_ce/hive.dart';
 
 part 'color_adapter.g.dart';

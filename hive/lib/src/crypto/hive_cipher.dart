@@ -1,4 +1,4 @@
-part of '../../hive.dart';
+import 'dart:typed_data';
 
 /// Abstract cipher can be implemented to customize encryption.
 abstract class HiveCipher {
