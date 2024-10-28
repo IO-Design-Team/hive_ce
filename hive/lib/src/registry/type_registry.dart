@@ -1,4 +1,4 @@
-part of '../../hive.dart';
+import 'package:hive_ce/src/registry/type_adapter.dart';
 
 /// TypeRegistries contain the [TypeAdapter]s associated with a typeId.
 ///

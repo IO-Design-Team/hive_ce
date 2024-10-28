@@ -1,4 +1,4 @@
-part of '../../hive.dart';
+import 'package:hive_ce/src/box/box_base.dart';
 
 /// [LazyBox]es don't keep the values in memory like normal boxes. Each time a
 /// value is read, it is loaded from the backend.
