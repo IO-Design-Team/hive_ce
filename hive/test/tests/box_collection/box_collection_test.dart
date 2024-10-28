@@ -16,9 +16,15 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
 }
 
 void main() {
+  final hive = Hive as HiveImpl;
+
   // web: The indexed db name identifies the collection
   // other: The box name identifies the collection
   final expectedBoxName = isBrowser ? 'cats' : 'MyFirstFluffyBox_cats';
+
+  tearDown(() {
+    hive.homePath = null;
+  });
 
   group('BoxCollection', () {
     group('.open', () {
@@ -27,10 +33,14 @@ void main() {
         expect(collection.name, 'MyFirstFluffyBox');
         expect(collection.boxNames, {'cats', 'dogs'});
       });
-      test('does not reinitialize Hive', () async {
-        Hive.init('MYPATH');
+      test('initializes Hive', () async {
         await _openCollection();
-        expect((Hive as HiveImpl).homePath, 'MYPATH');
+        expect(hive.homePath, isNotNull);
+      });
+      test('does not reinitialize Hive', () async {
+        hive.init('MYPATH');
+        await _openCollection();
+        expect(hive.homePath, 'MYPATH');
       });
     });
     test('.openBox', () async {
