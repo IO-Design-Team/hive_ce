@@ -6,6 +6,7 @@ import 'package:hive_ce/hive.dart';
 
 import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
+import 'package:hive_ce/src/hive_impl.dart';
 
 /// TODO: Document this!
 class BoxCollection implements implementation.BoxCollection {
@@ -27,7 +28,9 @@ class BoxCollection implements implementation.BoxCollection {
     String? path,
     HiveCipher? key,
   }) async {
-    if (!Hive.isInitialized) {
+    // This is internal access
+    // ignore: invalid_use_of_visible_for_testing_member
+    if ((Hive as HiveImpl).homePath == null) {
       Hive.init(path ?? './');
     }
     final collection = BoxCollection(name, boxNames);

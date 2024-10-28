@@ -33,11 +33,6 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   @visibleForTesting
   String? homePath;
 
-  bool _isInitialized = false;
-
-  @override
-  bool get isInitialized => _isInitialized;
-
   /// Not part of public API
   HiveImpl() {
     _registerDefaultAdapters();
@@ -63,7 +58,6 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   }) {
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);
-    _isInitialized = true;
   }
 
   Future<BoxBase<E>> _openBox<E>(
