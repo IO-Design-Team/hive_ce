@@ -2,6 +2,8 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
+import '../../util/is_browser.dart';
+
 Future<BoxCollection> _openCollection({bool withData = false}) async {
   final collection =
       await BoxCollection.open('MyFirstFluffyBox', {'cats', 'dogs'});
@@ -14,6 +16,10 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
 }
 
 void main() {
+  // web: The indexed db name identifies the collection
+  // other: The box name identifies the collection
+  final expectedBoxName = isBrowser ? 'cats' : 'MyFirstFluffyBox_cats';
+
   group('BoxCollection', () {
     group('.open', () {
       test('works', () async {
@@ -36,7 +42,7 @@ void main() {
         // The test passed
       }
       final box1 = await collection.openBox('cats');
-      expect(box1.name, 'MyFirstFluffyBox_cats');
+      expect(box1.name, expectedBoxName);
     });
 
     test('.transaction', () async {
@@ -55,7 +61,7 @@ void main() {
     test('.name', () async {
       final collection = await _openCollection();
       final box = await collection.openBox('cats');
-      expect(box.name, 'MyFirstFluffyBox_cats');
+      expect(box.name, expectedBoxName);
     });
 
     test('.boxCollection', () async {
