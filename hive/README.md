@@ -281,7 +281,7 @@ When adding a new non-nullable field to an existing object, you need to specify 
 
 For example, consider an existing database with a `Person` object:
 
-<!-- embedme readme/add_fields/person.dart -->
+<!-- embedme readme/add_fields/person_1.dart -->
 
 ```dart
 import 'package:hive_ce/hive.dart';
