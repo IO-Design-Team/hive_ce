@@ -125,6 +125,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (setterField != null) setters.add(setterField);
     }
 
+    // Sort by index for deterministic output
+    getters.sort((a, b) => a.index.compareTo(b.index));
+    setters.sort((a, b) => a.index.compareTo(b.index));
     return _GetAccessorsResult(getters, setters);
   }
 
