@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: public_member_api_docs
+// ignore_for_file: document_ignores, public_member_api_docs
 
 part of 'color_adapter.dart';
 
