@@ -1,4 +1,4 @@
-import 'package:hive_ce_generator/src/helper.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:test/test.dart';
 
 void main() {

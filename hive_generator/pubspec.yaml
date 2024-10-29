@@ -15,9 +15,12 @@ dependencies:
   source_helper: ^1.1.0
   glob: ^2.1.2
   path: ^1.9.0
+  yaml: ^3.1.2
+  json_annotation: ^4.9.0
+  collection: ^1.18.0
 
 dev_dependencies:
   test: ^1.17.11
-  build_test: any
   build_runner: any
   rexios_lints: ^8.2.0
+  json_serializable: ^6.8.0

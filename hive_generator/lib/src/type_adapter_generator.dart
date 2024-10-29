@@ -4,7 +4,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/builder.dart';
 import 'package:hive_ce_generator/src/class_builder.dart';
 import 'package:hive_ce_generator/src/enum_builder.dart';
-import 'package:hive_ce_generator/src/helper.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
@@ -18,17 +18,18 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   ) async {
     final cls = getClass(element);
     final library = await buildStep.inputLibrary;
-    final gettersAndSetters = getAccessors(cls, library);
+    final getAccessorsResult = _getAccessors(cls: cls, library: library);
 
-    final getters = gettersAndSetters[0];
-    verifyFieldIndices(getters);
+    final getters = getAccessorsResult.getters;
+    _verifyFieldIndices(getters);
 
-    final setters = gettersAndSetters[1];
-    verifyFieldIndices(setters);
+    final setters = getAccessorsResult.setters;
+    _verifyFieldIndices(setters);
 
-    final typeId = getTypeId(annotation);
+    final typeId = readTypeId(annotation);
 
-    final adapterName = getAdapterName(cls.name, annotation);
+    final adapterName =
+        readAdapterName(annotation) ?? generateAdapterName(cls.name);
     final builder = cls.thisType.isEnum
         ? EnumBuilder(cls, getters)
         : ClassBuilder(cls, getters, setters);
@@ -62,17 +63,18 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  Set<String> getAllAccessorNames(InterfaceElement cls) {
+  Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final accessorNames = <String>{};
 
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       for (final accessor in type.accessors) {
+        final name = accessor.name;
         if (accessor.isSetter) {
-          final name = accessor.name;
+          // Remove '=' from setter name
           accessorNames.add(name.substring(0, name.length - 1));
         } else {
-          accessorNames.add(accessor.name);
+          accessorNames.add(name);
         }
       }
     }
@@ -81,16 +83,15 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  List<List<AdapterField>> getAccessors(
-    InterfaceElement cls,
-    LibraryElement library,
-  ) {
-    final accessorNames = getAllAccessorNames(cls);
+  _GetAccessorsResult _getAccessors({
+    required InterfaceElement cls,
+    required LibraryElement library,
+  }) {
+    final accessorNames = _getAllAccessorNames(cls);
 
-    final constructor = cls.constructors.firstWhere((e) => e.name.isEmpty);
+    final constr = getConstructor(cls);
     final parameterDefaults = {
-      for (final param in constructor.parameters)
-        param.name: param.defaultValueCode,
+      for (final param in constr.parameters) param.name: param.defaultValueCode,
     };
 
     AdapterField? accessorToField(PropertyAccessorElement? element) {
@@ -101,12 +102,13 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (annotation == null) return null;
 
       final field = element.variable2!;
+      final name = field.name;
       return AdapterField(
         annotation.index,
-        field.name,
+        name,
         field.type,
         annotation.defaultValue,
-        parameterDefaults[field.name],
+        parameterDefaults[name],
       );
     }
 
@@ -123,16 +125,18 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (setterField != null) setters.add(setterField);
     }
 
-    return [getters, setters];
+    // Sort by index for deterministic output
+    getters.sort((a, b) => a.index.compareTo(b.index));
+    setters.sort((a, b) => a.index.compareTo(b.index));
+    return _GetAccessorsResult(getters, setters);
   }
 
   /// TODO: Document this!
-  void verifyFieldIndices(List<AdapterField> fields) {
+  void _verifyFieldIndices(List<AdapterField> fields) {
     for (final field in fields) {
-      check(
-        field.index >= 0 && field.index <= 255,
-        'Field numbers can only be in the range 0-255.',
-      );
+      if (field.index < 0 || field.index > 255) {
+        throw 'Field numbers can only be in the range 0-255.';
+      }
 
       for (final otherField in fields) {
         if (otherField == field) continue;
@@ -145,13 +149,11 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       }
     }
   }
+}
 
-  /// TODO: Document this!
-  int getTypeId(ConstantReader annotation) {
-    check(
-      !annotation.read('typeId').isNull,
-      'You have to provide a non-null typeId.',
-    );
-    return annotation.read('typeId').intValue;
-  }
+class _GetAccessorsResult {
+  final List<AdapterField> getters;
+  final List<AdapterField> setters;
+
+  const _GetAccessorsResult(this.getters, this.setters);
 }
