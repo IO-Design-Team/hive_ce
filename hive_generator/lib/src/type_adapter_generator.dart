@@ -4,7 +4,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/builder.dart';
 import 'package:hive_ce_generator/src/class_builder.dart';
 import 'package:hive_ce_generator/src/enum_builder.dart';
-import 'package:hive_ce_generator/src/helper.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 

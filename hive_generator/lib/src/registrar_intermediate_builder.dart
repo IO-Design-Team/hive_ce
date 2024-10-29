@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_generator/src/helper.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
 /// Builds intermediate data required for the registrar builder
