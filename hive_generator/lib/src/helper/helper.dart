@@ -1,5 +1,7 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:build/build.dart';
+import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -29,19 +31,20 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
   );
 }
 
-/// TODO: Document this!
-void check(bool condition, Object error) {
-  if (!condition) {
-    throw error;
+/// Get a classes default constructor or throw
+ConstructorElement getConstructor(InterfaceElement cls) {
+  final constr = cls.constructors.firstWhereOrNull((it) => it.name.isEmpty);
+  if (constr == null) {
+    throw 'Provide an unnamed constructor.';
   }
+  return constr;
 }
 
 /// Returns [element] as [InterfaceElement] if it is a class or enum
 InterfaceElement getClass(Element element) {
-  check(
-    element.kind == ElementKind.CLASS || element.kind == ElementKind.ENUM,
-    'Only classes or enums are allowed to be annotated with @HiveType.',
-  );
+  if (element.kind != ElementKind.CLASS && element.kind != ElementKind.ENUM) {
+    throw 'Only classes or enums are allowed to be annotated with @HiveType.';
+  }
 
   return element as InterfaceElement;
 }
@@ -59,12 +62,23 @@ String generateAdapterName(String typeName) {
   return adapterName;
 }
 
-/// Get the adapter name from the annotation or generate a default name
-String getAdapterName(String typeName, ConstantReader annotation) {
-  final annAdapterName = annotation.read('adapterName');
-  if (annAdapterName.isNull) {
-    return generateAdapterName(typeName);
-  } else {
-    return annAdapterName.stringValue;
+/// Read the adapter name from the annotation
+String? readAdapterName(ConstantReader annotation) {
+  final adapterNameField = annotation.read('adapterName');
+  return adapterNameField.isNull ? null : adapterNameField.stringValue;
+}
+
+/// Read the typeId from the annotation
+int readTypeId(ConstantReader annotation) {
+  if (annotation.read('typeId').isNull) {
+    throw 'You have to provide a non-null typeId.';
   }
+
+  return annotation.read('typeId').intValue;
+}
+
+/// Convenience extension for [BuildStep]
+extension BuildStepExtension on BuildStep {
+  /// Create an [AssetId] for the given [path] relative to the input package
+  AssetId asset(String path) => AssetId(inputId.package, path);
 }

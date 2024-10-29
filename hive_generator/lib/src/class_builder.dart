@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
@@ -39,14 +40,13 @@ class ClassBuilder extends Builder {
 
   @override
   String buildRead() {
-    final constr = cls.constructors.firstOrNullWhere((it) => it.name.isEmpty);
-    check(constr != null, 'Provide an unnamed constructor.');
+    final constr = getConstructor(cls);
 
     // The remaining fields to initialize.
     final fields = setters.toList();
 
     // Empty classes
-    if (constr!.parameters.isEmpty && fields.isEmpty) {
+    if (constr.parameters.isEmpty && fields.isEmpty) {
       return 'return ${cls.name}();';
     }
 
@@ -61,9 +61,9 @@ class ClassBuilder extends Builder {
     ''');
 
     for (final param in constr.parameters) {
-      var field = fields.firstOrNullWhere((it) => it.name == param.name);
+      var field = fields.firstWhereOrNull((it) => it.name == param.name);
       // Final fields
-      field ??= getters.firstOrNullWhere((it) => it.name == param.name);
+      field ??= getters.firstWhereOrNull((it) => it.name == param.name);
       if (field != null) {
         if (param.isNamed) {
           code.write('${param.name}: ');
@@ -186,17 +186,6 @@ class ClassBuilder extends Builder {
     code.writeln(';');
 
     return code.toString();
-  }
-}
-
-extension _FirstOrNullWhere<T> on Iterable<T> {
-  T? firstOrNullWhere(bool Function(T) predicate) {
-    for (final it in this) {
-      if (predicate(it)) {
-        return it;
-      }
-    }
-    return null;
   }
 }
 
