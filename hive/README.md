@@ -7,10 +7,6 @@
 
 Hive is a lightweight and blazing fast key-value database written in pure Dart. Inspired by [Bitcask](https://en.wikipedia.org/wiki/Bitcask).
 
-### [Documentation & Samples](https://docs.hivedb.dev/) 📖
-
-If you need queries, multi-isolate support or links between objects check out [Isar Database](https://github.com/isar/isar).
-
 ## Migrating from Hive
 
 The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
@@ -56,22 +52,22 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 - 🎈 **NO** native dependencies
 - 🔋 Batteries included
 
-## Getting Started
-
-Check out the [Quick Start](https://docs.hivedb.dev) documentation to get started.
-
 ## Usage
 
 You can use Hive just like a map. It is not necessary to await `Futures`.
 
+<!-- embedme readme/usage.dart -->
+
 ```dart
-var box = Hive.box('myBox');
+import 'package:hive_ce/hive.dart';
 
-box.put('name', 'David');
+void example() {
+  final box = Hive.box('myBox');
+  box.put('name', 'David');
+  final name = box.get('name');
+  print('Name: $name');
+}
 
-var name = box.get('name');
-
-print('Name: $name');
 ```
 
 ## BoxCollections
@@ -86,17 +82,27 @@ transactions on web.
 On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
 BoxCollections might be useful for some box hierarchy and development experience.
 
+<!-- embedme readme/box_collections.dart -->
+
 ```dart
-// Create a box collection
+import 'package:hive_ce/hive.dart';
+import 'hive_cipher_impl.dart';
+
+void example() async {
+  // Create a box collection
   final collection = await BoxCollection.open(
-    'MyFirstFluffyBox', // Name of your database
-    {'cats', 'dogs'}, // Names of your boxes
-    path: './', // Path where to store your boxes (Only used in Flutter / Dart IO)
-    key: HiveCipher(), // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    // Name of your database
+    'MyFirstFluffyBox',
+    // Names of your boxes
+    {'cats', 'dogs'},
+    // Path where to store your boxes (Only used in Flutter / Dart IO)
+    path: './',
+    // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    key: HiveCipherImpl(),
   );
 
   // Open your boxes. Optional: Give it a type.
-  final catsBox = collection.openBox<Map>('cats');
+  final catsBox = await collection.openBox<Map>('cats');
 
   // Put something in
   await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
@@ -135,76 +141,21 @@ BoxCollections might be useful for some box hierarchy and development experience
     boxNames: ['cats'], // By default all boxes become blocked.
     readOnly: false,
   );
+}
+
 ```
 
 ## Store objects
 
-Hive not only supports primitives, lists and maps but also any Dart object you like. You need to generate a type adapter before you can store objects.
+Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
+
+### Create model classes
+
+<!-- embedme readme/store_objects/person.dart -->
 
 ```dart
-@HiveType(typeId: 0)
-class Person extends HiveObject {
+import 'package:hive_ce/hive.dart';
 
-  @HiveField(0)
-  String name;
-
-  @HiveField(1)
-  int age;
-}
-```
-
-Add the following to your pubspec.yaml
-
-```yaml
-dev_dependencies:
-  build_runner: latest
-  hive_ce_generator: latest
-```
-
-And run the following command to generate the type adapter
-
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
-
-```dart
-import 'package:your_package/hive_registrar.g.dart';
-
-void main() {
-  final path = Directory.current.path;
-  Hive
-    ..init(path)
-    ..registerAdapters();
-}
-```
-
-Extending `HiveObject` is optional but it provides handy methods like `save()` and `delete()`.
-
-```dart
-var box = await Hive.openBox('myBox');
-
-var person = Person()
-  ..name = 'Dave'
-  ..age = 22;
-box.add(person);
-
-print(box.getAt(0)); // Dave - 22
-
-person.age = 30;
-person.save();
-
-print(box.getAt(0)) // Dave - 30
-```
-
-## Add fields to objects
-
-When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
-
-For example, consider an existing database with a `Person` object:
-
-```dart
 @HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age});
@@ -215,31 +166,96 @@ class Person extends HiveObject {
   @HiveField(1)
   int age;
 }
+
 ```
 
-If you want to add a `balance` field:
+### Update `pubspec.yaml`
+
+```yaml
+dev_dependencies:
+  build_runner: latest
+  hive_ce_generator: latest
+```
+
+### Run `build_runner`
+
+```bash
+dart pub run build_runner build --delete-conflicting-outputs
+```
+
+This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+
+### Use the Hive registrar
 
 ```dart
+import 'dart:io';
+import 'package:hive_ce/hive.dart';
+import 'package:your_package/hive/hive_registrar.g.dart';
+
+void main() {
+  Hive
+    ..init(Directory.current.path)
+    ..registerAdapters();
+}
+```
+
+### Using HiveObject methods
+
+Extending `HiveObject` is optional but it provides handy methods like `save()` and `delete()`.
+
+<!-- embedme readme/store_objects/hive_object.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
+
+void example() async {
+  final box = await Hive.openBox('myBox');
+
+  final person = Person(name: 'Dave', age: 22);
+  await box.add(person);
+
+  print(box.getAt(0)); // Dave - 22
+
+  person.age = 30;
+  await person.save();
+
+  print(box.getAt(0)); // Dave - 30
+}
+
+```
+
+## Add fields to objects
+
+When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
+
+For example, consider an existing database with a `Person` object:
+
+<!-- embedme readme/add_fields/person_1.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+
 @HiveType(typeId: 0)
 class Person extends HiveObject {
-  Person({required this.name, required this.age, required this.balance});
+  Person({required this.name, required this.age});
 
   @HiveField(0)
   String name;
 
   @HiveField(1)
   int age;
-
-  @HiveField(2)
-  int balance;
 }
+
 ```
 
-Without proper handling, this change will cause null errors in the existing application when accessing the new field.
+If you want to add a `balance` field, you must specify a default value or else reading existing data will result in null errors:
 
-To resolve this issue, you can set a default value in the constructor (this requires hive_ce_generator 1.5.0+)
+<!-- embedme readme/add_fields/person_2.dart -->
 
 ```dart
+import 'package:hive_ce/hive.dart';
+
 @HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age, this.balance = 0});
@@ -251,8 +267,9 @@ class Person extends HiveObject {
   int age;
 
   @HiveField(2)
-  int balance;
+  double balance;
 }
+
 ```
 
 Or specify it in the `HiveField` annotation:
@@ -264,13 +281,7 @@ int balance;
 
 Alternatively, you can write custom migration code to handle the transition.
 
-After modifying the schema, remember to run the build runner to generate the necessary code:
-
-```console
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-This will update your Hive adapters to reflect the changes in your object structure.
+After modifying the model, remember to run `build_runner` to regenerate the TypeAdapters
 
 ## Hive ❤️ Flutter
 
