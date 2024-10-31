@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:common_storage_benchmark/db_type.dart';
 import 'package:common_storage_benchmark/test_model.dart';
@@ -26,4 +27,9 @@ Future<void> runBenchmark({
   for (var i = 0; i < _iterations; i++) {
     await box.add(_model);
   }
+
+  final boxFile = File(type.boxFileName(_boxName));
+  final size = boxFile.lengthSync();
+  final megabytes = (size / 1024 / 1024).toStringAsFixed(2);
+  print('Size: $megabytes MB');
 }
