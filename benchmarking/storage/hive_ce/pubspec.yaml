@@ -1,0 +1,15 @@
+name: hive_ce_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  hive_ce: any
+
+dev_dependencies:
+  rexios_lints: ^8.2.0
+
+dependency_overrides:
+  hive_ce:
+    path: ../../../hive

@@ -1,0 +1,12 @@
+name: hive_v4_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  hive: ^4.0.0-dev.2
+
+dev_dependencies:
+  rexios_lints: ^8.2.0
+
