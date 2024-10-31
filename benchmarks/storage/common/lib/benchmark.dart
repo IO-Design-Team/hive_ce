@@ -5,7 +5,7 @@ import 'package:common_storage_benchmark/db_type.dart';
 import 'package:common_storage_benchmark/test_model.dart';
 
 const _boxName = 'test_box';
-const _operations = 100000;
+const _operations = 1000000;
 const _model = TestModel(
   testModelFieldZero: 0,
   testModelFieldOne: 1,
@@ -34,10 +34,14 @@ Future<void> runBenchmark({
     }
     await box.add(_model);
   }
-  print('Time: ${stopwatch.elapsed}');
 
   final boxFile = File(type.boxFileName(_boxName));
   final size = boxFile.lengthSync();
   final megabytes = (size / 1024 / 1024).toStringAsFixed(2);
+
+  print('');
+  print('DB Type: $type');
+  print('Operations: $_operations');
+  print('Time: ${stopwatch.elapsed}');
   print('Size: $megabytes MB');
 }

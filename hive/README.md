@@ -311,7 +311,9 @@ class SettingsPage extends StatelessWidget {
 
 Boxes are cached and therefore fast enough to be used directly in the `build()` method of Flutter widgets.
 
-## Benchmark
+## Benchmarks
+
+### Hive vs other solutions
 
 |                                         1000 read iterations                                         |                                      1000 write iterations                                       |
 | :--------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------: |
@@ -321,6 +323,21 @@ Boxes are cached and therefore fast enough to be used directly in the `build()` 
 The benchmark was performed on a Oneplus 6T with Android Q. You can [run the benchmark yourself](https://github.com/hivedb/hive_benchmark).
 
 \*Take this benchmark with a grain of salt. It is very hard to compare databases objectively since they were made for different purposes.
+
+### Hive CE (v2) vs Hive v4 (Isar)
+
+This is a comparison of the time to complete a given number of write operations and the resulting database file size
+
+| Operations | Hive CE            | Hive v4            |
+| ---------- | ------------------ | ------------------ |
+| 10         | 0.00 s, 0.00 MB    | 0.01 s, 1.00 MB    |
+| 100        | 0.01 s, 0.01 MB    | 0.01 s, 1.00 MB    |
+| 1,000      | 0.05 s, 0.11 MB    | 0.07 s, 1.00 MB    |
+| 10,000     | 0.21 s, 1.10 MB    | 0.69 s, 5.00 MB    |
+| 100,000    | 1.53 s, 10.97 MB   | 7.01 s, 30.00 MB   |
+| 1,000,000  | 19.97 s, 109.67 MB | 89.81 s, 290.00 MB |
+
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
 
 ### Licence
 
