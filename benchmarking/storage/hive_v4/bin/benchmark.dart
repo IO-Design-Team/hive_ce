@@ -11,7 +11,7 @@ void main() async {
   Hive.registerAdapter('TestModel', (json) => TestModel.fromJson(json));
 
   await runBenchmark(
-    type: DbType.hive,
-    openBox: (name) => Hive.box(name: name),
+    type: DbType.isar,
+    openBox: (name) => Hive.box(name: name, maxSizeMiB: 1024),
   );
 }

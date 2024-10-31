@@ -23,7 +23,10 @@ Future<void> runBenchmark({
   required DbType type,
   required FutureOr<dynamic> Function(String name) openBox,
 }) async {
-  final box = await openBox(_boxName);
+  var box = await openBox(_boxName);
+  await box.deleteFromDisk();
+  box = await openBox(_boxName);
+
   for (var i = 0; i < _iterations; i++) {
     await box.add(_model);
   }
