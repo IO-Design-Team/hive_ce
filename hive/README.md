@@ -46,7 +46,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 ## Features
 
 - 🚀 Cross platform: mobile, desktop, browser
-- ⚡ Great performance (see [benchmark](#benchmark))
+- ⚡ Great performance (see [benchmark](#benchmarks))
 - ❤️ Simple, powerful, & intuitive API
 - 🔒 Strong encryption built in
 - 🎈 **NO** native dependencies
@@ -336,6 +336,8 @@ This is a comparison of the time to complete a given number of write operations 
 | 10,000     | 0.21 s, 1.10 MB    | 0.69 s, 5.00 MB    |
 | 100,000    | 1.53 s, 10.97 MB   | 7.01 s, 30.00 MB   |
 | 1,000,000  | 19.97 s, 109.67 MB | 89.81 s, 290.00 MB |
+
+Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
 
