@@ -5,6 +5,8 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
+  common_storage_benchmark:
+    path: ../common
   hive_ce: any
 
 dev_dependencies:

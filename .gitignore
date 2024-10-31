@@ -141,3 +141,6 @@ app.*.symbols
 *.hive
 .test_coverage.dart
 coverage_badge.svg
+
+# isar
+*.isar

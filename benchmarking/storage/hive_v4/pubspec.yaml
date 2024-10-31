@@ -5,8 +5,10 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
+  common_storage_benchmark:
+    path: ../common
   hive: ^4.0.0-dev.2
+  isar: ^4.0.0-dev.14
 
 dev_dependencies:
   rexios_lints: ^8.2.0
-
