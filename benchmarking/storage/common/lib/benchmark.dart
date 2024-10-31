@@ -5,7 +5,7 @@ import 'package:common_storage_benchmark/db_type.dart';
 import 'package:common_storage_benchmark/test_model.dart';
 
 const _boxName = 'test_box';
-const _iterations = 100000;
+const _operations = 100000;
 const _model = TestModel(
   testModelFieldZero: 0,
   testModelFieldOne: 1,
@@ -27,9 +27,14 @@ Future<void> runBenchmark({
   await box.deleteFromDisk();
   box = await openBox(_boxName);
 
-  for (var i = 0; i < _iterations; i++) {
+  final stopwatch = Stopwatch()..start();
+  for (var i = 0; i < _operations; i++) {
+    if (i % 10000 == 0) {
+      print('Operation: $i');
+    }
     await box.add(_model);
   }
+  print('Time: ${stopwatch.elapsed}');
 
   final boxFile = File(type.boxFileName(_boxName));
   final size = boxFile.lengthSync();
