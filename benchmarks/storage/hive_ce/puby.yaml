@@ -1,0 +1,2 @@
+exclude:
+  - pub run build_runner
