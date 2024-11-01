@@ -34,14 +34,14 @@ You may be considering attempting to make the dev version of Hive v4 work in you
 
 This is a comparison of the time to complete a given number of write operations and the resulting database file size:
 
-| Operations | Hive CE            | Hive v4            |
-| ---------- | ------------------ | ------------------ |
-| 10         | 0.00 s, 0.00 MB    | 0.01 s, 1.00 MB    |
-| 100        | 0.01 s, 0.01 MB    | 0.01 s, 1.00 MB    |
-| 1,000      | 0.05 s, 0.11 MB    | 0.07 s, 1.00 MB    |
-| 10,000     | 0.21 s, 1.10 MB    | 0.69 s, 5.00 MB    |
-| 100,000    | 1.53 s, 10.97 MB   | 7.01 s, 30.00 MB   |
-| 1,000,000  | 19.97 s, 109.67 MB | 89.81 s, 290.00 MB |
+| Operations | Hive CE |           | Hive v4 |           |
+| ---------- | ------- | --------- | ------- | --------- |
+| 10         | 0.00 s  | 0.00 MB   | 0.01 s  | 1.00 MB   |
+| 100        | 0.01 s  | 0.01 MB   | 0.01 s  | 1.00 MB   |
+| 1,000      | 0.05 s  | 0.11 MB   | 0.07 s  | 1.00 MB   |
+| 10,000     | 0.21 s  | 1.10 MB   | 0.69 s  | 5.00 MB   |
+| 100,000    | 1.53 s  | 10.97 MB  | 7.01 s  | 30.00 MB  |
+| 1,000,000  | 19.97 s | 109.67 MB | 89.81 s | 290.00 MB |
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
