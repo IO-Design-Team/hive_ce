@@ -1,3 +1,7 @@
+## 2.7.0+1
+
+- Adds a storage benchmark to compare Hive CE with Hive v4
+
 ## 2.7.0
 
 - No longer reinitializes `Hive` when opening a `BoxCollection`
