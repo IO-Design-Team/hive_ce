@@ -7,6 +7,46 @@
 
 Hive is a lightweight and blazing fast key-value database written in pure Dart. Inspired by [Bitcask](https://en.wikipedia.org/wiki/Bitcask).
 
+## Features
+
+- 🚀 Cross platform: mobile, desktop, browser
+- ⚡ Great performance (see [benchmark](#benchmark))
+- ❤️ Simple, powerful, & intuitive API
+- 🔒 Strong encryption built in
+- 🎈 **NO** native dependencies
+- 🔋 Batteries included
+
+## New features in Hive CE
+
+Hive CE is a spiritual continuation of Hive v2 with the following new features:
+
+- Flutter web WASM support
+- Support for Sets
+- A built in Duration adapter
+- A `HiveRegistrar` extension that lets you register all your generated adapters in one call
+- Support for constructor parameter defaults
+- Freezed support
+- Support for generating adapters with classes that use named imports
+
+## Hive CE (v2) vs Hive v4 (Isar)
+
+You may be considering attempting to make the dev version of Hive v4 work in your project. I _strongly_ advise against this. Not only is Hive v4 not stable, but it is also much slower and less efficient than Hive CE.
+
+This is a comparison of the time to complete a given number of write operations and the resulting database file size:
+
+| Operations | Hive CE            | Hive v4            |
+| ---------- | ------------------ | ------------------ |
+| 10         | 0.00 s, 0.00 MB    | 0.01 s, 1.00 MB    |
+| 100        | 0.01 s, 0.01 MB    | 0.01 s, 1.00 MB    |
+| 1,000      | 0.05 s, 0.11 MB    | 0.07 s, 1.00 MB    |
+| 10,000     | 0.21 s, 1.10 MB    | 0.69 s, 5.00 MB    |
+| 100,000    | 1.53 s, 10.97 MB   | 7.01 s, 30.00 MB   |
+| 1,000,000  | 19.97 s, 109.67 MB | 89.81 s, 290.00 MB |
+
+Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
+
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
+
 ## Migrating from Hive
 
 The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
@@ -42,15 +82,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 ```
-
-## Features
-
-- 🚀 Cross platform: mobile, desktop, browser
-- ⚡ Great performance (see [benchmark](#benchmarks))
-- ❤️ Simple, powerful, & intuitive API
-- 🔒 Strong encryption built in
-- 🎈 **NO** native dependencies
-- 🔋 Batteries included
 
 ## Usage
 
@@ -311,9 +342,7 @@ class SettingsPage extends StatelessWidget {
 
 Boxes are cached and therefore fast enough to be used directly in the `build()` method of Flutter widgets.
 
-## Benchmarks
-
-### Hive vs other solutions
+## Benchmark
 
 |                                         1000 read iterations                                         |                                      1000 write iterations                                       |
 | :--------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------: |
@@ -323,23 +352,6 @@ Boxes are cached and therefore fast enough to be used directly in the `build()` 
 The benchmark was performed on a Oneplus 6T with Android Q. You can [run the benchmark yourself](https://github.com/hivedb/hive_benchmark).
 
 \*Take this benchmark with a grain of salt. It is very hard to compare databases objectively since they were made for different purposes.
-
-### Hive CE (v2) vs Hive v4 (Isar)
-
-This is a comparison of the time to complete a given number of write operations and the resulting database file size
-
-| Operations | Hive CE            | Hive v4            |
-| ---------- | ------------------ | ------------------ |
-| 10         | 0.00 s, 0.00 MB    | 0.01 s, 1.00 MB    |
-| 100        | 0.01 s, 0.01 MB    | 0.01 s, 1.00 MB    |
-| 1,000      | 0.05 s, 0.11 MB    | 0.07 s, 1.00 MB    |
-| 10,000     | 0.21 s, 1.10 MB    | 0.69 s, 5.00 MB    |
-| 100,000    | 1.53 s, 10.97 MB   | 7.01 s, 30.00 MB   |
-| 1,000,000  | 19.97 s, 109.67 MB | 89.81 s, 290.00 MB |
-
-Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
-
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
 
 ### Licence
 
