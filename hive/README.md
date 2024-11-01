@@ -27,6 +27,9 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
 - Support for constructor parameter defaults
 - Freezed support
 - Support for generating adapters with classes that use named imports
+- Automatic type adapter generation using the `GenerateAdapters` annotation
+  - No more manually adding annotations to every type and field
+  - Generate adapters for classes outside the current package
 
 ## Hive CE (v2) vs Hive v4 (Isar)
 
@@ -179,11 +182,6 @@ void example() async {
 ## Store objects
 
 Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
-
-Hive CE supports automatic type adapter generation using the `GenerateAdapters` annotation. This new method of generation has the following benefits:
-
-- No more manually adding annotations to every type and field
-- Generate adapters for classes outside the current package
 
 ### Create model classes
 
