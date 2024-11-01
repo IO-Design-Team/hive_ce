@@ -47,7 +47,7 @@ Database size in Hive v4 is directly affected by the length of field names in mo
 
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
 
-## Migrating from Hive
+## Migrating from Hive v2
 
 The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
 
