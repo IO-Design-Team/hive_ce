@@ -290,13 +290,22 @@ Some migrations might require manual modifications to the Hive schema file. One 
 
 ### Migrating to `GenerateAdapters`
 
-Another example of manual modifications to the Hive schema is switching an existing app from explicit HiveTypes to the new `GenerateAdapters` method. Take the following steps in this case:
+1. Set up the `GenerateAdapters` annotation as described above
+2. Add the following to your `build.yaml` file:
 
-1. Make sure your existing TypeAdapters are up to date
-2. Convert any `HiveType.defaultValue` values to constructor parameter defaults
-3. Follow the above instructions to set up a `GenerateAdapters` annotation for all your model classes. Type IDs will be generated according to the order of the classes in the annotation.
-4. Make any necessary modifications to the Hive schema so that the new TypeAdapters match the old ones. Ensure that `nextTypeId` and the `nextIndex` fields are correct.
-5. Finally, remove all explicit `HiveType` and `HiveField` annotations from your model classes
+```yaml
+targets:
+  $default:
+    builders:
+      hive_ce_generator|hive_schema_migrator:
+        enabled: true
+```
+
+2. Run the `build_runner`
+3. Copy the content of `hive_schema.g.yaml` to `lib/hive/hive_adapters.g.yaml`
+4. Revert the `build.yaml` changes
+5. Delete the `hive_schema.g.yaml` file
+6. Finally, remove all explicit `HiveType` and `HiveField` annotations from your model classes
 
 ### Explicitly defining HiveTypes
 
