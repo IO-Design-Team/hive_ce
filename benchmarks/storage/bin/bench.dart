@@ -40,7 +40,7 @@ void main() async {
 
     final v4Result = await runBenchmark(
       operations: operations,
-      type: DbType.hive,
+      type: DbType.isar,
       openBox: (name) => v4.Hive.box(name: name, maxSizeMiB: 1024),
     );
 

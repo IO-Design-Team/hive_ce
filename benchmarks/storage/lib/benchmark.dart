@@ -24,6 +24,9 @@ Future<BenchResult> runBenchmark({
   required DbType type,
   required FutureOr<dynamic> Function(String name) openBox,
 }) async {
+  print('');
+  print('Running $operations operation ${type.name} benchmark...');
+
   var box = await openBox(_boxName);
   await box.deleteFromDisk();
   box = await openBox(_boxName);
@@ -43,9 +46,6 @@ Future<BenchResult> runBenchmark({
   final megabytes = size / 1024 / 1024;
   final megabytesString = megabytes.toStringAsFixed(2);
 
-  print('');
-  print('DB Type: $type');
-  print('Operations: $operations');
   print('Time: $elapsed');
   print('Size: $megabytesString MB');
 
