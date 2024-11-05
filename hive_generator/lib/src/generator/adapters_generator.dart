@@ -75,19 +75,23 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       newTypes[typeKey] = result.schema!;
     }
 
-    final yaml = YamlWriter()
-        .write(HiveSchema(nextTypeId: nextTypeId, types: newTypes).toJson());
     // Do not output the schema file through the buildStep since conflicting
     // output handling will delete it before this generator runs
     // Not the safest thing to do, but there doesn't seem to be a better way
     buildStep.forceWriteAsString(
       schemaAsset,
-      '''
-$schemaComment
-$yaml''',
+      schemaToString(HiveSchema(nextTypeId: nextTypeId, types: newTypes)),
     );
 
     return content.toString();
+  }
+
+  /// Generate the schema content as a string
+  static String schemaToString(HiveSchema schema) {
+    final yaml = YamlWriter().write(schema.toJson());
+    return '''
+$schemaComment
+$yaml''';
   }
 
   void _validateSchema(HiveSchema schema) {
