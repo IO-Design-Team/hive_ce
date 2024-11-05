@@ -30,7 +30,7 @@ class Class3 {}
 
 void main() {
   group('schema_migrator', () {
-    test('does nothing if not enabled', () {
+    test('does not run if not enabled', () {
       expectGeneration(
         input: {
           'pubspec.yaml': pubspec,
