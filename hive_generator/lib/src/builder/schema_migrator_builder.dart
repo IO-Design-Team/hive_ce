@@ -19,6 +19,7 @@ class SchemaMigratorBuilder implements Builder {
   Future<void> build(BuildStep buildStep) async {
     final hiveTypes = <AnnotatedElement>[];
     await for (final input in buildStep.findAssets(Glob('**/*.dart'))) {
+      if (!await buildStep.resolver.isLibrary(input)) return;
       final library = await buildStep.resolver.libraryFor(input);
       final hiveTypeElements = LibraryReader(library)
           .annotatedWith(TypeChecker.fromRuntime(HiveType));
