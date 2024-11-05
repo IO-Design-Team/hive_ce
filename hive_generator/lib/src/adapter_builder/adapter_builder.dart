@@ -32,7 +32,7 @@ class AdapterField {
 }
 
 /// TODO: Document this!
-abstract class Builder {
+abstract class AdapterBuilder {
   /// TODO: Document this!
   final InterfaceElement cls;
 
@@ -43,7 +43,11 @@ abstract class Builder {
   final List<AdapterField> setters;
 
   /// TODO: Document this!
-  Builder(this.cls, this.getters, [this.setters = const <AdapterField>[]]);
+  AdapterBuilder(
+    this.cls,
+    this.getters, [
+    this.setters = const <AdapterField>[],
+  ]);
 
   /// TODO: Document this!
   String buildRead();

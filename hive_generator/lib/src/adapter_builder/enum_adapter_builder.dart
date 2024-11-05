@@ -1,9 +1,9 @@
-import 'package:hive_ce_generator/src/builder.dart';
+import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 
 /// TODO: Document this!
-class EnumBuilder extends Builder {
+class EnumAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
-  EnumBuilder(super.cls, super.getters);
+  EnumAdapterBuilder(super.cls, super.getters);
 
   @override
   String buildRead() {

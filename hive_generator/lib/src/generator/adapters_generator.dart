@@ -7,7 +7,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
-import 'package:hive_ce_generator/src/type_adapter_generator.dart';
+import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_writer/yaml_writer.dart';

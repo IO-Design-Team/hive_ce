@@ -1,9 +1,9 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_generator/src/builder.dart';
-import 'package:hive_ce_generator/src/class_builder.dart';
-import 'package:hive_ce_generator/src/enum_builder.dart';
+import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
+import 'package:hive_ce_generator/src/adapter_builder/class_adapter_builder.dart';
+import 'package:hive_ce_generator/src/adapter_builder/enum_adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
@@ -48,8 +48,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     adapterName ??= generateAdapterName(cls.name);
     final builder = cls.thisType.isEnum
-        ? EnumBuilder(cls, getters)
-        : ClassBuilder(cls, getters, setters);
+        ? EnumAdapterBuilder(cls, getters)
+        : ClassAdapterBuilder(cls, getters, setters);
 
     final content = '''
     class $adapterName extends TypeAdapter<${cls.name}> {

@@ -1,4 +1,4 @@
-import 'package:hive_ce_generator/src/adapters_generator.dart';
+import 'package:hive_ce_generator/src/generator/adapters_generator.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
