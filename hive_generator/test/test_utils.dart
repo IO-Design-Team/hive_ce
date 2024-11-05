@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+
+const schemaComment = HiveSchema.comment;
 
 const fileExists = true;
 const fileDoesNotExist = false;

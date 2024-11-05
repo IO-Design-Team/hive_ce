@@ -34,7 +34,7 @@ class SchemaMigratorBuilder implements Builder {
         library: type.element.library!,
       );
 
-      schemaTypes.add((cls.getDisplayString(), result.schema));
+      schemaTypes.add((cls.thisType.getDisplayString(), result.schema));
     }
 
     schemaTypes.sort((a, b) => a.$2.typeId.compareTo(b.$2.typeId));
@@ -42,7 +42,7 @@ class SchemaMigratorBuilder implements Builder {
     final types = {for (final type in schemaTypes) type.$1: type.$2};
 
     await buildStep.writeAsString(
-      buildStep.inputId.changeExtension('.g.yaml'),
+      buildStep.asset('lib/hive_schema.g.yaml'),
       HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
     );
   }

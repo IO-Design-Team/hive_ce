@@ -1,4 +1,3 @@
-import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -6,8 +5,6 @@ import 'test_utils.dart';
 const directives = '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';''';
-
-const schemaComment = HiveSchema.comment;
 
 const personSchema = '''
 $schemaComment

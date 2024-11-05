@@ -161,6 +161,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
             nextIndex++;
       } else if (annotation != null) {
         index = annotation.index;
+
+        // Keep track of the next index for the migration tool
+        if (index >= nextIndex) nextIndex = index + 1;
       } else {
         // This should be impossible
         throw HiveError('No index found');
