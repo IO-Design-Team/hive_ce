@@ -62,6 +62,19 @@ class HiveSchemaType {
 
   /// To json
   Map<String, dynamic> toJson() => _$HiveSchemaTypeToJson(this);
+
+  /// Copy with
+  HiveSchemaType copyWith({
+    int? typeId,
+    int? nextIndex,
+    Map<String, HiveSchemaField>? fields,
+  }) {
+    return HiveSchemaType(
+      typeId: typeId ?? this.typeId,
+      nextIndex: nextIndex ?? this.nextIndex,
+      fields: fields ?? this.fields,
+    );
+  }
 }
 
 /// Information about a Hive adapter field

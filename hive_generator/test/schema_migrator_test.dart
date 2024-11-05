@@ -24,7 +24,18 @@ class Class2 {
 import 'package:hive_ce/hive.dart';
 
 @HiveType(typeId: 3)
-class Class3 {}
+class Class3 {
+  Class3({required double value}): _value = value;
+
+  @HiveField(0)
+  double _value;
+
+  double get value => _value;
+
+  set value(double value) {
+    _value = value;
+  }
+}
 ''',
 };
 
@@ -74,8 +85,10 @@ types:
     fields: {}
   Class3:
     typeId: 3
-    nextIndex: 0
-    fields: {}
+    nextIndex: 1
+    fields:
+      value:
+        index: 0
 ''',
         },
       );

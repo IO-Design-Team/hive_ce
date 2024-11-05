@@ -37,11 +37,23 @@ class SchemaMigratorBuilder implements Builder {
 
       schemaTypes.add((cls.thisType.getDisplayString(), result.schema));
     }
-
     schemaTypes.sort((a, b) => a.$2.typeId.compareTo(b.$2.typeId));
     final nextTypeId = schemaTypes.isEmpty ? 0 : schemaTypes.last.$2.typeId + 1;
-    final types = {for (final type in schemaTypes) type.$1: type.$2};
 
+    final sanitizedSchemaTypes = <(String, HiveSchemaType)>[];
+    // Sanitize field names
+    for (final type in schemaTypes) {
+      final sanitizedFields = <String, HiveSchemaField>{};
+      for (final MapEntry(:key, :value) in type.$2.fields.entries) {
+        // Make field names public
+        final sanitizedKey = key.startsWith('_') ? key.substring(1) : key;
+        sanitizedFields[sanitizedKey] = value;
+      }
+      sanitizedSchemaTypes
+          .add((type.$1, type.$2.copyWith(fields: sanitizedFields)));
+    }
+
+    final types = {for (final type in sanitizedSchemaTypes) type.$1: type.$2};
     await buildStep.writeAsString(
       buildStep.asset('lib/hive_schema.g.yaml'),
       HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
