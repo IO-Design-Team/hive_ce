@@ -1,4 +1,5 @@
 import 'package:build/build.dart';
+import 'package:hive_ce_generator/src/builder/schema_migrator_builder.dart';
 import 'package:hive_ce_generator/src/generator/adapters_generator.dart';
 import 'package:hive_ce_generator/src/builder/registrar_builder.dart';
 import 'package:hive_ce_generator/src/builder/registrar_intermediate_builder.dart';
@@ -19,3 +20,7 @@ Builder getRegistrarBuilder(BuilderOptions options) => RegistrarBuilder();
 /// Builds Hive TypeAdapters from the GenerateAdapters annotation
 Builder getAdaptersBuilder(BuilderOptions options) =>
     SharedPartBuilder([AdaptersGenerator()], 'hive_adapters_generator');
+
+/// Builds a Hive schema from existing HiveType annotations
+Builder getSchemaMigratorBuilder(BuilderOptions options) =>
+    SchemaMigratorBuilder();

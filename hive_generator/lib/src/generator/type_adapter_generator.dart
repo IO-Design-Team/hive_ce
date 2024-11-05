@@ -37,8 +37,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     HiveSchemaType? schema,
   }) {
     final cls = getClass(element);
-    final getAccessorsResult =
-        _getAccessors(cls: cls, library: library, schema: schema);
+    final getAccessorsResult = getAccessors(
+      typeId: typeId,
+      cls: cls,
+      library: library,
+      schema: schema,
+    );
 
     final getters = getAccessorsResult.getters;
     _verifyFieldIndices(getters);
@@ -125,7 +129,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  static _GetAccessorsResult _getAccessors({
+  static GetAccessorsResult getAccessors({
+    required int typeId,
     required InterfaceElement cls,
     required LibraryElement library,
     HiveSchemaType? schema,
@@ -187,14 +192,15 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     // Sort by index for deterministic output
     getters.sort((a, b) => a.index.compareTo(b.index));
     setters.sort((a, b) => a.index.compareTo(b.index));
-    final newSchema = schema?.copyWith(
+    final newSchema = HiveSchemaType(
+      typeId: typeId,
       nextIndex: nextIndex,
       fields: Map.fromEntries(
         newSchemaFields.entries.toList()
           ..sort((a, b) => a.value.index.compareTo(b.value.index)),
       ),
     );
-    return _GetAccessorsResult(getters, setters, newSchema);
+    return GetAccessorsResult(getters, setters, newSchema);
   }
 
   /// TODO: Document this!
@@ -217,12 +223,19 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 }
 
-class _GetAccessorsResult {
+/// Result of [TypeAdapterGenerator.getAccessors]
+class GetAccessorsResult {
+  /// The getters of the class
   final List<AdapterField> getters;
-  final List<AdapterField> setters;
-  final HiveSchemaType? schema;
 
-  const _GetAccessorsResult(this.getters, this.setters, this.schema);
+  /// The setters of the class
+  final List<AdapterField> setters;
+
+  /// The Hive schema generated for the class
+  final HiveSchemaType schema;
+
+  /// Constructor
+  const GetAccessorsResult(this.getters, this.setters, this.schema);
 }
 
 /// Result of [TypeAdapterGenerator.generateTypeAdapter]
@@ -231,7 +244,7 @@ class GenerateTypeAdapterResult {
   final String content;
 
   /// The generated schema
-  final HiveSchemaType? schema;
+  final HiveSchemaType schema;
 
   /// Constructor
   const GenerateTypeAdapterResult(this.content, this.schema);
