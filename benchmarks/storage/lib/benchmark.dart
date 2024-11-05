@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:common_storage_benchmark/db_type.dart';
-import 'package:common_storage_benchmark/test_model.dart';
+import 'package:hive_storage_benchmark/bench_result.dart';
+import 'package:hive_storage_benchmark/db_type.dart';
+import 'package:hive_storage_benchmark/test_model.dart';
 
 const _boxName = 'test_box';
-const _operations = 1000000;
 const _model = TestModel(
   testModelFieldZero: 0,
   testModelFieldOne: 1,
@@ -19,7 +19,8 @@ const _model = TestModel(
   testModelFieldNine: 9,
 );
 
-Future<void> runBenchmark({
+Future<BenchResult> runBenchmark({
+  required int operations,
   required DbType type,
   required FutureOr<dynamic> Function(String name) openBox,
 }) async {
@@ -28,20 +29,25 @@ Future<void> runBenchmark({
   box = await openBox(_boxName);
 
   final stopwatch = Stopwatch()..start();
-  for (var i = 0; i < _operations; i++) {
+  for (var i = 0; i < operations; i++) {
     if (i % 10000 == 0) {
       print('Operation: $i');
     }
     await box.add(_model);
   }
 
+  final elapsed = stopwatch.elapsed;
+
   final boxFile = File(type.boxFileName(_boxName));
   final size = boxFile.lengthSync();
-  final megabytes = (size / 1024 / 1024).toStringAsFixed(2);
+  final megabytes = size / 1024 / 1024;
+  final megabytesString = megabytes.toStringAsFixed(2);
 
   print('');
   print('DB Type: $type');
-  print('Operations: $_operations');
-  print('Time: ${stopwatch.elapsed}');
-  print('Size: $megabytes MB');
+  print('Operations: $operations');
+  print('Time: $elapsed');
+  print('Size: $megabytesString MB');
+
+  return BenchResult(time: elapsed, size: megabytes);
 }
