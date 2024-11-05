@@ -48,7 +48,7 @@ This is a comparison of the time to complete a given number of write operations 
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/common/lib/benchmark.dart).
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/bin/bench.dart).
 
 ## Migrating from Hive v2
 

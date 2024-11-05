@@ -3,3 +3,4 @@
 .dart_tool/
 
 hive_registrar.g.dart
+results.csv

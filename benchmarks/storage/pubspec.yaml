@@ -1,4 +1,4 @@
-name: common_storage_benchmark
+name: hive_storage_benchmark
 publish_to: none
 
 environment:
@@ -7,6 +7,9 @@ environment:
 dependencies:
   json_annotation: ^4.9.0
   hive_ce: any
+  hive: ^4.0.0-dev.2
+  isar: ^4.0.0-dev.14
+  csv: ^6.0.0
 
 dev_dependencies:
   rexios_lints: ^8.2.0
@@ -16,6 +19,6 @@ dev_dependencies:
 
 dependency_overrides:
   hive_ce:
-    path: ../../../hive
+    path: ../../hive
   hive_ce_generator:
-    path: ../../../hive_generator
+    path: ../../hive_generator
