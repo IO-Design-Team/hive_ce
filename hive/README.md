@@ -302,7 +302,7 @@ targets:
 ```
 
 2. Run the `build_runner`
-3. Copy the content of `hive_schema.g.yaml` to `lib/hive/hive_adapters.g.yaml`
+3. Replace the content of `lib/hive/hive_adapters.g.yaml` with the content of `hive_schema.g.yaml`
 4. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
 5. Run the `build_runner` again
 6. Revert the `build.yaml` changes
