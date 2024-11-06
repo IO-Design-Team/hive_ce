@@ -290,6 +290,8 @@ Some migrations might require manual modifications to the Hive schema file. One 
 
 ### Migrating to `GenerateAdapters`
 
+If you already have model classes with `HiveType` and `HiveField` annotations, you can take the following steps to migrate to the new `GenerateAdapters` annotation:
+
 1. Set up the `GenerateAdapters` annotation as described above
 2. Add the following to your `build.yaml` file:
 
