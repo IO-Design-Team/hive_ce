@@ -84,6 +84,6 @@ dependency_overrides:
     path: $hivePath
   hive_ce_generator:
     path: $hiveGeneratorPath
-'''
+''',
   };
 }
