@@ -37,19 +37,20 @@ class RegistrarIntermediateBuilder implements Builder {
     final bool registrarLocation;
 
     final generateAdaptersChecker = TypeChecker.fromRuntime(GenerateAdapters);
-    final generateAdaptersAnnotations = LibraryReader(library)
-        .annotatedWith(generateAdaptersChecker)
-        // Read multiple annotations if they exist
+    final generateAdaptersElements =
+        LibraryReader(library).annotatedWith(generateAdaptersChecker);
+    // Read multiple annotations if they exist
+    final generateAdaptersAnnotations = generateAdaptersElements
         .expand((e) => generateAdaptersChecker.annotationsOf(e.element));
 
     if (generateAdaptersAnnotations.length > 1) {
       throw HiveError(
         'Multiple GenerateAdapters annotations found in file: ${library.source.uri}',
       );
-    } else if (generateAdaptersAnnotations.isNotEmpty) {
+    } else if (generateAdaptersElements.isNotEmpty) {
       registrarLocation = true;
 
-      final annotation = generateAdaptersAnnotations.single as ConstantReader;
+      final annotation = generateAdaptersElements.single.annotation;
       final revived = RevivedGenerateAdapters(annotation);
       for (final spec in revived.specs) {
         adapters.add(generateAdapterName(spec.type.getDisplayString()));
