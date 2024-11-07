@@ -78,6 +78,26 @@ class Type2 {}
       );
     });
 
+    test('fails with multiple GenerateAdapters on same element', () {
+      expectGeneration(
+        input: {
+          ...pubspec,
+          'lib/hive_adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([AdapterSpec<Type>()])
+@GenerateAdapters([AdapterSpec<Type2>()])
+class Type {}
+
+class Type2 {}
+''',
+        },
+        throws:
+            'Multiple GenerateAdapters annotations found in file: package:hive_ce_generator_test/hive_adapters.dart',
+      );
+    });
+
     test('fails with multiple GenerateAdapters files', () {
       expectGeneration(
         input: {
