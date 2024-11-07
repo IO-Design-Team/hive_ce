@@ -62,7 +62,6 @@ class SchemaMigratorBuilder implements Builder {
       for (final accessor in result.getters + result.setters) {
         final annotationDefault = accessor.annotationDefault;
         if (annotationDefault != null && !annotationDefault.isNull) {
-          print(accessor.annotationDefault);
           throw InvalidGenerationSource(
             hasAnnotationDefaultValue(
               className: className,
