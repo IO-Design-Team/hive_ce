@@ -25,7 +25,7 @@ void main() {
     test('fresh', () {
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -49,7 +49,7 @@ class Person {
       // the order in the annotation
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -101,7 +101,7 @@ types:
       // typeId of 1
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -137,7 +137,7 @@ types:
       // A new field on Person should have the last index no matter the order
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -175,7 +175,7 @@ types:
     test('add and remove field', () {
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -211,7 +211,7 @@ types:
       test('with invalid next type ID', () {
         expectGeneration(
           input: {
-            'pubspec.yaml': pubspec,
+            ...pubspec,
             'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -234,7 +234,7 @@ types:
       test('with invalid next field index', () {
         expectGeneration(
           input: {
-            'pubspec.yaml': pubspec,
+            ...pubspec,
             'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -259,7 +259,7 @@ types:
       test('with duplicate type ID', () {
         expectGeneration(
           input: {
-            'pubspec.yaml': pubspec,
+            ...pubspec,
             'lib/hive/hive_adapters.dart': '''
 $directives
 
@@ -286,7 +286,7 @@ types:
       test('with duplicate field index', () {
         expectGeneration(
           input: {
-            'pubspec.yaml': pubspec,
+            ...pubspec,
             'lib/hive/hive_adapters.dart': '''
 $directives
 

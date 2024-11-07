@@ -19,14 +19,14 @@ class SchemaMigratorBuilder implements Builder {
       '$className.$fieldName has a default value in the HiveField annotation.'
       ' Convert it to a constructor parameter default before migrating.';
 
-  /// Exception if a field does not have a setter
+  /// Exception if a field does not have a public setter
   static String hasNoSetter({
     required String className,
     required String fieldName,
   }) =>
       '$className.$fieldName does not have a public setter or corresponding constructor parameter';
 
-  /// Exception if a field does not have a getter
+  /// Exception if a field does not have a public getter
   static String hasNoGetter({
     required String className,
     required String fieldName,

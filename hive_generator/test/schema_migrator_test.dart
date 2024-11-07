@@ -1,6 +1,17 @@
+import 'package:hive_ce_generator/src/builder/schema_migrator_builder.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
+
+const buildYaml = {
+  'build.yaml': r'''
+targets:
+  $default:
+    builders:
+      hive_ce_generator|hive_schema_migrator:
+        enabled: true
+''',
+};
 
 const adapters = {
   'lib/adapters.dart': '''
@@ -40,7 +51,7 @@ void main() {
     test('does not run if not enabled', () {
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
+          ...pubspec,
           ...adapters,
         },
         output: {
@@ -52,14 +63,8 @@ void main() {
     test('generates schema', () {
       expectGeneration(
         input: {
-          'pubspec.yaml': pubspec,
-          'build.yaml': r'''
-targets:
-  $default:
-    builders:
-      hive_ce_generator|hive_schema_migrator:
-        enabled: true
-''',
+          ...pubspec,
+          ...buildYaml,
           ...adapters,
         },
         output: {
@@ -90,6 +95,74 @@ types:
       );
     });
 
+    test('throws with default value', () {
+      expectGeneration(
+        input: {
+          ...pubspec,
+          ...buildYaml,
+          'lib/adapters.dart': '''
+import 'package:hive_ce/hive.dart';
 
+@HiveType(typeId: 0)
+class Class {
+  @HiveField(0, defaultValue: 42)
+  int? value;
+}
+''',
+        },
+        throws: SchemaMigratorBuilder.hasAnnotationDefaultValue(
+          className: 'Class',
+          fieldName: 'value',
+        ),
+      );
+    });
+
+    test('throws with no public setter', () {
+      expectGeneration(
+        input: {
+          ...pubspec,
+          ...buildYaml,
+          'lib/adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+
+@HiveType(typeId: 0)
+class Class {
+  @HiveField(0)
+  int? _value;
+
+  int? get value => _value;
+}
+''',
+        },
+        throws: SchemaMigratorBuilder.hasNoSetter(
+          className: 'Class',
+          fieldName: '_value',
+        ),
+      );
+    });
+
+    test('throws with no public getter', () {
+      expectGeneration(
+        input: {
+          ...pubspec,
+          ...buildYaml,
+          'lib/adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+
+@HiveType(typeId: 0)
+class Class {
+  Class({required int value}): _value = value;
+
+  @HiveField(0)
+  int? _value;
+}
+''',
+        },
+        throws: SchemaMigratorBuilder.hasNoGetter(
+          className: 'Class',
+          fieldName: '_value',
+        ),
+      );
+    });
   });
 }

@@ -61,11 +61,12 @@ String createTestProject(Map<String, String> project) {
   return directory.path;
 }
 
-String get pubspec {
+Map<String, String> get pubspec {
   final hivePath = path.absolute(path.current, '..', 'hive');
   final hiveGeneratorPath = path.absolute(path.current);
 
-  return '''
+  return {
+    'pubspec.yaml': '''
 name: hive_ce_generator_test
 
 environment:
@@ -83,5 +84,6 @@ dependency_overrides:
     path: $hivePath
   hive_ce_generator:
     path: $hiveGeneratorPath
-''';
+'''
+  };
 }
