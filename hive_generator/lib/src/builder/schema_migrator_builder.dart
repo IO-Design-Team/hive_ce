@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:source_helper/source_helper.dart';
 
 /// Generate a Hive schema from existing HiveType annotations
 class SchemaMigratorBuilder implements Builder {
@@ -74,6 +75,7 @@ class SchemaMigratorBuilder implements Builder {
       schemaInfos.add(
         _SchemaInfo(
           className: className,
+          isEnum: cls.thisType.isEnum,
           constructor: getConstructor(cls),
           accessors: cls.accessors,
           schema: result.schema,
@@ -86,6 +88,12 @@ class SchemaMigratorBuilder implements Builder {
 
     final sanitizedSchemaInfos = <_SchemaInfo>[];
     for (final info in schemaInfos) {
+      if (info.isEnum) {
+        // Enums need no sanitization
+        sanitizedSchemaInfos.add(info);
+        continue;
+      }
+
       final sanitizedFields = <String, HiveSchemaField>{};
       for (final MapEntry(key: fieldName, value: schema)
           in info.schema.fields.entries) {
@@ -132,12 +140,14 @@ class SchemaMigratorBuilder implements Builder {
 
 class _SchemaInfo {
   final String className;
+  final bool isEnum;
   final ConstructorElement constructor;
   final List<PropertyAccessorElement> accessors;
   final HiveSchemaType schema;
 
   _SchemaInfo({
     required this.className,
+    required this.isEnum,
     required this.constructor,
     required this.accessors,
     required this.schema,
@@ -145,12 +155,14 @@ class _SchemaInfo {
 
   _SchemaInfo copyWith({
     String? className,
+    bool? isEnum,
     ConstructorElement? constructor,
     List<PropertyAccessorElement>? accessors,
     HiveSchemaType? schema,
   }) {
     return _SchemaInfo(
       className: className ?? this.className,
+      isEnum: isEnum ?? this.isEnum,
       constructor: constructor ?? this.constructor,
       accessors: accessors ?? this.accessors,
       schema: schema ?? this.schema,

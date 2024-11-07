@@ -43,6 +43,18 @@ class Class3 {
 
   double get value => _value;
 }
+
+@HiveType(typeId: 4)
+enum Enum {
+  @HiveField(0)
+  a,
+
+  @HiveField(1)
+  b,
+
+  @HiveField(2)
+  c,
+}
 ''',
 };
 
@@ -70,7 +82,7 @@ void main() {
         output: {
           'lib/hive_schema.g.yaml': '''
 $schemaComment
-nextTypeId: 4
+nextTypeId: 5
 types:
   Class2:
     typeId: 0
@@ -90,6 +102,16 @@ types:
     fields:
       value:
         index: 0
+  Enum:
+    typeId: 4
+    nextIndex: 3
+    fields:
+      a:
+        index: 0
+      b:
+        index: 1
+      c:
+        index: 2
 ''',
         },
       );
