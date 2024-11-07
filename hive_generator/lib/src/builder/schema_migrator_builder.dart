@@ -2,7 +2,6 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'dart:async';
 
@@ -77,8 +76,7 @@ class SchemaMigratorBuilder implements Builder {
         _SchemaInfo(
           className: className,
           constructor: getConstructor(cls),
-          getters: result.getters,
-          setters: result.setters,
+          accessors: cls.accessors,
           schema: result.schema,
         ),
       );
@@ -97,9 +95,10 @@ class SchemaMigratorBuilder implements Builder {
 
         final isInConstructor =
             info.constructor.parameters.any((e) => e.name == publicFieldName);
-        final hasSetter = info.setters.any((e) => e.name == publicFieldName);
-        final hasGetter = info.getters.any((e) => e.name == publicFieldName);
-        print((info.getters + info.setters).map((e) => e.name).toList());
+        final accessors =
+            info.accessors.where((e) => e.name == publicFieldName).toList();
+        final hasSetter = accessors.any((e) => e.isSetter);
+        final hasGetter = accessors.any((e) => e.isGetter);
 
         if (!isInConstructor && !hasSetter) {
           throw InvalidGenerationSourceError(
@@ -135,30 +134,26 @@ class SchemaMigratorBuilder implements Builder {
 class _SchemaInfo {
   final String className;
   final ConstructorElement constructor;
-  final List<AdapterField> getters;
-  final List<AdapterField> setters;
+  final List<PropertyAccessorElement> accessors;
   final HiveSchemaType schema;
 
   _SchemaInfo({
     required this.className,
     required this.constructor,
-    required this.getters,
-    required this.setters,
+    required this.accessors,
     required this.schema,
   });
 
   _SchemaInfo copyWith({
     String? className,
     ConstructorElement? constructor,
-    List<AdapterField>? getters,
-    List<AdapterField>? setters,
+    List<PropertyAccessorElement>? accessors,
     HiveSchemaType? schema,
   }) {
     return _SchemaInfo(
       className: className ?? this.className,
       constructor: constructor ?? this.constructor,
-      getters: getters ?? this.getters,
-      setters: setters ?? this.setters,
+      accessors: accessors ?? this.accessors,
       schema: schema ?? this.schema,
     );
   }
