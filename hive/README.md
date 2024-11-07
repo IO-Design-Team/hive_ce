@@ -199,7 +199,7 @@ class Person extends HiveObject {
 
 ```
 
-### Create a `GeneateAdapters` annotation
+### Create a `GenerateAdapters` annotation
 
 Usually this is placed in `lib/hive/hive_adapters.dart`
 
