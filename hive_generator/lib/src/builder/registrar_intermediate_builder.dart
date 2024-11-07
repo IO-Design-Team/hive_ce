@@ -39,6 +39,7 @@ class RegistrarIntermediateBuilder implements Builder {
     final generateAdaptersChecker = TypeChecker.fromRuntime(GenerateAdapters);
     final generateAdaptersAnnotations = LibraryReader(library)
         .annotatedWith(generateAdaptersChecker)
+        // Read multiple annotations if they exist
         .expand((e) => generateAdaptersChecker.annotationsOf(e.element));
 
     if (generateAdaptersAnnotations.length > 1) {
