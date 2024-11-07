@@ -31,10 +31,6 @@ class Class3 {
   double _value;
 
   double get value => _value;
-
-  set value(double value) {
-    _value = value;
-  }
 }
 ''',
 };
@@ -93,5 +89,7 @@ types:
         },
       );
     });
+
+
   });
 }

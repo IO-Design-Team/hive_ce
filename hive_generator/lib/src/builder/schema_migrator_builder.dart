@@ -25,14 +25,14 @@ class SchemaMigratorBuilder implements Builder {
     required String className,
     required String fieldName,
   }) =>
-      '$className.$fieldName does not have a setter or corresponding constructor parameter';
+      '$className.$fieldName does not have a public setter or corresponding constructor parameter';
 
   /// Exception if a field does not have a getter
   static String hasNoGetter({
     required String className,
     required String fieldName,
   }) =>
-      '$className.$fieldName does not have a getter';
+      '$className.$fieldName does not have a public getter';
 
   @override
   final buildExtensions = const {
@@ -61,7 +61,9 @@ class SchemaMigratorBuilder implements Builder {
 
       final className = cls.name;
       for (final accessor in result.getters + result.setters) {
-        if (accessor.annotationDefault != null) {
+        final annotationDefault = accessor.annotationDefault;
+        if (annotationDefault != null && !annotationDefault.isNull) {
+          print(accessor.annotationDefault);
           throw InvalidGenerationSource(
             hasAnnotationDefaultValue(
               className: className,
@@ -97,6 +99,7 @@ class SchemaMigratorBuilder implements Builder {
             info.constructor.parameters.any((e) => e.name == publicFieldName);
         final hasSetter = info.setters.any((e) => e.name == publicFieldName);
         final hasGetter = info.getters.any((e) => e.name == publicFieldName);
+        print((info.getters + info.setters).map((e) => e.name).toList());
 
         if (!isInConstructor && !hasSetter) {
           throw InvalidGenerationSourceError(
