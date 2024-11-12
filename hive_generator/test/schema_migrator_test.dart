@@ -80,7 +80,24 @@ void main() {
           ...adapters,
         },
         output: {
-          'lib/hive_schema.g.yaml': '''
+          'lib/hive/hive_adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_generator_test/adapters.dart';
+import 'package:hive_ce_generator_test/adapters_2.dart';
+
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([
+  AdapterSpec<Class2>(),
+  AdapterSpec<Class1>(),
+  AdapterSpec<Class3>(),
+  AdapterSpec<Enum>(),
+])
+// This is for code generation
+// ignore: unused_element
+void _() {}
+''',
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 5
 types:

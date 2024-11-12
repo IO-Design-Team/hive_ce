@@ -31,6 +31,7 @@ builders:
   hive_schema_migrator:
     import: "package:hive_ce_generator/hive_generator.dart"
     builder_factories: ["getSchemaMigratorBuilder"]
-    build_extensions: { "$lib$": ["hive_schema.g.yaml"] }
+    build_extensions:
+      { "$lib$": ["hive/hive_adapters.yaml", "hive/hive_adapters.g.yaml"] }
     auto_apply: none
     build_to: source

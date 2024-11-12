@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
@@ -36,7 +37,7 @@ class SchemaMigratorBuilder implements Builder {
 
   @override
   final buildExtensions = const {
-    r'$lib$': ['hive_schema.g.yaml'],
+    r'$lib$': ['hive/hive_adapters.dart', 'hive/hive_adapters.g.yaml'],
   };
 
   @override
@@ -53,10 +54,11 @@ class SchemaMigratorBuilder implements Builder {
     final schemaInfos = <_SchemaInfo>[];
     for (final type in hiveTypes) {
       final cls = getClass(type.element);
+      final library = type.element.library!;
       final result = TypeAdapterGenerator.getAccessors(
         typeId: readTypeId(type.annotation),
         cls: cls,
-        library: type.element.library!,
+        library: library,
       );
 
       final className = cls.name;
@@ -74,6 +76,7 @@ class SchemaMigratorBuilder implements Builder {
 
       schemaInfos.add(
         _SchemaInfo(
+          uri: library.source.uri,
           className: className,
           isEnum: cls.thisType.isEnum,
           constructor: getConstructor(cls),
@@ -131,14 +134,42 @@ class SchemaMigratorBuilder implements Builder {
     final types = {
       for (final type in sanitizedSchemaInfos) type.className: type.schema,
     };
+
+    final imports = sanitizedSchemaInfos
+        .map((e) => e.uri)
+        .toSet() // Remove duplicates
+        .map((e) => "import '$e';")
+        .sorted() // Sort alphabetically
+        .join('\n');
+    final specs = sanitizedSchemaInfos
+        .map((e) => 'AdapterSpec<${e.className}>()')
+        .join(',\n  ');
     await buildStep.writeAsString(
-      buildStep.asset('lib/hive_schema.g.yaml'),
+      buildStep.asset('lib/hive/hive_adapters.dart'),
+      '''
+import 'package:hive_ce/hive.dart';
+$imports
+
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([
+  $specs,
+])
+// This is for code generation
+// ignore: unused_element
+void _() {}
+''',
+    );
+
+    await buildStep.writeAsString(
+      buildStep.asset('lib/hive/hive_adapters.g.yaml'),
       HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
     );
   }
 }
 
 class _SchemaInfo {
+  final Uri uri;
   final String className;
   final bool isEnum;
   final ConstructorElement constructor;
@@ -146,6 +177,7 @@ class _SchemaInfo {
   final HiveSchemaType schema;
 
   _SchemaInfo({
+    required this.uri,
     required this.className,
     required this.isEnum,
     required this.constructor,
@@ -154,6 +186,7 @@ class _SchemaInfo {
   });
 
   _SchemaInfo copyWith({
+    Uri? uri,
     String? className,
     bool? isEnum,
     ConstructorElement? constructor,
@@ -161,6 +194,7 @@ class _SchemaInfo {
     HiveSchemaType? schema,
   }) {
     return _SchemaInfo(
+      uri: uri ?? this.uri,
       className: className ?? this.className,
       isEnum: isEnum ?? this.isEnum,
       constructor: constructor ?? this.constructor,

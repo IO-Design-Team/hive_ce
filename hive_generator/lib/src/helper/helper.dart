@@ -92,6 +92,8 @@ extension BuildStepExtension on BuildStep {
   /// - Any files output through `buildStep.writeAsString` will be deleted
   ///   before the build starts
   void forceWriteAsString(AssetId id, String content) {
-    File(path.joinAll(id.pathSegments)).writeAsStringSync(content);
+    File(path.joinAll(id.pathSegments))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(content);
   }
 }

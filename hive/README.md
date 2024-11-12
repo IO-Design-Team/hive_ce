@@ -292,7 +292,7 @@ Some migrations might require manual modifications to the Hive schema file. One 
 
 If you already have model classes with `HiveType` and `HiveField` annotations, you can take the following steps to migrate to the new `GenerateAdapters` annotation:
 
-1. Set up the `GenerateAdapters` annotation as described above
+1. Convert all default values to constructor parameter defaults
 2. Add the following to your `build.yaml` file:
 
 ```yaml
@@ -303,12 +303,10 @@ targets:
         enabled: true
 ```
 
-2. Run the `build_runner`
-3. Replace the content of `lib/hive/hive_adapters.g.yaml` with the content of `hive_schema.g.yaml`
-4. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
-5. Run the `build_runner` again
-6. Revert the `build.yaml` changes
-7. Delete the `hive_schema.g.yaml` file
+3. Run the `build_runner`. This will generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`.
+4. Revert the `build.yaml` changes
+5. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
+6. Run the `build_runner` again
 
 ### Explicitly defining HiveTypes
 
