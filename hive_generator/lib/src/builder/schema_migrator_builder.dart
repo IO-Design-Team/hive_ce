@@ -144,7 +144,7 @@ class SchemaMigratorBuilder implements Builder {
     final specs = sanitizedSchemaInfos
         .map((e) => 'AdapterSpec<${e.className}>()')
         .join(',\n  ');
-    await buildStep.writeAsString(
+    buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.dart'),
       '''
 import 'package:hive_ce/hive.dart';
@@ -161,7 +161,7 @@ void _() {}
 ''',
     );
 
-    await buildStep.writeAsString(
+    buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.g.yaml'),
       HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
     );
