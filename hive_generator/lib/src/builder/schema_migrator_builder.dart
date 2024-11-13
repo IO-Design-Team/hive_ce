@@ -40,7 +40,7 @@ class SchemaMigratorBuilder implements Builder {
     required String className,
     required Set<String> accessors,
   }) {
-    final accessorsString = accessors.join('\n -');
+    final accessorsString = accessors.join('\n- ');
     return 'Accessors in $className do not have HiveField annotations'
         ' but are valid accessors for the GenerateAdapters annotation.'
         ' This will result in a schema mismatch.'
