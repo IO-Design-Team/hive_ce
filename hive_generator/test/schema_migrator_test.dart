@@ -173,7 +173,7 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasNoSetter(
+        throws: SchemaMigratorBuilder.hasNoPublicSetter(
           className: 'Class',
           fieldName: '_value',
         ),
@@ -197,9 +197,33 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasNoGetter(
+        throws: SchemaMigratorBuilder.hasNoPublicGetter(
           className: 'Class',
           fieldName: '_value',
+        ),
+      );
+    });
+
+    test('throws with schema mismatch', () {
+      expectGeneration(
+        input: {
+          ...pubspec,
+          ...buildYaml,
+          'lib/adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+
+@HiveType(typeId: 0)
+class Class {
+  @HiveField(0)
+  int? value;
+
+  int? value2;
+}
+''',
+        },
+        throws: SchemaMigratorBuilder.hasSchemaMismatch(
+          className: 'Class',
+          accessors: {'value2'},
         ),
       );
     });

@@ -171,6 +171,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       newSchemaFields[name] = HiveSchemaField(index: index);
       return AdapterField(
+        element,
         index,
         name,
         field.type,

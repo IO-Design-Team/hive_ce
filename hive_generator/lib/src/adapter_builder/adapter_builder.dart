@@ -4,6 +4,9 @@ import 'package:analyzer/dart/element/type.dart';
 
 /// Metadata about a field in a class adapter
 class AdapterField {
+  /// The corresponding element for this field
+  final PropertyAccessorElement element;
+
   /// The index of the field
   ///
   /// Determines the order fields are read and written
@@ -23,6 +26,7 @@ class AdapterField {
 
   /// Constructor
   AdapterField(
+    this.element,
     this.index,
     this.name,
     this.type,
