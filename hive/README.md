@@ -27,6 +27,9 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
 - Support for constructor parameter defaults
 - Freezed support
 - Support for generating adapters with classes that use named imports
+- Automatic type adapter generation using the `GenerateAdapters` annotation
+  - No more manually adding annotations to every type and field
+  - Generate adapters for classes outside the current package
 
 ## Hive CE (v2) vs Hive v4 (Isar)
 
@@ -187,16 +190,31 @@ Hive not only supports primitives, lists, and maps but also any Dart object you 
 ```dart
 import 'package:hive_ce/hive.dart';
 
-@HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
+
+```
+
+### Create a `GenerateAdapters` annotation
+
+Usually this is placed in `lib/hive/hive_adapters.dart`
+
+<!-- embedme readme/store_objects/hive_adapters.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
+
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([AdapterSpec<Person>()])
+// Annotations must be on some element
+// ignore: unused_element
+void _() {}
 
 ```
 
@@ -214,7 +232,15 @@ dev_dependencies:
 dart pub run build_runner build --delete-conflicting-outputs
 ```
 
-This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+This will generate the following:
+
+- TypeAdapters for the specified AdapterSpecs
+- TypeAdapters for all explicitly defined HiveTypes
+- A `hive_adapters.g.dart` file containing all adapters generated from the `GenerateAdapters` annotation
+- A `hive_adapters.g.yaml` file
+- A `hive_registrar.g.dart` file containing an extension method to register all generated adapters
+
+All of the generated files should be checked into version control. These files are explained in more detail below.
 
 ### Use the Hive registrar
 
@@ -256,6 +282,38 @@ void example() async {
 
 ```
 
+### About `hive_adapters.g.yaml`
+
+The Hive schema is a generated yaml file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
+
+Some migrations might require manual modifications to the Hive schema file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
+
+### Migrating to `GenerateAdapters`
+
+If you already have model classes with `HiveType` and `HiveField` annotations, you can take the following steps to migrate to the new `GenerateAdapters` annotation:
+
+1. Convert all default values to constructor parameter defaults
+2. Add the following to your `build.yaml` file:
+
+```yaml
+targets:
+  $default:
+    builders:
+      hive_ce_generator|hive_schema_migrator:
+        enabled: true
+```
+
+3. Run the `build_runner`. This will generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`.
+4. Revert the `build.yaml` changes
+5. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
+6. Run the `build_runner` again
+
+### Explicitly defining HiveTypes
+
+The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
+
+Unfortunately it is not possible for `GenerateAdapters` to handle private fields. You can use `@protected` instead if necessary.
+
 ## Add fields to objects
 
 When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
@@ -267,14 +325,10 @@ For example, consider an existing database with a `Person` object:
 ```dart
 import 'package:hive_ce/hive.dart';
 
-@HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
 
@@ -287,30 +341,15 @@ If you want to add a `balance` field, you must specify a default value or else r
 ```dart
 import 'package:hive_ce/hive.dart';
 
-@HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age, this.balance = 0});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
-
-  @HiveField(2)
   double balance;
 }
 
 ```
-
-Or specify it in the `HiveField` annotation:
-
-```dart
-@HiveField(2, defaultValue: 0)
-int balance;
-```
-
-Alternatively, you can write custom migration code to handle the transition.
 
 After modifying the model, remember to run `build_runner` to regenerate the TypeAdapters
 

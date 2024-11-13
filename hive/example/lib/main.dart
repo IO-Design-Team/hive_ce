@@ -1,21 +1,13 @@
 import 'dart:io';
 
-import 'package:example/hive_registrar.g.dart';
+import 'package:example/hive/hive_registrar.g.dart';
 import 'package:hive_ce/hive.dart';
 
-part 'main.g.dart';
-
-@HiveType(typeId: 1)
 class Person {
   Person({required this.name, required this.age, required this.friends});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
-
-  @HiveField(2)
   List<String> friends;
 
   @override

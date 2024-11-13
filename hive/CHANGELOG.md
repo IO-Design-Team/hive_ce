@@ -1,3 +1,7 @@
+## 2.8.0
+
+- Adds `GenerateAdapters` annotation and relevant documentation
+
 ## 2.7.0+1
 
 - Adds a storage benchmark to compare Hive CE with Hive v4
