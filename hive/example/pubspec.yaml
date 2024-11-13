@@ -17,9 +17,4 @@ dependency_overrides:
   hive_ce:
     path: ../
   hive_ce_generator:
-    # TODO: Revert
-    # path: ../../hive_generator
-    git:
-      url: https://github.com/IO-Design-Team/hive_ce
-      ref: 4f06756e5eee0b027f2e9d623e8136620309afcb
-      path: hive_generator
+    path: ../../hive_generator
