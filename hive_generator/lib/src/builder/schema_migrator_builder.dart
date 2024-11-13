@@ -66,7 +66,7 @@ class SchemaMigratorBuilder implements Builder {
     final schemaInfos = <_SchemaInfo>[];
     for (final type in hiveTypes) {
       final cls = getClass(type.element);
-      final className = cls.name;
+      final className = cls.displayName;
       final library = type.element.library!;
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
@@ -213,9 +213,9 @@ class _SchemaInfo {
           fieldName.startsWith('_') ? fieldName.substring(1) : fieldName;
 
       final isInConstructor =
-          constructor.parameters.any((e) => e.name == publicFieldName);
+          constructor.parameters.any((e) => e.displayName == publicFieldName);
       final publicAccessors =
-          accessors.where((e) => e.name == publicFieldName).toList();
+          accessors.where((e) => e.displayName == publicFieldName).toList();
       final hasPublicSetter = publicAccessors.any((e) => e.isSetter);
       final hasPublicGetter = publicAccessors.any((e) => e.isGetter);
 
@@ -241,8 +241,6 @@ class _SchemaInfo {
 
       sanitizedFields[publicFieldName] = schema;
     }
-
-    print('sanitizedFields: $sanitizedFields');
 
     return schema.copyWith(fields: sanitizedFields);
   }

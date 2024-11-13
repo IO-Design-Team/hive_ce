@@ -115,13 +115,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
           continue;
         }
 
-        final name = accessor.name;
-        if (accessor.isSetter) {
-          // Remove '=' from setter name
-          accessorNames.add(name.substring(0, name.length - 1));
-        } else {
-          accessorNames.add(name);
-        }
+        // The display name does not have the trailing '=' for setters
+        accessorNames.add(accessor.displayName);
       }
     }
 
