@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:path/path.dart' as path;
 
 final _hiveFieldChecker = const TypeChecker.fromRuntime(HiveField);
 
@@ -81,4 +84,16 @@ int readTypeId(ConstantReader annotation) {
 extension BuildStepExtension on BuildStep {
   /// Create an [AssetId] for the given [path] relative to the input package
   AssetId asset(String path) => AssetId(inputId.package, path);
+
+  /// Write [content] to asset [id] ignoring output restrictions
+  ///
+  /// This exists to bypass the following restrictions:
+  /// - `$lib$` inputs can only have fixed output locations
+  /// - Any files output through `buildStep.writeAsString` will be deleted
+  ///   before the build starts
+  void forceWriteAsString(AssetId id, String content) {
+    File(path.joinAll(id.pathSegments))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(content);
+  }
 }

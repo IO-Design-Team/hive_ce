@@ -11,10 +11,16 @@ class RegistrarIntermediate {
   /// The names of the adapters
   final List<String> adapters;
 
+  /// If this is where the Hive registrar should be placed
+  ///
+  /// Only one intermediate may have this set to true
+  final bool registrarLocation;
+
   /// Constructor
   const RegistrarIntermediate({
     required this.uri,
     required this.adapters,
+    required this.registrarLocation,
   });
 
   /// From json
