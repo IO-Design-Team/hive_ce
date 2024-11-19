@@ -10,6 +10,7 @@ export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.io) 'package:hive_ce/src/box_collection/box_collection.dart';
 export 'src/object/hive_object.dart' show HiveObject, HiveObjectMixin;
 
+export 'src/annotations/generate_adapters.dart';
 export 'src/annotations/hive_field.dart';
 export 'src/annotations/hive_type.dart';
 export 'src/binary/binary_reader.dart';
