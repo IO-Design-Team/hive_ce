@@ -244,6 +244,8 @@ All of the generated files should be checked into version control. These files a
 
 ### Use the Hive registrar
 
+The Hive Registrar allows you to register all generated TypeAdapters in one call
+
 ```dart
 import 'dart:io';
 import 'package:hive_ce/hive.dart';
@@ -286,7 +288,7 @@ void example() async {
 
 The Hive schema is a generated yaml file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
 
-Some migrations might require manual modifications to the Hive schema file. One example is field renaming. Without manual intervention, the generator will see both an added and removed field. To resolve this, manually rename the field in the schema.
+Some migrations may require manual modifications to the Hive schema file. One example is class/field renaming. Without manual intervention, the generator will see both an added and removed class/field. To resolve this, manually rename the class/field in the schema.
 
 ### Migrating to `GenerateAdapters`
 
