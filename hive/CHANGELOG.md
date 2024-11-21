@@ -1,3 +1,7 @@
+## 2.8.0+1
+
+- Adds tutorial link to README
+
 ## 2.8.0
 
 - Adds `GenerateAdapters` annotation and relevant documentation
