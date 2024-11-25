@@ -5,7 +5,11 @@ environment:
 
 dependencies:
   hive: any
+  hive_ce: ^2.8.0
 
 dependency_overrides:
   hive:
-    path: ../
+    git:
+      url: https://github.com/IO-Design-Team/hive_ce
+      ref: f8172d4b88b195eea1b1d07e3397332dc77a91ae
+      path: overrides/hive

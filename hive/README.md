@@ -90,6 +90,23 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 ```
 
+## Workaround for transitive Hive dependencies
+
+If you are using a package that depends on Hive v2, you can use the following workaround to force it to use Hive CE:
+
+```yaml
+dependencies:
+  # Depend on hive_ce to prevent resolving breaking versions
+  hive_ce: latest
+
+dependency_overrides:
+  hive:
+    git:
+      url: https://github.com/IO-Design-Team/hive_ce
+      ref: f8172d4b88b195eea1b1d07e3397332dc77a91ae
+      path: overrides/hive
+```
+
 ## Usage
 
 You can use Hive just like a map. It is not necessary to await `Futures`.

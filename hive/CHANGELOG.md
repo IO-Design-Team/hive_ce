@@ -1,3 +1,7 @@
+## 2.8.0+2
+
+- Adds workaround for transitive Hive dependencies to README
+
 ## 2.8.0+1
 
 - Adds tutorial link to README
