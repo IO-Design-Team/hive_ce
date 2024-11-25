@@ -1,0 +1,11 @@
+name: hive_override_example
+
+environment:
+  sdk: ^3.4.0
+
+dependencies:
+  hive: any
+
+dependency_overrides:
+  hive:
+    path: ../
