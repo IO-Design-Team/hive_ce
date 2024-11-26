@@ -91,12 +91,16 @@ class SchemaMigratorBuilder implements Builder {
 
       final uri = library.source.uri;
       final isEnum = cls.thisType.isEnum;
+      final isFreezed = TypeChecker.fromUrl(
+        'package:freezed_annotation/freezed_annotation.dart#Freezed',
+      ).hasAnnotationOfExact(cls);
       final constructor = getConstructor(cls);
       final accessors = cls.accessors;
       final info = _SchemaInfo(
         uri: uri,
         className: className,
         isEnum: isEnum,
+        isFreezed: isFreezed,
         constructor: constructor,
         accessors: accessors,
         schema: result.schema,
@@ -114,6 +118,7 @@ class SchemaMigratorBuilder implements Builder {
         uri: uri,
         className: className,
         isEnum: isEnum,
+        isFreezed: isFreezed,
         constructor: constructor,
         accessors: accessors,
         schema: secondPassResult.schema,
@@ -185,12 +190,14 @@ class _SchemaInfo {
     required this.uri,
     required this.className,
     required bool isEnum,
+    required bool isFreezed,
     required ConstructorElement constructor,
     required List<PropertyAccessorElement> accessors,
     required HiveSchemaType schema,
   }) : schema = _sanitizeSchema(
           className: className,
           isEnum: isEnum,
+          isFreezed: isFreezed,
           schema: schema,
           constructor: constructor,
           accessors: accessors,
@@ -199,6 +206,7 @@ class _SchemaInfo {
   static HiveSchemaType _sanitizeSchema({
     required String className,
     required bool isEnum,
+    required bool isFreezed,
     required HiveSchemaType schema,
     required ConstructorElement constructor,
     required List<PropertyAccessorElement> accessors,
@@ -219,7 +227,7 @@ class _SchemaInfo {
       final hasPublicSetter = publicAccessors.any((e) => e.isSetter);
       final hasPublicGetter = publicAccessors.any((e) => e.isGetter);
 
-      if (!isInConstructor && !hasPublicSetter) {
+      if (!isFreezed && !isInConstructor && !hasPublicSetter) {
         throw InvalidGenerationSourceError(
           SchemaMigratorBuilder.hasNoPublicSetter(
             className: className,
@@ -229,7 +237,7 @@ class _SchemaInfo {
         );
       }
 
-      if (!hasPublicGetter) {
+      if (!isFreezed && !hasPublicGetter) {
         throw InvalidGenerationSourceError(
           SchemaMigratorBuilder.hasNoPublicGetter(
             className: className,

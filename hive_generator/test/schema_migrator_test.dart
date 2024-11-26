@@ -63,7 +63,7 @@ void main() {
     test('does not run if not enabled', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...adapters,
         },
         output: {
@@ -75,7 +75,7 @@ void main() {
     test('generates schema', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...buildYaml,
           ...adapters,
         },
@@ -137,7 +137,7 @@ types:
     test('throws with default value', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
@@ -159,7 +159,7 @@ class Class {
     test('throws with no public setter', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
@@ -183,7 +183,7 @@ class Class {
     test('throws with no public getter', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
@@ -207,7 +207,7 @@ class Class {
     test('throws with schema mismatch', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
@@ -225,6 +225,52 @@ class Class {
           className: 'Class',
           accessors: {'value2'},
         ),
+      );
+    });
+
+    test('works with freezed classes', () {
+      expectGeneration(
+        input: {
+          ...pubspec(dependencies: {'freezed_annotation: any'}),
+          ...buildYaml,
+          'lib/adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'adapters.freezed.dart';
+
+@freezed
+class Class with _\$Class {
+  factory Class({@HiveField(0) required int value}) = _Class;
+}
+''',
+        },
+        output: {
+          'lib/hive/hive_adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_generator_test/adapters.dart';
+
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([
+  AdapterSpec<Class>(),
+])
+// This is for code generation
+// ignore: unused_element
+void _() {}
+''',
+          'lib/hive/hive_adapters.g.yaml': '''
+$schemaComment
+nextTypeId: 1
+types:
+  Class:
+    typeId: 0
+    nextIndex: 1
+    fields:
+      value:
+        index: 0
+''',
+        },
       );
     });
   });

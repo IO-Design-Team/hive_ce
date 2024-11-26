@@ -7,7 +7,7 @@ void main() {
     test('outputs to lib folder by default', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/nested/type.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'type.g.dart';
@@ -25,7 +25,7 @@ class Type {}
     test('does not output with no types', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';
@@ -43,7 +43,7 @@ void _() {}
     test('outputs next to GenerateAdapters annotation', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';
@@ -61,7 +61,7 @@ class Type {}
     test('fails with multiple GenerateAdapters in same file', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';
@@ -81,7 +81,7 @@ class Type2 {}
     test('fails with multiple GenerateAdapters on same element', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';
@@ -101,7 +101,7 @@ class Type2 {}
     test('fails with multiple GenerateAdapters files', () {
       expectGeneration(
         input: {
-          ...pubspec,
+          ...pubspec(),
           'lib/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 part 'hive_adapters.g.dart';

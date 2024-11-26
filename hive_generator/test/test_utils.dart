@@ -61,7 +61,7 @@ String createTestProject(Map<String, String> project) {
   return directory.path;
 }
 
-Map<String, String> get pubspec {
+Map<String, String> pubspec({Set<String> dependencies = const {}}) {
   final hivePath = path.absolute(path.current, '..', 'hive');
   final hiveGeneratorPath = path.absolute(path.current);
 
@@ -74,6 +74,7 @@ environment:
 
 dependencies:
   hive_ce: any
+  ${dependencies.join('\n  ')}
 
 dev_dependencies:
   build_runner: any
