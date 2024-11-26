@@ -28,6 +28,8 @@ builders:
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
+    required_inputs:
+      - .freezed.dart
   hive_schema_migrator:
     import: "package:hive_ce_generator/hive_generator.dart"
     builder_factories: ["getSchemaMigratorBuilder"]
@@ -35,3 +37,5 @@ builders:
       { "$lib$": ["hive/hive_adapters.yaml", "hive/hive_adapters.g.yaml"] }
     auto_apply: none
     build_to: source
+    required_inputs:
+      - .freezed.dart

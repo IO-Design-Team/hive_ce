@@ -1,3 +1,7 @@
+## 1.8.1
+
+- Fixes a bug in the migrator affecting `freezed` classes
+
 ## 1.8.0
 
 - Adds support for the `GenerateAdapters` annotation. See the [hive_ce documentation](https://pub.dev/packages/hive_ce) for more information.
