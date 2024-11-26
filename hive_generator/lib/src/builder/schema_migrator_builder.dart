@@ -92,7 +92,8 @@ class SchemaMigratorBuilder implements Builder {
       final uri = library.source.uri;
       final isEnum = cls.thisType.isEnum;
       final constructor = getConstructor(cls);
-      final accessors = cls.allSupertypes.expand((it) => it.accessors).toList();
+      final accessors = cls.accessors +
+          cls.allSupertypes.expand((it) => it.accessors).toList();
       final info = _SchemaInfo(
         uri: uri,
         className: className,
