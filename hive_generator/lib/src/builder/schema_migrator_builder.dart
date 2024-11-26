@@ -229,7 +229,6 @@ class _SchemaInfo {
         );
       }
 
-      // Freezed classes will not have a public getter
       if (!hasPublicGetter) {
         throw InvalidGenerationSourceError(
           SchemaMigratorBuilder.hasNoPublicGetter(
