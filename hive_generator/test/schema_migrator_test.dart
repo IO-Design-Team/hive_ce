@@ -239,6 +239,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adapters.freezed.dart';
 
+@HiveType(typeId: 0)
 @freezed
 class Class with _\$Class {
   factory Class({@HiveField(0) required int value}) = _Class;
