@@ -231,13 +231,17 @@ class Class {
     test('works with freezed classes', () {
       expectGeneration(
         input: {
-          ...pubspec(dependencies: {'freezed_annotation: any'}),
+          ...pubspec(
+            dependencies: {'freezed_annotation: any'},
+            devDependencies: {'freezed: any'},
+          ),
           ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adapters.freezed.dart';
+part 'adapters.g.dart';
 
 @HiveType(typeId: 0)
 @freezed

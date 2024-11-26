@@ -37,3 +37,5 @@ builders:
       { "$lib$": ["hive/hive_adapters.yaml", "hive/hive_adapters.g.yaml"] }
     auto_apply: none
     build_to: source
+    required_inputs:
+      - .freezed.dart

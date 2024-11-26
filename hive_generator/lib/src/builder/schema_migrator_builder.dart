@@ -227,7 +227,7 @@ class _SchemaInfo {
       final hasPublicSetter = publicAccessors.any((e) => e.isSetter);
       final hasPublicGetter = publicAccessors.any((e) => e.isGetter);
 
-      if (!isFreezed && !isInConstructor && !hasPublicSetter) {
+      if (!isInConstructor && !hasPublicSetter) {
         throw InvalidGenerationSourceError(
           SchemaMigratorBuilder.hasNoPublicSetter(
             className: className,
@@ -237,6 +237,7 @@ class _SchemaInfo {
         );
       }
 
+      // Freezed classes will not have a public getter
       if (!isFreezed && !hasPublicGetter) {
         throw InvalidGenerationSourceError(
           SchemaMigratorBuilder.hasNoPublicGetter(
