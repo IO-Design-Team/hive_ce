@@ -1,4 +1,4 @@
-## 1.9.0
+## 1.8.1
 
 - Fixes a bug in the migrator affecting `freezed` classes
 
