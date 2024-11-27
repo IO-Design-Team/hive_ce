@@ -1,0 +1,19 @@
+name: hive_ce_inspector
+description: "A new Flutter project."
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  rexios_lints: ^8.2.0
+
+flutter:
+  uses-material-design: true
