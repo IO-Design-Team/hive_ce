@@ -19,6 +19,6 @@ dev_dependencies:
 
 dependency_overrides:
   hive_ce:
-    path: ../../hive
+    path: ../../packages/hive
   hive_ce_generator:
-    path: ../../hive_generator
+    path: ../../packages/hive_generator

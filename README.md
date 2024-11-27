@@ -1,1 +1,1 @@
-hive/README.md
+packages/hive/README.md
