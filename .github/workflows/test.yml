@@ -19,7 +19,7 @@ jobs:
         flutter-channel: [stable, beta]
     defaults:
       run:
-        working-directory: ${{ matrix.package }}
+        working-directory: packages/${{ matrix.package }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -44,7 +44,7 @@ jobs:
             compiler: dart2wasm
     defaults:
       run:
-        working-directory: hive
+        working-directory: packages/hive
     steps:
       - uses: actions/checkout@v4
       - uses: browser-actions/setup-chrome@v1
@@ -68,7 +68,7 @@ jobs:
         flutter-channel: [stable, beta]
     defaults:
       run:
-        working-directory: hive_flutter
+        working-directory: packages/hive_flutter
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -93,7 +93,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        working-directory: hive_generator
+        working-directory: packages/hive_generator
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2

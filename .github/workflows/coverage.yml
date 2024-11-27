@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: hive
+        working-directory: packages/hive
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
