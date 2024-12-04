@@ -1,3 +1,7 @@
+## 2.8.1
+
+- Fixes reading `int` types when compiled to WASM
+
 ## 2.8.0+2
 
 - Adds workaround for transitive Hive dependencies to README
