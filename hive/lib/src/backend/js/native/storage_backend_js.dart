@@ -11,6 +11,7 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/same_types.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart';
 
@@ -172,11 +173,13 @@ class StorageBackendJs extends StorageBackend {
   Future<T?> readValue<T>(Frame frame) async {
     final value = await getStore(false).get(frame.key.jsify()).asFuture();
     final decoded = decodeValue(value);
-    if (T == int) {
+    if (decoded == null) {
+      return null;
+    } else if (sameTypes<T, int>() || sameTypes<T, int?>()) {
       // Workaround for WASM numbers defaulting to double
-      return (decoded as num).toInt() as T?;
+      return (decoded as num).toInt() as T;
     } else {
-      return decoded as T?;
+      return decoded as T;
     }
   }
 

@@ -235,6 +235,11 @@ void main() async {
       expect(await backend.readValue(Frame('key2', null)), null);
       // Ints should decode as ints when compiled to JS and WASM
       expect(await backend.readValue<int>(Frame('key3', null)), isA<int>());
+      // Reading null value should work
+      expect(await backend.readValue<int>(Frame('key2', null)), null);
+      // Since we cannot enforce that T is non-null without a breaking change,
+      // check that if T is `int?` it still works
+      expect(await backend.readValue<int?>(Frame('key3', null)), isA<int>());
     });
 
     test('.writeFrames()', () async {
