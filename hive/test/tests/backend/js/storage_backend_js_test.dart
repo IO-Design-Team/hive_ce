@@ -233,6 +233,8 @@ void main() async {
 
       expect(await backend.readValue(Frame('key1', null)), 1);
       expect(await backend.readValue(Frame('key2', null)), null);
+      // Ints should decode as ints when compiled to JS and WASM
+      expect(await backend.readValue<int>(Frame('key3', null)), isA<int>());
     });
 
     test('.writeFrames()', () async {
