@@ -24,11 +24,11 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     final frame = keystore.get(key);
 
     if (frame != null) {
-      final value = await backend.readValue(frame);
+      final value = await backend.readValue<E>(frame);
       if (value is HiveObjectMixin) {
         value.init(key, this);
       }
-      return value as E?;
+      return value;
     } else {
       if (defaultValue != null && defaultValue is HiveObjectMixin) {
         defaultValue.init(key, this);

@@ -20,7 +20,7 @@ abstract class StorageBackend {
   Future<void> initialize(TypeRegistry registry, Keystore keystore, bool lazy);
 
   /// Read value from backend
-  Future<dynamic> readValue(Frame frame);
+  Future<T?> readValue<T>(Frame frame);
 
   /// Write a list of frames to the backend
   Future<void> writeFrames(List<Frame> frames);

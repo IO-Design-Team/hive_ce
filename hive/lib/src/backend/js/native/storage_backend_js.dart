@@ -169,9 +169,15 @@ class StorageBackendJs extends StorageBackend {
   }
 
   @override
-  Future<Object?> readValue(Frame frame) async {
+  Future<T?> readValue<T>(Frame frame) async {
     final value = await getStore(false).get(frame.key.jsify()).asFuture();
-    return decodeValue(value);
+    final decoded = decodeValue(value);
+    if (T is int) {
+      // Workaround for WASM numbers defaulting to double
+      return (decoded as num).toInt() as T?;
+    } else {
+      return decoded as T?;
+    }
   }
 
   @override

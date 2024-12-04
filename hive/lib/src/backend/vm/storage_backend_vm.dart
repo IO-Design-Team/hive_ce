@@ -113,7 +113,7 @@ class StorageBackendVm extends StorageBackend {
   }
 
   @override
-  Future<dynamic> readValue(Frame frame) {
+  Future<T?> readValue<T>(Frame frame) {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
@@ -128,7 +128,7 @@ class StorageBackendVm extends StorageBackend {
         );
       }
 
-      return readFrame.value;
+      return readFrame.value as T?;
     });
   }
 
