@@ -1,0 +1,24 @@
+name: hive_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  json_annotation: ^4.9.0
+  hive_ce: any
+  hive: ^4.0.0-dev.2
+  isar: ^4.0.0-dev.14
+  csv: ^6.0.0
+
+dev_dependencies:
+  rexios_lints: ^8.2.0
+  build_runner: ^2.4.13
+  json_serializable: ^6.8.0
+  hive_ce_generator: any
+
+dependency_overrides:
+  hive_ce:
+    path: ../../hive
+  hive_ce_generator:
+    path: ../../hive_generator

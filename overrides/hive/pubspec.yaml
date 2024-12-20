@@ -1,0 +1,7 @@
+name: hive
+
+environment:
+  sdk: ^3.4.0
+
+dependencies:
+  hive_ce: any

@@ -7,11 +7,54 @@
 
 Hive is a lightweight and blazing fast key-value database written in pure Dart. Inspired by [Bitcask](https://en.wikipedia.org/wiki/Bitcask).
 
-### [Documentation & Samples](https://docs.hivedb.dev/) 📖
+## Tutorial
 
-If you need queries, multi-isolate support or links between objects check out [Isar Database](https://github.com/isar/isar).
+For a quick tutorial, see [this wonderful post](https://onlyflutter.com/how-to-add-a-local-database-using-hive-in-flutter) by [Tijn van den Eijnde](https://x.com/TijnvdEijnde)
 
-## Migrating from Hive
+## Features
+
+- 🚀 Cross platform: mobile, desktop, browser
+- ⚡ Great performance (see [benchmark](#benchmark))
+- ❤️ Simple, powerful, & intuitive API
+- 🔒 Strong encryption built in
+- 🎈 **NO** native dependencies
+- 🔋 Batteries included
+
+## New features in Hive CE
+
+Hive CE is a spiritual continuation of Hive v2 with the following new features:
+
+- Flutter web WASM support
+- Support for Sets
+- A built in Duration adapter
+- A `HiveRegistrar` extension that lets you register all your generated adapters in one call
+- Support for constructor parameter defaults
+- Freezed support
+- Support for generating adapters with classes that use named imports
+- Automatic type adapter generation using the `GenerateAdapters` annotation
+  - No more manually adding annotations to every type and field
+  - Generate adapters for classes outside the current package
+
+## Hive CE (v2) vs Hive v4 (Isar)
+
+You may be considering attempting to make the dev version of Hive v4 work in your project. I _strongly_ advise against this. Not only is Hive v4 not stable, but it is also much slower and less efficient than Hive CE.
+
+This is a comparison of the time to complete a given number of write operations and the resulting database file size:
+
+| Operations | Hive CE |           | Hive v4 |           |
+| ---------- | ------- | --------- | ------- | --------- |
+| 10         | 0.00 s  | 0.00 MB   | 0.01 s  | 1.00 MB   |
+| 100        | 0.01 s  | 0.01 MB   | 0.01 s  | 1.00 MB   |
+| 1,000      | 0.05 s  | 0.11 MB   | 0.07 s  | 1.00 MB   |
+| 10,000     | 0.21 s  | 1.10 MB   | 0.69 s  | 5.00 MB   |
+| 100,000    | 1.53 s  | 10.97 MB  | 7.01 s  | 30.00 MB  |
+| 1,000,000  | 19.97 s | 109.67 MB | 89.81 s | 290.00 MB |
+
+Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
+
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/bin/bench.dart).
+
+## Migrating from Hive v2
 
 The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
 
@@ -47,31 +90,39 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 ```
 
-## Features
+## Workaround for transitive Hive dependencies
 
-- 🚀 Cross platform: mobile, desktop, browser
-- ⚡ Great performance (see [benchmark](#benchmark))
-- ❤️ Simple, powerful, & intuitive API
-- 🔒 Strong encryption built in
-- 🎈 **NO** native dependencies
-- 🔋 Batteries included
+If you are using a package that depends on Hive v2, you can use the following workaround to force it to use Hive CE:
 
-## Getting Started
+```yaml
+dependencies:
+  # Depend on hive_ce to prevent resolving breaking versions
+  hive_ce: latest
 
-Check out the [Quick Start](https://docs.hivedb.dev) documentation to get started.
+dependency_overrides:
+  hive:
+    git:
+      url: https://github.com/IO-Design-Team/hive_ce
+      ref: f8172d4b88b195eea1b1d07e3397332dc77a91ae
+      path: overrides/hive
+```
 
 ## Usage
 
 You can use Hive just like a map. It is not necessary to await `Futures`.
 
+<!-- embedme readme/usage.dart -->
+
 ```dart
-var box = Hive.box('myBox');
+import 'package:hive_ce/hive.dart';
 
-box.put('name', 'David');
+void example() {
+  final box = Hive.box('myBox');
+  box.put('name', 'David');
+  final name = box.get('name');
+  print('Name: $name');
+}
 
-var name = box.get('name');
-
-print('Name: $name');
 ```
 
 ## BoxCollections
@@ -86,17 +137,27 @@ transactions on web.
 On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
 BoxCollections might be useful for some box hierarchy and development experience.
 
+<!-- embedme readme/box_collections.dart -->
+
 ```dart
-// Create a box collection
+import 'package:hive_ce/hive.dart';
+import 'hive_cipher_impl.dart';
+
+void example() async {
+  // Create a box collection
   final collection = await BoxCollection.open(
-    'MyFirstFluffyBox', // Name of your database
-    {'cats', 'dogs'}, // Names of your boxes
-    path: './', // Path where to store your boxes (Only used in Flutter / Dart IO)
-    key: HiveCipher(), // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    // Name of your database
+    'MyFirstFluffyBox',
+    // Names of your boxes
+    {'cats', 'dogs'},
+    // Path where to store your boxes (Only used in Flutter / Dart IO)
+    path: './',
+    // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    key: HiveCipherImpl(),
   );
 
   // Open your boxes. Optional: Give it a type.
-  final catsBox = collection.openBox<Map>('cats');
+  final catsBox = await collection.openBox<Map>('cats');
 
   // Put something in
   await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
@@ -135,25 +196,50 @@ BoxCollections might be useful for some box hierarchy and development experience
     boxNames: ['cats'], // By default all boxes become blocked.
     readOnly: false,
   );
+}
+
 ```
 
 ## Store objects
 
-Hive not only supports primitives, lists and maps but also any Dart object you like. You need to generate a type adapter before you can store objects.
+Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
+
+### Create model classes
+
+<!-- embedme readme/store_objects/person.dart -->
 
 ```dart
-@HiveType(typeId: 0)
+import 'package:hive_ce/hive.dart';
+
 class Person extends HiveObject {
+  Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
+
 ```
 
-Add the following to your pubspec.yaml
+### Create a `GenerateAdapters` annotation
+
+Usually this is placed in `lib/hive/hive_adapters.dart`
+
+<!-- embedme readme/store_objects/hive_adapters.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
+
+part 'hive_adapters.g.dart';
+
+@GenerateAdapters([AdapterSpec<Person>()])
+// Annotations must be on some element
+// ignore: unused_element
+void _() {}
+
+```
+
+### Update `pubspec.yaml`
 
 ```yaml
 dev_dependencies:
@@ -161,42 +247,95 @@ dev_dependencies:
   hive_ce_generator: latest
 ```
 
-And run the following command to generate the type adapter
+### Run `build_runner`
 
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
+dart pub run build_runner build --delete-conflicting-outputs
 ```
 
-This will generate all of your `TypeAdapter`s as well as a Hive extension to register them all in one go
+This will generate the following:
+
+- TypeAdapters for the specified AdapterSpecs
+- TypeAdapters for all explicitly defined HiveTypes
+- A `hive_adapters.g.dart` file containing all adapters generated from the `GenerateAdapters` annotation
+- A `hive_adapters.g.yaml` file
+- A `hive_registrar.g.dart` file containing an extension method to register all generated adapters
+
+All of the generated files should be checked into version control. These files are explained in more detail below.
+
+### Use the Hive registrar
+
+The Hive Registrar allows you to register all generated TypeAdapters in one call
 
 ```dart
-import 'package:your_package/hive_registrar.g.dart';
+import 'dart:io';
+import 'package:hive_ce/hive.dart';
+import 'package:your_package/hive/hive_registrar.g.dart';
 
 void main() {
-  final path = Directory.current.path;
   Hive
-    ..init(path)
+    ..init(Directory.current.path)
     ..registerAdapters();
 }
 ```
 
+### Using HiveObject methods
+
 Extending `HiveObject` is optional but it provides handy methods like `save()` and `delete()`.
 
+<!-- embedme readme/store_objects/hive_object.dart -->
+
 ```dart
-var box = await Hive.openBox('myBox');
+import 'package:hive_ce/hive.dart';
+import 'person.dart';
 
-var person = Person()
-  ..name = 'Dave'
-  ..age = 22;
-box.add(person);
+void example() async {
+  final box = await Hive.openBox('myBox');
 
-print(box.getAt(0)); // Dave - 22
+  final person = Person(name: 'Dave', age: 22);
+  await box.add(person);
 
-person.age = 30;
-person.save();
+  print(box.getAt(0)); // Dave - 22
 
-print(box.getAt(0)) // Dave - 30
+  person.age = 30;
+  await person.save();
+
+  print(box.getAt(0)); // Dave - 30
+}
+
 ```
+
+### About `hive_adapters.g.yaml`
+
+The Hive schema is a generated yaml file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
+
+Some migrations may require manual modifications to the Hive schema file. One example is class/field renaming. Without manual intervention, the generator will see both an added and removed class/field. To resolve this, manually rename the class/field in the schema.
+
+### Migrating to `GenerateAdapters`
+
+If you already have model classes with `HiveType` and `HiveField` annotations, you can take the following steps to migrate to the new `GenerateAdapters` annotation:
+
+1. Convert all default values to constructor parameter defaults
+2. Add the following to your `build.yaml` file:
+
+```yaml
+targets:
+  $default:
+    builders:
+      hive_ce_generator|hive_schema_migrator:
+        enabled: true
+```
+
+3. Run the `build_runner`. This will generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`.
+4. Revert the `build.yaml` changes
+5. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
+6. Run the `build_runner` again
+
+### Explicitly defining HiveTypes
+
+The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
+
+Unfortunately it is not possible for `GenerateAdapters` to handle private fields. You can use `@protected` instead if necessary.
 
 ## Add fields to objects
 
@@ -204,73 +343,38 @@ When adding a new non-nullable field to an existing object, you need to specify 
 
 For example, consider an existing database with a `Person` object:
 
+<!-- embedme readme/add_fields/person_1.dart -->
+
 ```dart
-@HiveType(typeId: 0)
+import 'package:hive_ce/hive.dart';
+
 class Person extends HiveObject {
   Person({required this.name, required this.age});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
 }
+
 ```
 
-If you want to add a `balance` field:
+If you want to add a `balance` field, you must specify a default value or else reading existing data will result in null errors:
+
+<!-- embedme readme/add_fields/person_2.dart -->
 
 ```dart
-@HiveType(typeId: 0)
-class Person extends HiveObject {
-  Person({required this.name, required this.age, required this.balance});
+import 'package:hive_ce/hive.dart';
 
-  @HiveField(0)
-  String name;
-
-  @HiveField(1)
-  int age;
-
-  @HiveField(2)
-  int balance;
-}
-```
-
-Without proper handling, this change will cause null errors in the existing application when accessing the new field.
-
-To resolve this issue, you can set a default value in the constructor (this requires hive_ce_generator 1.5.0+)
-
-```dart
-@HiveType(typeId: 0)
 class Person extends HiveObject {
   Person({required this.name, required this.age, this.balance = 0});
 
-  @HiveField(0)
   String name;
-
-  @HiveField(1)
   int age;
-
-  @HiveField(2)
-  int balance;
+  double balance;
 }
+
 ```
 
-Or specify it in the `HiveField` annotation:
-
-```dart
-@HiveField(2, defaultValue: 0)
-int balance;
-```
-
-Alternatively, you can write custom migration code to handle the transition.
-
-After modifying the schema, remember to run the build runner to generate the necessary code:
-
-```console
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-This will update your Hive adapters to reflect the changes in your object structure.
+After modifying the model, remember to run `build_runner` to regenerate the TypeAdapters
 
 ## Hive ❤️ Flutter
 

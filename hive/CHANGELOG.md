@@ -1,3 +1,19 @@
+## 2.8.0+2
+
+- Adds workaround for transitive Hive dependencies to README
+
+## 2.8.0+1
+
+- Adds tutorial link to README
+
+## 2.8.0
+
+- Adds `GenerateAdapters` annotation and relevant documentation
+
+## 2.7.0+1
+
+- Adds a storage benchmark to compare Hive CE with Hive v4
+
 ## 2.7.0
 
 - No longer reinitializes `Hive` when opening a `BoxCollection`
