@@ -1,5 +1,3 @@
-library hive.test.mocks;
-
 import 'dart:io';
 
 import 'package:hive_ce/hive.dart';

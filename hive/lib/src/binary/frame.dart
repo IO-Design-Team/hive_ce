@@ -121,66 +121,66 @@ final class FrameKeyType {
 final class FrameValueType {
   FrameValueType._();
 
-  /// null
+  /// `null`
   static const nullT = 0;
 
-  /// int
+  /// `int`
   static const intT = 1;
 
-  /// double
+  /// `double`
   static const doubleT = 2;
 
-  /// bool
+  /// `bool`
   static const boolT = 3;
 
-  /// String
+  /// `String`
   static const stringT = 4;
 
-  /// Uint8List
+  /// `Uint8List`
   static const byteListT = 5;
 
-  /// List<int>
+  /// `List<int>`
   static const intListT = 6;
 
-  /// List<double>
+  /// `List<double>`
   static const doubleListT = 7;
 
-  /// List<bool>
+  /// `List<bool>`
   static const boolListT = 8;
 
-  /// List<String>
+  /// `List<String>`
   static const stringListT = 9;
 
-  /// List<dynamic>
+  /// `List<dynamic>`
   static const listT = 10;
 
-  /// Map<dynamic, dynamic>
+  /// `Map<dynamic, dynamic>`
   static const mapT = 11;
 
-  /// List<HiveObject>
+  /// `List<HiveObject>`
   static const hiveListT = 12;
 
-  /// Set<int>
+  /// `Set<int>`
   static const intSetT = 13;
 
-  /// Set<double>
+  /// `Set<double>`
   static const doubleSetT = 14;
 
-  /// Set<String>
+  /// `Set<String>`
   static const stringSetT = 15;
 
-  /// DateTimeAdapter
+  /// `DateTimeAdapter`
   static const dateTime = 16;
 
-  /// BigIntAdapter
+  /// `BigIntAdapter`
   static const bigInt = 17;
 
-  /// DateTimeWithTimezoneAdapter
+  /// `DateTimeWithTimezoneAdapter`
   static const dateTimeWithTimezone = 18;
 
-  /// Set<dynamic>
+  /// `Set<dynamic>`
   static const setT = 19;
 
-  /// DurationAdapter
+  /// `DurationAdapter`
   static const duration = 20;
 }
