@@ -1,5 +1,3 @@
-library hive_flutter;
-
 export 'package:hive_ce/hive.dart';
 
 export 'src/box_extensions.dart';
