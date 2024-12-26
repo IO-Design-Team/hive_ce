@@ -1,3 +1,7 @@
+## 2.8.0+3
+
+- Updates the commit hash for the transitive Hive dependencies workaround
+
 ## 2.8.0+2
 
 - Adds workaround for transitive Hive dependencies to README

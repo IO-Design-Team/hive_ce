@@ -103,7 +103,7 @@ dependency_overrides:
   hive:
     git:
       url: https://github.com/IO-Design-Team/hive_ce
-      ref: f8172d4b88b195eea1b1d07e3397332dc77a91ae
+      ref: 18f92b53295e9eb77ebd4830d905a72cd404a126
       path: overrides/hive
 ```
 
