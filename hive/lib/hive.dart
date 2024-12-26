@@ -1,7 +1,3 @@
-/// Hive is a lightweight and blazing fast key-value store written in pure Dart.
-/// It is strongly encrypted using AES-256.
-library hive;
-
 import 'package:hive_ce/src/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 
