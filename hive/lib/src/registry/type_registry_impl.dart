@@ -1,5 +1,6 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -107,7 +108,7 @@ class TypeRegistryImpl implements TypeRegistry {
     bool override = false,
   }) {
     if (T == dynamic || T == Object) {
-      print(
+      debugPrint(
         'Registering type adapters for dynamic type is must be avoided, '
         'otherwise all the write requests to Hive will be handled by given '
         'adapter. Please explicitly provide adapter type on registerAdapter '
@@ -130,7 +131,7 @@ class TypeRegistryImpl implements TypeRegistry {
           final oldAdapterType = oldAdapter.runtimeType;
           final newAdapterType = adapter.runtimeType;
           final typeId = adapter.typeId;
-          print(
+          debugPrint(
             'You are trying to override $oldAdapterType '
             'with $newAdapterType for typeId: $typeId. '
             'Please note that overriding adapters might '
@@ -151,7 +152,7 @@ class TypeRegistryImpl implements TypeRegistry {
         final existingAdapterTypeId = adapterForSameType.typeId;
 
         if (adapterTypeId != existingAdapterTypeId) {
-          print(
+          debugPrint(
             'WARNING: You are trying to register $adapterType '
             '(typeId $adapterTypeId) for type $T but there is already a '
             'TypeAdapter for this type: $existingAdapterType '
