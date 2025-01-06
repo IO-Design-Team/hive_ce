@@ -1,3 +1,8 @@
+## 2.9.0
+
+- Prints a warning when writing `int` or `List<int>` types in a WASM environment
+- Only emits print statements when assertions are enabled (aka debug mode)
+
 ## 2.8.0+3
 
 - Updates the commit hash for the transitive Hive dependencies workaround

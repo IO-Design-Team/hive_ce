@@ -11,6 +11,7 @@ import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
@@ -102,7 +103,7 @@ class StorageBackendVm extends StorageBackend {
 
     if (recoveryOffset != -1) {
       if (_crashRecovery) {
-        print('Recovering corrupted box.');
+        debugPrint('Recovering corrupted box.');
         await writeRaf.truncate(recoveryOffset);
         await writeRaf.setPosition(recoveryOffset);
         writeOffset = recoveryOffset;
