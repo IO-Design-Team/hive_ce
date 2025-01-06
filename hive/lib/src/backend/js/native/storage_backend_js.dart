@@ -18,8 +18,13 @@ import 'package:web/web.dart';
 /// Handles all IndexedDB related tasks
 class StorageBackendJs extends StorageBackend {
   static const _bytePrefix = [0x90, 0xA9];
-  static const _isWasm = bool.fromEnvironment('dart.tool.dart2wasm');
+
+  /// If this is a WASM environment
+  @visibleForTesting
+  static const isWasm = bool.fromEnvironment('dart.tool.dart2wasm');
+
   /// Warning message printed when writing `int` values in a WASM environment
+  @visibleForTesting
   static const wasmIntWarning =
       'WARNING: You are writing a type of `int` or `List<int>` in a WASM '
       'environment. This value will read as a `double` or `List<double>` '
@@ -76,7 +81,7 @@ class StorageBackendJs extends StorageBackend {
           value is List<String>) {
         ifDebug(() {
           final isIntType = value is int || value is List<int>;
-          if (isIntType && _isWasm) {
+          if (isIntType && isWasm) {
             print(wasmIntWarning);
           }
         });

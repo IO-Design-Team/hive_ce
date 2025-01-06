@@ -1,7 +1,7 @@
 @TestOn('browser')
 library;
 
-import 'dart:async' show Future;
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -116,6 +116,31 @@ void main() async {
             ..write(frame.value);
           expect(encoded, [0x90, 0xA9, ...writer.toBytes()]);
         });
+      });
+
+      group('int', () {
+        void expectWarning(Object obj) {
+          var output = '';
+          runZoned(
+            () => _getBackend().encodeValue(Frame('key', obj)),
+            zoneSpecification: ZoneSpecification(
+              print: (_, __, ___, line) => output += line,
+            ),
+          );
+
+          if (StorageBackendJs.isWasm) {
+            expect(output, StorageBackendJs.wasmIntWarning);
+          } else {
+            expect(output, isEmpty);
+          }
+        }
+
+        test('prints warning for `int` type', () => expectWarning(11));
+
+        test(
+          'prints warning for `List<int>` type',
+          () => expectWarning([11, 12, 13]),
+        );
       });
     });
 
