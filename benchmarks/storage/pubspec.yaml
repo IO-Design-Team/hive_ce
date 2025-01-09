@@ -13,7 +13,7 @@ dependencies:
 
 dev_dependencies:
   rexios_lints: ^9.2.0
-  build_runner: ^2.4.13
+  # build_runner: ^2.4.13 # TODO: Fix this
   json_serializable: ^6.8.0
   hive_ce_generator: any
 
