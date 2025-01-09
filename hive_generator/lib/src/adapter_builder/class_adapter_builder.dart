@@ -177,7 +177,9 @@ class ClassAdapterBuilder extends AdapterBuilder {
   String buildWrite() {
     final code = StringBuffer();
     code.writeln('writer');
-    code.writeln('..writeByte(${getters.length})');
+    // Only cascade when there are getters
+    if (getters.isNotEmpty) code.write('.');
+    code.writeln('.writeByte(${getters.length})');
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
@@ -218,9 +220,7 @@ extension on DartType {
     final definingLibrary = element.library;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
-    // TODO: This is failing in beta (remove when fixed)
-    // ignore: deprecated_member_use
-    for (final import in currentLibrary.libraryImports) {
+    for (final import in currentLibrary.units.expand((e) => e.libraryImports)) {
       for (final MapEntry(:key, :value)
           in import.namespace.definedNames.entries) {
         if (value == element) {

@@ -1,3 +1,7 @@
+## 1.8.2
+
+- Supports analyzer 7
+
 ## 1.8.1
 
 - Fixes a bug in the migrator affecting `freezed` classes
