@@ -108,7 +108,7 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
 
   @override
   void write(BinaryWriter writer, EmptyClass obj) {
-    writer..writeByte(0);
+    writer.writeByte(0);
   }
 
   @override

@@ -177,7 +177,9 @@ class ClassAdapterBuilder extends AdapterBuilder {
   String buildWrite() {
     final code = StringBuffer();
     code.writeln('writer');
-    code.writeln('..writeByte(${getters.length})');
+    // Only cascade when there are getters
+    if (getters.isNotEmpty) code.write('.');
+    code.writeln('.writeByte(${getters.length})');
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
