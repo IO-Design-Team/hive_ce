@@ -218,9 +218,7 @@ extension on DartType {
     final definingLibrary = element.library;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
-    // TODO: This is failing in beta (remove when fixed)
-    // ignore: deprecated_member_use
-    for (final import in currentLibrary.libraryImports) {
+    for (final import in currentLibrary.units.expand((e) => e.libraryImports)) {
       for (final MapEntry(:key, :value)
           in import.namespace.definedNames.entries) {
         if (value == element) {
