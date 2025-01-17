@@ -257,5 +257,37 @@ void main() {
         );
       });
     });
+
+    group('type id', () {
+      test('constants', () {
+        expect(TypeRegistryImpl.maxTypeId, 255);
+        expect(TypeRegistryImpl.maxExtendedTypeId, 65535);
+        expect(TypeRegistryImpl.maxInternalTypeId, 95);
+        expect(TypeRegistryImpl.maxExternalTypeId, 223);
+        expect(TypeRegistryImpl.maxExtendedExternalTypeId, 65439);
+      });
+
+      test('calculations', () {
+        // internal
+        expect(TypeRegistryImpl.calculateTypeId(0, internal: true), 0);
+        expect(TypeRegistryImpl.calculateTypeId(31, internal: true), 31);
+        expect(TypeRegistryImpl.calculateTypeId(32, internal: true), 256);
+        expect(TypeRegistryImpl.calculateTypeId(95, internal: true), 319);
+        expect(
+          () => TypeRegistryImpl.calculateTypeId(96, internal: true),
+          throwsA(isA<AssertionError>()),
+        );
+
+        // external
+        expect(TypeRegistryImpl.calculateTypeId(0, internal: false), 32);
+        expect(TypeRegistryImpl.calculateTypeId(223, internal: false), 255);
+        expect(TypeRegistryImpl.calculateTypeId(224, internal: false), 320);
+        expect(TypeRegistryImpl.calculateTypeId(65439, internal: false), 65535);
+        expect(
+          () => TypeRegistryImpl.calculateTypeId(65441, internal: false),
+          throwsA(isA<HiveError>()),
+        );
+      });
+    });
   });
 }
