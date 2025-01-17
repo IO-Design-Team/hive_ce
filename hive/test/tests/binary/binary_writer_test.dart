@@ -410,11 +410,11 @@ void main() {
     group('.write()', () {
       test('null', () {
         var bw = getWriter();
-        bw.write(null, writeTypeId: false);
+        bw.write(null, withTypeId: false);
         expect(bw.toBytes(), []);
 
         bw = getWriter();
-        bw.write(null, writeTypeId: true);
+        bw.write(null, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.nullT]);
       });
 
@@ -422,11 +422,11 @@ void main() {
         final bd = ByteData(8)..setFloat64(0, 12345, Endian.little);
 
         var bw = getWriter();
-        bw.write(12345, writeTypeId: false);
+        bw.write(12345, withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write(12345, writeTypeId: true);
+        bw.write(12345, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.intT, ...bytes(bd)]);
       });
 
@@ -434,31 +434,31 @@ void main() {
         final bd = ByteData(8)..setFloat64(0, 123.456, Endian.little);
 
         var bw = getWriter();
-        bw.write(123.456, writeTypeId: false);
+        bw.write(123.456, withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write(123.456, writeTypeId: true);
+        bw.write(123.456, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.doubleT, ...bytes(bd)]);
       });
 
       test('bool', () {
         var bw = getWriter();
-        bw.write(true, writeTypeId: false);
+        bw.write(true, withTypeId: false);
         expect(bw.toBytes(), [1]);
 
         bw = getWriter();
-        bw.write(true, writeTypeId: true);
+        bw.write(true, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.boolT, 1]);
       });
 
       test('string', () {
         var bw = getWriter();
-        bw.write('hi', writeTypeId: false);
+        bw.write('hi', withTypeId: false);
         expect(bw.toBytes(), [2, 0, 0, 0, 0x68, 0x69]);
 
         bw = getWriter();
-        bw.write('hi', writeTypeId: true);
+        bw.write('hi', withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.stringT, 2, 0, 0, 0, 0x68, 0x69]);
       });
 
@@ -480,11 +480,11 @@ void main() {
 
       test('byte list', () {
         var bw = getWriter();
-        bw.write(Uint8List.fromList([1, 2, 3, 4]), writeTypeId: false);
+        bw.write(Uint8List.fromList([1, 2, 3, 4]), withTypeId: false);
         expect(bw.toBytes(), [4, 0, 0, 0, 1, 2, 3, 4]);
 
         bw = getWriter();
-        bw.write(Uint8List.fromList([1, 2, 3, 4]), writeTypeId: true);
+        bw.write(Uint8List.fromList([1, 2, 3, 4]), withTypeId: true);
         expect(
           bw.toBytes(),
           [FrameValueType.byteListT, 4, 0, 0, 0, 1, 2, 3, 4],
@@ -498,11 +498,11 @@ void main() {
           ..setFloat64(12, 45, Endian.little);
 
         var bw = getWriter();
-        bw.write([123, 45], writeTypeId: false);
+        bw.write([123, 45], withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write([123, 45], writeTypeId: true);
+        bw.write([123, 45], withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.intListT, ...bytes(bd)]);
       });
 
@@ -513,11 +513,11 @@ void main() {
           ..setFloat64(12, 456.321, Endian.little);
 
         var bw = getWriter();
-        bw.write([123.456, 456.321], writeTypeId: false);
+        bw.write([123.456, 456.321], withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write([123.456, 456.321], writeTypeId: true);
+        bw.write([123.456, 456.321], withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.doubleListT, ...bytes(bd)]);
       });
 
@@ -528,17 +528,17 @@ void main() {
           ..setUint8(5, 1);
 
         var bw = getWriter();
-        bw.write([false, true], writeTypeId: false);
+        bw.write([false, true], withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write([false, true], writeTypeId: true);
+        bw.write([false, true], withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.boolListT, ...bytes(bd)]);
       });
 
       test('string list', () {
         var bw = getWriter();
-        bw.write(['h', 'hi'], writeTypeId: false);
+        bw.write(['h', 'hi'], withTypeId: false);
         expect(bw.toBytes(), [
           2, 0, 0, 0, //
           1, 0, 0, 0, 0x68, //
@@ -546,7 +546,7 @@ void main() {
         ]);
 
         bw = getWriter();
-        bw.write(['h', 'hi'], writeTypeId: true);
+        bw.write(['h', 'hi'], withTypeId: true);
         expect(bw.toBytes(), [
           FrameValueType.stringListT, 2, 0, 0, 0, //
           1, 0, 0, 0, 0x68, //
@@ -564,11 +564,11 @@ void main() {
           ..setUint8(22, FrameValueType.nullT);
 
         var bw = getWriter();
-        bw.write([123, 45, null], writeTypeId: false);
+        bw.write([123, 45, null], withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write([123, 45, null], writeTypeId: true);
+        bw.write([123, 45, null], withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.listT, ...bytes(bd)]);
       });
 
@@ -579,11 +579,11 @@ void main() {
           ..setFloat64(12, 45, Endian.little);
 
         var bw = getWriter();
-        bw.write({123, 45}, writeTypeId: false);
+        bw.write({123, 45}, withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write({123, 45}, writeTypeId: true);
+        bw.write({123, 45}, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.intSetT, ...bytes(bd)]);
       });
 
@@ -594,17 +594,17 @@ void main() {
           ..setFloat64(12, 456.321, Endian.little);
 
         var bw = getWriter();
-        bw.write({123.456, 456.321}, writeTypeId: false);
+        bw.write({123.456, 456.321}, withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write({123.456, 456.321}, writeTypeId: true);
+        bw.write({123.456, 456.321}, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.doubleSetT, ...bytes(bd)]);
       });
 
       test('string set', () {
         var bw = getWriter();
-        bw.write({'h', 'hi'}, writeTypeId: false);
+        bw.write({'h', 'hi'}, withTypeId: false);
         expect(bw.toBytes(), [
           2, 0, 0, 0, //
           1, 0, 0, 0, 0x68, //
@@ -612,7 +612,7 @@ void main() {
         ]);
 
         bw = getWriter();
-        bw.write({'h', 'hi'}, writeTypeId: true);
+        bw.write({'h', 'hi'}, withTypeId: true);
         expect(bw.toBytes(), [
           FrameValueType.stringSetT, 2, 0, 0, 0, //
           1, 0, 0, 0, 0x68, //
@@ -630,11 +630,11 @@ void main() {
           ..setUint8(22, FrameValueType.nullT);
 
         var bw = getWriter();
-        bw.write({123, 45, null}, writeTypeId: false);
+        bw.write({123, 45, null}, withTypeId: false);
         expect(bw.toBytes(), bytes(bd));
 
         bw = getWriter();
-        bw.write({123, 45, null}, writeTypeId: true);
+        bw.write({123, 45, null}, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.setT, ...bytes(bd)]);
       });
     });

@@ -7,6 +7,7 @@ import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:meta/meta.dart';
 
 /// Not part of public API
 class BinaryReaderImpl extends BinaryReader {
@@ -242,6 +243,19 @@ class BinaryReaderImpl extends BinaryReader {
     return HiveListImpl.lazy(boxName, keys);
   }
 
+  /// Read a type ID and handle exrtension
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @visibleForTesting
+  int readTypeId() {
+    final typeId = readByte();
+    if (typeId == FrameValueType.typeIdExtension) {
+      return readByte() | readByte() << 8;
+    } else {
+      return typeId;
+    }
+  }
+
   /// Not part of public API
   Frame? readFrame({
     HiveCipher? cipher,
@@ -296,7 +310,7 @@ class BinaryReaderImpl extends BinaryReader {
 
   @override
   dynamic read([int? typeId]) {
-    typeId ??= readByte();
+    typeId ??= readTypeId();
     switch (typeId) {
       case FrameValueType.nullT:
         return null;

@@ -55,8 +55,6 @@ class BinaryWriterImpl extends BinaryWriter {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void _addBytes(List<int> bytes) {
-    ArgumentError.checkNotNull(bytes);
-
     final length = bytes.length;
     _reserveBytes(length);
     _buffer.setRange(_offset, _offset + length, bytes);
@@ -67,16 +65,12 @@ class BinaryWriterImpl extends BinaryWriter {
   @pragma('dart2js:tryInline')
   @override
   void writeByte(int byte) {
-    ArgumentError.checkNotNull(byte);
-
     _reserveBytes(1);
     _buffer[_offset++] = byte;
   }
 
   @override
   void writeWord(int value) {
-    ArgumentError.checkNotNull(value);
-
     _reserveBytes(2);
     _buffer[_offset++] = value;
     _buffer[_offset++] = value >> 8;
@@ -84,8 +78,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeInt32(int value) {
-    ArgumentError.checkNotNull(value);
-
     _reserveBytes(4);
     _byteData.setInt32(_offset, value, Endian.little);
     _offset += 4;
@@ -95,8 +87,6 @@ class BinaryWriterImpl extends BinaryWriter {
   @pragma('dart2js:tryInline')
   @override
   void writeUint32(int value) {
-    ArgumentError.checkNotNull(value);
-
     _reserveBytes(4);
     _buffer.writeUint32(_offset, value);
     _offset += 4;
@@ -109,8 +99,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeDouble(double value) {
-    ArgumentError.checkNotNull(value);
-
     _reserveBytes(8);
     _byteData.setFloat64(_offset, value, Endian.little);
     _offset += 8;
@@ -118,8 +106,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeBool(bool value) {
-    ArgumentError.checkNotNull(value);
-
     writeByte(value ? 1 : 0);
   }
 
@@ -129,8 +115,6 @@ class BinaryWriterImpl extends BinaryWriter {
     bool writeByteCount = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
-    ArgumentError.checkNotNull(value);
-
     final bytes = encoder.convert(value);
     if (writeByteCount) {
       writeUint32(bytes.length);
@@ -140,8 +124,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeByteList(List<int> bytes, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(bytes);
-
     if (writeLength) {
       writeUint32(bytes.length);
     }
@@ -150,8 +132,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeIntList(List<int> list, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(list);
-
     final length = list.length;
     if (writeLength) {
       writeUint32(length);
@@ -166,8 +146,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeDoubleList(List<double> list, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(list);
-
     final length = list.length;
     if (writeLength) {
       writeUint32(length);
@@ -182,8 +160,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeBoolList(List<bool> list, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(list);
-
     final length = list.length;
     if (writeLength) {
       writeUint32(length);
@@ -200,8 +176,6 @@ class BinaryWriterImpl extends BinaryWriter {
     bool writeLength = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
-    ArgumentError.checkNotNull(list);
-
     if (writeLength) {
       writeUint32(list.length);
     }
@@ -214,8 +188,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeList(List list, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(list);
-
     if (writeLength) {
       writeUint32(list.length);
     }
@@ -226,8 +198,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeMap(Map<dynamic, dynamic> map, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(map);
-
     if (writeLength) {
       writeUint32(map.length);
     }
@@ -254,8 +224,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeHiveList(HiveList list, {bool writeLength = true}) {
-    ArgumentError.checkNotNull(list);
-
     if (writeLength) {
       writeUint32(list.length);
     }
@@ -267,10 +235,25 @@ class BinaryWriterImpl extends BinaryWriter {
     }
   }
 
+  /// Handle type ID writing
+  /// - Type IDs less than 256 are written as a single byte
+  /// - Type IDs greater than 255 are written as [FrameValueType.typeIdExtension]
+  ///   followed by two bytes
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  @visibleForTesting
+  void writeTypeId(int typeId) {
+    if (typeId < 256) {
+      writeByte(typeId);
+    } else {
+      writeByte(FrameValueType.typeIdExtension);
+      writeByte(typeId);
+      writeByte(typeId >> 8);
+    }
+  }
+
   /// Not part of public API
   int writeFrame(Frame frame, {HiveCipher? cipher}) {
-    ArgumentError.checkNotNull(frame);
-
     final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
@@ -300,110 +283,88 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   @override
-  void write<T>(T value, {bool writeTypeId = true}) {
+  void write<T>(T value, {bool withTypeId = true}) {
+    final int typeId;
+    final void Function() write;
     if (value == null) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.nullT);
-      }
+      typeId = FrameValueType.nullT;
+      write = () {};
     } else if (value is int) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.intT);
-      }
-      writeInt(value);
+      typeId = FrameValueType.intT;
+      write = () => writeInt(value);
     } else if (value is double) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.doubleT);
-      }
-      writeDouble(value);
+      typeId = FrameValueType.doubleT;
+      write = () => writeDouble(value);
     } else if (value is bool) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.boolT);
-      }
-      writeBool(value);
+      typeId = FrameValueType.boolT;
+      write = () => writeBool(value);
     } else if (value is String) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.stringT);
-      }
-      writeString(value);
+      typeId = FrameValueType.stringT;
+      write = () => writeString(value);
     } else if (value is List || value is Set) {
-      _writeList(value as Iterable, writeTypeId: writeTypeId);
+      _writeList(value as Iterable, withTypeId: withTypeId);
+      return;
     } else if (value is Map) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.mapT);
-      }
-      writeMap(value);
+      typeId = FrameValueType.mapT;
+      write = () => writeMap(value);
     } else {
       final resolved = _typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
       }
-      if (writeTypeId) {
-        writeByte(resolved.typeId);
-      }
-      resolved.adapter.write(this, value);
+      typeId = resolved.typeId;
+      write = () => resolved.adapter.write(this, value);
     }
+
+    if (withTypeId) writeTypeId(typeId);
+    write();
   }
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  void _writeList(Iterable value, {bool writeTypeId = true}) {
+  void _writeList(Iterable value, {bool withTypeId = true}) {
+    final int typeId;
+    final void Function() write;
     if (value is HiveList) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.hiveListT);
-      }
-      writeHiveList(value);
+      typeId = FrameValueType.hiveListT;
+      write = () => writeHiveList(value);
     } else if (value is Uint8List) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.byteListT);
-      }
-      writeByteList(value);
+      typeId = FrameValueType.byteListT;
+      write = () => writeByteList(value);
     } else if (value is List<int>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.intListT);
-      }
-      writeIntList(value);
+      typeId = FrameValueType.intListT;
+      write = () => writeIntList(value);
     } else if (value is List<double>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.doubleListT);
-      }
-      writeDoubleList(value);
+      typeId = FrameValueType.doubleListT;
+      write = () => writeDoubleList(value);
     } else if (value is List<bool>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.boolListT);
-      }
-      writeBoolList(value);
+      typeId = FrameValueType.boolListT;
+      write = () => writeBoolList(value);
     } else if (value is List<String>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.stringListT);
-      }
-      writeStringList(value);
+      typeId = FrameValueType.stringListT;
+      write = () => writeStringList(value);
     } else if (value is List) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.listT);
-      }
-      writeList(value);
+      typeId = FrameValueType.listT;
+      write = () => writeList(value);
     } else if (value is Set<int>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.intSetT);
-      }
-      writeIntList(value.toList());
+      typeId = FrameValueType.intSetT;
+      write = () => writeIntList(value.toList());
     } else if (value is Set<double>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.doubleSetT);
-      }
-      writeDoubleList(value.toList());
+      typeId = FrameValueType.doubleSetT;
+      write = () => writeDoubleList(value.toList());
     } else if (value is Set<String>) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.stringSetT);
-      }
-      writeStringList(value.toList());
+      typeId = FrameValueType.stringSetT;
+      write = () => writeStringList(value.toList());
     } else if (value is Set) {
-      if (writeTypeId) {
-        writeByte(FrameValueType.setT);
-      }
-      writeList(value.toList());
+      typeId = FrameValueType.setT;
+      write = () => writeList(value.toList());
+    } else {
+      throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
+
+    if (withTypeId) writeTypeId(typeId);
+    write();
   }
 
   /// Not part of public API
@@ -412,10 +373,10 @@ class BinaryWriterImpl extends BinaryWriter {
   void writeEncrypted(
     dynamic value,
     HiveCipher cipher, {
-    bool writeTypeId = true,
+    bool withTypeId = true,
   }) {
     final valueWriter = BinaryWriterImpl(_typeRegistry)
-      ..write(value, writeTypeId: writeTypeId);
+      ..write(value, withTypeId: withTypeId);
     final inp = valueWriter._buffer;
     final inpLength = valueWriter._offset;
 

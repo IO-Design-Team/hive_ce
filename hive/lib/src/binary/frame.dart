@@ -185,7 +185,7 @@ final class FrameValueType {
   static const duration = 20;
 
   /// Type ID extension
-  /// 
+  ///
   /// Informs Hive that the next 2 bytes contain the real type ID
   static const typeIdExtension = 21;
 }
