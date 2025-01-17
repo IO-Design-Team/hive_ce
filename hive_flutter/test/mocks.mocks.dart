@@ -29,13 +29,8 @@ import 'package:mockito/src/dummies.dart' as _i7;
 
 class _FakeHiveList_0<E extends _i1.HiveObjectMixin> extends _i2.SmartFake
     implements _i3.HiveList<E> {
-  _FakeHiveList_0(
-    Object parent,
-    Invocation parentInvocation,
-  ) : super(
-          parent,
-          parentInvocation,
-        );
+  _FakeHiveList_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
 }
 
 /// A class which mocks [BinaryReader].
@@ -43,117 +38,109 @@ class _FakeHiveList_0<E extends _i1.HiveObjectMixin> extends _i2.SmartFake
 /// See the documentation for Mockito's code generation for more information.
 class MockBinaryReader extends _i2.Mock implements _i4.BinaryReader {
   @override
-  int get availableBytes => (super.noSuchMethod(
-        Invocation.getter(#availableBytes),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int get availableBytes =>
+      (super.noSuchMethod(
+            Invocation.getter(#availableBytes),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  int get usedBytes => (super.noSuchMethod(
-        Invocation.getter(#usedBytes),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int get usedBytes =>
+      (super.noSuchMethod(
+            Invocation.getter(#usedBytes),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
   void skip(int? bytes) => super.noSuchMethod(
-        Invocation.method(
-          #skip,
-          [bytes],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#skip, [bytes]),
+    returnValueForMissingStub: null,
+  );
 
   @override
-  int readByte() => (super.noSuchMethod(
-        Invocation.method(
-          #readByte,
-          [],
-        ),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int readByte() =>
+      (super.noSuchMethod(
+            Invocation.method(#readByte, []),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  _i5.Uint8List viewBytes(int? bytes) => (super.noSuchMethod(
-        Invocation.method(
-          #viewBytes,
-          [bytes],
-        ),
-        returnValue: _i5.Uint8List(0),
-        returnValueForMissingStub: _i5.Uint8List(0),
-      ) as _i5.Uint8List);
+  _i5.Uint8List viewBytes(int? bytes) =>
+      (super.noSuchMethod(
+            Invocation.method(#viewBytes, [bytes]),
+            returnValue: _i5.Uint8List(0),
+            returnValueForMissingStub: _i5.Uint8List(0),
+          )
+          as _i5.Uint8List);
 
   @override
-  _i5.Uint8List peekBytes(int? bytes) => (super.noSuchMethod(
-        Invocation.method(
-          #peekBytes,
-          [bytes],
-        ),
-        returnValue: _i5.Uint8List(0),
-        returnValueForMissingStub: _i5.Uint8List(0),
-      ) as _i5.Uint8List);
+  _i5.Uint8List peekBytes(int? bytes) =>
+      (super.noSuchMethod(
+            Invocation.method(#peekBytes, [bytes]),
+            returnValue: _i5.Uint8List(0),
+            returnValueForMissingStub: _i5.Uint8List(0),
+          )
+          as _i5.Uint8List);
 
   @override
-  int readWord() => (super.noSuchMethod(
-        Invocation.method(
-          #readWord,
-          [],
-        ),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int readWord() =>
+      (super.noSuchMethod(
+            Invocation.method(#readWord, []),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  int readInt32() => (super.noSuchMethod(
-        Invocation.method(
-          #readInt32,
-          [],
-        ),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int readInt32() =>
+      (super.noSuchMethod(
+            Invocation.method(#readInt32, []),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  int readUint32() => (super.noSuchMethod(
-        Invocation.method(
-          #readUint32,
-          [],
-        ),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int readUint32() =>
+      (super.noSuchMethod(
+            Invocation.method(#readUint32, []),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  int readInt() => (super.noSuchMethod(
-        Invocation.method(
-          #readInt,
-          [],
-        ),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int readInt() =>
+      (super.noSuchMethod(
+            Invocation.method(#readInt, []),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  double readDouble() => (super.noSuchMethod(
-        Invocation.method(
-          #readDouble,
-          [],
-        ),
-        returnValue: 0.0,
-        returnValueForMissingStub: 0.0,
-      ) as double);
+  double readDouble() =>
+      (super.noSuchMethod(
+            Invocation.method(#readDouble, []),
+            returnValue: 0.0,
+            returnValueForMissingStub: 0.0,
+          )
+          as double);
 
   @override
-  bool readBool() => (super.noSuchMethod(
-        Invocation.method(
-          #readBool,
-          [],
-        ),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
+  bool readBool() =>
+      (super.noSuchMethod(
+            Invocation.method(#readBool, []),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
 
   @override
   String readString([
@@ -161,74 +148,53 @@ class MockBinaryReader extends _i2.Mock implements _i4.BinaryReader {
     _i6.Converter<List<int>, String>? decoder = const _i6.Utf8Decoder(),
   ]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #readString,
-          [
-            byteCount,
-            decoder,
-          ],
-        ),
-        returnValue: _i7.dummyValue<String>(
-          this,
-          Invocation.method(
-            #readString,
-            [
-              byteCount,
-              decoder,
-            ],
-          ),
-        ),
-        returnValueForMissingStub: _i7.dummyValue<String>(
-          this,
-          Invocation.method(
-            #readString,
-            [
-              byteCount,
-              decoder,
-            ],
-          ),
-        ),
-      ) as String);
+            Invocation.method(#readString, [byteCount, decoder]),
+            returnValue: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#readString, [byteCount, decoder]),
+            ),
+            returnValueForMissingStub: _i7.dummyValue<String>(
+              this,
+              Invocation.method(#readString, [byteCount, decoder]),
+            ),
+          )
+          as String);
 
   @override
-  _i5.Uint8List readByteList([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readByteList,
-          [length],
-        ),
-        returnValue: _i5.Uint8List(0),
-        returnValueForMissingStub: _i5.Uint8List(0),
-      ) as _i5.Uint8List);
+  _i5.Uint8List readByteList([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readByteList, [length]),
+            returnValue: _i5.Uint8List(0),
+            returnValueForMissingStub: _i5.Uint8List(0),
+          )
+          as _i5.Uint8List);
 
   @override
-  List<int> readIntList([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readIntList,
-          [length],
-        ),
-        returnValue: <int>[],
-        returnValueForMissingStub: <int>[],
-      ) as List<int>);
+  List<int> readIntList([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readIntList, [length]),
+            returnValue: <int>[],
+            returnValueForMissingStub: <int>[],
+          )
+          as List<int>);
 
   @override
-  List<double> readDoubleList([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readDoubleList,
-          [length],
-        ),
-        returnValue: <double>[],
-        returnValueForMissingStub: <double>[],
-      ) as List<double>);
+  List<double> readDoubleList([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readDoubleList, [length]),
+            returnValue: <double>[],
+            returnValueForMissingStub: <double>[],
+          )
+          as List<double>);
 
   @override
-  List<bool> readBoolList([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readBoolList,
-          [length],
-        ),
-        returnValue: <bool>[],
-        returnValueForMissingStub: <bool>[],
-      ) as List<bool>);
+  List<bool> readBoolList([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readBoolList, [length]),
+            returnValue: <bool>[],
+            returnValueForMissingStub: <bool>[],
+          )
+          as List<bool>);
 
   @override
   List<String> readStringList([
@@ -236,59 +202,44 @@ class MockBinaryReader extends _i2.Mock implements _i4.BinaryReader {
     _i6.Converter<List<int>, String>? decoder = const _i6.Utf8Decoder(),
   ]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #readStringList,
-          [
-            length,
-            decoder,
-          ],
-        ),
-        returnValue: <String>[],
-        returnValueForMissingStub: <String>[],
-      ) as List<String>);
+            Invocation.method(#readStringList, [length, decoder]),
+            returnValue: <String>[],
+            returnValueForMissingStub: <String>[],
+          )
+          as List<String>);
 
   @override
-  List<dynamic> readList([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readList,
-          [length],
-        ),
-        returnValue: <dynamic>[],
-        returnValueForMissingStub: <dynamic>[],
-      ) as List<dynamic>);
+  List<dynamic> readList([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readList, [length]),
+            returnValue: <dynamic>[],
+            returnValueForMissingStub: <dynamic>[],
+          )
+          as List<dynamic>);
 
   @override
-  Map<dynamic, dynamic> readMap([int? length]) => (super.noSuchMethod(
-        Invocation.method(
-          #readMap,
-          [length],
-        ),
-        returnValue: <dynamic, dynamic>{},
-        returnValueForMissingStub: <dynamic, dynamic>{},
-      ) as Map<dynamic, dynamic>);
+  Map<dynamic, dynamic> readMap([int? length]) =>
+      (super.noSuchMethod(
+            Invocation.method(#readMap, [length]),
+            returnValue: <dynamic, dynamic>{},
+            returnValueForMissingStub: <dynamic, dynamic>{},
+          )
+          as Map<dynamic, dynamic>);
 
   @override
   _i3.HiveList<_i1.HiveObjectMixin> readHiveList([int? length]) =>
       (super.noSuchMethod(
-        Invocation.method(
-          #readHiveList,
-          [length],
-        ),
-        returnValue: _FakeHiveList_0<_i1.HiveObjectMixin>(
-          this,
-          Invocation.method(
-            #readHiveList,
-            [length],
-          ),
-        ),
-        returnValueForMissingStub: _FakeHiveList_0<_i1.HiveObjectMixin>(
-          this,
-          Invocation.method(
-            #readHiveList,
-            [length],
-          ),
-        ),
-      ) as _i3.HiveList<_i1.HiveObjectMixin>);
+            Invocation.method(#readHiveList, [length]),
+            returnValue: _FakeHiveList_0<_i1.HiveObjectMixin>(
+              this,
+              Invocation.method(#readHiveList, [length]),
+            ),
+            returnValueForMissingStub: _FakeHiveList_0<_i1.HiveObjectMixin>(
+              this,
+              Invocation.method(#readHiveList, [length]),
+            ),
+          )
+          as _i3.HiveList<_i1.HiveObjectMixin>);
 }
 
 /// A class which mocks [BinaryWriter].
@@ -297,118 +248,76 @@ class MockBinaryReader extends _i2.Mock implements _i4.BinaryReader {
 class MockBinaryWriter extends _i2.Mock implements _i8.BinaryWriter {
   @override
   void writeByte(int? byte) => super.noSuchMethod(
-        Invocation.method(
-          #writeByte,
-          [byte],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeByte, [byte]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeWord(int? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeWord,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeWord, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeInt32(int? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeInt32,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeInt32, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeUint32(int? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeUint32,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeUint32, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeInt(int? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeInt,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeInt, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeDouble(double? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeDouble,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeDouble, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeBool(bool? value) => super.noSuchMethod(
-        Invocation.method(
-          #writeBool,
-          [value],
-        ),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#writeBool, [value]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void writeString(
     String? value, {
     bool? writeByteCount = true,
     _i6.Converter<String, List<int>>? encoder = const _i6.Utf8Encoder(),
-  }) =>
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #writeString,
+      [value],
+      {#writeByteCount: writeByteCount, #encoder: encoder},
+    ),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void writeByteList(List<int>? bytes, {bool? writeLength = true}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #writeString,
-          [value],
-          {
-            #writeByteCount: writeByteCount,
-            #encoder: encoder,
-          },
-        ),
+        Invocation.method(#writeByteList, [bytes], {#writeLength: writeLength}),
         returnValueForMissingStub: null,
       );
 
   @override
-  void writeByteList(
-    List<int>? bytes, {
-    bool? writeLength = true,
-  }) =>
+  void writeIntList(List<int>? list, {bool? writeLength = true}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #writeByteList,
-          [bytes],
-          {#writeLength: writeLength},
-        ),
+        Invocation.method(#writeIntList, [list], {#writeLength: writeLength}),
         returnValueForMissingStub: null,
       );
 
   @override
-  void writeIntList(
-    List<int>? list, {
-    bool? writeLength = true,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #writeIntList,
-          [list],
-          {#writeLength: writeLength},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void writeDoubleList(
-    List<double>? list, {
-    bool? writeLength = true,
-  }) =>
+  void writeDoubleList(List<double>? list, {bool? writeLength = true}) =>
       super.noSuchMethod(
         Invocation.method(
           #writeDoubleList,
@@ -419,16 +328,9 @@ class MockBinaryWriter extends _i2.Mock implements _i8.BinaryWriter {
       );
 
   @override
-  void writeBoolList(
-    List<bool>? list, {
-    bool? writeLength = true,
-  }) =>
+  void writeBoolList(List<bool>? list, {bool? writeLength = true}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #writeBoolList,
-          [list],
-          {#writeLength: writeLength},
-        ),
+        Invocation.method(#writeBoolList, [list], {#writeLength: writeLength}),
         returnValueForMissingStub: null,
       );
 
@@ -437,44 +339,26 @@ class MockBinaryWriter extends _i2.Mock implements _i8.BinaryWriter {
     List<String>? list, {
     bool? writeLength = true,
     _i6.Converter<String, List<int>>? encoder = const _i6.Utf8Encoder(),
-  }) =>
+  }) => super.noSuchMethod(
+    Invocation.method(
+      #writeStringList,
+      [list],
+      {#writeLength: writeLength, #encoder: encoder},
+    ),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void writeList(List<dynamic>? list, {bool? writeLength = true}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #writeStringList,
-          [list],
-          {
-            #writeLength: writeLength,
-            #encoder: encoder,
-          },
-        ),
+        Invocation.method(#writeList, [list], {#writeLength: writeLength}),
         returnValueForMissingStub: null,
       );
 
   @override
-  void writeList(
-    List<dynamic>? list, {
-    bool? writeLength = true,
-  }) =>
+  void writeMap(Map<dynamic, dynamic>? map, {bool? writeLength = true}) =>
       super.noSuchMethod(
-        Invocation.method(
-          #writeList,
-          [list],
-          {#writeLength: writeLength},
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void writeMap(
-    Map<dynamic, dynamic>? map, {
-    bool? writeLength = true,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #writeMap,
-          [map],
-          {#writeLength: writeLength},
-        ),
+        Invocation.method(#writeMap, [map], {#writeLength: writeLength}),
         returnValueForMissingStub: null,
       );
 
@@ -482,27 +366,14 @@ class MockBinaryWriter extends _i2.Mock implements _i8.BinaryWriter {
   void writeHiveList(
     _i3.HiveList<_i1.HiveObjectMixin>? list, {
     bool? writeLength = true,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #writeHiveList,
-          [list],
-          {#writeLength: writeLength},
-        ),
-        returnValueForMissingStub: null,
-      );
+  }) => super.noSuchMethod(
+    Invocation.method(#writeHiveList, [list], {#writeLength: writeLength}),
+    returnValueForMissingStub: null,
+  );
 
   @override
-  void write<T>(
-    T? value, {
-    bool? writeTypeId = true,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #write,
-          [value],
-          {#writeTypeId: writeTypeId},
-        ),
-        returnValueForMissingStub: null,
-      );
+  void write<T>(T? value, {bool? writeTypeId = true}) => super.noSuchMethod(
+    Invocation.method(#write, [value], {#writeTypeId: writeTypeId}),
+    returnValueForMissingStub: null,
+  );
 }
