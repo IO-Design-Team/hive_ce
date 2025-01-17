@@ -145,6 +145,22 @@ void main() {
           contains('WARNING: You are trying to register TestAdapter'),
         );
       });
+
+      group('with typeId extension', () {
+        test('external', () {
+          final registry = TypeRegistryImpl();
+          registry.registerAdapter(TestAdapter(224));
+          final resolved = registry.findAdapterForValue(123)!;
+          expect(resolved.typeId, 320);
+        });
+
+        test('internal', () {
+          final registry = TypeRegistryImpl();
+          registry.registerAdapter(TestAdapter(32), internal: true);
+          final resolved = registry.findAdapterForValue(123)!;
+          expect(resolved.typeId, 256);
+        });
+      });
     });
 
     test('.findAdapterForTypeId()', () {
@@ -289,7 +305,7 @@ void main() {
         expect(TypeRegistryImpl.calculateTypeId(65439, internal: false), 65535);
         expect(
           () => TypeRegistryImpl.calculateTypeId(65441, internal: false),
-          throwsA(isA<HiveError>()),
+          throwsHiveError(),
         );
       });
     });
