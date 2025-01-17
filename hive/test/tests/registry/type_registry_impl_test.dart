@@ -99,7 +99,9 @@ void main() {
           throwsHiveError('not allowed'),
         );
         expect(
-          () => registry.registerAdapter(TestAdapter(224)),
+          () => registry.registerAdapter(
+            TestAdapter(TypeRegistryImpl.maxExtendedExternalTypeId + 1),
+          ),
           throwsHiveError('not allowed'),
         );
       });
@@ -234,7 +236,9 @@ void main() {
           throwsHiveError('not allowed'),
         );
         expect(
-          () => registry.isAdapterRegistered(224),
+          () => registry.isAdapterRegistered(
+            TypeRegistryImpl.maxExtendedExternalTypeId + 1,
+          ),
           throwsHiveError('not allowed'),
         );
       });
