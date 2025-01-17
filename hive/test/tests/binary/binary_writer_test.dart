@@ -638,5 +638,20 @@ void main() {
         expect(bw.toBytes(), [FrameValueType.setT, ...bytes(bd)]);
       });
     });
+
+    test('.writeTypeId()', () {
+      for (var i = 0; i <= TypeRegistryImpl.maxExtendedTypeId; i++) {
+        final bw = getWriter();
+        bw.writeTypeId(i);
+        if (i < 256) {
+          expect(bw.toBytes(), [i]);
+        } else {
+          expect(
+            bw.toBytes(),
+            Uint8List.fromList([FrameValueType.typeIdExtension, i, i >> 8]),
+          );
+        }
+      }
+    });
   });
 }

@@ -616,4 +616,18 @@ void main() {
       });
     });
   });
+
+  test('.readTypeId()', () {
+    for (var i = 0; i <= TypeRegistryImpl.maxExtendedTypeId; i++) {
+      // Skip the type ID extension value
+      if (i == FrameValueType.typeIdExtension) continue;
+      if (i < 256) {
+        final br = fromBytes([i]);
+        expect(br.readTypeId(), i);
+      } else {
+        final br = fromBytes([FrameValueType.typeIdExtension, i, i >> 8]);
+        expect(br.readTypeId(), i);
+      }
+    }
+  });
 }
