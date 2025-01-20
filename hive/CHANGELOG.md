@@ -1,3 +1,7 @@
+## 2.10.0
+
+- Raises the maximum type ID from 223 to 65439
+
 ## 2.9.0
 
 - Prints a warning when writing `int` or `List<int>` types in a WASM environment
