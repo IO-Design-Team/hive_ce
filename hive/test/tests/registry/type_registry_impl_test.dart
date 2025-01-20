@@ -304,7 +304,7 @@ void main() {
         expect(TypeRegistryImpl.calculateTypeId(224, internal: false), 320);
         expect(TypeRegistryImpl.calculateTypeId(65439, internal: false), 65535);
         expect(
-          () => TypeRegistryImpl.calculateTypeId(65441, internal: false),
+          () => TypeRegistryImpl.calculateTypeId(65440, internal: false),
           throwsHiveError(),
         );
       });

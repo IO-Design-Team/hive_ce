@@ -34,6 +34,7 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
 - Automatic type adapter generation using the `GenerateAdapters` annotation
   - No more manually adding annotations to every type and field
   - Generate adapters for classes outside the current package
+- Extends the maximum type ID from `223` to `65439`
 
 ## Hive CE (v2) vs Hive v4 (Isar)
 
