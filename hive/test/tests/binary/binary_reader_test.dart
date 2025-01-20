@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
@@ -10,7 +9,7 @@ import 'package:test/test.dart';
 import '../common.dart';
 import '../frames.dart';
 
-BinaryReader fromByteData(ByteData byteData) {
+BinaryReaderImpl fromByteData(ByteData byteData) {
   return BinaryReaderImpl(byteData.buffer.asUint8List(), TypeRegistryImpl());
 }
 
@@ -625,7 +624,10 @@ void main() {
         final br = fromBytes([i]);
         expect(br.readTypeId(), i);
       } else {
-        final br = fromBytes([FrameValueType.typeIdExtension, i, i >> 8]);
+        final byteData = ByteData(3)
+          ..setUint8(0, FrameValueType.typeIdExtension)
+          ..setUint16(1, i, Endian.little);
+        final br = fromByteData(byteData);
         expect(br.readTypeId(), i);
       }
     }

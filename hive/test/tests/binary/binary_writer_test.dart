@@ -646,10 +646,10 @@ void main() {
         if (i < 256) {
           expect(bw.toBytes(), [i]);
         } else {
-          expect(
-            bw.toBytes(),
-            Uint8List.fromList([FrameValueType.typeIdExtension, i, i >> 8]),
-          );
+          final bd = ByteData(3)
+            ..setUint8(0, FrameValueType.typeIdExtension)
+            ..setUint16(1, i, Endian.little);
+          expect(bw.toBytes(), bytes(bd));
         }
       }
     });

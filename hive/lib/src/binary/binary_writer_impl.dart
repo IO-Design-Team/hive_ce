@@ -247,8 +247,7 @@ class BinaryWriterImpl extends BinaryWriter {
       writeByte(typeId);
     } else {
       writeByte(FrameValueType.typeIdExtension);
-      writeByte(typeId);
-      writeByte(typeId >> 8);
+      writeWord(typeId);
     }
   }
 

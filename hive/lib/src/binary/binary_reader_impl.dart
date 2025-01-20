@@ -250,7 +250,7 @@ class BinaryReaderImpl extends BinaryReader {
   int readTypeId() {
     final typeId = readByte();
     if (typeId == FrameValueType.typeIdExtension) {
-      return readByte() | readByte() << 8;
+      return readWord();
     } else {
       return typeId;
     }
