@@ -243,7 +243,7 @@ class BinaryReaderImpl extends BinaryReader {
     return HiveListImpl.lazy(boxName, keys);
   }
 
-  /// Read a type ID and handle exrtension
+  /// Read a type ID and handle extension
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   @visibleForTesting
