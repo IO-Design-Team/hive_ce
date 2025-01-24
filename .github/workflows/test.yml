@@ -113,6 +113,7 @@ jobs:
           dart pub global activate puby
           puby link
           puby gen
+          dart format .
           git diff --exit-code
 
   ensure-embedme:
