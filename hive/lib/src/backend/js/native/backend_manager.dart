@@ -21,8 +21,12 @@ class BackendManager implements BackendManagerInterface {
     String? collection,
   ) async {
     try {
-      await window.self.navigator.storage.persist().toDart;
-      debugPrint('Enabled persistent storage');
+      final result = await window.self.navigator.storage.persist().toDart;
+      if (result.toDart) {
+        debugPrint('Persistent storage is enabled');
+      } else {
+        debugPrint('Persistent storage is disabled');
+      }
     } catch (e) {
       debugPrint('Error enabling persistent storage');
       debugPrint(e);
