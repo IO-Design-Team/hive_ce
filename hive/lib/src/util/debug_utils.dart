@@ -7,4 +7,4 @@ void ifDebug(void Function() f) {
 }
 
 /// Only print the given message if assertions are enabled
-void debugPrint(String message) => ifDebug(() => print(message));
+void debugPrint(Object? object) => ifDebug(() => print(object));

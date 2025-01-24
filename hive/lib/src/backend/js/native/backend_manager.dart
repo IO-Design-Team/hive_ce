@@ -20,6 +20,14 @@ class BackendManager implements BackendManagerInterface {
     HiveCipher? cipher,
     String? collection,
   ) async {
+    try {
+      await window.self.navigator.storage.persist().toDart;
+      debugPrint('Enabled persistent storage');
+    } catch (e) {
+      debugPrint('Error enabling persistent storage');
+      debugPrint(e);
+    }
+
     // compatibility for old store format
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;
