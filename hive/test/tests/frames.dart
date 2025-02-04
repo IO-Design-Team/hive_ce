@@ -7,6 +7,7 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
+import 'package:path/path.dart' as path;
 
 export '../generated/frame_values.g.dart';
 export '../generated/frame_values_encrypted.g.dart';
@@ -182,7 +183,7 @@ Future<void> buildGoldens() async {
     String varName,
     Uint8List Function(Frame frame) transformer,
   ) async {
-    final file = File('test/generated/$fileName.g.dart');
+    final file = File(path.join('test', 'generated', '$fileName.g.dart'));
     await file.create();
     final code = StringBuffer();
     code.writeln("import 'dart:typed_data';\n");

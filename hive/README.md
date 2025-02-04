@@ -5,6 +5,8 @@
 
 [![Dart CI](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml/badge.svg)](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/IO-Design-Team/hive_ce/graph/badge.svg?token=ODO2JA4286)](https://codecov.io/gh/IO-Design-Team/hive_ce) [![Pub Version](https://img.shields.io/pub/v/hive_ce?label=pub.dev&labelColor=333940&logo=dart)](https://pub.dev/packages/hive_ce) [![GitHub](https://img.shields.io/github/license/IO-Design-Team/hive_ce?color=%23007A88&labelColor=333940&logo=apache)](https://github.com/IO-Design-Team/hive_ce/blob/master/LICENSE)
 
+[![PubStats Popularity](https://pubstats.dev/badges/packages/hive_ce/popularity.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Rank](https://pubstats.dev/badges/packages/hive_ce/rank.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Dependents](https://pubstats.dev/badges/packages/hive_ce/dependents.svg)](https://pubstats.dev/packages/hive_ce)
+
 Hive is a lightweight and blazing fast key-value database written in pure Dart. Inspired by [Bitcask](https://en.wikipedia.org/wiki/Bitcask).
 
 ## Tutorial
@@ -34,6 +36,7 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
 - Automatic type adapter generation using the `GenerateAdapters` annotation
   - No more manually adding annotations to every type and field
   - Generate adapters for classes outside the current package
+- Extends the maximum type ID from `223` to `65439`
 
 ## Hive CE (v2) vs Hive v4 (Isar)
 

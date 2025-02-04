@@ -64,5 +64,5 @@ abstract class BinaryWriter {
   void writeHiveList(HiveList list, {bool writeLength = true});
 
   /// Write any [value].
-  void write<T>(T value, {bool writeTypeId = true});
+  void write<T>(T value, {bool withTypeId = true});
 }
