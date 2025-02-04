@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
@@ -66,9 +68,35 @@ class TypeRegistryImpl implements TypeRegistry {
   /// Not part of public API
   static const TypeRegistryImpl nullImpl = _NullTypeRegistry();
 
-  /// Not part of public API
+  /// Max type ID is 1 byte long
+  @visibleForTesting
+  static final maxTypeId = math.pow(2, 8).toInt() - 1;
+
+  /// Max extended type ID is 2 bytes long
+  @visibleForTesting
+  static final maxExtendedTypeId = math.pow(2, 16).toInt() - 1;
+
+  /// Number of type IDs reserved for internal use
   @visibleForTesting
   static const reservedTypeIds = 32;
+
+  /// Number of extended type IDs reserved for internal use
+  @visibleForTesting
+  static const reservedExtendedTypeIds = 64;
+
+  /// Max type ID for internal adapters
+  @visibleForTesting
+  static const maxInternalTypeId =
+      reservedTypeIds + reservedExtendedTypeIds - 1;
+
+  /// Max type ID for external adapters
+  @visibleForTesting
+  static final maxExternalTypeId = maxTypeId - reservedTypeIds;
+
+  /// Max extended type ID for external adapters
+  @visibleForTesting
+  static final maxExtendedExternalTypeId =
+      maxExtendedTypeId - maxInternalTypeId - 1;
 
   final _typeAdapters = <int, ResolvedAdapter>{};
 
@@ -117,14 +145,8 @@ class TypeRegistryImpl implements TypeRegistry {
         'registerAdapter<MyType>(MyTypeAdapter())',
       );
     }
-    var typeId = adapter.typeId;
+    final typeId = calculateTypeId(adapter.typeId, internal: internal);
     if (!internal) {
-      if (typeId < 0 || typeId > 223) {
-        throw HiveError('TypeId $typeId not allowed. Type ids must be in the '
-            'range 0 <= typeId <= 223.');
-      }
-      typeId = typeId + reservedTypeIds;
-
       final oldAdapter = findAdapterForTypeId(typeId)?.adapter;
       if (oldAdapter != null) {
         if (override) {
@@ -164,20 +186,12 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
 
-    final resolved = ResolvedAdapter<T>(adapter, typeId);
-    _typeAdapters[typeId] = resolved;
+    _typeAdapters[typeId] = ResolvedAdapter<T>(adapter, typeId);
   }
 
   @override
   bool isAdapterRegistered(int typeId, {bool internal = false}) {
-    if (!internal) {
-      if (typeId < 0 || typeId > 223) {
-        throw HiveError('TypeId $typeId not allowed.');
-      }
-
-      typeId = typeId + reservedTypeIds;
-    }
-
+    typeId = calculateTypeId(typeId, internal: internal);
     return findAdapterForTypeId(typeId) != null;
   }
 
@@ -189,5 +203,30 @@ class TypeRegistryImpl implements TypeRegistry {
   @override
   void ignoreTypeId<T>(int typeId) {
     registerAdapter(IgnoredTypeAdapter<T>(typeId));
+  }
+
+  /// Resolve the real type ID for the given [typeId]
+  @visibleForTesting
+  static int calculateTypeId(int typeId, {required bool internal}) {
+    if (internal) {
+      assert(typeId >= 0 && typeId <= maxInternalTypeId);
+
+      if (typeId > reservedTypeIds - 1) {
+        return typeId - reservedTypeIds + maxTypeId + 1;
+      } else {
+        return typeId;
+      }
+    } else {
+      if (typeId < 0 || typeId > maxExtendedExternalTypeId) {
+        throw HiveError('TypeId $typeId not allowed. Type ids must be in the '
+            'range 0 <= typeId <= $maxExtendedExternalTypeId.');
+      }
+
+      if (typeId > maxTypeId - reservedTypeIds) {
+        return typeId + reservedTypeIds + reservedExtendedTypeIds;
+      } else {
+        return typeId + reservedTypeIds;
+      }
+    }
   }
 }

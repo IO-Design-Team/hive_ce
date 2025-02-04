@@ -99,7 +99,9 @@ void main() {
           throwsHiveError('not allowed'),
         );
         expect(
-          () => registry.registerAdapter(TestAdapter(224)),
+          () => registry.registerAdapter(
+            TestAdapter(TypeRegistryImpl.maxExtendedExternalTypeId + 1),
+          ),
           throwsHiveError('not allowed'),
         );
       });
@@ -142,6 +144,22 @@ void main() {
           output,
           contains('WARNING: You are trying to register TestAdapter'),
         );
+      });
+
+      group('with typeId extension', () {
+        test('external', () {
+          final registry = TypeRegistryImpl();
+          registry.registerAdapter(TestAdapter(224));
+          final resolved = registry.findAdapterForValue(123)!;
+          expect(resolved.typeId, 320);
+        });
+
+        test('internal', () {
+          final registry = TypeRegistryImpl();
+          registry.registerAdapter(TestAdapter(32), internal: true);
+          final resolved = registry.findAdapterForValue(123)!;
+          expect(resolved.typeId, 256);
+        });
       });
     });
 
@@ -234,7 +252,9 @@ void main() {
           throwsHiveError('not allowed'),
         );
         expect(
-          () => registry.isAdapterRegistered(224),
+          () => registry.isAdapterRegistered(
+            TypeRegistryImpl.maxExtendedExternalTypeId + 1,
+          ),
           throwsHiveError('not allowed'),
         );
       });
@@ -254,6 +274,38 @@ void main() {
         expect(
           () => registry.ignoreTypeId(0),
           throwsHiveError('already a TypeAdapter for typeId'),
+        );
+      });
+    });
+
+    group('type id', () {
+      test('constants', () {
+        expect(TypeRegistryImpl.maxTypeId, 255);
+        expect(TypeRegistryImpl.maxExtendedTypeId, 65535);
+        expect(TypeRegistryImpl.maxInternalTypeId, 95);
+        expect(TypeRegistryImpl.maxExternalTypeId, 223);
+        expect(TypeRegistryImpl.maxExtendedExternalTypeId, 65439);
+      });
+
+      test('calculations', () {
+        // internal
+        expect(TypeRegistryImpl.calculateTypeId(0, internal: true), 0);
+        expect(TypeRegistryImpl.calculateTypeId(31, internal: true), 31);
+        expect(TypeRegistryImpl.calculateTypeId(32, internal: true), 256);
+        expect(TypeRegistryImpl.calculateTypeId(95, internal: true), 319);
+        expect(
+          () => TypeRegistryImpl.calculateTypeId(96, internal: true),
+          throwsA(isA<AssertionError>()),
+        );
+
+        // external
+        expect(TypeRegistryImpl.calculateTypeId(0, internal: false), 32);
+        expect(TypeRegistryImpl.calculateTypeId(223, internal: false), 255);
+        expect(TypeRegistryImpl.calculateTypeId(224, internal: false), 320);
+        expect(TypeRegistryImpl.calculateTypeId(65439, internal: false), 65535);
+        expect(
+          () => TypeRegistryImpl.calculateTypeId(65440, internal: false),
+          throwsHiveError(),
         );
       });
     });
