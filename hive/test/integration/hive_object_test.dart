@@ -81,9 +81,9 @@ void main() {
     final box2 = await openBox(true, hive: hive);
 
     final obj = _TestObject('test');
-
     expect(obj.box, null);
     expect(obj.key, null);
+
     final key1 = await box1.add(obj);
     expect(obj.box, box1);
     expect(obj.key, key1);
