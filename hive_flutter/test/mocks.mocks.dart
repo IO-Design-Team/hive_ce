@@ -338,8 +338,8 @@ class MockBinaryWriter extends _i2.Mock implements _i8.BinaryWriter {
       );
 
   @override
-  void write<T>(T? value, {bool? writeTypeId = true}) => super.noSuchMethod(
-        Invocation.method(#write, [value], {#writeTypeId: writeTypeId}),
+  void write<T>(T? value, {bool? withTypeId = true}) => super.noSuchMethod(
+        Invocation.method(#write, [value], {#withTypeId: withTypeId}),
         returnValueForMissingStub: null,
       );
 }
