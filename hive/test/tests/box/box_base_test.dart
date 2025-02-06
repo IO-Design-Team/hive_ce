@@ -13,6 +13,9 @@ import '../common.dart';
 import '../mocks.dart';
 
 class _BoxBaseMock<E> extends BoxBaseImpl<E> with Mock {
+  @override
+  final lazy = false;
+
   _BoxBaseMock(
     super.hive,
     super.name,
@@ -158,7 +161,6 @@ void main() {
     test('.initialize()', () async {
       final backend = MockStorageBackend();
       final box = _openBoxBaseMock(backend: backend);
-      when(() => box.lazy).thenReturn(false);
 
       when(() => backend.initialize(any(), any(), any())).thenAnswer((i) async {
         i.positionalArguments[1].insert(Frame('key1', 1));

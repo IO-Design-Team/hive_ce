@@ -11,7 +11,12 @@ import 'package:mocktail/mocktail.dart';
 
 // Mocks
 
-class MockBox<E> extends Mock implements Box<E> {}
+class MockBox<E> extends Mock implements Box<E> {
+  @override
+  final bool lazy;
+
+  MockBox({this.lazy = false});
+}
 
 class MockChangeNotifier extends Mock implements ChangeNotifier {}
 
