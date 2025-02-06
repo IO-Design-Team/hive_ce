@@ -1,3 +1,7 @@
+## 2.10.1
+
+- Fixes `HiveObject` disposal in lazy boxes
+
 ## 2.10.0
 
 - Raises the maximum type ID from 223 to 65439

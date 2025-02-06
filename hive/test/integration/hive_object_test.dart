@@ -72,4 +72,28 @@ void main() {
     },
     timeout: longTimeout,
   );
+
+  test('move HiveObject between lazy boxes', () async {
+    final hive = await createHive();
+    hive.registerAdapter<_TestObject>(_TestObjectAdapter());
+
+    final box1 = await openBox(true, hive: hive);
+    final box2 = await openBox(true, hive: hive);
+
+    final obj = _TestObject('test');
+    expect(obj.box, null);
+    expect(obj.key, null);
+
+    final key1 = await box1.add(obj);
+    expect(obj.box, box1);
+    expect(obj.key, key1);
+
+    await obj.delete();
+    expect(obj.box, null);
+    expect(obj.key, null);
+
+    final key2 = await box2.add(obj);
+    expect(obj.box, box2);
+    expect(obj.key, key2);
+  });
 }
