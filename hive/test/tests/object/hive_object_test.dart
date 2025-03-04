@@ -153,7 +153,6 @@ void main() {
       test('returns true if object is in normal box', () {
         final obj = TestHiveObject();
         final box = MockBox();
-        when(() => box.lazy).thenReturn(false);
         obj.init('key', box);
 
         expect(obj.isInBox, true);
@@ -162,8 +161,7 @@ void main() {
       test('returns the result ob box.containsKey() if object is in lazy box',
           () {
         final obj = TestHiveObject();
-        final box = MockBox();
-        when(() => box.lazy).thenReturn(true);
+        final box = MockBox(lazy: true);
         obj.init('key', box);
 
         when(() => box.containsKey('key')).thenReturn(true);
