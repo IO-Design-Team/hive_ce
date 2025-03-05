@@ -7,6 +7,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
+import 'package:hive_ce/src/backend/isolate/isolate_backend_manager.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';
@@ -36,7 +37,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   /// either returns the preferred [BackendManagerInterface] or the
   /// platform default fallback
-  final BackendManagerInterface _manager = BackendManager();
+  final BackendManagerInterface _manager = IsolateBackendManager();
 
   void _registerDefaultAdapters() {
     registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
