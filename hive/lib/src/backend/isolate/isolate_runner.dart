@@ -40,7 +40,7 @@ class IsolateRunner {
 
   /// Sends a message to the isolate and returns a future that completes with the response
   Future<T> sendMessage<T>({
-    required IsolateMessageType type,
+    required MessageType type,
     Object? payload,
   }) async {
     await isInitialized;

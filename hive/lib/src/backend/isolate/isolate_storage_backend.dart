@@ -22,7 +22,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> initialize(TypeRegistry registry, Keystore keystore, bool lazy) {
     return manager.sendMessage(
-      type: IsolateMessageType.storageInitialize,
+      type: MessageType.storageInitialize,
       payload: StorageInitializePayload(
         storageId: id,
         registry: registry,
@@ -35,7 +35,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<dynamic> readValue(Frame frame) {
     return manager.sendMessage(
-      type: IsolateMessageType.storageReadValue,
+      type: MessageType.storageReadValue,
       payload: StorageReadValuePayload(storageId: id, frame: frame),
     );
   }
@@ -43,7 +43,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> writeFrames(List<Frame> frames) {
     return manager.sendMessage(
-      type: IsolateMessageType.storageWriteFrames,
+      type: MessageType.storageWriteFrames,
       payload: StorageWriteFramesPayload(storageId: id, frames: frames),
     );
   }
@@ -51,7 +51,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> compact(Iterable<Frame> frames) {
     return manager.sendMessage(
-      type: IsolateMessageType.storageCompact,
+      type: MessageType.storageCompact,
       payload: StorageCompactPayload(storageId: id, frames: frames),
     );
   }
@@ -59,7 +59,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> clear() {
     return manager.sendMessage(
-      type: IsolateMessageType.storageClear,
+      type: MessageType.storageClear,
       payload: StoragePayload(storageId: id),
     );
   }
@@ -67,7 +67,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> close() {
     return manager.sendMessage(
-      type: IsolateMessageType.storageClose,
+      type: MessageType.storageClose,
       payload: StoragePayload(storageId: id),
     );
   }
@@ -75,7 +75,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> deleteFromDisk() {
     return manager.sendMessage(
-      type: IsolateMessageType.storageDeleteFromDisk,
+      type: MessageType.storageDeleteFromDisk,
       payload: StoragePayload(storageId: id),
     );
   }
@@ -83,7 +83,7 @@ class IsolateStorageBackend implements StorageBackend {
   @override
   Future<void> flush() {
     return manager.sendMessage(
-      type: IsolateMessageType.storageFlush,
+      type: MessageType.storageFlush,
       payload: StoragePayload(storageId: id),
     );
   }

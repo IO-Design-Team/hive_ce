@@ -12,7 +12,7 @@ class IsolateBackendManager implements BackendManagerInterface {
   final _isolateRunner = IsolateRunner(_isolateEntryPoint);
 
   Future<T> sendMessage<T>({
-    required IsolateMessageType type,
+    required MessageType type,
     Object? payload,
   }) {
     return _isolateRunner.sendMessage<T>(type: type, payload: payload);
@@ -32,7 +32,7 @@ class IsolateBackendManager implements BackendManagerInterface {
 
       final Object? result;
       switch (message.type) {
-        case IsolateMessageType.managerOpen:
+        case MessageType.managerOpen:
           final payload = message.payload as ManagerOpenPayload;
           final backend = await backendManager.open(
             payload.name,
@@ -48,7 +48,7 @@ class IsolateBackendManager implements BackendManagerInterface {
             path: backend.path,
             supportsCompaction: backend.supportsCompaction,
           );
-        case IsolateMessageType.managerDeleteBox:
+        case MessageType.managerDeleteBox:
           final payload = message.payload as ManagerDeleteBoxPayload;
           await backendManager.deleteBox(
             payload.name,
@@ -56,14 +56,14 @@ class IsolateBackendManager implements BackendManagerInterface {
             payload.collection,
           );
           result = null;
-        case IsolateMessageType.managerBoxExists:
+        case MessageType.managerBoxExists:
           final payload = message.payload as ManagerBoxExistsPayload;
           result = await backendManager.boxExists(
             payload.name,
             payload.path,
             payload.collection,
           );
-        case IsolateMessageType.storageInitialize:
+        case MessageType.storageInitialize:
           final payload = message.payload as StorageInitializePayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.initialize(
@@ -72,38 +72,38 @@ class IsolateBackendManager implements BackendManagerInterface {
             payload.lazy,
           );
           result = null;
-        case IsolateMessageType.storageReadValue:
+        case MessageType.storageReadValue:
           final payload = message.payload as StorageReadValuePayload;
           final backend = storageBackends[payload.storageId]!;
           result = await backend.readValue(payload.frame);
-        case IsolateMessageType.storageWriteFrames:
+        case MessageType.storageWriteFrames:
           final payload = message.payload as StorageWriteFramesPayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.writeFrames(payload.frames);
           result = null;
-        case IsolateMessageType.storageCompact:
+        case MessageType.storageCompact:
           final payload = message.payload as StorageCompactPayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.compact(payload.frames);
           result = null;
-        case IsolateMessageType.storageClear:
+        case MessageType.storageClear:
           final payload = message.payload as StoragePayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.clear();
           result = null;
-        case IsolateMessageType.storageClose:
+        case MessageType.storageClose:
           final payload = message.payload as StoragePayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.close();
           storageBackends.remove(payload.storageId);
           result = null;
-        case IsolateMessageType.storageDeleteFromDisk:
+        case MessageType.storageDeleteFromDisk:
           final payload = message.payload as StoragePayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.deleteFromDisk();
           storageBackends.remove(payload.storageId);
           result = null;
-        case IsolateMessageType.storageFlush:
+        case MessageType.storageFlush:
           final payload = message.payload as StoragePayload;
           final backend = storageBackends[payload.storageId]!;
           await backend.flush();
@@ -123,7 +123,7 @@ class IsolateBackendManager implements BackendManagerInterface {
     String? collection,
   ) async {
     final info = await sendMessage<StorageInfoPayload>(
-      type: IsolateMessageType.managerOpen,
+      type: MessageType.managerOpen,
       payload: ManagerOpenPayload(
         name: name,
         path: path,
@@ -146,7 +146,7 @@ class IsolateBackendManager implements BackendManagerInterface {
   @override
   Future<void> deleteBox(String name, String? path, String? collection) {
     return sendMessage<void>(
-      type: IsolateMessageType.managerDeleteBox,
+      type: MessageType.managerDeleteBox,
       payload: ManagerDeleteBoxPayload(
         name: name,
         path: path,
@@ -158,7 +158,7 @@ class IsolateBackendManager implements BackendManagerInterface {
   @override
   Future<bool> boxExists(String name, String? path, String? collection) {
     return sendMessage<bool>(
-      type: IsolateMessageType.managerBoxExists,
+      type: MessageType.managerBoxExists,
       payload: ManagerBoxExistsPayload(
         name: name,
         path: path,

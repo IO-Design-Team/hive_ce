@@ -3,7 +3,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 
 /// Message types for communication with the isolate
-enum IsolateMessageType {
+enum MessageType {
   managerOpen,
   managerDeleteBox,
   managerBoxExists,
@@ -20,7 +20,7 @@ enum IsolateMessageType {
 /// Base message for communication with the isolate
 class IsolateMessage {
   final int id;
-  final IsolateMessageType type;
+  final MessageType type;
   final Object? payload;
 
   const IsolateMessage({
@@ -131,10 +131,7 @@ class IsolateResponse {
   final int id;
   final Object? payload;
 
-  const IsolateResponse({
-    required this.id,
-    this.payload
-  });
+  const IsolateResponse({required this.id, this.payload});
 }
 
 /// Storage backend information returned from isolate

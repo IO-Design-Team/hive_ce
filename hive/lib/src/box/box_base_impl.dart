@@ -3,6 +3,7 @@ import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -40,7 +41,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
     this._compactionStrategy,
     this.backend,
   ) {
-    keystore = Keystore(this, ChangeNotifier(), keyComparator);
+    keystore = Keystore(ChangeNotifier(), keyComparator);
   }
 
   /// Not part of public API
@@ -92,7 +93,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
 
   /// Not part of public API
   Future<void> initialize() {
-    return backend.initialize(hive, keystore, lazy);
+    return backend.initialize(TypeRegistryImpl.copy(hive), keystore, lazy);
   }
 
   @override
