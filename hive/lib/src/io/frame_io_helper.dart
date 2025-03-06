@@ -7,6 +7,7 @@ import 'package:hive_ce/src/binary/frame_helper.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/isolated_file.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -14,13 +15,13 @@ class FrameIoHelper extends FrameHelper {
   /// Not part of public API
   @visibleForTesting
   Future<RandomAccessFile> openFile(String path) {
-    return File(path).open();
+    return IsolatedFile(path).open();
   }
 
   /// Not part of public API
   @visibleForTesting
   Future<List<int>> readFile(String path) {
-    return File(path).readAsBytes();
+    return IsolatedFile(path).readAsBytes();
   }
 
   /// Not part of public API

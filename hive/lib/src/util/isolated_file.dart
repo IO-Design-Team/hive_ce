@@ -9,9 +9,8 @@ import 'dart:typed_data';
 ///
 /// This class implements most of the same methods as [File], allowing it to be
 /// used as a drop-in replacement in many cases.
-class IsolatedFile implements FileSystemEntity {
+class IsolatedFile {
   /// The path of the file.
-  @override
   final String path;
 
   // Isolate infrastructure
@@ -33,99 +32,15 @@ class IsolatedFile implements FileSystemEntity {
   /// [IsolatedFile].
   File get file => File(path);
 
-  /// Returns whether this object's path is absolute.
-  @override
-  bool get isAbsolute => file.isAbsolute;
-
-  /// The URI of this file.
-  @override
-  Uri get uri => file.uri;
-
-  /// A [Stream] of [FileSystemEvent]s for this file.
-  @override
-  Stream<FileSystemEvent> watch({
-    int events = FileSystemEvent.all,
-    bool recursive = false,
-  }) {
-    // Watch operations need to happen on the main isolate to properly stream events
-    return file.watch(events: events, recursive: recursive);
-  }
-
-  /// Gets the file path of the file when [path] is a link.
-  @override
-  Future<String> resolveSymbolicLinks() {
-    return _sendOperation<String>('resolveSymbolicLinks', path);
-  }
-
-  /// Synchronous version of [resolveSymbolicLinks] - not recommended.
-  ///
-  /// Note: This will run on the main thread since it's synchronous.
-  @override
-  String resolveSymbolicLinksSync() {
-    return file.resolveSymbolicLinksSync();
-  }
-
   /// Checks if this file exists through the isolate.
-  @override
   Future<bool> exists() {
     return _sendOperation<bool>('exists', path);
   }
 
-  /// Synchronous check if file exists - not recommended.
-  ///
-  /// Note: This will run on the main thread since it's synchronous.
-  /// It's recommended to use [exists] instead if possible.
-  @override
-  bool existsSync() {
-    return file.existsSync();
-  }
-
-  /// Returns a [FileStat] object for this file.
-  @override
-  Future<FileStat> stat() {
-    return _sendOperation<FileStat>('stat', path);
-  }
-
-  /// Synchronous version of [stat] - not recommended.
-  ///
-  /// Note: This will run on the main thread since it's synchronous.
-  @override
-  FileStat statSync() {
-    return file.statSync();
-  }
-
-  /// Gets the parent directory of this file.
-  @override
-  Directory get parent => Directory(dirname(path));
-
-  /// Creates a [IsolatedFile] instance whose path is the absolute path of [path].
-  @override
-  IsolatedFile get absolute => IsolatedFile(file.absolute.path);
-
   /// Deletes this file using an isolate.
-  @override
-  Future<FileSystemEntity> delete({bool recursive = false}) async {
+  Future<IsolatedFile> delete({bool recursive = false}) async {
     await _sendOperation<void>('delete', path);
     return this;
-  }
-
-  /// Synchronous delete operation - not recommended.
-  ///
-  /// Note: This will run on the main thread since it's synchronous.
-  /// It's recommended to use [delete] instead if possible.
-  @override
-  void deleteSync({bool recursive = false}) {
-    file.deleteSync(recursive: recursive);
-  }
-
-  /// Renames this file synchronously - not recommended.
-  ///
-  /// Note: This will run on the main thread since it's synchronous.
-  /// It's recommended to use [rename] instead if possible.
-  @override
-  FileSystemEntity renameSync(String newPath) {
-    file.renameSync(newPath);
-    return IsolatedFile(newPath);
   }
 
   // File-specific methods
@@ -138,15 +53,6 @@ class IsolatedFile implements FileSystemEntity {
     return this;
   }
 
-  /// Copies the file to a new path using an isolate.
-  Future<IsolatedFile> copy(String newPath) async {
-    final newFilePath = await _sendOperation<String>(
-      'copy',
-      _CopyParams(path, newPath),
-    );
-    return IsolatedFile(newFilePath);
-  }
-
   /// Renames the file to a new path using an isolate.
   Future<IsolatedFile> rename(String newPath) async {
     final newFilePath = await _sendOperation<String>(
@@ -156,78 +62,14 @@ class IsolatedFile implements FileSystemEntity {
     return IsolatedFile(newFilePath);
   }
 
-  /// Returns the length of the file in bytes using an isolate.
-  Future<int> length() async {
-    return _sendOperation<int>('length', path);
-  }
-
-  /// Gets the last-modified time for the file using an isolate.
-  Future<DateTime> lastModified() async {
-    return _sendOperation<DateTime>('lastModified', path);
-  }
-
-  /// Sets the last-modified time for the file using an isolate.
-  Future<IsolatedFile> setLastModified(DateTime time) async {
-    await _sendOperation<void>(
-        'setLastModified', _LastModifiedParams(path, time));
-    return this;
-  }
-
   /// Opens the file for random access operations.
   Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     return file.open(mode: mode);
   }
 
-  /// Reads the entire file contents as a string using an isolate.
-  Future<String> readAsString({Encoding encoding = utf8}) async {
-    return _sendOperation<String>('readAsString', _FileParams(path, encoding));
-  }
-
   /// Reads the entire file contents as a list of bytes using an isolate.
   Future<Uint8List> readAsBytes() async {
     return _sendOperation<Uint8List>('readAsBytes', path);
-  }
-
-  /// Reads the entire file contents as a list of lines using an isolate.
-  Future<List<String>> readAsLines({Encoding encoding = utf8}) async {
-    return _sendOperation<List<String>>(
-        'readAsLines', _FileParams(path, encoding));
-  }
-
-  /// Writes a string to the file using an isolate.
-  Future<void> writeAsString(
-    String contents, {
-    Encoding encoding = utf8,
-    FileMode mode = FileMode.write,
-    bool flush = false,
-  }) async {
-    return _sendOperation<void>(
-      'writeAsString',
-      _WriteParams(
-        path,
-        contents,
-        encoding,
-        mode,
-        flush,
-      ),
-    );
-  }
-
-  /// Writes a list of bytes to the file using an isolate.
-  Future<void> writeAsBytes(
-    List<int> bytes, {
-    FileMode mode = FileMode.write,
-    bool flush = false,
-  }) async {
-    return _sendOperation<void>(
-      'writeAsBytes',
-      _ByteWriteParams(
-        path,
-        bytes,
-        mode,
-        flush,
-      ),
-    );
   }
 
   /// Initializes the isolate if not already initialized
@@ -395,16 +237,6 @@ class IsolatedFile implements FileSystemEntity {
         });
       }
     });
-  }
-
-  // Returns the directory name for a file path
-  static String dirname(String path) {
-    final lastSeparator = path.lastIndexOf(Platform.pathSeparator);
-    if (lastSeparator == -1) return '.';
-
-    if (lastSeparator == 0) return Platform.pathSeparator;
-
-    return path.substring(0, lastSeparator);
   }
 }
 

@@ -12,12 +12,13 @@ import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/isolated_file.dart';
 import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
-  final File _file;
-  final File _lockFile;
+  final IsolatedFile _file;
+  final IsolatedFile _lockFile;
   final bool _crashRecovery;
   final HiveCipher? _cipher;
   final FrameIoHelper _frameHelper;
@@ -166,7 +167,7 @@ class StorageBackendVm extends StorageBackend {
       final reader = BufferedFileReader(readRaf);
 
       final fileDirectory = path.substring(0, path.length - 5);
-      final compactFile = File('$fileDirectory.hivec');
+      final compactFile = IsolatedFile('$fileDirectory.hivec');
       final compactRaf = await compactFile.open(mode: FileMode.write);
       final writer = BufferedFileWriter(compactRaf);
 
