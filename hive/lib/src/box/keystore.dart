@@ -8,8 +8,6 @@ import 'package:hive_ce/src/object/hive_object.dart';
 import 'package:hive_ce/src/util/indexable_skip_list.dart';
 import 'package:meta/meta.dart';
 
-import 'package:hive_ce/src/box/box_base_impl.dart';
-
 /// Not part of public API
 class KeyTransaction<E> {
   /// The values that have been added
@@ -25,7 +23,7 @@ class KeyTransaction<E> {
 
 /// Not part of public API
 class Keystore<E> {
-  final BoxBase<E> _box;
+  final String _boxName;
 
   final ChangeNotifier _notifier;
 
@@ -39,18 +37,18 @@ class Keystore<E> {
   var _autoIncrement = -1;
 
   /// Not part of public API
-  Keystore(this._box, this._notifier, KeyComparator? keyComparator)
+  Keystore(this._boxName, this._notifier, KeyComparator? keyComparator)
       : _store = IndexableSkipList(keyComparator ?? defaultKeyComparator);
 
   /// Not part of public API
   factory Keystore.debug({
     Iterable<Frame> frames = const [],
-    BoxBase<E>? box,
+    String? boxName,
     ChangeNotifier? notifier,
     KeyComparator keyComparator = defaultKeyComparator,
   }) {
     final keystore = Keystore<E>(
-      box ?? BoxBaseImpl.nullImpl<E>(),
+      boxName ?? '',
       notifier ?? ChangeNotifier(),
       keyComparator,
     );
@@ -157,7 +155,7 @@ class Keystore<E> {
       }
 
       if (value is HiveObjectMixin) {
-        value.init(key, _box);
+        value.init(key, _boxName);
       }
 
       deletedFrame = _store.insert(key, lazy ? frame.toLazy() : frame);

@@ -42,7 +42,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
       return frame.value as E?;
     } else {
       if (defaultValue != null && defaultValue is HiveObjectMixin) {
-        defaultValue.init(key, this);
+        defaultValue.init(key, name);
       }
       return defaultValue;
     }

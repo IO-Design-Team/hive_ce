@@ -12,7 +12,7 @@ void main() {
         final obj = TestHiveObject();
         final box = MockBox();
 
-        obj.init('someKey', box);
+        obj.init('someKey', box.name);
 
         expect(obj.key, 'someKey');
         expect(obj.box, box);
@@ -22,8 +22,8 @@ void main() {
         final obj = TestHiveObject();
         final box = MockBox();
 
-        obj.init('someKey', box);
-        obj.init('someKey', box);
+        obj.init('someKey', box.name);
+        obj.init('someKey', box.name);
 
         expect(obj.key, 'someKey');
         expect(obj.box, box);
@@ -34,9 +34,9 @@ void main() {
         final box1 = MockBox();
         final box2 = MockBox();
 
-        obj.init('someKey', box1);
+        obj.init('someKey', box1.name);
         expect(
-          () => obj.init('someKey', box2),
+          () => obj.init('someKey', box2.name),
           throwsHiveError('two different boxes'),
         );
       });
@@ -45,9 +45,9 @@ void main() {
         final obj = TestHiveObject();
         final box = MockBox();
 
-        obj.init('key1', box);
+        obj.init('key1', box.name);
         expect(
-          () => obj.init('key2', box),
+          () => obj.init('key2', box.name),
           throwsHiveError('two different keys'),
         );
       });
@@ -58,7 +58,7 @@ void main() {
         final obj = TestHiveObject();
         final box = MockBox();
 
-        obj.init('key', box);
+        obj.init('key', box.name);
         obj.dispose();
 
         expect(obj.key, null);
@@ -68,7 +68,7 @@ void main() {
       test('notifies remote HiveLists', () {
         final obj = TestHiveObject();
         final box = MockBox();
-        obj.init('key', box);
+        obj.init('key', box.name);
 
         final list = MockHiveListImpl();
         obj.linkHiveList(list);
@@ -81,7 +81,7 @@ void main() {
     test('.linkHiveList()', () {
       final box = MockBox();
       final obj = TestHiveObject();
-      obj.init('key', box);
+      obj.init('key', box.name);
       final hiveList = MockHiveListImpl();
 
       obj.linkHiveList(hiveList);
@@ -93,7 +93,7 @@ void main() {
     test('.unlinkHiveList()', () {
       final box = MockBox();
       final obj = TestHiveObject();
-      obj.init('key', box);
+      obj.init('key', box.name);
       final hiveList = MockHiveListImpl();
 
       obj.linkHiveList(hiveList);
@@ -112,7 +112,7 @@ void main() {
         final box = MockBox();
         returnFutureVoid(when(() => box.put('key', obj)));
 
-        obj.init('key', box);
+        obj.init('key', box.name);
         verifyZeroInteractions(box);
 
         obj.save();
@@ -131,7 +131,7 @@ void main() {
         final box = MockBox();
         returnFutureVoid(when(() => box.delete('key')));
 
-        obj.init('key', box);
+        obj.init('key', box.name);
         verifyZeroInteractions(box);
 
         obj.delete();
@@ -153,7 +153,7 @@ void main() {
       test('returns true if object is in normal box', () {
         final obj = TestHiveObject();
         final box = MockBox();
-        obj.init('key', box);
+        obj.init('key', box.name);
 
         expect(obj.isInBox, true);
       });
@@ -162,7 +162,7 @@ void main() {
           () {
         final obj = TestHiveObject();
         final box = MockBox(lazy: true);
-        obj.init('key', box);
+        obj.init('key', box.name);
 
         when(() => box.containsKey('key')).thenReturn(true);
         expect(obj.isInBox, true);

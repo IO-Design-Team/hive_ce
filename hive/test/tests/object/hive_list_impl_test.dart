@@ -11,7 +11,7 @@ import '../mocks.dart';
 
 HiveObject _getHiveObject(String key, MockBox box) {
   final hiveObject = TestHiveObject();
-  hiveObject.init(key, box);
+  hiveObject.init(key, box.name);
   when(
     () => box.get(
       key,

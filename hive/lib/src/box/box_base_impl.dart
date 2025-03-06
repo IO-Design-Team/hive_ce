@@ -41,7 +41,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
     this._compactionStrategy,
     this.backend,
   ) {
-    keystore = Keystore(ChangeNotifier(), keyComparator);
+    keystore = Keystore(name, ChangeNotifier(), keyComparator);
   }
 
   /// Not part of public API

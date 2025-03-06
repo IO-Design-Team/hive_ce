@@ -42,7 +42,7 @@ _BoxBaseMock _openBoxBaseMock({
     cStrategy ?? (_, __) => false,
     backend,
   );
-  mock.keystore = keystore ?? Keystore(mock, ChangeNotifier(), null);
+  mock.keystore = keystore ?? Keystore(mock.name, ChangeNotifier(), null);
   return mock;
 }
 

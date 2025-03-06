@@ -359,7 +359,7 @@ void main() {
       final box = MockBox();
       when(() => box.name).thenReturn('Box');
 
-      final obj = TestHiveObject()..init('key', box);
+      final obj = TestHiveObject()..init('key', box.name);
 
       test('write length', () {
         final list = HiveList(box, objects: [obj]);
@@ -466,7 +466,7 @@ void main() {
         final box = MockBox();
         when(() => box.name).thenReturn('Box');
 
-        final obj = TestHiveObject()..init('key', box);
+        final obj = TestHiveObject()..init('key', box.name);
         final list = HiveList(box, objects: [obj]);
         final bw = getWriter();
         bw.write(list);

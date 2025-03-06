@@ -198,7 +198,7 @@ void main() {
 
         test('initializes HiveObject', () {
           final box = MockBox();
-          final keystore = Keystore.debug(box: box);
+          final keystore = Keystore.debug(boxName: box.name);
 
           final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
@@ -228,7 +228,7 @@ void main() {
 
         test('unloads previous HiveObject', () {
           final box = MockBox();
-          final keystore = Keystore.debug(box: box);
+          final keystore = Keystore.debug(boxName: box.name);
 
           final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
@@ -240,7 +240,7 @@ void main() {
 
         test('does not unload HiveObject if it is the same instance', () {
           final box = MockBox();
-          final keystore = Keystore.debug(box: box);
+          final keystore = Keystore.debug(boxName: box.name);
 
           final hiveObject = TestHiveObject();
           keystore.insert(Frame('key', hiveObject));
@@ -298,7 +298,7 @@ void main() {
           final box = MockBox();
           final hiveObject = TestHiveObject();
           final keystore =
-              Keystore.debug(frames: [Frame('key', hiveObject)], box: box);
+              Keystore.debug(frames: [Frame('key', hiveObject)], boxName: box.name);
 
           keystore.insert(Frame.deleted('key'));
           expect(hiveObject.key, null);
@@ -592,7 +592,7 @@ void main() {
             Frame('key1', 'val1'),
             Frame('key2', hiveObject),
           ],
-          box: box,
+          boxName: box.name,
         );
         expect(hiveObject.key, 'key2');
         expect(hiveObject.box, box);
