@@ -24,7 +24,7 @@ BoxImpl _getBox({
     cStrategy ?? (total, deleted) => false,
     backend ?? MockStorageBackend(),
   );
-  box.keystore = keystore ?? Keystore(box.name, ChangeNotifier(), null);
+  box.keystore = keystore ?? Keystore(box, ChangeNotifier(), null);
   return box;
 }
 

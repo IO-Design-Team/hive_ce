@@ -5,7 +5,7 @@ extension HiveObjectInternal on HiveObjectMixin {
   /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  void init(dynamic key, String boxName) {
+  void init(dynamic key, BoxBase box) {
     if (_box != null) {
       if (_box != box) {
         throw HiveError('The same instance of an HiveObject cannot '
@@ -15,7 +15,7 @@ extension HiveObjectInternal on HiveObjectMixin {
             'be stored with two different keys ("$_key" and "$key").');
       }
     }
-    _box = Hive.box(boxName);
+    _box = box;
     _key = key;
   }
 

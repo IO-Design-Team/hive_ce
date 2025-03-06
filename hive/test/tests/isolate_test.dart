@@ -1,16 +1,14 @@
 import 'dart:isolate';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
-import 'common.dart';
+import '../integration/integration.dart';
 
 void main() async {
-  Future<void> runIsolate() async {
-    final dir = await getTempDir();
+  Future<void> runIsolate(HiveImpl hive) {
     return Isolate.run(() async {
-      Hive.init(dir.path);
-      final box = await Hive.openBox<int>('test');
+      final box = await hive.openBox<int>('test');
       for (var i = 0; i < 1000; i++) {
         await box.put(i, i);
       }
@@ -18,13 +16,15 @@ void main() async {
   }
 
   group('isolates', () {
-    test('single', () {
-      expect(runIsolate(), completes);
+    test('single', () async {
+      final hive = await createHive();
+      expect(runIsolate(hive), completes);
     });
 
-    test('multiple', () {
+    test('multiple', () async {
+      final hive = await createHive();
       expect(
-        Future.wait([for (var i = 0; i < 100; i++) runIsolate()]),
+        Future.wait([for (var i = 0; i < 100; i++) runIsolate(hive)]),
         completes,
       );
     });

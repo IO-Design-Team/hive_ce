@@ -100,10 +100,6 @@ class TypeRegistryImpl implements TypeRegistry {
 
   final _typeAdapters = <int, ResolvedAdapter>{};
 
-  /// Create a copy of a type registry
-  static TypeRegistryImpl copy(TypeRegistryImpl registry) =>
-      TypeRegistryImpl().._typeAdapters.addAll(registry._typeAdapters);
-
   /// Not part of public API
   ResolvedAdapter? findAdapterForValue(dynamic value) {
     ResolvedAdapter? match;
