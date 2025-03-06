@@ -10,9 +10,9 @@ void main() async {
     return Isolate.run(() async {
       final hive = HiveImpl()..init(path);
       final box = await hive.openBox<int>('test');
-      await Future.wait([
-        for (var i = 0; i < 1000; i++) box.put(i, i),
-      ]);
+      for (var i = 0; i < 1000; i++) {
+        await box.put(i, i);
+      }
     });
   }
 
