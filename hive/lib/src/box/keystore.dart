@@ -25,7 +25,7 @@ class KeyTransaction<E> {
 
 /// Not part of public API
 class Keystore<E> {
-
+  final BoxBase<E> _box;
 
   final ChangeNotifier _notifier;
 
@@ -39,8 +39,26 @@ class Keystore<E> {
   var _autoIncrement = -1;
 
   /// Not part of public API
-  Keystore(this._notifier, KeyComparator? keyComparator)
+  Keystore(this._box, this._notifier, KeyComparator? keyComparator)
       : _store = IndexableSkipList(keyComparator ?? defaultKeyComparator);
+
+  /// Not part of public API
+  factory Keystore.debug({
+    Iterable<Frame> frames = const [],
+    BoxBase<E>? box,
+    ChangeNotifier? notifier,
+    KeyComparator keyComparator = defaultKeyComparator,
+  }) {
+    final keystore = Keystore<E>(
+      box ?? BoxBaseImpl.nullImpl<E>(),
+      notifier ?? ChangeNotifier(),
+      keyComparator,
+    );
+    for (final frame in frames) {
+      keystore.insert(frame);
+    }
+    return keystore;
+  }
 
   /// Not part of public API
   int get deletedEntries => _deletedEntries;
@@ -139,7 +157,7 @@ class Keystore<E> {
       }
 
       if (value is HiveObjectMixin) {
-        // value.init(key, _box);
+        value.init(key, _box);
       }
 
       deletedFrame = _store.insert(key, lazy ? frame.toLazy() : frame);
