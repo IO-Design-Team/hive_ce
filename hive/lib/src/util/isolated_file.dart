@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -46,10 +45,14 @@ class IsolatedFile {
   // File-specific methods
 
   /// Creates the file using an isolate.
-  Future<IsolatedFile> create(
-      {bool recursive = false, bool exclusive = false}) async {
+  Future<IsolatedFile> create({
+    bool recursive = false,
+    bool exclusive = false,
+  }) async {
     await _sendOperation<void>(
-        'create', _CreateParams(path, recursive, exclusive));
+      'create',
+      _CreateParams(path, recursive, exclusive),
+    );
     return this;
   }
 
@@ -172,56 +175,25 @@ class IsolatedFile {
         dynamic result;
 
         switch (operation) {
-          case 'readAsString':
-            result = await _readAsString(params as _FileParams);
-            break;
           case 'readAsBytes':
-            result = await _readAsBytes(params as String);
-            break;
-          case 'readAsLines':
-            result = await _readAsLines(params as _FileParams);
-            break;
-          case 'writeAsString':
-            await _writeAsString(params as _WriteParams);
-            result = null;
-            break;
-          case 'writeAsBytes':
-            await _writeAsBytes(params as _ByteWriteParams);
-            result = null;
-            break;
+            result = await File(params as String).readAsBytes();
           case 'exists':
-            result = await _exists(params as String);
-            break;
+            result = await File(params as String).exists();
           case 'delete':
-            await _delete(params as String);
+            await File(params as String).delete();
             result = null;
-            break;
           case 'create':
-            await _create(params as _CreateParams);
+            final createParams = params as _CreateParams;
+            await File(createParams.path).create(
+              recursive: createParams.recursive,
+              exclusive: createParams.exclusive,
+            );
             result = null;
-            break;
-          case 'copy':
-            result = await _copy(params as _CopyParams);
-            break;
           case 'rename':
-            result = await _rename(params as _CopyParams);
-            break;
-          case 'length':
-            result = await _length(params as String);
-            break;
-          case 'lastModified':
-            result = await _lastModified(params as String);
-            break;
-          case 'setLastModified':
-            await _setLastModified(params as _LastModifiedParams);
-            result = null;
-            break;
-          case 'resolveSymbolicLinks':
-            result = await _resolveSymbolicLinks(params as String);
-            break;
-          case 'stat':
-            result = await _stat(params as String);
-            break;
+            final renameParams = params as _CopyParams;
+            final newFile =
+                await File(renameParams.path).rename(renameParams.newPath);
+            result = newFile.path;
           default:
             throw Exception('Unknown operation: $operation');
         }
@@ -240,39 +212,6 @@ class IsolatedFile {
   }
 }
 
-/// Internal class for file operation parameters.
-class _FileParams {
-  final String path;
-  final Encoding encoding;
-
-  _FileParams(this.path, this.encoding);
-}
-
-/// Internal class for write operation parameters.
-class _WriteParams extends _FileParams {
-  final String contents;
-  final FileMode mode;
-  final bool flush;
-
-  _WriteParams(
-    String path,
-    this.contents,
-    Encoding encoding,
-    this.mode,
-    this.flush,
-  ) : super(path, encoding);
-}
-
-/// Internal class for byte write operation parameters.
-class _ByteWriteParams {
-  final String path;
-  final List<int> bytes;
-  final FileMode mode;
-  final bool flush;
-
-  _ByteWriteParams(this.path, this.bytes, this.mode, this.flush);
-}
-
 /// Internal class for create operation parameters.
 class _CreateParams {
   final String path;
@@ -288,87 +227,4 @@ class _CopyParams {
   final String newPath;
 
   _CopyParams(this.path, this.newPath);
-}
-
-/// Internal class for last modified parameters.
-class _LastModifiedParams {
-  final String path;
-  final DateTime time;
-
-  _LastModifiedParams(this.path, this.time);
-}
-
-// Isolate worker functions
-Future<String> _readAsString(_FileParams params) async {
-  return File(params.path).readAsString(encoding: params.encoding);
-}
-
-Future<Uint8List> _readAsBytes(String path) async {
-  return File(path).readAsBytes();
-}
-
-Future<List<String>> _readAsLines(_FileParams params) async {
-  return File(params.path).readAsLines(encoding: params.encoding);
-}
-
-Future<void> _writeAsString(_WriteParams params) async {
-  final file = File(params.path);
-  await file.writeAsString(
-    params.contents,
-    encoding: params.encoding,
-    mode: params.mode,
-    flush: params.flush,
-  );
-}
-
-Future<void> _writeAsBytes(_ByteWriteParams params) async {
-  final file = File(params.path);
-  await file.writeAsBytes(
-    params.bytes,
-    mode: params.mode,
-    flush: params.flush,
-  );
-}
-
-Future<bool> _exists(String path) async {
-  return File(path).exists();
-}
-
-Future<void> _delete(String path) async {
-  await File(path).delete();
-}
-
-Future<void> _create(_CreateParams params) async {
-  await File(params.path)
-      .create(recursive: params.recursive, exclusive: params.exclusive);
-}
-
-Future<String> _copy(_CopyParams params) async {
-  final newFile = await File(params.path).copy(params.newPath);
-  return newFile.path;
-}
-
-Future<String> _rename(_CopyParams params) async {
-  final newFile = await File(params.path).rename(params.newPath);
-  return newFile.path;
-}
-
-Future<int> _length(String path) async {
-  return File(path).length();
-}
-
-Future<DateTime> _lastModified(String path) async {
-  return File(path).lastModified();
-}
-
-Future<void> _setLastModified(_LastModifiedParams params) async {
-  await File(params.path).setLastModified(params.time);
-}
-
-Future<String> _resolveSymbolicLinks(String path) async {
-  return File(path).resolveSymbolicLinks();
-}
-
-Future<FileStat> _stat(String path) async {
-  return File(path).stat();
 }

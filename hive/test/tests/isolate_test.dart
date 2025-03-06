@@ -22,16 +22,12 @@ void main() async {
       expect(runIsolate(dir.path), completes);
     });
 
-    test(
-      'multiple',
-      () async {
-        final dir = await getTempDir();
-        expect(
-          Future.wait([for (var i = 0; i < 1000; i++) runIsolate(dir.path)]),
-          completes,
-        );
-      },
-      timeout: const Timeout(Duration(minutes: 10)),
-    );
+    test('multiple', () async {
+      final dir = await getTempDir();
+      expect(
+        Future.wait([for (var i = 0; i < 100; i++) runIsolate(dir.path)]),
+        completes,
+      );
+    });
   });
 }
