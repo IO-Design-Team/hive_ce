@@ -11,7 +11,6 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/isolated_file.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -37,8 +36,8 @@ Uint8List getFrameBytes(Iterable<Frame> frames) {
 }
 
 StorageBackendVm _getBackend({
-  IsolatedFile? file,
-  IsolatedFile? lockFile,
+  File? file,
+  File? lockFile,
   bool crashRecovery = false,
   HiveCipher? cipher,
   FrameIoHelper? ioHelper,
@@ -47,8 +46,8 @@ StorageBackendVm _getBackend({
   RandomAccessFile? writeRaf,
 }) {
   final backend = StorageBackendVm.debug(
-    file ?? MockIsolatedFile(),
-    lockFile ?? MockIsolatedFile(),
+    file ?? MockFile(),
+    lockFile ?? MockFile(),
     crashRecovery,
     cipher,
     ioHelper ?? MockFrameIoHelper(),
@@ -73,7 +72,7 @@ void main() {
     test('.path returns path for of open box file', () {
       // This is a test
       // ignore: do_not_use_raw_paths
-      final file = IsolatedFile('some/path');
+      final file = File('some/path');
       final backend = _getBackend(file: file);
       expect(backend.path, 'some/path');
     });
@@ -85,7 +84,7 @@ void main() {
 
     group('.open()', () {
       test('readFile & writeFile', () async {
-        final file = MockIsolatedFile();
+        final file = MockFile();
         final readRaf = MockRandomAccessFile();
         final writeRaf = MockRandomAccessFile();
         when(file.open).thenAnswer((i) => Future.value(readRaf));
@@ -100,7 +99,7 @@ void main() {
       });
 
       test('writeOffset', () async {
-        final file = MockIsolatedFile();
+        final file = MockFile();
         final writeFile = MockRandomAccessFile();
         final readRaf = MockRandomAccessFile();
         when(() => file.open(mode: FileMode.writeOnlyAppend))
@@ -115,8 +114,8 @@ void main() {
     });
 
     group('.initialize()', () {
-      IsolatedFile getLockFile() {
-        final lockMockFile = MockIsolatedFile();
+      File getLockFile() {
+        final lockMockFile = MockFile();
         when(() => lockMockFile.open(mode: FileMode.write))
             .thenAnswer((i) => Future.value(MockRandomAccessFile()));
         return lockMockFile;
@@ -144,7 +143,7 @@ void main() {
 
       void runTests(bool lazy) {
         test('opens lock file and acquires lock', () async {
-          final lockFile = MockIsolatedFile();
+          final lockFile = MockFile();
           final lockRaf = MockRandomAccessFile();
           when(() => lockFile.open(mode: FileMode.write))
               .thenAnswer((i) => Future.value(lockRaf));
@@ -412,7 +411,7 @@ void main() {
       final readRaf = MockRandomAccessFile();
       final writeRaf = MockRandomAccessFile();
       final lockRaf = MockRandomAccessFile();
-      final lockFile = MockIsolatedFile();
+      final lockFile = MockFile();
 
       returnFutureVoid(when(readRaf.close));
       returnFutureVoid(when(writeRaf.close));
@@ -439,8 +438,8 @@ void main() {
       final readRaf = MockRandomAccessFile();
       final writeRaf = MockRandomAccessFile();
       final lockRaf = MockRandomAccessFile();
-      final lockFile = MockIsolatedFile();
-      final file = MockIsolatedFile();
+      final lockFile = MockFile();
+      final file = MockFile();
 
       returnFutureVoid(when(readRaf.close));
       returnFutureVoid(when(writeRaf.close));

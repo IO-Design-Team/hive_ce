@@ -5,7 +5,6 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
-import 'package:hive_ce/src/util/isolated_file.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -38,7 +37,7 @@ class BackendManager implements BackendManagerInterface {
     }
 
     final file = await findHiveFileAndCleanUp(name, path);
-    final lockFile = IsolatedFile('$path$_delimiter$name.lock');
+    final lockFile = File('$path$_delimiter$name.lock');
 
     final backend = StorageBackendVm(file, lockFile, crashRecovery, cipher);
     await backend.open();
@@ -47,9 +46,9 @@ class BackendManager implements BackendManagerInterface {
 
   /// Not part of public API
   @visibleForTesting
-  Future<IsolatedFile> findHiveFileAndCleanUp(String name, String path) async {
-    final hiveFile = IsolatedFile('$path$_delimiter$name.hive');
-    final compactedFile = IsolatedFile('$path$_delimiter$name.hivec');
+  Future<File> findHiveFileAndCleanUp(String name, String path) async {
+    final hiveFile = File('$path$_delimiter$name.hive');
+    final compactedFile = File('$path$_delimiter$name.hivec');
 
     if (await hiveFile.exists()) {
       if (await compactedFile.exists()) {
@@ -75,12 +74,12 @@ class BackendManager implements BackendManagerInterface {
       path = path + collection;
     }
 
-    await _deleteFileIfExists(IsolatedFile('$path$_delimiter$name.hive'));
-    await _deleteFileIfExists(IsolatedFile('$path$_delimiter$name.hivec'));
-    await _deleteFileIfExists(IsolatedFile('$path$_delimiter$name.lock'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.hive'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.hivec'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.lock'));
   }
 
-  Future<void> _deleteFileIfExists(IsolatedFile file) async {
+  Future<void> _deleteFileIfExists(File file) async {
     if (await file.exists()) {
       await file.delete();
     }
@@ -96,8 +95,8 @@ class BackendManager implements BackendManagerInterface {
       path = path + collection;
     }
 
-    return await IsolatedFile('$path$_delimiter$name.hive').exists() ||
-        await IsolatedFile('$path$_delimiter$name.hivec').exists() ||
-        await IsolatedFile('$path$_delimiter$name.lock').exists();
+    return await File('$path$_delimiter$name.hive').exists() ||
+        await File('$path$_delimiter$name.hivec').exists() ||
+        await File('$path$_delimiter$name.lock').exists();
   }
 }

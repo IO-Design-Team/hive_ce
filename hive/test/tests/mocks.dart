@@ -7,7 +7,6 @@ import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
-import 'package:hive_ce/src/util/isolated_file.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Mocks
@@ -37,7 +36,7 @@ class MockBinaryReader extends Mock implements BinaryReader {}
 
 class MockBinaryWriter extends Mock implements BinaryWriter {}
 
-class MockIsolatedFile extends Mock implements IsolatedFile {}
+class MockFile extends Mock implements File {}
 
 class MockFrameIoHelper extends Mock implements FrameIoHelper {}
 
