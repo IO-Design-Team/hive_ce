@@ -58,7 +58,11 @@ class IsolatedBoxBase<E> implements BoxBase<E> {
 
   @override
   Future<void> put(key, E value) {
-    return _channel.invokeMethod('put', [name, key, value]);
+    return _channel.invokeMethod('put', {
+      'name': name,
+      'key': key,
+      'value': value,
+    });
   }
 
   @override

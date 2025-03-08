@@ -5,7 +5,8 @@ import 'package:hive_ce/hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 class IsolatedHive implements HiveInterface {
-  late final IsolateMethodChannel _channel;
+  late final IsolateMethodChannel _hiveChannel;
+  late final IsolateMethodChannel _boxChannel;
 
   /// Must only be called once per isolate
   ///
@@ -20,8 +21,9 @@ class IsolatedHive implements HiveInterface {
     Object? isolateNameServer,
   }) async {
     final (send, receive, shutdown) = await spawnIsolate(_isolateEntryPoint);
-    _channel = IsolateMethodChannel('hive', send, receive);
-    return _channel.invokeMethod('init', path);
+    _hiveChannel = IsolateMethodChannel('hive', send, receive);
+    _boxChannel = IsolateMethodChannel('box', send, receive);
+    return _hiveChannel.invokeMethod('init', path);
   }
 
   @override
@@ -37,16 +39,37 @@ class IsolatedHive implements HiveInterface {
     String? collection,
     List<int>? encryptionKey,
   }) async {
-    await _channel.invokeMethod('openBox', name);
-    return IsolatedBox(_channel, name);
+    await _hiveChannel.invokeMethod('openBox', name);
+    return IsolatedBox(_boxChannel, name);
   }
 
   @override
-  Box<E> box<E>(String name) => IsolatedBox(_channel, name);
+  Future<LazyBox<E>> openLazyBox<E>(
+    String name, {
+    HiveCipher? encryptionCipher,
+    KeyComparator? keyComparator,
+    CompactionStrategy? compactionStrategy,
+    bool crashRecovery = true,
+    String? path,
+    String? collection,
+    List<int>? encryptionKey,
+  }) {
+    // TODO: implement openLazyBox
+    throw UnimplementedError();
+  }
 
   @override
-  Future<bool> boxExists(String name, {String? path}) {
-    // TODO: implement boxExists
+  Box<E> box<E>(String name) => IsolatedBox(_hiveChannel, name);
+
+  @override
+  LazyBox<E> lazyBox<E>(String name) {
+    // TODO: implement lazyBox
+    throw UnimplementedError();
+  }
+
+  @override
+  bool isBoxOpen(String name) {
+    // TODO: implement isBoxOpen
     throw UnimplementedError();
   }
 
@@ -75,41 +98,14 @@ class IsolatedHive implements HiveInterface {
   }
 
   @override
-  void ignoreTypeId<T>(int typeId) {
-    // TODO: implement ignoreTypeId
-  }
-
-  @override
-  bool isAdapterRegistered(int typeId) {
-    // TODO: implement isAdapterRegistered
+  Future<bool> boxExists(String name, {String? path}) {
+    // TODO: implement boxExists
     throw UnimplementedError();
   }
 
   @override
-  bool isBoxOpen(String name) {
-    // TODO: implement isBoxOpen
-    throw UnimplementedError();
-  }
-
-  @override
-  LazyBox<E> lazyBox<E>(String name) {
-    // TODO: implement lazyBox
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<LazyBox<E>> openLazyBox<E>(
-    String name, {
-    HiveCipher? encryptionCipher,
-    KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
-    bool crashRecovery = true,
-    String? path,
-    String? collection,
-    List<int>? encryptionKey,
-  }) {
-    // TODO: implement openLazyBox
-    throw UnimplementedError();
+  void resetAdapters() {
+    // TODO: implement resetAdapters
   }
 
   @override
@@ -119,16 +115,24 @@ class IsolatedHive implements HiveInterface {
   }
 
   @override
-  void resetAdapters() {
-    // TODO: implement resetAdapters
+  bool isAdapterRegistered(int typeId) {
+    // TODO: implement isAdapterRegistered
+    throw UnimplementedError();
+  }
+
+  @override
+  void ignoreTypeId<T>(int typeId) {
+    // TODO: implement ignoreTypeId
   }
 }
 
 void _isolateEntryPoint(SendPort send) {
   final receive = setupIsolate(send);
-  final channel = IsolateMethodChannel('hive', send, receive);
+  final hiveChannel = IsolateMethodChannel('hive', send, receive);
+  final boxChannel = IsolateMethodChannel('box', send, receive);
 
-  channel.setMethodCallHandler(_handleMethodCall);
+  hiveChannel.setMethodCallHandler(_handleMethodCall);
+  boxChannel.setMethodCallHandler(_handleBoxMethodCall);
 }
 
 void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
@@ -139,8 +143,14 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
     case 'openBox':
       await Hive.openBox(call.arguments);
       result(null);
+  }
+}
+
+void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
+  switch (call.method) {
     case 'put':
-      await Hive.box(call.arguments[0]).put(call.arguments[1], call.arguments[2]);
+      await Hive.box(call.arguments['name'])
+          .put(call.arguments['key'], call.arguments['value']);
       result(null);
   }
 }
