@@ -206,11 +206,77 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
 }
 
 void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
+  final box = Hive.box(call.arguments['name']);
   switch (call.method) {
-    case 'put':
-      await Hive.box(call.arguments['name'])
-          .put(call.arguments['key'], call.arguments['value']);
+    case 'path':
+      result(box.path);
+    case 'keys':
+      result(box.keys);
+    case 'length':
+      result(box.length);
+    case 'isEmpty':
+      result(box.isEmpty);
+    case 'isNotEmpty':
+      result(box.isNotEmpty);
+    case 'keyAt':
+      result(box.keyAt(call.arguments['index']));
+    case 'watch':
+      // TODO
       result(null);
+    case 'containsKey':
+      result(box.containsKey(call.arguments['key']));
+    case 'put':
+      await box.put(call.arguments['key'], call.arguments['value']);
+      result(null);
+    case 'putAt':
+      await box.putAt(call.arguments['index'], call.arguments['value']);
+      result(null);
+    case 'putAll':
+      await box.putAll(call.arguments['entries']);
+      result(null);
+    case 'add':
+      result(await box.add(call.arguments['value']));
+    case 'addAll':
+      result(await box.addAll(call.arguments['values']));
+    case 'delete':
+      await box.delete(call.arguments['key']);
+      result(null);
+    case 'deleteAt':
+      await box.deleteAt(call.arguments['index']);
+      result(null);
+    case 'deleteAll':
+      await box.deleteAll(call.arguments['keys']);
+      result(null);
+    case 'compact':
+      await box.compact();
+      result(null);
+    case 'clear':
+      await box.clear();
+      result(null);
+    case 'close':
+      await box.close();
+      result(null);
+    case 'deleteFromDisk':
+      await box.deleteFromDisk();
+      result(null);
+    case 'flush':
+      await box.flush();
+      result(null);
+    case 'values':
+      result(box.values);
+    case 'valuesBetween':
+      result(
+        box.valuesBetween(
+          startKey: call.arguments['startKey'],
+          endKey: call.arguments['endKey'],
+        ),
+      );
+    case 'get':
+      result(box.get(call.arguments['key']));
+    case 'getAt':
+      result(box.getAt(call.arguments['index']));
+    case 'toMap':
+      result(box.toMap());
     default:
       throw UnimplementedError();
   }
