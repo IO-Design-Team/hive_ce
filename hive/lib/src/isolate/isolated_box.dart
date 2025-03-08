@@ -86,17 +86,20 @@ abstract class IsolatedBoxBase<E> {
   }
 
   Future<void> flush() => _channel.invokeMethod('flush', _params);
+
+  Future<E?> get(key, {E? defaultValue}) => _channel.invokeMethod('get', {
+        ..._params,
+        'key': key,
+        'defaultValue': defaultValue,
+      });
+
+  Future<E?> getAt(int index) =>
+      _channel.invokeMethod('getAt', {..._params, 'index': index});
 }
 
 class IsolatedLazyBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
   IsolatedLazyBox(super._channel, super._eventChannel, super.name, super.lazy);
-
-  Future<E?> get(key, {E? defaultValue}) =>
-      _channel.invokeMethod('get', {..._params, 'defaultValue': defaultValue});
-
-  Future<E?> getAt(int index) =>
-      _channel.invokeMethod('getAt', {..._params, 'index': index});
 }
 
 class IsolatedBox<E> extends IsolatedBoxBase<E> {
@@ -111,12 +114,6 @@ class IsolatedBox<E> extends IsolatedBoxBase<E> {
         'startKey': startKey,
         'endKey': endKey,
       });
-
-  Future<E?> get(key, {E? defaultValue}) =>
-      _channel.invokeMethod('get', {..._params, 'defaultValue': defaultValue});
-
-  Future<E?> getAt(int index) =>
-      _channel.invokeMethod('getAt', {..._params, 'index': index});
 
   Future<Map<dynamic, E>> toMap() => _channel.invokeMethod('toMap', _params);
 }
