@@ -88,8 +88,8 @@ class IsolatedHive {
   IsolatedBox<E> box<E>(String name) =>
       IsolatedBox(_hiveChannel, _createEventChannel('box_$name'), name, false);
 
-  IsolatedLazyBox<E> lazyBox<E>(String name) =>
-      IsolatedLazyBox(_boxChannel, _createEventChannel('box_$name'), name, true);
+  IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBox(
+      _boxChannel, _createEventChannel('box_$name'), name, true);
 
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name);
@@ -206,7 +206,10 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
 }
 
 void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
-  final box = Hive.box(call.arguments['name']);
+  final name = call.arguments['name'];
+  final lazy = call.arguments['lazy'];
+  final box = lazy ? Hive.lazyBox(name) : Hive.box(name);
+
   switch (call.method) {
     case 'path':
       result(box.path);
@@ -263,20 +266,28 @@ void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
       await box.flush();
       result(null);
     case 'values':
-      result(box.values);
+      result((box as Box).values);
     case 'valuesBetween':
       result(
-        box.valuesBetween(
+        (box as Box).valuesBetween(
           startKey: call.arguments['startKey'],
           endKey: call.arguments['endKey'],
         ),
       );
     case 'get':
-      result(box.get(call.arguments['key']));
+      if (lazy) {
+        result(await (box as LazyBox).get(call.arguments['key']));
+      } else {
+        result((box as Box).get(call.arguments['key']));
+      }
     case 'getAt':
-      result(box.getAt(call.arguments['index']));
+      if (lazy) {
+        result(await (box as LazyBox).getAt(call.arguments['index']));
+      } else {
+        result((box as Box).getAt(call.arguments['index']));
+      }
     case 'toMap':
-      result(box.toMap());
+      result((box as Box).toMap());
     default:
       throw UnimplementedError();
   }
