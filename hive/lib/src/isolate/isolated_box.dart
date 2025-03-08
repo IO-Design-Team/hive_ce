@@ -39,7 +39,10 @@ abstract class IsolatedBoxBase<E> {
       .receiveBroadcastStream(key)
       .map((event) => BoxEvent(event['key'], event['value'], event['deleted']));
 
-  Future<bool> containsKey(key) => _channel.invokeMethod('containsKey', name);
+  Future<bool> containsKey(key) => _channel.invokeMethod('containsKey', {
+        'name': name,
+        'key': key,
+      });
 
   Future<void> put(key, E value) =>
       _channel.invokeMethod('put', {'name': name, 'key': key, 'value': value});
@@ -88,12 +91,23 @@ class IsolatedBox<E> extends IsolatedBoxBase<E> {
 
   Future<Iterable<E>> get values => _channel.invokeMethod('values', name);
 
-  Future<Iterable<E>> valuesBetween({startKey, endKey}) =>
-      _channel.invokeMethod('valuesBetween', name);
+  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
+      _channel.invokeMethod('valuesBetween', {
+        'name': name,
+        'startKey': startKey,
+        'endKey': endKey,
+      });
 
-  Future<E?> get(key, {E? defaultValue}) => _channel.invokeMethod('get', name);
+  Future<E?> get(key, {E? defaultValue}) => _channel.invokeMethod('get', {
+        'name': name,
+        'key': key,
+        'defaultValue': defaultValue,
+      });
 
-  Future<E?> getAt(int index) => _channel.invokeMethod('getAt', name);
+  Future<E?> getAt(int index) => _channel.invokeMethod('getAt', {
+        'name': name,
+        'index': index,
+      });
 
   Future<Map<dynamic, E>> toMap() => _channel.invokeMethod('toMap', name);
 }
