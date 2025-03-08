@@ -1,139 +1,72 @@
 import 'package:hive_ce/hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
-class IsolatedBoxBase<E> implements BoxBase<E> {
+/// Isolated implementation of [BoxBase]
+///
+/// Most methods are async due to isolate communication
+abstract class IsolatedBoxBase<E> {
   final IsolateMethodChannel _channel;
 
-  @override
+  /// Constructor
+  IsolatedBoxBase(this._channel, this.name, this.lazy);
+
   final String name;
 
-  IsolatedBoxBase(this._channel, this.name);
+  Future<bool> get isOpen => _channel.invokeMethod('isOpen', name);
 
-  var _open = true;
+  Future<String?> get path => _channel.invokeMethod('path', name);
 
-  @override
-  bool get isOpen => _open;
+  final bool lazy;
 
-  @override
-  // TODO: implement path
-  String? get path => null;
+  Future<Iterable> get keys => _channel.invokeMethod('keys', name);
 
-  @override
-  // TODO: implement lazy
-  bool get lazy => throw UnimplementedError();
+  Future<int> get length => _channel.invokeMethod('length', name);
 
-  @override
-  // TODO: implement keys
-  Iterable get keys => throw UnimplementedError();
+  Future<bool> get isEmpty => _channel.invokeMethod('isEmpty', name);
 
-  @override
-  // TODO: implement length
-  int get length => throw UnimplementedError();
+  Future<bool> get isNotEmpty => _channel.invokeMethod('isNotEmpty', name);
 
-  @override
-  // TODO: implement isEmpty
-  bool get isEmpty => throw UnimplementedError();
+  Future keyAt(int index) => _channel.invokeMethod('keyAt', name);
 
-  @override
-  // TODO: implement isNotEmpty
-  bool get isNotEmpty => throw UnimplementedError();
-
-  @override
-  void keyAt(int index) {
-    // TODO: implement keyAt
-    throw UnimplementedError();
-  }
-
-  @override
   Stream<BoxEvent> watch({key}) {
     // TODO: implement watch
     throw UnimplementedError();
   }
 
-  @override
-  bool containsKey(key) {
-    // TODO: implement containsKey
-    throw UnimplementedError();
-  }
+  Future<bool> containsKey(key) => _channel.invokeMethod('containsKey', name);
 
-  @override
-  Future<void> put(key, E value) {
-    return _channel.invokeMethod('put', {
-      'name': name,
-      'key': key,
-      'value': value,
-    });
-  }
+  Future<void> put(key, E value) =>
+      _channel.invokeMethod('put', {'name': name, 'key': key, 'value': value});
 
-  @override
-  Future<void> putAt(int index, E value) {
-    // TODO: implement putAt
-    throw UnimplementedError();
-  }
+  Future<void> putAt(int index, E value) => _channel
+      .invokeMethod('putAt', {'name': name, 'index': index, 'value': value});
 
-  @override
-  Future<void> putAll(Map<dynamic, E> entries) {
-    // TODO: implement putAll
-    throw UnimplementedError();
-  }
+  Future<void> putAll(Map<dynamic, E> entries) =>
+      _channel.invokeMethod('putAll', {'name': name, 'entries': entries});
 
-  @override
-  Future<int> add(E value) {
-    // TODO: implement add
-    throw UnimplementedError();
-  }
+  Future<int> add(E value) =>
+      _channel.invokeMethod('add', {'name': name, 'value': value});
 
-  @override
-  Future<Iterable<int>> addAll(Iterable<E> values) {
-    // TODO: implement addAll
-    throw UnimplementedError();
-  }
+  Future<Iterable<int>> addAll(Iterable<E> values) =>
+      _channel.invokeMethod('addAll', {'name': name, 'values': values});
 
-  @override
-  Future<void> delete(key) {
-    // TODO: implement delete
-    throw UnimplementedError();
-  }
+  Future<void> delete(key) =>
+      _channel.invokeMethod('delete', {'name': name, 'key': key});
 
-  @override
-  Future<void> deleteAt(int index) {
-    // TODO: implement deleteAt
-    throw UnimplementedError();
-  }
+  Future<void> deleteAt(int index) =>
+      _channel.invokeMethod('deleteAt', {'name': name, 'index': index});
 
-  @override
-  Future<void> deleteAll(Iterable keys) {
-    // TODO: implement deleteAll
-    throw UnimplementedError();
-  }
+  Future<void> deleteAll(Iterable keys) =>
+      _channel.invokeMethod('deleteAll', {'name': name, 'keys': keys});
 
-  @override
-  Future<void> compact() {
-    // TODO: implement compact
-    throw UnimplementedError();
-  }
+  Future<void> compact() => _channel.invokeMethod('compact', {'name': name});
 
-  @override
-  Future<int> clear() {
-    // TODO: implement clear
-    throw UnimplementedError();
-  }
+  Future<int> clear() => _channel.invokeMethod('clear', {'name': name});
 
-  @override
-  Future<void> close() {
-    // TODO: implement close
-    throw UnimplementedError();
-  }
+  Future<void> close() => _channel.invokeMethod('close', {'name': name});
 
-  @override
-  Future<void> deleteFromDisk() {
-    // TODO: implement deleteFromDisk
-    throw UnimplementedError();
-  }
+  Future<void> deleteFromDisk() =>
+      _channel.invokeMethod('deleteFromDisk', {'name': name});
 
-  @override
-  Future<void> flush() {
-    // TODO: implement flush
-    throw UnimplementedError();
-  }
+  Future<void> flush() => _channel.invokeMethod('flush', {'name': name});
 }

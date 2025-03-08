@@ -2,6 +2,8 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/box/default_compaction_strategy.dart';
+import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 class IsolatedHive implements HiveInterface {
@@ -29,17 +31,25 @@ class IsolatedHive implements HiveInterface {
   @override
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
-    // TODO: Implement these fields
     HiveCipher? encryptionCipher,
-    KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    KeyComparator keyComparator = defaultKeyComparator,
+    CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
     String? path,
     Uint8List? bytes,
     String? collection,
-    List<int>? encryptionKey,
+    @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   }) async {
-    await _hiveChannel.invokeMethod('openBox', name);
+    await _hiveChannel.invokeMethod('openBox', {
+      'name': name,
+      'encryptionCipher': encryptionCipher,
+      'keyComparator': keyComparator,
+      'compactionStrategy': compactionStrategy,
+      'crashRecovery': crashRecovery,
+      'path': path,
+      'bytes': bytes,
+      'collection': collection,
+    });
     return IsolatedBox(_boxChannel, name);
   }
 
@@ -47,15 +57,21 @@ class IsolatedHive implements HiveInterface {
   Future<LazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
-    KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    KeyComparator keyComparator = defaultKeyComparator,
+    CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
     String? path,
     String? collection,
-    List<int>? encryptionKey,
-  }) {
-    // TODO: implement openLazyBox
-    throw UnimplementedError();
+    @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
+  }) async {
+    await _hiveChannel.invokeMethod('openLazyBox', {
+      'name': name,
+      'encryptionCipher': encryptionCipher,
+      'keyComparator': keyComparator,
+      'compactionStrategy': compactionStrategy,
+      'crashRecovery': crashRecovery,
+    });
+    return IsolatedBox(_boxChannel, name);
   }
 
   @override
@@ -143,6 +159,8 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
     case 'openBox':
       await Hive.openBox(call.arguments);
       result(null);
+    default:
+      throw UnimplementedError();
   }
 }
 
@@ -152,5 +170,7 @@ void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
       await Hive.box(call.arguments['name'])
           .put(call.arguments['key'], call.arguments['value']);
       result(null);
+    default:
+      throw UnimplementedError();
   }
 }
