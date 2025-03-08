@@ -15,99 +15,108 @@ abstract class IsolatedBoxBase<E> {
   IsolatedBoxBase(this._channel, this._eventChannel, this.name, this.lazy);
 
   final String name;
+  final bool lazy;
+
+  Map<String, dynamic> get _params => {
+        'name': name,
+        'lazy': lazy,
+      };
 
   bool _open = true;
 
   bool get isOpen => _open;
 
-  Future<String?> get path => _channel.invokeMethod('path', name);
+  Future<String?> get path => _channel.invokeMethod('path', _params);
 
-  final bool lazy;
+  Future<Iterable> get keys => _channel.invokeMethod('keys', _params);
 
-  Future<Iterable> get keys => _channel.invokeMethod('keys', name);
+  Future<int> get length => _channel.invokeMethod('length', _params);
 
-  Future<int> get length => _channel.invokeMethod('length', name);
+  Future<bool> get isEmpty => _channel.invokeMethod('isEmpty', _params);
 
-  Future<bool> get isEmpty => _channel.invokeMethod('isEmpty', name);
+  Future<bool> get isNotEmpty => _channel.invokeMethod('isNotEmpty', _params);
 
-  Future<bool> get isNotEmpty => _channel.invokeMethod('isNotEmpty', name);
-
-  Future keyAt(int index) => _channel.invokeMethod('keyAt', name);
+  Future keyAt(int index) =>
+      _channel.invokeMethod('keyAt', {..._params, 'index': index});
 
   // TODO: Fix this
   Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
       .receiveBroadcastStream(key)
       .map((event) => BoxEvent(event['key'], event['value'], event['deleted']));
 
-  Future<bool> containsKey(key) => _channel.invokeMethod('containsKey', {
-        'name': name,
-        'key': key,
-      });
+  Future<bool> containsKey(key) =>
+      _channel.invokeMethod('containsKey', {..._params, 'key': key});
 
   Future<void> put(key, E value) =>
-      _channel.invokeMethod('put', {'name': name, 'key': key, 'value': value});
+      _channel.invokeMethod('put', {..._params, 'key': key, 'value': value});
 
   Future<void> putAt(int index, E value) => _channel
-      .invokeMethod('putAt', {'name': name, 'index': index, 'value': value});
+      .invokeMethod('putAt', {..._params, 'index': index, 'value': value});
 
   Future<void> putAll(Map<dynamic, E> entries) =>
-      _channel.invokeMethod('putAll', {'name': name, 'entries': entries});
+      _channel.invokeMethod('putAll', {..._params, 'entries': entries});
 
   Future<int> add(E value) =>
-      _channel.invokeMethod('add', {'name': name, 'value': value});
+      _channel.invokeMethod('add', {..._params, 'value': value});
 
   Future<Iterable<int>> addAll(Iterable<E> values) =>
-      _channel.invokeMethod('addAll', {'name': name, 'values': values});
+      _channel.invokeMethod('addAll', {..._params, 'values': values});
 
   Future<void> delete(key) =>
-      _channel.invokeMethod('delete', {'name': name, 'key': key});
+      _channel.invokeMethod('delete', {..._params, 'key': key});
 
   Future<void> deleteAt(int index) =>
-      _channel.invokeMethod('deleteAt', {'name': name, 'index': index});
+      _channel.invokeMethod('deleteAt', {..._params, 'index': index});
 
   Future<void> deleteAll(Iterable keys) =>
-      _channel.invokeMethod('deleteAll', {'name': name, 'keys': keys});
+      _channel.invokeMethod('deleteAll', {..._params, 'keys': keys});
 
-  Future<void> compact() => _channel.invokeMethod('compact', {'name': name});
+  Future<void> compact() => _channel.invokeMethod('compact', _params);
 
-  Future<int> clear() => _channel.invokeMethod('clear', {'name': name});
+  Future<int> clear() => _channel.invokeMethod('clear', _params);
 
   Future<void> close() async {
-    await _channel.invokeMethod('close', {'name': name});
+    await _channel.invokeMethod('close', _params);
     _open = false;
   }
 
   Future<void> deleteFromDisk() async {
-    await _channel.invokeMethod('deleteFromDisk', {'name': name});
+    await _channel.invokeMethod('deleteFromDisk', _params);
     _open = false;
   }
 
-  Future<void> flush() => _channel.invokeMethod('flush', {'name': name});
+  Future<void> flush() => _channel.invokeMethod('flush', _params);
+}
+
+class IsolatedLazyBox<E> extends IsolatedBoxBase<E> {
+  /// Constructor
+  IsolatedLazyBox(super._channel, super._eventChannel, super.name, super.lazy);
+
+  Future<E?> get(key, {E? defaultValue}) =>
+      _channel.invokeMethod('get', {..._params, 'defaultValue': defaultValue});
+
+  Future<E?> getAt(int index) =>
+      _channel.invokeMethod('getAt', {..._params, 'index': index});
 }
 
 class IsolatedBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
   IsolatedBox(super._channel, super._eventChannel, super.name, super.lazy);
 
-  Future<Iterable<E>> get values => _channel.invokeMethod('values', name);
+  Future<Iterable<E>> get values => _channel.invokeMethod('values', _params);
 
   Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
       _channel.invokeMethod('valuesBetween', {
-        'name': name,
+        ..._params,
         'startKey': startKey,
         'endKey': endKey,
       });
 
-  Future<E?> get(key, {E? defaultValue}) => _channel.invokeMethod('get', {
-        'name': name,
-        'key': key,
-        'defaultValue': defaultValue,
-      });
+  Future<E?> get(key, {E? defaultValue}) =>
+      _channel.invokeMethod('get', {..._params, 'defaultValue': defaultValue});
 
-  Future<E?> getAt(int index) => _channel.invokeMethod('getAt', {
-        'name': name,
-        'index': index,
-      });
+  Future<E?> getAt(int index) =>
+      _channel.invokeMethod('getAt', {..._params, 'index': index});
 
-  Future<Map<dynamic, E>> toMap() => _channel.invokeMethod('toMap', name);
+  Future<Map<dynamic, E>> toMap() => _channel.invokeMethod('toMap', _params);
 }

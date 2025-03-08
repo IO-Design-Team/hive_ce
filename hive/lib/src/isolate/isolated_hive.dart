@@ -59,7 +59,7 @@ class IsolatedHive {
     );
   }
 
-  Future<IsolatedBox<E>> openLazyBox<E>(
+  Future<IsolatedLazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
@@ -77,7 +77,7 @@ class IsolatedHive {
       'path': path,
       'collection': collection,
     });
-    return IsolatedBox(
+    return IsolatedLazyBox(
       _boxChannel,
       _createEventChannel('box_$name'),
       name,
@@ -88,8 +88,8 @@ class IsolatedHive {
   IsolatedBox<E> box<E>(String name) =>
       IsolatedBox(_hiveChannel, _createEventChannel('box_$name'), name, false);
 
-  IsolatedBox<E> lazyBox<E>(String name) =>
-      IsolatedBox(_boxChannel, _createEventChannel('box_$name'), name, true);
+  IsolatedLazyBox<E> lazyBox<E>(String name) =>
+      IsolatedLazyBox(_boxChannel, _createEventChannel('box_$name'), name, true);
 
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name);
