@@ -5,17 +5,17 @@ import 'integration.dart';
 
 Future _performTest(bool encrypted, bool lazy) async {
   final encryptionKey = encrypted ? List.generate(32, (i) => i) : null;
-  var box = await openBox(lazy, encryptionKey: encryptionKey);
+  var (hive, box) = await openBox(lazy, encryptionKey: encryptionKey);
   for (final frame in valueTestFrames) {
     if (frame.deleted) continue;
     await box.put(frame.key, frame.value);
   }
 
-  box = await box.reopen(encryptionKey: encryptionKey);
+  box = await hive.reopenBox(box, encryptionKey: encryptionKey);
 
   for (final frame in valueTestFrames) {
     if (frame.deleted) continue;
-    final f = await await box.get(frame.key);
+    final f = await box.get(frame.key);
     expect(f, frame.value);
   }
   await box.close();

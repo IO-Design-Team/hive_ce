@@ -7,7 +7,7 @@ import 'integration.dart';
 
 Future _performTest(bool lazy) async {
   final amount = isBrowser ? 5 : 100;
-  var box = await openBox(lazy);
+  var (hive, box) = await openBox(lazy);
 
   for (var i = 0; i < amount; i++) {
     for (var n = 0; n < 100; n++) {
@@ -18,10 +18,10 @@ Future _performTest(bool lazy) async {
         await box.put('bool$i', n % 2 == 0);
         await box.put('null$i', null);
 
-        expect(await await box.get('string$i'), 'test$n');
-        expect(await await box.get('int$i'), n);
-        expect(await await box.get('bool$i'), n % 2 == 0);
-        expect(await await box.get('null$i', defaultValue: 0), null);
+        expect(await box.get('string$i'), 'test$n');
+        expect(await box.get('int$i'), n);
+        expect(await box.get('bool$i'), n % 2 == 0);
+        expect(await box.get('null$i', defaultValue: 0), null);
 
         completer.complete();
       });
@@ -29,12 +29,12 @@ Future _performTest(bool lazy) async {
     }
   }
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
-    expect(await await box.get('string$i'), 'test99');
-    expect(await await box.get('int$i'), 99);
-    expect(await await box.get('bool$i'), false);
-    expect(await await box.get('null$i', defaultValue: 0), null);
+    expect(await box.get('string$i'), 'test99');
+    expect(await box.get('int$i'), 99);
+    expect(await box.get('bool$i'), false);
+    expect(await box.get('null$i', defaultValue: 0), null);
   }
   await box.close();
 }

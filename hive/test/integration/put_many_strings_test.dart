@@ -7,17 +7,17 @@ import 'integration.dart';
 Future _performTest(bool lazy) async {
   final hive = await createHive();
   final repeat = isBrowser ? 20 : 1000;
-  var box = await openBox(lazy, hive: hive);
+  var (_, box) = await openBox(lazy, hive: hive);
   for (var i = 0; i < repeat; i++) {
     for (final frame in valueTestFrames) {
       await box.put('${frame.key}n$i', frame.value);
     }
   }
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < repeat; i++) {
     for (final frame in valueTestFrames) {
-      expect(await await box.get('${frame.key}n$i'), frame.value);
+      expect(await box.get('${frame.key}n$i'), frame.value);
     }
   }
   await box.close();

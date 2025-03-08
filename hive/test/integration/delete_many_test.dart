@@ -5,7 +5,7 @@ import 'integration.dart';
 
 Future _performTest(bool lazy) async {
   final amount = isBrowser ? 1000 : 20000;
-  var box = await openBox(lazy);
+  var (hive, box) = await openBox(lazy);
   final entries = <String, dynamic>{};
   for (var i = 0; i < amount; i++) {
     entries['string$i'] = 'test';
@@ -16,7 +16,7 @@ Future _performTest(bool lazy) async {
   await box.putAll(entries);
   await box.put('123123', 'value');
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
     await box.delete('string$i');
     await box.delete('int$i');
@@ -24,14 +24,14 @@ Future _performTest(bool lazy) async {
     await box.delete('null$i');
   }
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
-    expect(box.containsKey('string$i'), false);
-    expect(box.containsKey('int$i'), false);
-    expect(box.containsKey('bool$i'), false);
-    expect(box.containsKey('null$i'), false);
+    expect(await box.containsKey('string$i'), false);
+    expect(await box.containsKey('int$i'), false);
+    expect(await box.containsKey('bool$i'), false);
+    expect(await box.containsKey('null$i'), false);
   }
-  expect(await await box.get('123123'), 'value');
+  expect(await box.get('123123'), 'value');
   await box.close();
 }
 

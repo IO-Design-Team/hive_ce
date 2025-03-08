@@ -5,7 +5,7 @@ import 'integration.dart';
 
 Future _performTest(bool lazy) async {
   final amount = isBrowser ? 10 : 100;
-  var box = await openBox(lazy);
+  var (hive, box) = await openBox(lazy);
 
   Future putEntries() async {
     for (var i = 0; i < amount; i++) {
@@ -19,7 +19,7 @@ Future _performTest(bool lazy) async {
   }
   await Future.wait(futures);
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
     expect(await box.get('key$i'), 'value$i');
   }

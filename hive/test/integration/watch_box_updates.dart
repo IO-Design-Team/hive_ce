@@ -32,10 +32,10 @@ Future<void> expectNextEvent(
 
 void main() {
   group('watch() emits box updates when', () {
-    late BoxBase box;
+    late IsolatedBoxBase box;
 
     setUp(() async {
-      box = await openBox(false);
+      (_, box) = await openBox(false);
     });
 
     tearDown(() async {
