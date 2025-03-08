@@ -1,6 +1,6 @@
 import 'dart:isolate';
 
-import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:test/test.dart';
 
 import 'common.dart';
@@ -8,7 +8,8 @@ import 'common.dart';
 void main() async {
   Future<void> runIsolate(String path) {
     return Isolate.run(() async {
-      final hive = HiveImpl()..init(path);
+      final hive = IsolatedHive();
+      await hive.init(path);
       final box = await hive.openBox<int>('test');
       for (var i = 0; i < 1000; i++) {
         await box.put(i, i);
