@@ -6,15 +6,16 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
-class IsolatedHive implements HiveInterface {
+class IsolatedHive {
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
+
+  late final IsolateEventChannel Function(String name) _createEventChannel;
 
   /// Must only be called once per isolate
   ///
   /// If accessing Hive in multiple isolates, an [isolateNameSever] MUST be
   /// passed to avoid box corruption
-  @override
   Future<void> init(
     String? path, {
     // Unused
@@ -25,10 +26,10 @@ class IsolatedHive implements HiveInterface {
     final (send, receive, shutdown) = await spawnIsolate(_isolateEntryPoint);
     _hiveChannel = IsolateMethodChannel('hive', send, receive);
     _boxChannel = IsolateMethodChannel('box', send, receive);
+    _createEventChannel = (name) => IsolateEventChannel(name, send, receive);
     return _hiveChannel.invokeMethod('init', path);
   }
 
-  @override
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -38,7 +39,6 @@ class IsolatedHive implements HiveInterface {
     String? path,
     Uint8List? bytes,
     String? collection,
-    @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   }) async {
     await _hiveChannel.invokeMethod('openBox', {
       'name': name,
@@ -50,11 +50,15 @@ class IsolatedHive implements HiveInterface {
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBox(_boxChannel, name);
+    return IsolatedBox(
+      _boxChannel,
+      _createEventChannel('box_$name'),
+      name,
+      false,
+    );
   }
 
-  @override
-  Future<LazyBox<E>> openLazyBox<E>(
+  Future<IsolatedBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator keyComparator = defaultKeyComparator,
@@ -62,7 +66,6 @@ class IsolatedHive implements HiveInterface {
     bool crashRecovery = true,
     String? path,
     String? collection,
-    @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   }) async {
     await _hiveChannel.invokeMethod('openLazyBox', {
       'name': name,
@@ -70,76 +73,54 @@ class IsolatedHive implements HiveInterface {
       'keyComparator': keyComparator,
       'compactionStrategy': compactionStrategy,
       'crashRecovery': crashRecovery,
+      'path': path,
+      'collection': collection,
     });
-    return IsolatedBox(_boxChannel, name);
+    return IsolatedBox(
+      _boxChannel,
+      _createEventChannel('box_$name'),
+      name,
+      true,
+    );
   }
 
-  @override
-  Box<E> box<E>(String name) => IsolatedBox(_hiveChannel, name);
+  IsolatedBox<E> box<E>(String name) =>
+      IsolatedBox(_hiveChannel, _createEventChannel('box_$name'), name, false);
 
-  @override
-  LazyBox<E> lazyBox<E>(String name) {
-    // TODO: implement lazyBox
-    throw UnimplementedError();
-  }
+  IsolatedBox<E> lazyBox<E>(String name) =>
+      IsolatedBox(_boxChannel, _createEventChannel('box_$name'), name, true);
 
-  @override
-  bool isBoxOpen(String name) {
-    // TODO: implement isBoxOpen
-    throw UnimplementedError();
-  }
+  Future<bool> isBoxOpen(String name) =>
+      _hiveChannel.invokeMethod('isBoxOpen', name);
 
-  @override
-  Future<void> close() {
-    // TODO: implement close
-    throw UnimplementedError();
-  }
+  Future<void> close() => _hiveChannel.invokeMethod('close');
 
-  @override
-  Future<void> deleteBoxFromDisk(String name, {String? path}) {
-    // TODO: implement deleteBoxFromDisk
-    throw UnimplementedError();
-  }
+  Future<void> deleteBoxFromDisk(String name, {String? path}) => _hiveChannel
+      .invokeMethod('deleteBoxFromDisk', {'name': name, 'path': path});
 
-  @override
-  Future<void> deleteFromDisk() {
-    // TODO: implement deleteFromDisk
-    throw UnimplementedError();
-  }
+  Future<void> deleteFromDisk() => _hiveChannel.invokeMethod('deleteFromDisk');
 
-  @override
-  List<int> generateSecureKey() {
-    // TODO: implement generateSecureKey
-    throw UnimplementedError();
-  }
+  Future<bool> boxExists(String name, {String? path}) =>
+      _hiveChannel.invokeMethod('boxExists', {'name': name, 'path': path});
 
-  @override
-  Future<bool> boxExists(String name, {String? path}) {
-    // TODO: implement boxExists
-    throw UnimplementedError();
-  }
+  Future<void> resetAdapters() => _hiveChannel.invokeMethod('resetAdapters');
 
-  @override
-  void resetAdapters() {
-    // TODO: implement resetAdapters
-  }
+  void registerAdapter<T>(
+    TypeAdapter<T> adapter, {
+    bool internal = false,
+    bool override = false,
+  }) =>
+      _hiveChannel.invokeMethod('registerAdapter', {
+        'adapter': adapter,
+        'internal': internal,
+        'override': override,
+      });
 
-  @override
-  void registerAdapter<T>(TypeAdapter<T> adapter,
-      {bool internal = false, bool override = false}) {
-    // TODO: implement registerAdapter
-  }
+  Future<bool> isAdapterRegistered(int typeId) =>
+      _hiveChannel.invokeMethod('isAdapterRegistered', typeId);
 
-  @override
-  bool isAdapterRegistered(int typeId) {
-    // TODO: implement isAdapterRegistered
-    throw UnimplementedError();
-  }
-
-  @override
-  void ignoreTypeId<T>(int typeId) {
-    // TODO: implement ignoreTypeId
-  }
+  Future<void> ignoreTypeId<T>(int typeId) =>
+      _hiveChannel.invokeMethod('ignoreTypeId', typeId);
 }
 
 void _isolateEntryPoint(SendPort send) {
