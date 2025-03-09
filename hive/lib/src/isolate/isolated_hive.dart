@@ -148,7 +148,7 @@ void _isolateEntryPoint(SendPort send) {
   boxChannel.setMethodCallHandler(_handleBoxMethodCall);
 }
 
-Future<Object?> _handleMethodCall(IsolateMethodCall call) async {
+Future<dynamic> _handleMethodCall(IsolateMethodCall call) async {
   switch (call.method) {
     case 'init':
       Hive.init(call.arguments);
@@ -210,7 +210,7 @@ Future<Object?> _handleMethodCall(IsolateMethodCall call) async {
   }
 }
 
-Future<Object?> _handleBoxMethodCall(IsolateMethodCall call) async {
+Future<dynamic> _handleBoxMethodCall(IsolateMethodCall call) async {
   final name = call.arguments['name'];
   final lazy = call.arguments['lazy'];
   final box = lazy ? Hive.lazyBox(name) : Hive.box(name);
