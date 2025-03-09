@@ -58,7 +58,9 @@ void main() {
           final hiveList = HiveListImpl.lazy('someBox', [])
             ..debugHive = hive.hive as HiveImpl;
           expect(
-              () => hiveList.box, throwsHiveError('you have to open the box'));
+            () => hiveList.box,
+            throwsHiveError('you have to open the box'),
+          );
         });
 
         test('returns the box', () async {
@@ -66,7 +68,7 @@ void main() {
           final box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
           final hiveList = HiveListImpl.lazy('someBox', [])
             ..debugHive = hive.hive as HiveImpl;
-          expect(hiveList.box, box);
+          expect(hiveList.box, box.box);
         });
       });
 
@@ -177,7 +179,9 @@ void main() {
           final item = _getHiveObject('item', MockBox());
           final list = HiveListImpl(box);
           expect(
-              () => list.add(item), throwsHiveError('needs to be in the box'));
+            () => list.add(item),
+            throwsHiveError('needs to be in the box'),
+          );
         });
       });
 
