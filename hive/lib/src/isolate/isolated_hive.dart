@@ -7,6 +7,11 @@ import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
 
+/// Handles Hive operations in an isolate
+///
+/// Limitations:
+/// - [IsolatedHive] does not support [HiveObject]s
+/// - Most methods are async due to isolate communication
 class IsolatedHive {
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
