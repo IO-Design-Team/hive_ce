@@ -13,10 +13,9 @@ import 'package:meta/meta.dart';
 /// - [IsolatedHive] does not support [HiveObject]s
 /// - Most methods are async due to isolate communication
 class IsolatedHive {
+  late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
-  late final IsolateEventChannel Function(String name) _createEventChannel;
-  late final void Function() _shutdown;
 
   /// Must only be called once per isolate
   ///
@@ -29,11 +28,9 @@ class IsolatedHive {
     // TODO: Implement this
     Object? isolateNameServer,
   }) async {
-    final connection = await spawnIsolate(_isolateEntryPoint);
-    _hiveChannel = IsolateMethodChannel('hive', connection);
-    _boxChannel = IsolateMethodChannel('box', connection);
-    _createEventChannel = (name) => IsolateEventChannel(name, connection);
-    _shutdown = connection.shutdown;
+    _connection = await spawnIsolate(_isolateEntryPoint);
+    _hiveChannel = IsolateMethodChannel('hive', _connection);
+    _boxChannel = IsolateMethodChannel('box', _connection);
     return _hiveChannel.invokeMethod('init', path);
   }
 
@@ -59,7 +56,7 @@ class IsolatedHive {
     });
     return IsolatedBox(
       _boxChannel,
-      _createEventChannel('box_$name'),
+      IsolateEventChannel('box_$name', _connection),
       name,
       false,
     );
@@ -85,24 +82,32 @@ class IsolatedHive {
     });
     return IsolatedLazyBox(
       _boxChannel,
-      _createEventChannel('box_$name'),
+      IsolateEventChannel('box_$name', _connection),
       name,
       true,
     );
   }
 
-  IsolatedBox<E> box<E>(String name) =>
-      IsolatedBox(_hiveChannel, _createEventChannel('box_$name'), name, false);
+  IsolatedBox<E> box<E>(String name) => IsolatedBox(
+        _hiveChannel,
+        IsolateEventChannel('box_$name', _connection),
+        name,
+        false,
+      );
 
   IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBox(
-      _boxChannel, _createEventChannel('box_$name'), name, true);
+        _boxChannel,
+        IsolateEventChannel('box_$name', _connection),
+        name,
+        true,
+      );
 
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name);
 
   Future<void> close() async {
     await _hiveChannel.invokeMethod('close');
-    _shutdown();
+    _connection.shutdown();
   }
 
   Future<void> deleteBoxFromDisk(String name, {String? path}) => _hiveChannel
