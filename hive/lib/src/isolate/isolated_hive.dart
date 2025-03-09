@@ -109,7 +109,7 @@ class IsolatedHive {
   Future<bool> boxExists(String name, {String? path}) =>
       _hiveChannel.invokeMethod('boxExists', {'name': name, 'path': path});
 
-  void registerAdapter<T>(
+  Future<void> registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
     bool override = false,

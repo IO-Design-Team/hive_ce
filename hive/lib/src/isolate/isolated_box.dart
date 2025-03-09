@@ -44,10 +44,10 @@ abstract class IsolatedBoxBase<E> {
       .receiveBroadcastStream(key)
       .map((event) => BoxEvent(event['key'], event['value'], event['deleted']));
 
-  Future<bool> containsKey(key) =>
+  Future<bool> containsKey(dynamic key) =>
       _channel.invokeMethod('containsKey', {..._params, 'key': key});
 
-  Future<void> put(key, E value) =>
+  Future<void> put(dynamic key, E value) =>
       _channel.invokeMethod('put', {..._params, 'key': key, 'value': value});
 
   Future<void> putAt(int index, E value) => _channel
@@ -62,7 +62,7 @@ abstract class IsolatedBoxBase<E> {
   Future<Iterable<int>> addAll(Iterable<E> values) =>
       _channel.invokeMethod('addAll', {..._params, 'values': values});
 
-  Future<void> delete(key) =>
+  Future<void> delete(dynamic key) =>
       _channel.invokeMethod('delete', {..._params, 'key': key});
 
   Future<void> deleteAt(int index) =>
@@ -87,7 +87,7 @@ abstract class IsolatedBoxBase<E> {
 
   Future<void> flush() => _channel.invokeMethod('flush', _params);
 
-  Future<E?> get(key, {E? defaultValue}) => _channel.invokeMethod('get', {
+  Future<E?> get(dynamic key, {E? defaultValue}) => _channel.invokeMethod('get', {
         ..._params,
         'key': key,
         'defaultValue': defaultValue,

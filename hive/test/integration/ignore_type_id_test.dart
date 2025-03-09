@@ -31,21 +31,21 @@ void main() {
     final hive = await createHive();
     final box1 = await hive.openBox('test');
 
-    hive.registerAdapter(TestAdapter());
+    await hive.registerAdapter(TestAdapter());
 
     await box1.put(1, TestObject(5));
     await box1.put(2, 42);
     await box1.put(3, 78);
     await box1.close();
 
-    hive.resetAdapters();
-    hive.ignoreTypeId(10);
+    await hive.resetAdapters();
+    await hive.ignoreTypeId(10);
 
     final box2 = await hive.openBox('test');
 
     expect(box2, isNotNull);
-    expect(box2.get(1), null);
-    expect(box2.get(2), 42);
-    expect(box2.get(3), 78);
+    expect(await box2.get(1), null);
+    expect(await box2.get(2), 42);
+    expect(await box2.get(3), 78);
   });
 }
