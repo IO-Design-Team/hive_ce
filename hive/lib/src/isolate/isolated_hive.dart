@@ -29,11 +29,11 @@ class IsolatedHive {
     // TODO: Implement this
     Object? isolateNameServer,
   }) async {
-    final (send, receive, shutdown) = await spawnIsolate(_isolateEntryPoint);
-    _hiveChannel = IsolateMethodChannel('hive', send, receive);
-    _boxChannel = IsolateMethodChannel('box', send, receive);
-    _createEventChannel = (name) => IsolateEventChannel(name, send, receive);
-    _shutdown = shutdown;
+    final connection = await spawnIsolate(_isolateEntryPoint);
+    _hiveChannel = IsolateMethodChannel('hive', connection);
+    _boxChannel = IsolateMethodChannel('box', connection);
+    _createEventChannel = (name) => IsolateEventChannel(name, connection);
+    _shutdown = connection.shutdown;
     return _hiveChannel.invokeMethod('init', path);
   }
 
@@ -135,9 +135,9 @@ class IsolatedHive {
 }
 
 void _isolateEntryPoint(SendPort send) {
-  final receive = setupIsolate(send);
-  final hiveChannel = IsolateMethodChannel('hive', send, receive);
-  final boxChannel = IsolateMethodChannel('box', send, receive);
+  final connection = setupIsolate(send);
+  final hiveChannel = IsolateMethodChannel('hive', connection);
+  final boxChannel = IsolateMethodChannel('box', connection);
 
   hiveChannel.setMethodCallHandler(_handleMethodCall);
   boxChannel.setMethodCallHandler(_handleBoxMethodCall);
