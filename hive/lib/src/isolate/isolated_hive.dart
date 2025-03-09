@@ -148,11 +148,10 @@ void _isolateEntryPoint(SendPort send) {
   boxChannel.setMethodCallHandler(_handleBoxMethodCall);
 }
 
-void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
+Future<Object?> _handleMethodCall(IsolateMethodCall call) async {
   switch (call.method) {
     case 'init':
       Hive.init(call.arguments);
-      result(null);
     case 'openBox':
       await Hive.openBox(
         call.arguments['name'],
@@ -165,7 +164,6 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
         bytes: call.arguments['bytes'],
         collection: call.arguments['collection'],
       );
-      result(null);
     case 'openLazyBox':
       await Hive.openLazyBox(
         call.arguments['name'],
@@ -177,131 +175,110 @@ void _handleMethodCall(IsolateMethodCall call, IsolateResult result) async {
         path: call.arguments['path'],
         collection: call.arguments['collection'],
       );
-      result(null);
     case 'isBoxOpen':
-      result(Hive.isBoxOpen(call.arguments));
+      return Hive.isBoxOpen(call.arguments);
     case 'close':
       await Hive.close();
-      result(null);
     case 'deleteBoxFromDisk':
       await Hive.deleteBoxFromDisk(
         call.arguments['name'],
         path: call.arguments['path'],
       );
-      result(null);
     case 'deleteFromDisk':
       await Hive.deleteFromDisk();
-      result(null);
     case 'boxExists':
-      result(
-        Hive.boxExists(call.arguments['name'], path: call.arguments['path']),
+      return Hive.boxExists(
+        call.arguments['name'],
+        path: call.arguments['path'],
       );
-      result(null);
     case 'registerAdapter':
       Hive.registerAdapter(
         call.arguments['adapter'],
         internal: call.arguments['internal'],
         override: call.arguments['override'],
       );
-      result(null);
     case 'isAdapterRegistered':
-      result(Hive.isAdapterRegistered(call.arguments));
+      return Hive.isAdapterRegistered(call.arguments);
     case 'resetAdapters':
       // This is a proxy
       // ignore: invalid_use_of_visible_for_testing_member
       Hive.resetAdapters();
-      result(null);
     case 'ignoreTypeId':
       Hive.ignoreTypeId(call.arguments);
-      result(null);
     default:
       throw UnimplementedError();
   }
 }
 
-void _handleBoxMethodCall(IsolateMethodCall call, IsolateResult result) async {
+Future<Object?> _handleBoxMethodCall(IsolateMethodCall call) async {
   final name = call.arguments['name'];
   final lazy = call.arguments['lazy'];
   final box = lazy ? Hive.lazyBox(name) : Hive.box(name);
 
   switch (call.method) {
     case 'path':
-      result(box.path);
+      return box.path;
     case 'keys':
-      result(box.keys);
+      return box.keys;
     case 'length':
-      result(box.length);
+      return box.length;
     case 'isEmpty':
-      result(box.isEmpty);
+      return box.isEmpty;
     case 'isNotEmpty':
-      result(box.isNotEmpty);
+      return box.isNotEmpty;
     case 'keyAt':
-      result(box.keyAt(call.arguments['index']));
+      return box.keyAt(call.arguments['index']);
     case 'watch':
-      // TODO
-      result(null);
+    // TODO
     case 'containsKey':
-      result(box.containsKey(call.arguments['key']));
+      return box.containsKey(call.arguments['key']);
     case 'put':
       await box.put(call.arguments['key'], call.arguments['value']);
-      result(null);
     case 'putAt':
       await box.putAt(call.arguments['index'], call.arguments['value']);
-      result(null);
     case 'putAll':
       await box.putAll(call.arguments['entries']);
-      result(null);
     case 'add':
-      result(await box.add(call.arguments['value']));
+      return await box.add(call.arguments['value']);
     case 'addAll':
-      result(await box.addAll(call.arguments['values']));
+      return await box.addAll(call.arguments['values']);
     case 'delete':
       await box.delete(call.arguments['key']);
-      result(null);
     case 'deleteAt':
       await box.deleteAt(call.arguments['index']);
-      result(null);
     case 'deleteAll':
       await box.deleteAll(call.arguments['keys']);
-      result(null);
     case 'compact':
       await box.compact();
-      result(null);
     case 'clear':
       await box.clear();
-      result(null);
     case 'close':
       await box.close();
-      result(null);
     case 'deleteFromDisk':
       await box.deleteFromDisk();
-      result(null);
     case 'flush':
       await box.flush();
-      result(null);
     case 'values':
-      result((box as Box).values);
+      return (box as Box).values;
     case 'valuesBetween':
-      result(
-        (box as Box).valuesBetween(
-          startKey: call.arguments['startKey'],
-          endKey: call.arguments['endKey'],
-        ),
+      return (box as Box).valuesBetween(
+        startKey: call.arguments['startKey'],
+        endKey: call.arguments['endKey'],
       );
     case 'get':
       if (lazy) {
-        result(await (box as LazyBox).get(call.arguments['key']));
+        return await (box as LazyBox).get(call.arguments['key']);
       } else {
-        result((box as Box).get(call.arguments['key']));
+        return (box as Box).get(call.arguments['key']);
       }
     case 'getAt':
       if (lazy) {
-        result(await (box as LazyBox).getAt(call.arguments['index']));
+        return await (box as LazyBox).getAt(call.arguments['index']);
       } else {
-        result((box as Box).getAt(call.arguments['index']));
+        return (box as Box).getAt(call.arguments['index']);
       }
     case 'toMap':
-      result((box as Box).toMap());
+      return (box as Box).toMap();
     default:
       throw UnimplementedError();
   }
