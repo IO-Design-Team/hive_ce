@@ -17,18 +17,24 @@ void main() async {
     });
   }
 
-  group('isolates', () {
-    test('single', () async {
-      final dir = await getTempDir();
-      expect(runIsolate(dir.path), completes);
-    });
+  group(
+    'isolates',
+    () {
+      test('single', () async {
+        final dir = await getTempDir();
+        expect(runIsolate(dir.path), completes);
+      });
 
-    test('multiple', () async {
-      final dir = await getTempDir();
-      expect(
-        Future.wait([for (var i = 0; i < 100; i++) runIsolate(dir.path)]),
-        completes,
-      );
-    });
-  });
+      test('multiple', () async {
+        final dir = await getTempDir();
+        expect(
+          Future.wait([for (var i = 0; i < 100; i++) runIsolate(dir.path)]),
+          completes,
+        );
+      });
+    },
+    onPlatform: {
+      'chrome': Skip('Isolates are not supported on web'),
+    },
+  );
 }
