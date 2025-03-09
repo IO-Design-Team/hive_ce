@@ -40,7 +40,7 @@ Future _performTest(bool lazy, {required bool isolated}) async {
         subKeystore.getKeys(),
         subKeystore.getValues(),
       );
-      expect(box.toMap(), map);
+      expect(await box.toMap(), map);
       await box.compact();
       await box.close();
     }

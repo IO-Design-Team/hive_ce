@@ -165,5 +165,11 @@ const longTimeout = Timeout(Duration(minutes: 2));
 
 void hiveIntegrationTest(void Function(bool isolated) test) {
   test(false);
-  group('IsolatedHive', () => test(true));
+  group(
+    'IsolatedHive',
+    () => test(true),
+    onPlatform: {
+      'chrome': Skip('Isolates are not supported on web'),
+    },
+  );
 }
