@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -9,7 +10,8 @@ import 'package:test/test.dart';
 import '../tests/common.dart';
 import '../util/is_browser.dart';
 
-const isolated = bool.fromEnvironment('ISOLATED', defaultValue: false);
+/// Run `export ISOLATED=true && dart test` to run the tests using `IsolatedHive`
+final isolated = Platform.environment['ISOLATED'] == 'true';
 
 class HiveWrapper {
   final dynamic hive;
