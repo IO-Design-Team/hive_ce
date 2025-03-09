@@ -4,9 +4,9 @@ import '../tests/frames.dart';
 import '../util/is_browser.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final repeat = isBrowser ? 20 : 1000;
-  var (hive, box) = await openBox(lazy);
+  var (hive, box) = await openBox(lazy, isolated: isolated);
   final entries = <String, dynamic>{};
   for (var i = 0; i < repeat; i++) {
     for (final frame in valueTestFrames) {
@@ -25,13 +25,15 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group(
-    'put many entries in a single batch',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'put many entries in a single batch',
+      () {
+        test('normal box', () => _performTest(false, isolated: isolated));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, isolated: isolated));
+      },
+      timeout: longTimeout,
+    );
+  });
 }

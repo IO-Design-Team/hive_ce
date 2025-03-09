@@ -31,9 +31,9 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 }
 
 Future _performTest(bool lazy) async {
-  final hive = await createHive();
+  final hive = await createHive(isolated: false);
   await hive.registerAdapter<_TestObject>(_TestObjectAdapter());
-  var (_, box) = await openBox(lazy, hive: hive);
+  var (_, box) = await openBox(lazy, isolated: false, hive: hive);
 
   var obj1 = _TestObject('test1');
   await box.add(obj1);
@@ -71,17 +71,16 @@ void main() {
       test('lazy box', () => _performTest(true));
     },
     timeout: longTimeout,
-    skip: isolated,
   );
 
   test(
     'move HiveObject between lazy boxes',
     () async {
-      final hive = await createHive();
+      final hive = await createHive(isolated: false);
       await hive.registerAdapter<_TestObject>(_TestObjectAdapter());
 
-      final (_, box1) = await openBox(true, hive: hive);
-      final (_, box2) = await openBox(true, hive: hive);
+      final (_, box1) = await openBox(true, isolated: false, hive: hive);
+      final (_, box2) = await openBox(true, isolated: false, hive: hive);
 
       final obj = _TestObject('test');
       expect(obj.box, null);
@@ -99,6 +98,5 @@ void main() {
       expect(obj.box, box2.box);
       expect(obj.key, key2);
     },
-    skip: isolated,
   );
 }

@@ -15,8 +15,8 @@ import 'package:meta/meta.dart';
 class IsolatedHive {
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
-
   late final IsolateEventChannel Function(String name) _createEventChannel;
+  late final void Function() _shutdown;
 
   /// Must only be called once per isolate
   ///
@@ -33,6 +33,7 @@ class IsolatedHive {
     _hiveChannel = IsolateMethodChannel('hive', send, receive);
     _boxChannel = IsolateMethodChannel('box', send, receive);
     _createEventChannel = (name) => IsolateEventChannel(name, send, receive);
+    _shutdown = shutdown;
     return _hiveChannel.invokeMethod('init', path);
   }
 
@@ -99,7 +100,10 @@ class IsolatedHive {
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name);
 
-  Future<void> close() => _hiveChannel.invokeMethod('close');
+  Future<void> close() async {
+    await _hiveChannel.invokeMethod('close');
+    _shutdown();
+  }
 
   Future<void> deleteBoxFromDisk(String name, {String? path}) => _hiveChannel
       .invokeMethod('deleteBoxFromDisk', {'name': name, 'path': path});

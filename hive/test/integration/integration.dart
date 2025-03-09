@@ -10,15 +10,12 @@ import 'package:test/test.dart';
 import '../tests/common.dart';
 import '../util/is_browser.dart';
 
-/// Run `export ISOLATED=true && dart test` to run the tests using `IsolatedHive`
-final isolated = Platform.environment['ISOLATED'] == 'true';
-
 class HiveWrapper {
   final dynamic hive;
 
   HiveWrapper(this.hive);
 
-  Future<void> init(String? path) async => hive.init(path);
+  FutureOr<void> init(String? path) => hive.init(path);
 
   Future<BoxWrapper<T>> openBox<T>(
     String name, {
@@ -48,11 +45,13 @@ class HiveWrapper {
         ),
       );
 
+  Future<void> close() => hive.close();
+
   FutureOr<void> registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
     bool override = false,
-  }) async =>
+  }) =>
       hive.registerAdapter(adapter, internal: internal, override: override);
 
   FutureOr<void> resetAdapters() => hive.resetAdapters();
@@ -65,33 +64,41 @@ class BoxBaseWrapper<E> {
   BoxBaseWrapper(this.box);
 
   String get name => box.name;
+  String? get path => box.path;
   bool get lazy => box.lazy;
-
+  FutureOr<Iterable> get keys => box.keys;
   Stream<BoxEvent> watch({dynamic key}) => box.watch(key: key);
-  FutureOr<bool> containsKey(dynamic key) async => box.containsKey(key);
-  Future<void> put(dynamic key, E value) async => box.put(key, value);
-  Future<void> putAt(int index, E value) async => box.putAt(index, value);
-  Future<void> delete(dynamic key) async => box.delete(key);
-  Future<void> putAll(Map<dynamic, E> entries) async => box.putAll(entries);
-  Future<int> add(E value) async => box.add(value);
-  Future<void> deleteAll(Iterable keys) async => box.deleteAll(keys);
-  Future<void> close() async => box.close();
-  FutureOr<E?> get(dynamic key, {E? defaultValue}) async =>
+  FutureOr<bool> containsKey(dynamic key) => box.containsKey(key);
+  Future<void> put(dynamic key, E value) => box.put(key, value);
+  Future<void> putAt(int index, E value) => box.putAt(index, value);
+  Future<void> delete(dynamic key) => box.delete(key);
+  Future<void> putAll(Map<dynamic, E> entries) => box.putAll(entries);
+  Future<int> add(E value) => box.add(value);
+  Future<void> deleteAll(Iterable keys) => box.deleteAll(keys);
+  Future<void> compact() => box.compact();
+  Future<void> close() => box.close();
+  FutureOr<E?> get(dynamic key, {E? defaultValue}) =>
       box.get(key, defaultValue: defaultValue);
 }
 
-class LazyBoxWrapper<T> extends BoxBaseWrapper<T> {
+class LazyBoxWrapper<E> extends BoxBaseWrapper<E> {
   LazyBoxWrapper(super.box);
 }
 
-class BoxWrapper<T> extends BoxBaseWrapper<T> {
+class BoxWrapper<E> extends BoxBaseWrapper<E> {
   BoxWrapper(super.box);
+
+  FutureOr<Map<dynamic, E>> toMap() => box.toMap();
 }
 
-Future<HiveWrapper> createHive() async {
+Future<HiveWrapper> createHive({
+  required bool isolated,
+  Directory? directory,
+}) async {
   final hive = HiveWrapper(isolated ? IsolatedHive() : HiveImpl());
+  addTearDown(hive.close);
   if (!isBrowser) {
-    final dir = await getTempDir();
+    final dir = directory ?? await getTempDir();
     await hive.init(dir.path);
   } else {
     await hive.init(null);
@@ -102,9 +109,10 @@ Future<HiveWrapper> createHive() async {
 Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   bool lazy, {
   HiveWrapper? hive,
+  required bool isolated,
   List<int>? encryptionKey,
 }) async {
-  hive ??= await createHive();
+  hive ??= await createHive(isolated: isolated);
   final id = Random.secure().nextInt(99999999);
   HiveCipher? cipher;
   if (encryptionKey != null) {
@@ -154,3 +162,8 @@ extension HiveWrapperX on HiveWrapper {
 }
 
 const longTimeout = Timeout(Duration(minutes: 2));
+
+void hiveIntegrationTest(void Function(bool isolated) test) {
+  test(false);
+  group('IsolatedHive', () => test(true));
+}

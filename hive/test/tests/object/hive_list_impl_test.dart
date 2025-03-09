@@ -54,7 +54,7 @@ void main() {
 
       group('.box', () {
         test('throws HiveError if box is not open', () async {
-          final hive = await createHive();
+          final hive = await createHive(isolated: false);
           final hiveList = HiveListImpl.lazy('someBox', [])
             ..debugHive = hive.hive as HiveImpl;
           expect(
@@ -64,7 +64,7 @@ void main() {
         });
 
         test('returns the box', () async {
-          final hive = await createHive();
+          final hive = await createHive(isolated: false);
           final box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
           final hiveList = HiveListImpl.lazy('someBox', [])
             ..debugHive = hive.hive as HiveImpl;
@@ -210,6 +210,5 @@ void main() {
         });
       });
     },
-    skip: isolated,
   );
 }

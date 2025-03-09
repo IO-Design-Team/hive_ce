@@ -31,62 +31,64 @@ Future<void> expectNextEvent(
 }
 
 void main() {
-  group('watch() emits box updates when', () {
-    late BoxBaseWrapper box;
+  hiveIntegrationTest((isolated) {
+    group('watch() emits box updates when', () {
+      late BoxBaseWrapper box;
 
-    setUp(() async {
-      (_, box) = await openBox(false);
-    });
+      setUp(() async {
+        (_, box) = await openBox(false, isolated: isolated);
+      });
 
-    tearDown(() async {
-      await box.close();
-    });
+      tearDown(() async {
+        await box.close();
+      });
 
-    test('.put() is called', () async {
-      await expectNextEvent(
-        box.watch(),
-        () async {
-          await box.put('key', 'value');
-        },
-        key: 'key',
-        value: 'value',
-        deleted: false,
-      );
-    });
+      test('.put() is called', () async {
+        await expectNextEvent(
+          box.watch(),
+          () async {
+            await box.put('key', 'value');
+          },
+          key: 'key',
+          value: 'value',
+          deleted: false,
+        );
+      });
 
-    test('.add() is called', () async {
-      await expectNextEvent(
-        box.watch(),
-        () async {
-          await box.add('value');
-        },
-        value: 'value',
-        deleted: false,
-      );
-    });
+      test('.add() is called', () async {
+        await expectNextEvent(
+          box.watch(),
+          () async {
+            await box.add('value');
+          },
+          value: 'value',
+          deleted: false,
+        );
+      });
 
-    test('.putAt() is called', () async {
-      await expectNextEvent(
-        box.watch().skip(1),
-        () async {
-          await box.add(null);
-          await box.putAt(0, 'value');
-        },
-        value: 'value',
-        deleted: false,
-      );
-    });
+      test('.putAt() is called', () async {
+        await expectNextEvent(
+          box.watch().skip(1),
+          () async {
+            await box.add(null);
+            await box.putAt(0, 'value');
+          },
+          value: 'value',
+          deleted: false,
+        );
+      });
 
-    test('.delete() is called', () async {
-      await expectNextEvent(
-        box.watch().skip(1),
-        () async {
-          await box.put('key', 'value');
-          await box.delete('key');
-        },
-        key: 'key',
-        deleted: true,
-      );
+      test('.delete() is called', () async {
+        await expectNextEvent(
+          box.watch().skip(1),
+          () async {
+            await box.put('key', 'value');
+            await box.delete('key');
+          },
+          key: 'key',
+          deleted: true,
+        );
+      });
     });
   });
 }

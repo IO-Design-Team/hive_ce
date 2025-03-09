@@ -5,9 +5,9 @@ import 'package:test/test.dart';
 import '../util/is_browser.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final amount = isBrowser ? 5 : 100;
-  var (hive, box) = await openBox(lazy);
+  var (hive, box) = await openBox(lazy, isolated: isolated);
 
   for (var i = 0; i < amount; i++) {
     for (var n = 0; n < 100; n++) {
@@ -40,13 +40,15 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group(
-    'put many entries with the same key',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'put many entries with the same key',
+      () {
+        test('normal box', () => _performTest(false, isolated: isolated));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, isolated: isolated));
+      },
+      timeout: longTimeout,
+    );
+  });
 }

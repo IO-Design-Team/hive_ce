@@ -40,9 +40,10 @@ void main() {
   test(
     'add and remove objects to / from HiveList',
     () async {
-      final hive = await createHive();
+      final hive = await createHive(isolated: false);
       await hive.registerAdapter(_TestObjectAdapter());
-      var (_, box) = await openBox<_TestObject>(false, hive: hive);
+      var (_, box) =
+          await openBox<_TestObject>(false, isolated: false, hive: hive);
 
       var obj = _TestObject('obj');
       obj.list = HiveListImpl(box.box as Box<_TestObject>);
@@ -74,6 +75,5 @@ void main() {
       expect(obj.list![0].name, 'element1');
     },
     timeout: longTimeout,
-    skip: isolated,
   );
 }

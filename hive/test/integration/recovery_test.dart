@@ -5,7 +5,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:hive_ce/src/box/keystore.dart';
-import 'package:hive_ce/src/hive_impl.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -14,15 +13,14 @@ import '../tests/common.dart';
 import '../tests/frames.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final bytes = getFrameBytes(testFrames);
   final frames = testFrames;
 
   framesSetLengthOffset(frames, frameBytes);
 
   final dir = await getTempDir();
-  final hive = HiveImpl();
-  hive.init(dir.path);
+  final hive = await createHive(isolated: isolated, directory: dir);
 
   for (var i = 0; i < bytes.length; i++) {
     final subBytes = bytes.sublist(0, i + 1);
@@ -33,7 +31,7 @@ Future _performTest(bool lazy) async {
     final subKeystore = Keystore.debug(frames: subFrames);
     if (lazy) {
       final box = await hive.openLazyBox('testbox$i');
-      expect(box.keys, subKeystore.getKeys());
+      expect(await box.keys, subKeystore.getKeys());
       await box.compact();
       await box.close();
     } else {
@@ -51,9 +49,9 @@ Future _performTest(bool lazy) async {
   }
 }
 
-Future _performTestWithoutOutput(bool lazy) {
+Future _performTestWithoutOutput(bool lazy, {required bool isolated}) {
   return runZoned(
-    () => _performTest(lazy),
+    () => _performTest(lazy, isolated: isolated),
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, message) {},
     ),
@@ -61,13 +59,21 @@ Future _performTestWithoutOutput(bool lazy) {
 }
 
 void main() {
-  group(
-    'test recovery',
-    () {
-      test('normal box', () => _performTestWithoutOutput(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'test recovery',
+      () {
+        test(
+          'normal box',
+          () => _performTestWithoutOutput(false, isolated: isolated),
+        );
 
-      test('lazy box', () => _performTestWithoutOutput(true));
-    },
-    timeout: longTimeout,
-  );
+        test(
+          'lazy box',
+          () => _performTestWithoutOutput(true, isolated: isolated),
+        );
+      },
+      timeout: longTimeout,
+    );
+  });
 }

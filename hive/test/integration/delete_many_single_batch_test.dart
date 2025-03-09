@@ -3,9 +3,9 @@ import 'package:test/test.dart';
 import '../util/is_browser.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final amount = isBrowser ? 500 : 20000;
-  var (hive, box) = await openBox(lazy);
+  var (hive, box) = await openBox(lazy, isolated: isolated);
   final entries = <String, dynamic>{};
   for (var i = 0; i < amount; i++) {
     entries['string$i'] = 'test';
@@ -32,13 +32,15 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group(
-    'delete many entries in a single batch',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'delete many entries in a single batch',
+      () {
+        test('normal box', () => _performTest(false, isolated: isolated));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, isolated: isolated));
+      },
+      timeout: longTimeout,
+    );
+  });
 }
