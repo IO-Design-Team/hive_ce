@@ -15,24 +15,22 @@ part 'isolated_hive_internal.dart';
 class IsolatedHive {
   static const _isolateName = '_hive_isolate';
 
-  final IsolateNameServer? _isolateNameServer;
-
+  late final IsolateNameServer? _isolateNameServer;
   late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
 
   IsolateEntryPoint _entryPoint = isolateEntryPoint;
 
-  /// Constructor
-  IsolatedHive({
-    IsolateNameServer? isolateNameServer,
-  }) : _isolateNameServer = isolateNameServer;
-
   /// Must only be called once per isolate
   ///
   /// If accessing Hive in multiple isolates, an [isolateNameSever] MUST be
   /// passed to avoid box corruption
-  Future<void> init(String? path) async {
+  Future<void> init(
+    String? path, {
+    IsolateNameServer? isolateNameServer,
+  }) async {
+    _isolateNameServer = isolateNameServer;
     final send = _isolateNameServer?.lookupPortByName(_isolateName);
     if (send != null) {
       _connection = connectToIsolate(send);

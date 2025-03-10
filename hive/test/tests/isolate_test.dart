@@ -30,8 +30,8 @@ void main() async {
     required String path,
   }) {
     return Isolate.run(() async {
-      final hive = IsolatedHive(isolateNameServer: ins);
-      await hive.init(path);
+      final hive = IsolatedHive();
+      await hive.init(path, isolateNameServer: ins);
       final box = await hive.openBox<int>('test');
       for (var i = 0; i < 100; i++) {
         await box.add(i);
@@ -69,8 +69,8 @@ void main() async {
         test('with INS', () async {
           final dir = await getTempDir();
           final ins = TestIns();
-          final hive = IsolatedHive(isolateNameServer: ins);
-          await hive.init(dir.path);
+          final hive = IsolatedHive();
+          await hive.init(dir.path, isolateNameServer: ins);
           await expectLater(
             Future.wait([
               for (var i = 0; i < 100; i++)

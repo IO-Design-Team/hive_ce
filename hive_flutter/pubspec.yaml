@@ -22,3 +22,7 @@ dev_dependencies:
   mockito: ^5.4.1
   build_runner: ^2.1.11
   hive_ce_generator: ^1.5.0
+
+dependency_overrides:
+  hive_ce:
+    path: ../hive

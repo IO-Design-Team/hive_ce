@@ -1,5 +1,6 @@
 ## NEXT
 
+- Isolate support through `IsolatedHive`
 - Updates suggested placement of `GenerateAdapters` annotation
 
 ## 2.10.1
