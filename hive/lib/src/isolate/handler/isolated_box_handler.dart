@@ -6,7 +6,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 class IsolatedBoxHandler extends IsolateStreamHandler {
   final BoxBase box;
   final IsolateEventChannel _channel;
-  final _watchers = <String, ({StreamSubscription subscription, int count})>{};
+  StreamSubscription? _subscription;
 
   /// Constructor
   IsolatedBoxHandler(this.box, IsolateConnection connection)
@@ -15,39 +15,28 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   }
 
   @override
-  void onListen(dynamic key, IsolateEventSink events) {
-    _watchers.update(
-      key,
-      (e) => (subscription: e.subscription, count: e.count + 1),
-      ifAbsent: () {
-        final subscription = box.watch(key: key).listen(events.success);
-        subscription.onError(
-          (e) => events.error(
-            code: 'box_watch_error',
-            message: 'Error watching ${box.name}[$key]',
-            details: e,
-          ),
-        );
-        subscription.onDone(events.endOfStream);
-        return (subscription: subscription, count: 1);
-      },
+  void onListen(dynamic arguments, IsolateEventSink events) {
+    if (_subscription != null) return;
+
+    final subscription = _subscription = box.watch().listen(events.success);
+    subscription.onError(
+      (e) => events.error(
+        code: 'box_watch_error',
+        message: 'Error watching ${box.name}',
+        details: e,
+      ),
     );
+    subscription.onDone(events.endOfStream);
   }
 
   @override
-  void onCancel(dynamic key) {
-    final existing = _watchers[key];
-    if (existing == null) return;
+  void onCancel(dynamic arguments) {
+    // Don't need to do anything
+  }
 
-    if (existing.count == 1) {
-      existing.subscription.cancel();
-      _watchers.remove(key);
-    } else {
-      _watchers.update(
-        key,
-        (e) => (subscription: e.subscription, count: e.count - 1),
-      );
-    }
+  void _close() {
+    _subscription?.cancel();
+    _subscription = null;
   }
 
   Future<dynamic> call(IsolateMethodCall call) async {
@@ -88,8 +77,10 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
         await box.clear();
       case 'close':
         await box.close();
+        _close();
       case 'deleteFromDisk':
         await box.deleteFromDisk();
+        _close();
       case 'flush':
         await box.flush();
       case 'values':

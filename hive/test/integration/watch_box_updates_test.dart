@@ -39,10 +39,6 @@ void main() {
         (_, box) = await openBox(false, isolated: isolated);
       });
 
-      tearDown(() async {
-        await box.close();
-      });
-
       test('.put() is called', () async {
         await expectNextEvent(
           box.watch(),

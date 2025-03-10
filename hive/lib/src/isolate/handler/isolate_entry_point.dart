@@ -18,6 +18,6 @@ void isolateEntryPoint(SendPort send) {
   boxChannel.setMethodCallHandler((call) {
     final name = call.arguments['name'];
     final handler = boxHandlers[name];
-    handler?.call(call);
+    return handler?.call(call);
   });
 }
