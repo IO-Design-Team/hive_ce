@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 
 import '../tests/common.dart';
 import '../util/is_browser.dart';
+import '../util/print_utils.dart';
 
 class HiveWrapper {
   final dynamic hive;
@@ -111,7 +112,7 @@ Future<HiveWrapper> createHive({
   addTearDown(hive.close);
   if (!isBrowser) {
     final dir = directory ?? await getTempDir();
-    await hive.init(dir.path);
+    await silenceOutput(() => hive.init(dir.path));
   } else {
     await hive.init(null);
   }
