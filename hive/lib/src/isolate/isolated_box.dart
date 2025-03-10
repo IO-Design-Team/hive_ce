@@ -39,10 +39,10 @@ abstract class IsolatedBoxBase<E> {
   Future keyAt(int index) =>
       _channel.invokeMethod('keyAt', {..._params, 'index': index});
 
-  // TODO: Fix this
   Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
       .receiveBroadcastStream(key)
-      .map((event) => BoxEvent(event['key'], event['value'], event['deleted']));
+      .map((event) => BoxEvent(event['key'], event['value'], event['deleted']))
+      .where((event) => event.key == key);
 
   Future<bool> containsKey(dynamic key) =>
       _channel.invokeMethod('containsKey', {..._params, 'key': key});
@@ -87,7 +87,8 @@ abstract class IsolatedBoxBase<E> {
 
   Future<void> flush() => _channel.invokeMethod('flush', _params);
 
-  Future<E?> get(dynamic key, {E? defaultValue}) => _channel.invokeMethod('get', {
+  Future<E?> get(dynamic key, {E? defaultValue}) =>
+      _channel.invokeMethod('get', {
         ..._params,
         'key': key,
         'defaultValue': defaultValue,
