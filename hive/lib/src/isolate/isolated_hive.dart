@@ -13,26 +13,40 @@ part 'isolated_hive_internal.dart';
 /// - [IsolatedHive] does not support [HiveObject]s
 /// - Most methods are async due to isolate communication
 class IsolatedHive {
+  static const _isolateName = '_hive_isolate';
+
+  final IsolateNameServer? _isolateNameServer;
+
   late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
 
   IsolateEntryPoint _entryPoint = isolateEntryPoint;
 
+  /// Constructor
+  IsolatedHive({
+    IsolateNameServer? isolateNameServer,
+  }) : _isolateNameServer = isolateNameServer;
+
   /// Must only be called once per isolate
   ///
   /// If accessing Hive in multiple isolates, an [isolateNameSever] MUST be
   /// passed to avoid box corruption
-  Future<void> init(
-    String? path, {
-    // Unused
-    HiveStorageBackendPreference? backendPreference,
-    // TODO: Implement this
-    Object? isolateNameServer,
-  }) async {
-    _connection = await spawnIsolate(_entryPoint);
+  Future<void> init(String? path) async {
+    final send = _isolateNameServer?.lookupPortByName(_isolateName);
+    if (send != null) {
+      _connection = connectToIsolate(send);
+    } else {
+      _connection = await spawnIsolate(
+        _entryPoint,
+        onConnect: (send) =>
+            _isolateNameServer?.registerPortWithName(send, _isolateName),
+      );
+    }
+
     _hiveChannel = IsolateMethodChannel('hive', _connection);
     _boxChannel = IsolateMethodChannel('box', _connection);
+
     return _hiveChannel.invokeMethod('init', path);
   }
 
@@ -94,7 +108,7 @@ class IsolatedHive {
 
   /// Get an object to communicate with the isolated box
   IsolatedBox<E> box<E>(String name) => IsolatedBox(
-        _hiveChannel,
+        _boxChannel,
         IsolateEventChannel('box_$name', _connection),
         name,
         false,

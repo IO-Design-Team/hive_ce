@@ -5,12 +5,31 @@ import 'package:test/test.dart';
 
 import 'common.dart';
 
+class TestIns extends IsolateNameServer {
+  final _ports = <String, SendPort>{};
+
+  @override
+  SendPort? lookupPortByName(String name) => _ports[name];
+
+  @override
+  bool registerPortWithName(SendPort port, String name) {
+    _ports[name] = port;
+    return true;
+  }
+
+  @override
+  bool removePortNameMapping(String name) {
+    _ports.remove(name);
+    return true;
+  }
+}
+
 void main() async {
-  Future<void> runIsolate(String path, int index) {
+  Future<void> runIsolate(TestIns ins, String path, int index) {
     return Isolate.run(() async {
-      final hive = IsolatedHive();
+      final hive = IsolatedHive(isolateNameServer: ins);
       await hive.init(path);
-      final box = await hive.openBox<int>('test');
+      final box = hive.box<int>('test');
       final start = index * 100;
       final end = start + 100;
       for (var i = start; i < end; i++) {
@@ -24,21 +43,27 @@ void main() async {
     () {
       test('single', () async {
         final dir = await getTempDir();
-        await expectLater(runIsolate(dir.path, 0), completes);
-        Hive.init(dir.path);
-        final box = await Hive.openBox<int>('test');
-        expect(box.length, 100);
+        final ins = TestIns();
+        final hive = IsolatedHive(isolateNameServer: ins);
+        await hive.init(dir.path);
+        final box = await hive.openBox<int>('test');
+        await expectLater(runIsolate(ins, dir.path, 0), completes);
+        expect(await box.length, 100);
       });
 
       test('multiple', () async {
         final dir = await getTempDir();
+        final ins = TestIns();
+        final hive = IsolatedHive(isolateNameServer: ins);
+        await hive.init(dir.path);
+        final box = await hive.openBox<int>('test');
         await expectLater(
-          Future.wait([for (var i = 0; i < 100; i++) runIsolate(dir.path, i)]),
+          Future.wait(
+            [for (var i = 0; i < 100; i++) runIsolate(ins, dir.path, i)],
+          ),
           completes,
         );
-        Hive.init(dir.path);
-        final box = await Hive.openBox<int>('test');
-        expect(box.length, 10000);
+        expect(await box.length, 10000);
       });
     },
     onPlatform: {
