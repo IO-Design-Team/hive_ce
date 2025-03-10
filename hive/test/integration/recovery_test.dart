@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:hive_ce/src/box/keystore.dart';
+import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -20,7 +21,18 @@ Future _performTest(bool lazy, {required bool isolated}) async {
   framesSetLengthOffset(frames, frameBytes);
 
   final dir = await getTempDir();
-  final hive = await createHive(isolated: isolated, directory: dir);
+  final hive = await createHive(
+    isolated: isolated,
+    directory: dir,
+    entryPoint: (send) {
+      runZoned(
+        () => isolateEntryPoint(send),
+        zoneSpecification: ZoneSpecification(
+          print: (self, parent, zone, message) {},
+        ),
+      );
+    },
+  );
 
   for (var i = 0; i < bytes.length; i++) {
     final subBytes = bytes.sublist(0, i + 1);

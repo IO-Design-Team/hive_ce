@@ -5,6 +5,8 @@ import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
 
+part 'isolated_hive_internal.dart';
+
 /// Handles Hive operations in an isolate
 ///
 /// Limitations:
@@ -14,6 +16,8 @@ class IsolatedHive {
   late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
+
+  IsolateEntryPoint _entryPoint = isolateEntryPoint;
 
   /// Must only be called once per isolate
   ///
@@ -26,7 +30,7 @@ class IsolatedHive {
     // TODO: Implement this
     Object? isolateNameServer,
   }) async {
-    _connection = await spawnIsolate(isolateEntryPoint);
+    _connection = await spawnIsolate(_entryPoint);
     _hiveChannel = IsolateMethodChannel('hive', _connection);
     _boxChannel = IsolateMethodChannel('box', _connection);
     return _hiveChannel.invokeMethod('init', path);

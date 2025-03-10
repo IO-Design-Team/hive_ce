@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../tests/common.dart';
@@ -94,8 +95,19 @@ class BoxWrapper<E> extends BoxBaseWrapper<E> {
 Future<HiveWrapper> createHive({
   required bool isolated,
   Directory? directory,
+  IsolateEntryPoint? entryPoint,
 }) async {
-  final hive = HiveWrapper(isolated ? IsolatedHive() : HiveImpl());
+  final HiveWrapper hive;
+  if (isolated) {
+    final isolatedHive = IsolatedHive();
+    if (entryPoint != null) {
+      isolatedHive.setEntryPoint(entryPoint);
+    }
+    hive = HiveWrapper(isolatedHive);
+  } else {
+    hive = HiveWrapper(HiveImpl());
+  }
+
   addTearDown(hive.close);
   if (!isBrowser) {
     final dir = directory ?? await getTempDir();
