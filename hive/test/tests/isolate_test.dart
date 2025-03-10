@@ -25,11 +25,15 @@ class TestIns extends IsolateNameServer {
 }
 
 void main() async {
-  Future<void> runIsolate(TestIns ins, String path, int index) {
+  Future<void> runIsolate({
+    IsolateNameServer? ins,
+    required String path,
+    required int index,
+  }) {
     return Isolate.run(() async {
       final hive = IsolatedHive(isolateNameServer: ins);
       await hive.init(path);
-      final box = hive.box<int>('test');
+      final box = await hive.openBox<int>('test');
       final start = index * 100;
       final end = start + 100;
       for (var i = start; i < end; i++) {
@@ -41,29 +45,46 @@ void main() async {
   group(
     'isolates',
     () {
-      test('single', () async {
+      test('single without INS', () async {
         final dir = await getTempDir();
-        final ins = TestIns();
-        final hive = IsolatedHive(isolateNameServer: ins);
+        final hive = IsolatedHive();
         await hive.init(dir.path);
+        await expectLater(runIsolate(path: dir.path, index: 0), completes);
         final box = await hive.openBox<int>('test');
-        await expectLater(runIsolate(ins, dir.path, 0), completes);
         expect(await box.length, 100);
       });
 
-      test('multiple', () async {
-        final dir = await getTempDir();
-        final ins = TestIns();
-        final hive = IsolatedHive(isolateNameServer: ins);
-        await hive.init(dir.path);
-        final box = await hive.openBox<int>('test');
-        await expectLater(
-          Future.wait(
-            [for (var i = 0; i < 100; i++) runIsolate(ins, dir.path, i)],
-          ),
-          completes,
-        );
-        expect(await box.length, 10000);
+      group('multiple', () {
+        test('without INS', () async {
+          final dir = await getTempDir();
+          final hive = IsolatedHive();
+          await hive.init(dir.path);
+          await expectLater(
+            Future.wait([
+              for (var i = 0; i < 100; i++)
+                runIsolate(path: dir.path, index: i),
+            ]),
+            completes,
+          );
+          final box = await hive.openBox<int>('test');
+          expect(await box.length, isNot(10000));
+        });
+
+        test('with INS', () async {
+          final dir = await getTempDir();
+          final ins = TestIns();
+          final hive = IsolatedHive(isolateNameServer: ins);
+          await hive.init(dir.path);
+          await expectLater(
+            Future.wait([
+              for (var i = 0; i < 100; i++)
+                runIsolate(ins: ins, path: dir.path, index: i),
+            ]),
+            completes,
+          );
+          final box = await hive.openBox<int>('test');
+          expect(await box.length, 10000);
+        });
       });
     },
     onPlatform: {

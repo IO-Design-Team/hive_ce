@@ -21,4 +21,3 @@ dev_dependencies:
   path: ^1.7.0
   pointycastle: ^3.4.0
   build_runner: ^2.1.2
-  isolate_name_server: ^1.1.0
