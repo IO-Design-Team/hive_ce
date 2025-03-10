@@ -4,5 +4,5 @@ part of 'isolated_hive.dart';
 extension IsolatedHiveInternal on IsolatedHive {
   /// Set the entry point for the isolate for testing purposes
   @visibleForTesting
-  void setEntryPoint(IsolateEntryPoint entryPoint) => _entryPoint = entryPoint;
+  set entryPoint(IsolateEntryPoint entryPoint) => _entryPoint = entryPoint;
 }
