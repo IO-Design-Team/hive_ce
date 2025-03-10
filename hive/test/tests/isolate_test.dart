@@ -1,9 +1,15 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
+import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
+import '../util/print_utils.dart';
 import 'common.dart';
+import 'registry/type_registry_impl_test.dart';
 
 class TestIns extends IsolateNameServer {
   final _ports = <String, SendPort>{};
@@ -23,6 +29,8 @@ class TestIns extends IsolateNameServer {
     return true;
   }
 }
+
+final isolateNameRegex = RegExp(r'\(current isolate: .+?\)');
 
 void main() async {
   Future<void> runIsolate({
@@ -80,6 +88,44 @@ void main() async {
           );
           final box = await hive.openBox<int>('test');
           expect(await box.length, 10000);
+        });
+      });
+
+      group('warnings', () {
+        test('unsafe isolate', () async {
+          final patchedWarning =
+              HiveImpl.unsafeIsolateWarning.replaceFirst(isolateNameRegex, '');
+
+          final safeOutput =
+              await captureOutput(() => Hive.init(null)).toList();
+          expect(safeOutput, isEmpty);
+
+          final unsafeOutput = await Isolate.run(
+            () => captureOutput(() => Hive.init(null)).toList(),
+          );
+          expect(
+            unsafeOutput.first.replaceFirst(isolateNameRegex, ''),
+            patchedWarning,
+          );
+        });
+
+        test('safe hive isolate', () async {
+          final hive = IsolatedHive();
+          addTearDown(hive.close);
+
+          hive.entryPoint = (send) async {
+            final connection = setupIsolate(send);
+            final hiveChannel = IsolateMethodChannel('hive', connection);
+            final testChannel = IsolateMethodChannel('test', connection);
+            hiveChannel.setMethodCallHandler((_) {});
+            testChannel.setMethodCallHandler(
+              (_) => captureOutput(() => Hive.init(null)).toList(),
+            );
+          };
+          await hive.init(null);
+          final channel = IsolateMethodChannel('test', hive.connection);
+          final result = await channel.invokeListMethod('');
+          expect(result, isEmpty);
         });
       });
     },

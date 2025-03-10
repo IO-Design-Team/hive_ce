@@ -12,6 +12,7 @@ import 'package:test/test.dart';
 import '../tests/backend/vm/storage_backend_vm_test.dart';
 import '../tests/common.dart';
 import '../tests/frames.dart';
+import '../util/print_utils.dart';
 import 'integration.dart';
 
 Future _performTest(bool lazy, {required bool isolated}) async {
@@ -24,14 +25,7 @@ Future _performTest(bool lazy, {required bool isolated}) async {
   final hive = await createHive(
     isolated: isolated,
     directory: dir,
-    entryPoint: (send) {
-      runZoned(
-        () => isolateEntryPoint(send),
-        zoneSpecification: ZoneSpecification(
-          print: (self, parent, zone, message) {},
-        ),
-      );
-    },
+    entryPoint: (send) => silenceOutput(() => isolateEntryPoint(send)),
   );
 
   for (var i = 0; i < bytes.length; i++) {
@@ -61,15 +55,6 @@ Future _performTest(bool lazy, {required bool isolated}) async {
   }
 }
 
-Future _performTestWithoutOutput(bool lazy, {required bool isolated}) {
-  return runZoned(
-    () => _performTest(lazy, isolated: isolated),
-    zoneSpecification: ZoneSpecification(
-      print: (self, parent, zone, message) {},
-    ),
-  );
-}
-
 void main() {
   hiveIntegrationTest((isolated) {
     group(
@@ -77,12 +62,12 @@ void main() {
       () {
         test(
           'normal box',
-          () => _performTestWithoutOutput(false, isolated: isolated),
+          () => silenceOutput(() => _performTest(false, isolated: isolated)),
         );
 
         test(
           'lazy box',
-          () => _performTestWithoutOutput(true, isolated: isolated),
+          () => silenceOutput(() => _performTest(true, isolated: isolated)),
         );
       },
       timeout: longTimeout,

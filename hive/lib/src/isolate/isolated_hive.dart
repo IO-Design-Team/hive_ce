@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
 
@@ -15,6 +16,17 @@ part 'isolated_hive_internal.dart';
 class IsolatedHive {
   /// The name of the hive isolate
   static const isolateName = '_hive_isolate';
+
+  /// Warning message printed when using [IsolatedHive] without an [IsolateNameServer]
+  @visibleForTesting
+  static final noIsolateNameServerWarning = '''
+⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
+Using IsolatedHive without an IsolateNameServer is unsafe.
+This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent access across isolates.
+Using an IsolateNameServer allows IsolatedHive to maintain a single isolate for all Hive operations.
+RECOMMENDED ACTION: Use IsolatedHive with an IsolateNameServer.
+
+''';
 
   late final IsolateNameServer? _isolateNameServer;
   late final IsolateConnection _connection;
@@ -32,6 +44,11 @@ class IsolatedHive {
     IsolateNameServer? isolateNameServer,
   }) async {
     _isolateNameServer = isolateNameServer;
+
+    if (kDebugMode && _isolateNameServer == null) {
+      print(noIsolateNameServerWarning);
+    }
+
     final send = _isolateNameServer?.lookupPortByName(isolateName);
     if (send != null) {
       _connection = connectToIsolate(send);
