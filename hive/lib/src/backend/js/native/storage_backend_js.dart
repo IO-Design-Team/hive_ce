@@ -4,7 +4,7 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/backend/js/utils.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';

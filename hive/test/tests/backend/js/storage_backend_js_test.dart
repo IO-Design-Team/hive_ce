@@ -6,8 +6,8 @@ import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/backend/js/storage_backend_js.dart';
-import 'package:hive_ce/src/backend/js/utils.dart';
+import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
+import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
