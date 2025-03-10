@@ -9,6 +9,18 @@ import 'package:test/test.dart';
 import '../util/print_utils.dart';
 import 'common.dart';
 
+/// Exists to silence the warning about not passing an INS
+class StubIns extends IsolateNameServer {
+  @override
+  SendPort? lookupPortByName(String name) => null;
+
+  @override
+  bool registerPortWithName(SendPort port, String name) => true;
+
+  @override
+  bool removePortNameMapping(String name) => true;
+}
+
 class TestIns extends IsolateNameServer {
   final _ports = <String, SendPort>{};
 
@@ -32,7 +44,7 @@ final isolateNameRegex = RegExp(r'\(current isolate: .+?\)');
 
 void main() async {
   Future<void> runIsolate({
-    IsolateNameServer? ins,
+    required IsolateNameServer ins,
     required String path,
   }) {
     return Isolate.run(() async {
@@ -51,8 +63,11 @@ void main() async {
       test('single without INS', () async {
         final dir = await getTempDir();
         final hive = IsolatedHive();
-        await hive.init(dir.path);
-        await expectLater(runIsolate(path: dir.path), completes);
+        await hive.init(dir.path, isolateNameServer: StubIns());
+        await expectLater(
+          runIsolate(ins: StubIns(), path: dir.path),
+          completes,
+        );
         final box = await hive.openBox<int>('test');
         expect(await box.length, 100);
       });
@@ -61,10 +76,11 @@ void main() async {
         test('without INS', () async {
           final dir = await getTempDir();
           final hive = IsolatedHive();
-          await hive.init(dir.path);
+          await hive.init(dir.path, isolateNameServer: StubIns());
           await expectLater(
             Future.wait([
-              for (var i = 0; i < 100; i++) runIsolate(path: dir.path),
+              for (var i = 0; i < 100; i++)
+                runIsolate(ins: StubIns(), path: dir.path),
             ]),
             completes,
           );
@@ -120,7 +136,7 @@ void main() async {
               (_) => captureOutput(() => Hive.init(null)).toList(),
             );
           };
-          await hive.init(null);
+          await hive.init(null, isolateNameServer: StubIns());
           final channel = IsolateMethodChannel('test', hive.connection);
           final result = await channel.invokeListMethod('');
           expect(result, isEmpty);
