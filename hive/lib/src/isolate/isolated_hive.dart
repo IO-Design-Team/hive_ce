@@ -13,7 +13,8 @@ part 'isolated_hive_internal.dart';
 /// - [IsolatedHive] does not support [HiveObject]s
 /// - Most methods are async due to isolate communication
 class IsolatedHive {
-  static const _isolateName = '_hive_isolate';
+  /// The name of the hive isolate
+  static const isolateName = '_hive_isolate';
 
   late final IsolateNameServer? _isolateNameServer;
   late final IsolateConnection _connection;
@@ -31,14 +32,15 @@ class IsolatedHive {
     IsolateNameServer? isolateNameServer,
   }) async {
     _isolateNameServer = isolateNameServer;
-    final send = _isolateNameServer?.lookupPortByName(_isolateName);
+    final send = _isolateNameServer?.lookupPortByName(isolateName);
     if (send != null) {
       _connection = connectToIsolate(send);
     } else {
       _connection = await spawnIsolate(
         _entryPoint,
+        debugName: isolateName,
         onConnect: (send) =>
-            _isolateNameServer?.registerPortWithName(send, _isolateName),
+            _isolateNameServer?.registerPortWithName(send, isolateName),
       );
     }
 
