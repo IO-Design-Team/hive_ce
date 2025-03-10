@@ -101,7 +101,7 @@ Future<HiveWrapper> createHive({
   if (isolated) {
     final isolatedHive = IsolatedHive();
     if (entryPoint != null) {
-      isolatedHive.setEntryPoint(entryPoint);
+      isolatedHive.entryPoint = entryPoint;
     }
     hive = HiveWrapper(isolatedHive);
   } else {
