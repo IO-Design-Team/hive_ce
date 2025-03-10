@@ -23,14 +23,14 @@ void main() {
   group('BackendManager', () {
     group('.boxExists()', () {
       test('returns true', () async {
-        final backendManager = BackendManager();
+        final backendManager = BackendManager.select();
         final db = await _openDb();
         db.close();
         expect(await backendManager.boxExists('testBox', null, null), isTrue);
       });
 
       test('returns false', () async {
-        final backendManager = BackendManager();
+        final backendManager = BackendManager.select();
         final boxName =
             'notexists-${DateTime.timestamp().millisecondsSinceEpoch}';
         expect(await backendManager.boxExists(boxName, null, null), isFalse);
