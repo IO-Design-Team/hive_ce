@@ -1,3 +1,7 @@
+## NEXT
+
+- Updates suggested placement of `GenerateAdapters` annotation
+
 ## 2.10.1
 
 - Fixes `HiveObject` disposal in lazy boxes
