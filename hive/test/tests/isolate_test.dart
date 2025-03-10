@@ -125,6 +125,20 @@ void main() async {
           final result = await channel.invokeListMethod('');
           expect(result, isEmpty);
         });
+
+        test('no INS', () async {
+          final unsafeOutput =
+              await captureOutput(() => IsolatedHive().init(null)).toList();
+          expect(
+            unsafeOutput,
+            contains(IsolatedHive.noIsolateNameServerWarning),
+          );
+
+          final safeOutput = await captureOutput(
+            () => IsolatedHive().init(null, isolateNameServer: TestIns()),
+          ).toList();
+          expect(safeOutput, isEmpty);
+        });
       });
     },
     onPlatform: {

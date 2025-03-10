@@ -30,7 +30,8 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 Accessing Hive from an unsafe isolate (current isolate: $isolateDebugName)
 This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent access across isolates.
 Each isolate would maintain its own box cache, potentially causing data inconsistency and corruption.
-RECOMMENDED ACTION: Use IsolatedHive instead.
+RECOMMENDED ACTIONS:
+- Use IsolatedHive instead
 
 ''';
 
