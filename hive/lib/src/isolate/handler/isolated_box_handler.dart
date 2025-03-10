@@ -5,13 +5,11 @@ import 'package:isolate_channel/isolate_channel.dart';
 
 class IsolatedBoxHandler extends IsolateStreamHandler {
   final BoxBase box;
-  final IsolateEventChannel _channel;
   StreamSubscription? _subscription;
 
   /// Constructor
-  IsolatedBoxHandler(this.box, IsolateConnection connection)
-      : _channel = IsolateEventChannel('box_${box.name}', connection) {
-    _channel.setStreamHandler(this);
+  IsolatedBoxHandler(this.box, IsolateConnection connection) {
+    IsolateEventChannel('box_${box.name}', connection).setStreamHandler(this);
   }
 
   @override
