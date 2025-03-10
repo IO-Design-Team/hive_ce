@@ -85,17 +85,13 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 import 'package:hive_ce_generator_test/adapters_2.dart';
 
-part 'hive_adapters.g.dart';
-
 @GenerateAdapters([
   AdapterSpec<Class2>(),
   AdapterSpec<Class1>(),
   AdapterSpec<Class3>(),
   AdapterSpec<Enum>(),
 ])
-// This is for code generation
-// ignore: unused_element
-void _() {}
+part 'hive_adapters.g.dart';
 ''',
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
@@ -255,14 +251,10 @@ class Class with _\$Class {
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
-part 'hive_adapters.g.dart';
-
 @GenerateAdapters([
   AdapterSpec<Class>(),
 ])
-// This is for code generation
-// ignore: unused_element
-void _() {}
+part 'hive_adapters.g.dart';
 ''',
           'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment

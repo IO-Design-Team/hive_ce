@@ -161,14 +161,10 @@ class SchemaMigratorBuilder implements Builder {
 import 'package:hive_ce/hive.dart';
 $imports
 
-part 'hive_adapters.g.dart';
-
 @GenerateAdapters([
   $specs,
 ])
-// This is for code generation
-// ignore: unused_element
-void _() {}
+part 'hive_adapters.g.dart';
 ''',
     );
 
