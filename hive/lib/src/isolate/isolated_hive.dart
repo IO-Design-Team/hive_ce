@@ -36,6 +36,7 @@ class IsolatedHive {
     return _hiveChannel.invokeMethod('init', path);
   }
 
+  /// Open a box in the isolate
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -64,6 +65,7 @@ class IsolatedHive {
     );
   }
 
+  /// Open a lazy box in the isolate
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -90,6 +92,7 @@ class IsolatedHive {
     );
   }
 
+  /// Get an object to communicate with the isolated box
   IsolatedBox<E> box<E>(String name) => IsolatedBox(
         _hiveChannel,
         IsolateEventChannel('box_$name', _connection),
@@ -97,6 +100,7 @@ class IsolatedHive {
         false,
       );
 
+  /// Get an object to communicate with the isolated box
   IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBox(
         _boxChannel,
         IsolateEventChannel('box_$name', _connection),
@@ -104,22 +108,28 @@ class IsolatedHive {
         true,
       );
 
+  /// Check if a box is open in the isolate
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name);
 
+  /// Shutdown the isolate
   Future<void> close() async {
     await _hiveChannel.invokeMethod('close');
     _connection.shutdown();
   }
 
+  /// Delete a box from the disk
   Future<void> deleteBoxFromDisk(String name, {String? path}) => _hiveChannel
       .invokeMethod('deleteBoxFromDisk', {'name': name, 'path': path});
 
+  /// Delete all boxes from the disk
   Future<void> deleteFromDisk() => _hiveChannel.invokeMethod('deleteFromDisk');
 
+  /// Check if a box exists in the isolate
   Future<bool> boxExists(String name, {String? path}) =>
       _hiveChannel.invokeMethod('boxExists', {'name': name, 'path': path});
 
+  /// Register an adapter in the isolate
   Future<void> registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
@@ -131,12 +141,15 @@ class IsolatedHive {
         'override': override,
       });
 
+  /// Check if an adapter is registered in the isolate
   Future<bool> isAdapterRegistered(int typeId) =>
       _hiveChannel.invokeMethod('isAdapterRegistered', typeId);
 
+  /// Reset the adapters in the isolate
   @visibleForTesting
   Future<void> resetAdapters() => _hiveChannel.invokeMethod('resetAdapters');
 
+  /// Ignore a type id in the isolate
   Future<void> ignoreTypeId<T>(int typeId) =>
       _hiveChannel.invokeMethod('ignoreTypeId', typeId);
 }

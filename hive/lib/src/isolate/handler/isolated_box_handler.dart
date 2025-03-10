@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:hive_ce/hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
+/// Class to handle method calls to the isolated box
 class IsolatedBoxHandler extends IsolateStreamHandler {
+  /// The wrapped box
   final BoxBase box;
   StreamSubscription? _subscription;
 
@@ -37,6 +39,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
     _subscription = null;
   }
 
+  /// The method call handler for the box
   Future<dynamic> call(IsolateMethodCall call) async {
     switch (call.method) {
       case 'path':

@@ -4,6 +4,7 @@ import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_hive_handler.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
+/// The entry point for the Hive isolate
 void isolateEntryPoint(SendPort send) {
   final connection = setupIsolate(send);
 

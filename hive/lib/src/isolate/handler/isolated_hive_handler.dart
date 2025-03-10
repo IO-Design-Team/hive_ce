@@ -4,6 +4,7 @@ import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
+/// Method call handler for Hive methods
 Future<dynamic> handleHiveMethodCall(
   IsolateMethodCall call,
   IsolateConnection connection,

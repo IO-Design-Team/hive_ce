@@ -28,15 +28,19 @@ void main() {
       'different frame types',
       () {
         group('encrypted', () {
-          test('normal box',
-              () => _performTest(true, false, isolated: isolated));
+          test(
+            'normal box',
+            () => _performTest(true, false, isolated: isolated),
+          );
 
           test('lazy box', () => _performTest(true, true, isolated: isolated));
         });
 
         group('not encrypted', () {
-          test('normal box',
-              () => _performTest(false, false, isolated: isolated));
+          test(
+            'normal box',
+            () => _performTest(false, false, isolated: isolated),
+          );
 
           test('lazy box', () => _performTest(false, true, isolated: isolated));
         });
