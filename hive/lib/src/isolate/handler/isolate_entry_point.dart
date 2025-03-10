@@ -6,9 +6,18 @@ import 'package:isolate_channel/isolate_channel.dart';
 
 void isolateEntryPoint(SendPort send) {
   final connection = setupIsolate(send);
+
   final hiveChannel = IsolateMethodChannel('hive', connection);
   final boxChannel = IsolateMethodChannel('box', connection);
 
-  hiveChannel.setMethodCallHandler(handleHiveMethodCall);
-  boxChannel.setMethodCallHandler(handleBoxMethodCall);
+  final boxHandlers = <String, IsolatedBoxHandler>{};
+
+  hiveChannel.setMethodCallHandler(
+    (call) => handleHiveMethodCall(call, connection, boxHandlers),
+  );
+  boxChannel.setMethodCallHandler((call) {
+    final name = call.arguments['name'];
+    final handler = boxHandlers[name];
+    handler?.call(call);
+  });
 }
