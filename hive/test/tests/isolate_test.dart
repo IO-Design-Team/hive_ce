@@ -3,13 +3,11 @@ import 'dart:isolate';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
-import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../util/print_utils.dart';
 import 'common.dart';
-import 'registry/type_registry_impl_test.dart';
 
 class TestIns extends IsolateNameServer {
   final _ports = <String, SendPort>{};

@@ -124,7 +124,8 @@ void main() {
           output,
           isNot(
             contains(
-                contains('WARNING: You are trying to register TestAdapter')),
+              contains('WARNING: You are trying to register TestAdapter'),
+            ),
           ),
         );
       });
