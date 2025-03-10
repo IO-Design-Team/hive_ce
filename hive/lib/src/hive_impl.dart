@@ -21,8 +21,12 @@ import 'package:hive_ce/src/backend/storage_backend.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
+  static final BackendManagerInterface _defaultBackendManager =
+      BackendManager.select();
+
   final _boxes = HashMap<String, BoxBaseImpl>();
   final _openingBoxes = HashMap<String, Future>();
+  BackendManagerInterface? _managerOverride;
   final Random _secureRandom = Random.secure();
 
   /// Not part of public API
@@ -36,7 +40,8 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   /// either returns the preferred [BackendManagerInterface] or the
   /// platform default fallback
-  final _manager = BackendManager();
+  BackendManagerInterface get _manager =>
+      _managerOverride ?? _defaultBackendManager;
 
   void _registerDefaultAdapters() {
     registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
@@ -48,10 +53,11 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   @override
   void init(
     String? path, {
-    // Unused
-    HiveStorageBackendPreference? backendPreference,
+    HiveStorageBackendPreference backendPreference =
+        HiveStorageBackendPreference.native,
   }) {
     homePath = path;
+    _managerOverride = BackendManager.select(backendPreference);
   }
 
   Future<BoxBase<E>> _openBox<E>(
