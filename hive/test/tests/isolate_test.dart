@@ -28,16 +28,13 @@ void main() async {
   Future<void> runIsolate({
     IsolateNameServer? ins,
     required String path,
-    required int index,
   }) {
     return Isolate.run(() async {
       final hive = IsolatedHive(isolateNameServer: ins);
       await hive.init(path);
       final box = await hive.openBox<int>('test');
-      final start = index * 100;
-      final end = start + 100;
-      for (var i = start; i < end; i++) {
-        await box.put(i, i);
+      for (var i = 0; i < 100; i++) {
+        await box.add(i);
       }
     });
   }
@@ -49,7 +46,7 @@ void main() async {
         final dir = await getTempDir();
         final hive = IsolatedHive();
         await hive.init(dir.path);
-        await expectLater(runIsolate(path: dir.path, index: 0), completes);
+        await expectLater(runIsolate(path: dir.path), completes);
         final box = await hive.openBox<int>('test');
         expect(await box.length, 100);
       });
@@ -61,8 +58,7 @@ void main() async {
           await hive.init(dir.path);
           await expectLater(
             Future.wait([
-              for (var i = 0; i < 100; i++)
-                runIsolate(path: dir.path, index: i),
+              for (var i = 0; i < 100; i++) runIsolate(path: dir.path),
             ]),
             completes,
           );
@@ -78,7 +74,7 @@ void main() async {
           await expectLater(
             Future.wait([
               for (var i = 0; i < 100; i++)
-                runIsolate(ins: ins, path: dir.path, index: i),
+                runIsolate(ins: ins, path: dir.path),
             ]),
             completes,
           );
