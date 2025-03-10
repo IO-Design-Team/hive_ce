@@ -1,4 +1,5 @@
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:test/test.dart';
 
@@ -39,13 +40,13 @@ void main() {
   test(
     'add and remove objects to / from HiveList',
     () async {
-      final hive = await createHive();
-      hive.registerAdapter(_TestObjectAdapter());
-      var box =
-          await openBox<_TestObject>(false, hive: hive) as Box<_TestObject>;
+      final hive = await createHive(isolated: false);
+      await hive.registerAdapter(_TestObjectAdapter());
+      var (_, box) =
+          await openBox<_TestObject>(false, isolated: false, hive: hive);
 
       var obj = _TestObject('obj');
-      obj.list = HiveListImpl(box);
+      obj.list = HiveListImpl(box.box as Box<_TestObject>);
       await box.put('obj', obj);
 
       for (var i = 0; i < 100; i++) {
@@ -56,9 +57,9 @@ void main() {
 
       await obj.save();
 
-      box = (await box.reopen()) as Box<_TestObject>;
-      obj = box.get('obj')!;
-      (obj.list as HiveListImpl).debugHive = hive;
+      box = await hive.reopenBox(box);
+      obj = (await box.get('obj'))!;
+      (obj.list as HiveListImpl).debugHive = hive.hive as HiveImpl;
 
       for (var i = 0; i < 100; i++) {
         expect(obj.list![i].name, 'element$i');

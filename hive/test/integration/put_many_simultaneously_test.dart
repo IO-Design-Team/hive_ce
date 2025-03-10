@@ -3,9 +3,9 @@ import 'package:test/test.dart';
 import '../util/is_browser.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final amount = isBrowser ? 10 : 100;
-  var box = await openBox(lazy);
+  var (hive, box) = await openBox(lazy, isolated: isolated);
 
   Future putEntries() async {
     for (var i = 0; i < amount; i++) {
@@ -19,7 +19,7 @@ Future _performTest(bool lazy) async {
   }
   await Future.wait(futures);
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
     expect(await box.get('key$i'), 'value$i');
   }
@@ -27,13 +27,15 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group(
-    'put many entries simultaneously',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'put many entries simultaneously',
+      () {
+        test('normal box', () => _performTest(false, isolated: isolated));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, isolated: isolated));
+      },
+      timeout: longTimeout,
+    );
+  });
 }
