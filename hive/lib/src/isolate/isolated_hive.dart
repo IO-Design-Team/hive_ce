@@ -61,6 +61,10 @@ RECOMMENDED ACTIONS:
       _connection = await spawnIsolate(
         _entryPoint,
         debugName: isolateName,
+        onExit: () {
+          _isolateNameServer?.removePortNameMapping(isolateName);
+          close();
+        },
         onConnect: (send) =>
             _isolateNameServer?.registerPortWithName(send, isolateName),
       );
