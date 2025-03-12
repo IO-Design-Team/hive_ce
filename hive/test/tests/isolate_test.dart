@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart' as isolated_hive;
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
@@ -49,9 +50,8 @@ void main() async {
     required String path,
   }) {
     return Isolate.run(() async {
-      final hive = IsolatedHive();
-      await hive.init(path, isolateNameServer: ins);
-      final box = await hive.openBox<int>('test');
+      await IsolatedHive.init(path, isolateNameServer: ins);
+      final box = await IsolatedHive.openBox<int>('test');
       for (var i = 0; i < 100; i++) {
         await box.add(i);
       }
@@ -63,21 +63,19 @@ void main() async {
     () {
       test('single without INS', () async {
         final dir = await getTempDir();
-        final hive = IsolatedHive();
-        await hive.init(dir.path, isolateNameServer: StubIns());
+        await IsolatedHive.init(dir.path, isolateNameServer: StubIns());
         await expectLater(
           runIsolate(ins: StubIns(), path: dir.path),
           completes,
         );
-        final box = await hive.openBox<int>('test');
+        final box = await IsolatedHive.openBox<int>('test');
         expect(await box.length, 100);
       });
 
       group('multiple', () {
         test('without INS', () async {
           final dir = await getTempDir();
-          final hive = IsolatedHive();
-          await hive.init(dir.path, isolateNameServer: StubIns());
+          await IsolatedHive.init(dir.path, isolateNameServer: StubIns());
           await expectLater(
             Future.wait([
               for (var i = 0; i < 100; i++)
@@ -85,15 +83,14 @@ void main() async {
             ]),
             completes,
           );
-          final box = await hive.openBox<int>('test');
+          final box = await IsolatedHive.openBox<int>('test');
           expect(await box.length, isNot(10000));
         });
 
         test('with INS', () async {
           final dir = await getTempDir();
           final ins = TestIns();
-          final hive = IsolatedHive();
-          await hive.init(dir.path, isolateNameServer: ins);
+          await IsolatedHive.init(dir.path, isolateNameServer: ins);
           await expectLater(
             Future.wait([
               for (var i = 0; i < 100; i++)
@@ -101,7 +98,7 @@ void main() async {
             ]),
             completes,
           );
-          final box = await hive.openBox<int>('test');
+          final box = await IsolatedHive.openBox<int>('test');
           expect(await box.length, 10000);
         });
       });
@@ -125,10 +122,9 @@ void main() async {
         });
 
         test('safe hive isolate', () async {
-          final hive = IsolatedHive();
-          addTearDown(hive.close);
+          addTearDown(IsolatedHive.close);
 
-          hive.entryPoint = (send) async {
+          IsolatedHive.entryPoint = (send) async {
             final connection = setupIsolate(send);
             final hiveChannel = IsolateMethodChannel('hive', connection);
             final testChannel = IsolateMethodChannel('test', connection);
@@ -137,22 +133,22 @@ void main() async {
               (_) => captureOutput(() => Hive.init(null)).toList(),
             );
           };
-          await hive.init(null, isolateNameServer: StubIns());
-          final channel = IsolateMethodChannel('test', hive.connection);
+          await IsolatedHive.init(null, isolateNameServer: StubIns());
+          final channel = IsolateMethodChannel('test', IsolatedHive.connection);
           final result = await channel.invokeListMethod('');
           expect(result, isEmpty);
         });
 
         test('no INS', () async {
           final unsafeOutput =
-              await captureOutput(() => IsolatedHive().init(null)).toList();
+              await captureOutput(() => IsolatedHive.init(null)).toList();
           expect(
             unsafeOutput,
-            contains(IsolatedHive.noIsolateNameServerWarning),
+            contains(isolated_hive.IsolatedHive.noIsolateNameServerWarning),
           );
 
           final safeOutput = await captureOutput(
-            () => IsolatedHive().init(null, isolateNameServer: TestIns()),
+            () => IsolatedHive.init(null, isolateNameServer: TestIns()),
           ).toList();
           expect(safeOutput, isEmpty);
         });
@@ -176,13 +172,11 @@ void main() async {
         test('lock file does not exist', () async {
           final dir = await getTempDir();
           final path = dir.path;
-          final hive = IsolatedHive();
-          await hive.init(path, isolateNameServer: StubIns());
-          await hive.openBox('test');
+          await IsolatedHive.init(path, isolateNameServer: StubIns());
+          await IsolatedHive.openBox('test');
           final output = await Isolate.run(() async {
-            final hive = IsolatedHive();
-            await hive.init(path, isolateNameServer: StubIns());
-            return captureOutput(() => hive.openBox('test')).toList();
+            await IsolatedHive.init(path, isolateNameServer: StubIns());
+            return captureOutput(() => IsolatedHive.openBox('test')).toList();
           });
 
           expect(output, isEmpty);

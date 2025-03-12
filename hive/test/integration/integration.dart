@@ -3,8 +3,9 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
