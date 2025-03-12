@@ -82,6 +82,8 @@ void main() async {
         test('without INS', () async {
           final dir = await getTempDir();
           final hive = IsolatedHive();
+          hive.entryPoint =
+              (send) => silenceOutput(() => isolateEntryPoint(send));
           await hive.init(dir.path, isolateNameServer: StubIns());
           await expectLater(
             Future.wait([
