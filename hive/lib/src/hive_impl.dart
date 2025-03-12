@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
@@ -20,6 +20,7 @@ import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {

@@ -1,8 +1,12 @@
 import 'package:flutter/widgets.dart';
-import 'package:hive_ce_flutter/adapters.dart' hide IsolateNameServer;
+import 'package:hive_ce_flutter/adapters.dart'
+    hide IsolatedHive, IsolateNameServer;
 import 'package:hive_ce_flutter/src/isolate/isolate_name_server.dart';
 import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
 import 'package:path/path.dart' as path;
+// This is internal access
+// ignore: implementation_imports
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 
 /// Flutter extensions for [IsolatedHive]
 extension IsolatedHiveX on IsolatedHive {
