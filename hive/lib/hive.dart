@@ -1,5 +1,6 @@
 import 'package:hive_ce/src/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart' as isolated_hive;
 
 export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.js_interop) 'package:hive_ce/src/box_collection/box_collection_indexed_db.dart'
@@ -24,6 +25,13 @@ export 'src/object/hive_storage_backend_preference.dart';
 export 'src/registry/type_adapter.dart';
 export 'src/registry/type_registry.dart';
 
-/// Global constant to access Hive.
+export 'src/isolate/isolate_name_server.dart';
+export 'src/isolate/isolated_box.dart';
+
+/// Global constant to access Hive
 // ignore: non_constant_identifier_names
 final HiveInterface Hive = HiveImpl();
+
+/// Global constant to access IsolatedHive
+// ignore: non_constant_identifier_names
+final IsolatedHive = isolated_hive.IsolatedHive();

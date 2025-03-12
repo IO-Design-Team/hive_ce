@@ -102,6 +102,7 @@ class BoxCollection implements implementation.BoxCollection {
     for (final box in _openBoxes) {
       box._cachedBox?.close();
     }
+    _badKeyBox.close();
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 import 'package:mocktail/mocktail.dart';
@@ -51,16 +52,18 @@ void main() {
 
     group('.box', () {
       test('throws HiveError if box is not open', () async {
-        final hive = await createHive();
-        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
+        final hive = await createHive(isolated: false);
+        final hiveList = HiveListImpl.lazy('someBox', [])
+          ..debugHive = hive.hive as HiveImpl;
         expect(() => hiveList.box, throwsHiveError('you have to open the box'));
       });
 
       test('returns the box', () async {
-        final hive = await createHive();
+        final hive = await createHive(isolated: false);
         final box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
-        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
-        expect(hiveList.box, box);
+        final hiveList = HiveListImpl.lazy('someBox', [])
+          ..debugHive = hive.hive as HiveImpl;
+        expect(hiveList.box, box.box);
       });
     });
 

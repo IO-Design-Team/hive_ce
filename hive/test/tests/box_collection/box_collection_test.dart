@@ -7,6 +7,7 @@ import '../../util/is_browser.dart';
 Future<BoxCollection> _openCollection({bool withData = false}) async {
   final collection =
       await BoxCollection.open('MyFirstFluffyBox', {'cats', 'dogs'});
+  addTearDown(collection.close);
   if (withData) {
     final catsBox = await collection.openBox('cats');
     await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});

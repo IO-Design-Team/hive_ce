@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
@@ -13,14 +13,32 @@ import 'package:hive_ce/src/box/box_impl.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
+import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
+  /// Warning message printed when accessing Hive from an unsafe isolate
+  @visibleForTesting
+  static final unsafeIsolateWarning = '''
+⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
+
+Accessing Hive from an unsafe isolate (current isolate: $isolateDebugName)
+This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent
+access across isolates. Each isolate would maintain its own box cache,
+potentially causing data inconsistency and corruption.
+
+RECOMMENDED ACTIONS:
+- Use IsolatedHive instead
+
+''';
+
   static final BackendManagerInterface _defaultBackendManager =
       BackendManager.select();
 
@@ -56,6 +74,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
+    if (!{'main', IsolatedHive.isolateName}.contains(isolateDebugName)) {
+      debugPrint(unsafeIsolateWarning);
+    }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);
   }

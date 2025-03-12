@@ -3,9 +3,9 @@ import 'package:test/test.dart';
 import '../util/is_browser.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
+Future _performTest(bool lazy, {required bool isolated}) async {
   final amount = isBrowser ? 500 : 20000;
-  var box = await openBox(lazy);
+  var (hive, box) = await openBox(lazy, isolated: isolated);
   final entries = <String, dynamic>{};
   for (var i = 0; i < amount; i++) {
     entries['string$i'] = 'test';
@@ -16,29 +16,31 @@ Future _performTest(bool lazy) async {
   await box.putAll(entries);
   await box.put('123123', 'value');
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   await box.deleteAll(entries.keys);
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < amount; i++) {
-    expect(box.containsKey('string$i'), false);
-    expect(box.containsKey('int$i'), false);
-    expect(box.containsKey('bool$i'), false);
-    expect(box.containsKey('null$i'), false);
+    expect(await box.containsKey('string$i'), false);
+    expect(await box.containsKey('int$i'), false);
+    expect(await box.containsKey('bool$i'), false);
+    expect(await box.containsKey('null$i'), false);
   }
-  expect(await await box.get('123123'), 'value');
+  expect(await box.get('123123'), 'value');
 
   await box.close();
 }
 
 void main() {
-  group(
-    'delete many entries in a single batch',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((isolated) {
+    group(
+      'delete many entries in a single batch',
+      () {
+        test('normal box', () => _performTest(false, isolated: isolated));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, isolated: isolated));
+      },
+      timeout: longTimeout,
+    );
+  });
 }
