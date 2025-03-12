@@ -16,6 +16,7 @@ import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
+  /// Warning for lock file already existing
   @visibleForTesting
   static const lockFileExistsWarning = '''
 ⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
