@@ -10,7 +10,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../util/print_utils.dart';
-import 'common.dart';
+import '../tests/common.dart';
 
 /// Exists to silence the warning about not passing an INS
 class StubIns extends IsolateNameServer {
