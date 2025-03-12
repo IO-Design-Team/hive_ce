@@ -40,6 +40,10 @@ Future<dynamic> handleHiveMethodCall(
         collection: call.arguments['collection'],
       );
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
+    case 'box':
+      Hive.box(call.arguments['name']);
+    case 'lazyBox':
+      Hive.lazyBox(call.arguments['name']);
     case 'isBoxOpen':
       return Hive.isBoxOpen(call.arguments);
     case 'close':

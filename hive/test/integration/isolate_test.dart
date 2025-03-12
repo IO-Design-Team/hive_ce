@@ -108,7 +108,7 @@ void main() async {
             ]),
             completes,
           );
-          final box = hive.box<int>('test');
+          final box = await hive.box<int>('test');
           expect(await box.length, 10000);
         });
       });

@@ -133,20 +133,26 @@ RECOMMENDED ACTIONS:
   }
 
   /// Get an object to communicate with the isolated box
-  IsolatedBox<E> box<E>(String name) => IsolatedBox(
-        _boxChannel,
-        IsolateEventChannel('box_$name', _connection),
-        name,
-        false,
-      );
+  Future<IsolatedBox<E>> box<E>(String name) async {
+    await _hiveChannel.invokeMethod('box', {'name': name});
+    return IsolatedBox(
+      _boxChannel,
+      IsolateEventChannel('box_$name', _connection),
+      name,
+      false,
+    );
+  }
 
   /// Get an object to communicate with the isolated box
-  IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBox(
-        _boxChannel,
-        IsolateEventChannel('box_$name', _connection),
-        name,
-        true,
-      );
+  Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
+    await _hiveChannel.invokeMethod('lazyBox', {'name': name});
+    return IsolatedLazyBox(
+      _boxChannel,
+      IsolateEventChannel('box_$name', _connection),
+      name,
+      true,
+    );
+  }
 
   /// Check if a box is open in the isolate
   Future<bool> isBoxOpen(String name) =>
