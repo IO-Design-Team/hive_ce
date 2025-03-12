@@ -105,8 +105,8 @@ RECOMMENDED ACTIONS:
   ) async {
     this.registry = registry;
 
-    if (kDebugMode && _lockFile.existsSync()) {
-      print(lockFileExistsWarning);
+    if (_lockFile.existsSync()) {
+      debugPrint(lockFileExistsWarning);
     }
 
     lockRaf = await _lockFile.open(mode: FileMode.write);

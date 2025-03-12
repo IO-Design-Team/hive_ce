@@ -50,8 +50,8 @@ RECOMMENDED ACTIONS:
   }) async {
     _isolateNameServer = isolateNameServer;
 
-    if (kDebugMode && _isolateNameServer == null) {
-      print(noIsolateNameServerWarning);
+    if (_isolateNameServer == null) {
+      debugPrint(noIsolateNameServerWarning);
     }
 
     final send = _isolateNameServer?.lookupPortByName(isolateName);

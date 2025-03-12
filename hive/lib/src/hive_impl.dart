@@ -74,9 +74,8 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (kDebugMode &&
-        !{'main', IsolatedHive.isolateName}.contains(isolateDebugName)) {
-      print(unsafeIsolateWarning);
+    if (!{'main', IsolatedHive.isolateName}.contains(isolateDebugName)) {
+      debugPrint(unsafeIsolateWarning);
     }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);

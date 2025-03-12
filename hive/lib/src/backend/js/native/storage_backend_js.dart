@@ -82,7 +82,7 @@ class StorageBackendJs extends StorageBackend {
         if (kDebugMode) {
           final isIntType = value is int || value is List<int>;
           if (isIntType && isWasm) {
-            print(wasmIntWarning);
+            debugPrint(wasmIntWarning);
           }
         }
 
