@@ -21,9 +21,12 @@ class IsolatedHive {
   @visibleForTesting
   static final noIsolateNameServerWarning = '''
 ⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
-Using IsolatedHive without an IsolateNameServer is unsafe.
-This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent access across isolates.
-Using an IsolateNameServer allows IsolatedHive to maintain a single isolate for all Hive operations.
+
+Using IsolatedHive without an IsolateNameServer is unsafe. This can lead to
+DATA CORRUPTION as Hive boxes are not designed for concurrent access across
+isolates. Using an IsolateNameServer allows IsolatedHive to maintain a single
+isolate for all Hive operations.
+
 RECOMMENDED ACTIONS:
 - Initialize IsolatedHive with IsolatedHive.initFlutter from hive_ce_flutter
 - Provide your own IsolateNameServer

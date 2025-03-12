@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -154,6 +155,37 @@ void main() async {
             () => IsolatedHive().init(null, isolateNameServer: TestIns()),
           ).toList();
           expect(safeOutput, isEmpty);
+        });
+
+        test('lock file exists', () async {
+          final dir = await getTempDir();
+          final path = dir.path;
+          Hive.init(path);
+          await Hive.openBox('test');
+          final output = await Isolate.run(() {
+            Hive.init(path);
+            return captureOutput(() => Hive.openBox('test')).toList();
+          });
+
+          expect(
+            output,
+            contains(StorageBackendVm.lockFileExistsWarning),
+          );
+        });
+
+        test('lock file does not exist', () async {
+          final dir = await getTempDir();
+          final path = dir.path;
+          final hive = IsolatedHive();
+          await hive.init(path, isolateNameServer: StubIns());
+          await hive.openBox('test');
+          final output = await Isolate.run(() async {
+            final hive = IsolatedHive();
+            await hive.init(path, isolateNameServer: StubIns());
+            return captureOutput(() => hive.openBox('test')).toList();
+          });
+
+          expect(output, isEmpty);
         });
       });
     },
