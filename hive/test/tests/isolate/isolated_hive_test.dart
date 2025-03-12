@@ -9,8 +9,8 @@ import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:test/test.dart';
 
-import '../integration/isolate_test.dart';
-import 'common.dart';
+import '../../integration/isolate_test.dart';
+import '../common.dart';
 
 class _TestAdapter extends TypeAdapter<int> {
   _TestAdapter([this.typeId = 0]);
