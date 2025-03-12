@@ -165,12 +165,14 @@ void main() async {
         test('lock file exists', () async {
           final dir = await getTempDir();
           final path = dir.path;
-          Hive.init(path);
-          await Hive.openBox('test');
-          final output = await Isolate.run(() {
-            Hive.init(path);
-            return captureOutput(() => Hive.openBox('test')).toList();
+          await Isolate.run(() async {
+            silenceOutput(() => Hive.init(path));
+            await Hive.openBox('test');
           });
+
+          Hive.init(path);
+          final output =
+              await captureOutput(() => Hive.openBox('test')).toList();
 
           expect(
             output,
@@ -181,15 +183,9 @@ void main() async {
         test('lock file does not exist', () async {
           final dir = await getTempDir();
           final path = dir.path;
-          final hive = IsolatedHive();
-          await hive.init(path, isolateNameServer: StubIns());
-          await hive.openBox('test');
-          final output = await Isolate.run(() async {
-            final hive = IsolatedHive();
-            await hive.init(path, isolateNameServer: StubIns());
-            return captureOutput(() => hive.openBox('test')).toList();
-          });
-
+          Hive.init(path);
+          final output =
+              await captureOutput(() => Hive.openBox('test')).toList();
           expect(output, isEmpty);
         });
       });
