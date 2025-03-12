@@ -4,6 +4,7 @@ import 'dart:isolate';
 import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -48,14 +49,17 @@ void main() async {
   Future<void> runIsolate({
     required IsolateNameServer ins,
     required String path,
+    bool close = false,
   }) {
     return Isolate.run(() async {
       final hive = IsolatedHive();
+      hive.entryPoint = (send) => silenceOutput(() => isolateEntryPoint(send));
       await hive.init(path, isolateNameServer: ins);
       final box = await hive.openBox<int>('test');
       for (var i = 0; i < 100; i++) {
         await box.add(i);
       }
+      if (close) await hive.close();
     });
   }
 
@@ -67,7 +71,7 @@ void main() async {
         final hive = IsolatedHive();
         await hive.init(dir.path, isolateNameServer: StubIns());
         await expectLater(
-          runIsolate(ins: StubIns(), path: dir.path),
+          runIsolate(ins: StubIns(), path: dir.path, close: true),
           completes,
         );
         final box = await hive.openBox<int>('test');
@@ -102,7 +106,7 @@ void main() async {
             ]),
             completes,
           );
-          final box = await hive.openBox<int>('test');
+          final box = hive.box<int>('test');
           expect(await box.length, 10000);
         });
       });
