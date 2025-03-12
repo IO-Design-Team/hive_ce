@@ -148,7 +148,7 @@ RECOMMENDED ACTIONS:
   /// Shutdown the isolate
   Future<void> close() async {
     await _hiveChannel.invokeMethod('close');
-    _connection.shutdown();
+    _connection.close();
   }
 
   /// Delete a box from the disk
