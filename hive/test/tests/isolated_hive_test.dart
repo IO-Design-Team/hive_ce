@@ -32,6 +32,7 @@ void main() {
     Future<IsolatedHive> initHive() async {
       final tempDir = await getTempDir();
       final hive = IsolatedHive();
+      addTearDown(hive.close);
       await hive.init(tempDir.path, isolateNameServer: StubIns());
       return hive;
     }
@@ -57,12 +58,10 @@ void main() {
           await hive.openLazyBox('LAZYBOX');
           await expectLater(
             () => hive.openBox('lazyBox'),
-            throwsHiveError(
-              'is already open and of type IsolatedLazyBox<dynamic>',
+            throwsIsolatedHiveError(
+              'is already open and of type LazyBox<dynamic>',
             ),
           );
-
-          await hive.close();
         });
 
         test('throw HiveError if already opening box is lazy', () async {
@@ -72,8 +71,8 @@ void main() {
             hive.openLazyBox('TESTBOX'),
             expectLater(
               hive.openBox('testbox'),
-              throwsHiveError(
-                'is already open and of type IsolatedLazyBox<dynamic>',
+              throwsIsolatedHiveError(
+                'is already open and of type LazyBox<dynamic>',
               ),
             ),
           ]);
@@ -125,7 +124,7 @@ void main() {
           await hive.openBox('LAZYBOX');
           await expectLater(
             () => hive.openLazyBox('lazyBox'),
-            throwsHiveError('is already open and of type IsolatedBox<dynamic>'),
+            throwsIsolatedHiveError('is already open and of type IsolatedBox<dynamic>'),
           );
 
           await hive.close();
@@ -138,7 +137,7 @@ void main() {
             hive.openBox('LAZYBOX'),
             expectLater(
               hive.openLazyBox('lazyBox'),
-              throwsHiveError(
+              throwsIsolatedHiveError(
                 'is already open and of type IsolatedBox<dynamic>',
               ),
             ),
@@ -153,7 +152,7 @@ void main() {
 
         final box = await hive.openBox('TESTBOX');
         expect(hive.box('testBox'), box);
-        expect(() => hive.box('other'), throwsHiveError('not found'));
+        expect(() => hive.box('other'), throwsIsolatedHiveError('not found'));
 
         await hive.close();
       });
@@ -164,19 +163,19 @@ void main() {
         await hive.openBox<int>('INTBOX');
         expect(
           () => hive.box('intBox'),
-          throwsHiveError('is already open and of type IsolatedBox<int>'),
+          throwsIsolatedHiveError('is already open and of type IsolatedBox<int>'),
         );
 
         await hive.openBox('DYNAMICBOX');
         expect(
           () => hive.box<int>('dynamicBox'),
-          throwsHiveError('is already open and of type IsolatedBox<dynamic>'),
+          throwsIsolatedHiveError('is already open and of type IsolatedBox<dynamic>'),
         );
 
         await hive.openLazyBox('LAZYBOX');
         expect(
           () => hive.box('lazyBox'),
-          throwsHiveError(
+          throwsIsolatedHiveError(
             'is already open and of type IsolatedLazyBox<dynamic>',
           ),
         );
@@ -191,7 +190,7 @@ void main() {
 
         final box = await hive.openLazyBox('TESTBOX');
         expect(hive.lazyBox('testBox'), box);
-        expect(() => hive.lazyBox('other'), throwsHiveError('not found'));
+        expect(() => hive.lazyBox('other'), throwsIsolatedHiveError('not found'));
 
         await hive.close();
       });
@@ -202,13 +201,13 @@ void main() {
         await hive.openLazyBox<int>('INTBOX');
         expect(
           () => hive.lazyBox('intBox'),
-          throwsHiveError('is already open and of type IsolatedLazyBox<int>'),
+          throwsIsolatedHiveError('is already open and of type IsolatedLazyBox<int>'),
         );
 
         await hive.openLazyBox('DYNAMICBOX');
         expect(
           () => hive.lazyBox<int>('dynamicBox'),
-          throwsHiveError(
+          throwsIsolatedHiveError(
             'is already open and of type IsolatedLazyBox<dynamic>',
           ),
         );
@@ -216,7 +215,7 @@ void main() {
         await hive.openBox('BOX');
         expect(
           () => hive.lazyBox('box'),
-          throwsHiveError('is already open and of type IsolatedBox<dynamic>'),
+          throwsIsolatedHiveError('is already open and of type IsolatedBox<dynamic>'),
         );
 
         await hive.close();
