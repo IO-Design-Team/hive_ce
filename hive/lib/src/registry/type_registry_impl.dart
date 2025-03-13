@@ -194,8 +194,8 @@ class TypeRegistryImpl implements TypeRegistry {
 
       final adapterForSameType = findAdapterForType<T>()?.adapter;
       if (adapterForSameType != null) {
-        final adapterType = adapter.runtimeType;
-        final adapterTypeId = adapter.typeId;
+        final adapterType = adapter.adapter.runtimeType;
+        final adapterTypeId = adapter.adapter.typeId;
         final existingAdapterType = adapterForSameType.runtimeType;
         final existingAdapterTypeId = adapterForSameType.typeId;
 
