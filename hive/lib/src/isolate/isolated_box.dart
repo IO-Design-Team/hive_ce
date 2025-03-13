@@ -131,11 +131,11 @@ class IsolatedBox<E> extends IsolatedBoxBase<E> {
   IsolatedBox(super._channel, super.connection, super.name, super.lazy);
 
   /// The values of the box
-  Future<Iterable<E>> get values =>
+  Future<List<E>> get values =>
       _channel.invokeMethod('values', {'name': name});
 
   /// The values of the box between the given keys
-  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
+  Future<List<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
       _channel.invokeMethod('valuesBetween', {
         'name': name,
         'startKey': startKey,

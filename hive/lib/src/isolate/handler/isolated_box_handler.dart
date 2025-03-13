@@ -87,17 +87,27 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'flush':
         await box.flush();
       case 'values':
-        return (box as Box).values;
+        // This needs to be a list or it is unsendable
+        return (box as Box).values.toList();
       case 'valuesBetween':
-        return (box as Box).valuesBetween(
-          startKey: call.arguments['startKey'],
-          endKey: call.arguments['endKey'],
-        );
+        // This needs to be a list or it is unsendable
+        return (box as Box)
+            .valuesBetween(
+              startKey: call.arguments['startKey'],
+              endKey: call.arguments['endKey'],
+            )
+            .toList();
       case 'get':
         if (box.lazy) {
-          return (box as LazyBox).get(call.arguments['key']);
+          return (box as LazyBox).get(
+            call.arguments['key'],
+            defaultValue: call.arguments['defaultValue'],
+          );
         } else {
-          return (box as Box).get(call.arguments['key']);
+          return (box as Box).get(
+            call.arguments['key'],
+            defaultValue: call.arguments['defaultValue'],
+          );
         }
       case 'getAt':
         if (box.lazy) {
