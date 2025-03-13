@@ -1,7 +1,5 @@
 import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/binary/frame.dart';
-
-import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
@@ -51,7 +49,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBoxBase();
         await box.close();
-        expect(box.keys, throwsHiveError('closed'));
+        expect(box.keys, throwsIsolatedHiveError('closed'));
       });
     });
 
@@ -78,9 +76,9 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBoxBase();
         await box.close();
-        expect(box.length, throwsHiveError('closed'));
-        expect(box.isEmpty, throwsHiveError('closed'));
-        expect(box.isNotEmpty, throwsHiveError('closed'));
+        expect(box.length, throwsIsolatedHiveError('closed'));
+        expect(box.isEmpty, throwsIsolatedHiveError('closed'));
+        expect(box.isNotEmpty, throwsIsolatedHiveError('closed'));
       });
     });
 
@@ -106,7 +104,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBoxBase();
         await box.close();
-        expect(box.keyAt(0), throwsHiveError('closed'));
+        expect(box.keyAt(0), throwsIsolatedHiveError('closed'));
       });
     });
 
@@ -132,7 +130,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBoxBase();
         await box.close();
-        expect(box.containsKey(0), throwsHiveError('closed'));
+        expect(box.containsKey(0), throwsIsolatedHiveError('closed'));
       });
     });
 
@@ -189,7 +187,7 @@ void main() {
 
     test('.compact()', () async {
       final box = await _openBoxBase();
-      expect(box.compact, completes);
+      expect(box.compact(), completes);
     });
 
     test('.close()', () async {
