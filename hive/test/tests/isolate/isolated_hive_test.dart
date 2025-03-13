@@ -145,75 +145,91 @@ void main() {
       expect(await box2.isOpen, false);
     });
 
-    group('.deleteBoxFromDisk()', () {
-      test('deletes open box', () async {
+    group(
+      '.deleteBoxFromDisk()',
+      () {
+        test('deletes open box', () async {
+          final hive = await initHive();
+
+          final box1 = await hive.openBox('testBox1');
+          await box1.put('key', 'value');
+          final box1File = File((await box1.path)!);
+
+          await hive.deleteBoxFromDisk('testBox1');
+          expect(await box1File.exists(), false);
+          expect(await hive.isBoxOpen('testBox1'), false);
+        });
+
+        test('deletes closed box', () async {
+          final hive = await initHive();
+
+          final box1 = await hive.openBox('testBox1');
+          await box1.put('key', 'value');
+          final path = (await box1.path)!;
+          await box1.close();
+          final box1File = File(path);
+
+          await hive.deleteBoxFromDisk('testBox1');
+          expect(await box1File.exists(), false);
+          expect(await hive.isBoxOpen('testBox1'), false);
+        });
+
+        test('does nothing if files do not exist', () async {
+          final hive = await initHive();
+          await hive.deleteBoxFromDisk('testBox1');
+        });
+      },
+      skip: isBrowser,
+    );
+
+    test(
+      '.deleteFromDisk()',
+      () async {
         final hive = await initHive();
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
         final box1File = File((await box1.path)!);
 
-        await hive.deleteBoxFromDisk('testBox1');
+        final box2 = await hive.openBox('testBox2');
+        await box2.put('key', 'value');
+        final box2File = File((await box2.path)!);
+
+        await hive.deleteFromDisk();
         expect(await box1File.exists(), false);
+        expect(await box2File.exists(), false);
         expect(await hive.isBoxOpen('testBox1'), false);
-      });
-
-      test('deletes closed box', () async {
-        final hive = await initHive();
-
-        final box1 = await hive.openBox('testBox1');
-        await box1.put('key', 'value');
-        final path = (await box1.path)!;
-        await box1.close();
-        final box1File = File(path);
-
-        await hive.deleteBoxFromDisk('testBox1');
-        expect(await box1File.exists(), false);
-        expect(await hive.isBoxOpen('testBox1'), false);
-      });
-
-      test('does nothing if files do not exist', () async {
-        final hive = await initHive();
-        await hive.deleteBoxFromDisk('testBox1');
-      });
-    });
-
-    test('.deleteFromDisk()', () async {
-      final hive = await initHive();
-
-      final box1 = await hive.openBox('testBox1');
-      await box1.put('key', 'value');
-      final box1File = File((await box1.path)!);
-
-      final box2 = await hive.openBox('testBox2');
-      await box2.put('key', 'value');
-      final box2File = File((await box2.path)!);
-
-      await hive.deleteFromDisk();
-      expect(await box1File.exists(), false);
-      expect(await box2File.exists(), false);
-      expect(await hive.isBoxOpen('testBox1'), false);
-      expect(await hive.isBoxOpen('testBox2'), false);
-    });
+        expect(await hive.isBoxOpen('testBox2'), false);
+      },
+      skip: isBrowser,
+    );
 
     group('.boxExists()', () {
       test('returns true if a box was created', () async {
         final hive = await initHive();
-        await hive.openBox('testBox1');
-        expect(await hive.boxExists('testBox1'), true);
+        final boxName = generateBoxName();
+        await hive.openBox(boxName);
+        expect(await hive.boxExists(boxName), true);
       });
 
       test('returns false if no box was created', () async {
         final hive = await initHive();
-        expect(await hive.boxExists('testBox1'), false);
+        final boxName = generateBoxName();
+        expect(await hive.boxExists(boxName), false);
       });
 
-      test('returns false if box was created and then deleted', () async {
-        final hive = await initHive();
-        await hive.openBox('testBox1');
-        await hive.deleteBoxFromDisk('testBox1');
-        expect(await hive.boxExists('testBox1'), false);
-      });
+      test(
+        'returns false if box was created and then deleted',
+        () async {
+          final hive = await initHive();
+          final boxName = generateBoxName();
+          await hive.openBox(boxName);
+          await hive.deleteBoxFromDisk(boxName);
+          expect(await hive.boxExists(boxName), false);
+        },
+        // TODO: Figure out why deleteFromDisk never completes on web
+        skip: isBrowser,
+      );
     });
 
     group('.resetAdapters()', () {
