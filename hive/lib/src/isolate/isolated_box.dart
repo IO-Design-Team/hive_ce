@@ -131,8 +131,7 @@ class IsolatedBox<E> extends IsolatedBoxBase<E> {
   IsolatedBox(super._channel, super.connection, super.name, super.lazy);
 
   /// The values of the box
-  Future<List<E>> get values =>
-      _channel.invokeMethod('values', {'name': name});
+  Future<List<E>> get values => _channel.invokeMethod('values', {'name': name});
 
   /// The values of the box between the given keys
   Future<List<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
