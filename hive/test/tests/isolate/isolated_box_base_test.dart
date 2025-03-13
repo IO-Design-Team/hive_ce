@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
 import '../common.dart';
 
-Future<IsolatedBoxBase> _openBoxBase({
+Future<IsolatedBoxBase> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
@@ -25,18 +25,18 @@ Future<IsolatedBoxBase> _openBoxBase({
 void main() {
   group('BoxBase', () {
     test('.name', () async {
-      final box = await _openBoxBase(name: 'testName');
+      final box = await _openBox(name: 'testName');
       expect(box.name, 'testname');
     });
 
     test('.path', () async {
-      final box = await _openBoxBase();
+      final box = await _openBox();
       expect(await box.path, isNotEmpty);
     });
 
     group('.keys', () {
       test('returns keys from keystore', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame.lazy('key1'),
             Frame.lazy('key4'),
@@ -47,7 +47,7 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         await box.close();
         expect(box.keys, throwsIsolatedHiveError('closed'));
       });
@@ -55,14 +55,14 @@ void main() {
 
     group('.length / .isEmpty / .isNotEmpty', () {
       test('empty box', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         expect(await box.length, 0);
         expect(await box.isEmpty, true);
         expect(await box.isNotEmpty, false);
       });
 
       test('non empty box', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame.lazy('key1'),
             Frame.lazy('key2'),
@@ -74,7 +74,7 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         await box.close();
         expect(box.length, throwsIsolatedHiveError('closed'));
         expect(box.isEmpty, throwsIsolatedHiveError('closed'));
@@ -84,7 +84,7 @@ void main() {
 
     group('.watch()', () {
       test('throws if box is closed', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         await box.close();
         expect(box.watch().drain(), throwsIsolatedHiveError('closed'));
       });
@@ -92,7 +92,7 @@ void main() {
 
     group('.keyAt()', () {
       test('returns key at index', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame.lazy(0),
             Frame.lazy('test'),
@@ -102,7 +102,7 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         await box.close();
         expect(box.keyAt(0), throwsIsolatedHiveError('closed'));
       });
@@ -110,7 +110,7 @@ void main() {
 
     group('.containsKey()', () {
       test('returns true if key exists', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame.lazy('existingKey'),
           ],
@@ -119,7 +119,7 @@ void main() {
       });
 
       test('returns false if key does not exist', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame.lazy('existingKey'),
           ],
@@ -128,20 +128,20 @@ void main() {
       });
 
       test('throws if box is closed', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         await box.close();
         expect(box.containsKey(0), throwsIsolatedHiveError('closed'));
       });
     });
 
     test('.add()', () async {
-      final box = await _openBoxBase();
+      final box = await _openBox();
       expect(await box.add(123), 0);
       expect(await box.get(0), 123);
     });
 
     test('.addAll()', () async {
-      final box = await _openBoxBase();
+      final box = await _openBox();
 
       expect(await box.addAll([1, 2, 3]), [0, 1, 2]);
       expect(await box.get(0), 1);
@@ -150,7 +150,7 @@ void main() {
     });
 
     test('.putAt()', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame(0, 'a'),
           Frame(1, 'b'),
@@ -162,7 +162,7 @@ void main() {
     });
 
     test('.deleteAt()', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame.lazy('a'),
           Frame.lazy('b'),
@@ -174,7 +174,7 @@ void main() {
     });
 
     test('.clear()', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame.lazy('a'),
           Frame.lazy('b'),
@@ -186,19 +186,19 @@ void main() {
     });
 
     test('.compact()', () async {
-      final box = await _openBoxBase();
+      final box = await _openBox();
       expect(box.compact(), completes);
     });
 
     test('.close()', () async {
-      final box = await _openBoxBase(name: 'myBox');
+      final box = await _openBox(name: 'myBox');
       await box.close();
       expect(await box.isOpen, false);
     });
 
     group('.deleteFromDisk()', () {
       test('closes and deletes box', () async {
-        final box = await _openBoxBase(name: 'myBox');
+        final box = await _openBox(name: 'myBox');
         await box.deleteFromDisk();
         expect(await box.isOpen, false);
       });

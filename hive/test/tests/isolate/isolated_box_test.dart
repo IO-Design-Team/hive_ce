@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
 import '../common.dart';
 
-Future<IsolatedBox> _openBoxBase({
+Future<IsolatedBox> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
@@ -25,7 +25,7 @@ Future<IsolatedBox> _openBoxBase({
 void main() {
   group('BoxImpl', () {
     test('.values', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame(0, 123),
           Frame('key1', 'value1'),
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('.valuesBetween()', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame(0, 0),
           Frame(1, 1),
@@ -51,14 +51,14 @@ void main() {
 
     group('.get()', () {
       test('returns defaultValue if key does not exist', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
 
         expect(await box.get('someKey'), null);
         expect(await box.get('otherKey', defaultValue: -12), -12);
       });
 
       test('returns value if it exists', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame('testKey', 'testVal'),
             Frame(123, 456),
@@ -71,7 +71,7 @@ void main() {
     });
 
     test('.getAt() returns value at given index', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame(0, 'zero'),
           Frame('a', 'A'),
@@ -84,7 +84,7 @@ void main() {
 
     group('.putAll()', () {
       test('values', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
 
         await box.putAll({'key1': 'value1', 'key2': 'value2'});
 
@@ -93,7 +93,7 @@ void main() {
       });
 
       test('does nothing if no entries are provided', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         final lengthBefore = await box.length;
 
         await box.putAll({});
@@ -104,7 +104,7 @@ void main() {
       test('handles exceptions gracefully', () async {
         // This is a simplified test since we can't easily mock exceptions
         // with the actual box implementation
-        final box = await _openBoxBase();
+        final box = await _openBox();
 
         await box.putAll({'key1': 'value1', 'key2': 'value2'});
         expect(await box.get('key1'), 'value1');
@@ -113,7 +113,7 @@ void main() {
 
     group('.deleteAll()', () {
       test('do nothing when deleting non existing keys', () async {
-        final box = await _openBoxBase();
+        final box = await _openBox();
         final lengthBefore = await box.length;
 
         await box.deleteAll(['key1', 'key2', 'key3']);
@@ -122,7 +122,7 @@ void main() {
       });
 
       test('delete keys', () async {
-        final box = await _openBoxBase(
+        final box = await _openBox(
           frames: [
             Frame('key1', 'value1'),
             Frame('key2', 'value2'),
@@ -139,7 +139,7 @@ void main() {
     });
 
     test('.toMap()', () async {
-      final box = await _openBoxBase(
+      final box = await _openBox(
         frames: [
           Frame('key1', 1),
           Frame('key2', 2),
