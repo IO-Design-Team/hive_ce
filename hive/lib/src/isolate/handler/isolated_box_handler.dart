@@ -42,6 +42,8 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   /// The method call handler for the box
   Future<dynamic> call(IsolateMethodCall call) async {
     switch (call.method) {
+      case 'isOpen':
+        return box.isOpen;
       case 'path':
         return box.path;
       case 'keys':
@@ -75,7 +77,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'compact':
         await box.compact();
       case 'clear':
-        await box.clear();
+        return box.clear();
       case 'close':
         await box.close();
         _close();
@@ -85,17 +87,27 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'flush':
         await box.flush();
       case 'values':
-        return (box as Box).values;
+        // This needs to be a list or it is unsendable
+        return (box as Box).values.toList();
       case 'valuesBetween':
-        return (box as Box).valuesBetween(
-          startKey: call.arguments['startKey'],
-          endKey: call.arguments['endKey'],
-        );
+        // This needs to be a list or it is unsendable
+        return (box as Box)
+            .valuesBetween(
+              startKey: call.arguments['startKey'],
+              endKey: call.arguments['endKey'],
+            )
+            .toList();
       case 'get':
         if (box.lazy) {
-          return (box as LazyBox).get(call.arguments['key']);
+          return (box as LazyBox).get(
+            call.arguments['key'],
+            defaultValue: call.arguments['defaultValue'],
+          );
         } else {
-          return (box as Box).get(call.arguments['key']);
+          return (box as Box).get(
+            call.arguments['key'],
+            defaultValue: call.arguments['defaultValue'],
+          );
         }
       case 'getAt':
         if (box.lazy) {

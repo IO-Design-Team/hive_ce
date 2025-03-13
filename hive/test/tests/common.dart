@@ -2,23 +2,31 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:hive_ce/hive.dart';
+import 'package:isolate_channel/isolate_channel.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-Matcher isAHiveError([String? contains]) {
+Matcher isAHiveError([String? containing]) {
   return allOf(
     isA<HiveError>(),
     predicate(
       (e) =>
-          contains == null ||
-          e.toString().toLowerCase().contains(contains.toLowerCase()),
+          containing == null ||
+          e.toString().toLowerCase().contains(containing.toLowerCase()),
     ),
   );
 }
 
-Matcher throwsHiveError([String? contains]) {
-  return throwsA(isAHiveError(contains));
+Matcher throwsHiveError([String? containing]) {
+  return throwsA(isAHiveError(containing));
+}
+
+Matcher throwsIsolatedHiveError([String? containing]) {
+  return throwsA(
+    isA<IsolateException>()
+        .having((e) => e.details, 'details', contains(contains(containing))),
+  );
 }
 
 final random = Random();

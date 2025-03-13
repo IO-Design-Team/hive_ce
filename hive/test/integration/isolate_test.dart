@@ -1,3 +1,6 @@
+@TestOn('vm')
+library;
+
 import 'dart:async';
 import 'dart:isolate';
 
@@ -10,7 +13,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../util/print_utils.dart';
-import 'common.dart';
+import '../tests/common.dart';
 
 /// Exists to silence the warning about not passing an INS
 class StubIns extends IsolateNameServer {
@@ -108,7 +111,7 @@ void main() async {
             ]),
             completes,
           );
-          final box = hive.box<int>('test');
+          final box = await hive.box<int>('test');
           expect(await box.length, 10000);
         });
       });
@@ -178,7 +181,7 @@ void main() async {
 
           expect(
             output,
-            contains(StorageBackendVm.lockFileExistsWarning),
+            contains(StorageBackendVm.lockFileExistsWarning('test.lock')),
           );
         });
 

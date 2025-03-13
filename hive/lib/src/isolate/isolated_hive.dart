@@ -87,6 +87,7 @@ RECOMMENDED ACTIONS:
     Uint8List? bytes,
     String? collection,
   }) async {
+    name = name.toLowerCase();
     await _hiveChannel.invokeMethod('openBox', {
       'name': name,
       'encryptionCipher': encryptionCipher,
@@ -97,12 +98,7 @@ RECOMMENDED ACTIONS:
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      false,
-    );
+    return IsolatedBox(_boxChannel, _connection, name, false);
   }
 
   /// Open a lazy box in the isolate
@@ -115,6 +111,7 @@ RECOMMENDED ACTIONS:
     String? path,
     String? collection,
   }) async {
+    name = name.toLowerCase();
     await _hiveChannel.invokeMethod('openLazyBox', {
       'name': name,
       'encryptionCipher': encryptionCipher,
@@ -124,33 +121,26 @@ RECOMMENDED ACTIONS:
       'path': path,
       'collection': collection,
     });
-    return IsolatedLazyBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      true,
-    );
+    return IsolatedLazyBox(_boxChannel, _connection, name, true);
   }
 
   /// Get an object to communicate with the isolated box
-  IsolatedBox<E> box<E>(String name) => IsolatedBox(
-        _boxChannel,
-        IsolateEventChannel('box_$name', _connection),
-        name,
-        false,
-      );
+  Future<IsolatedBox<E>> box<E>(String name) async {
+    name = name.toLowerCase();
+    await _hiveChannel.invokeMethod('box', {'name': name});
+    return IsolatedBox(_boxChannel, _connection, name, false);
+  }
 
   /// Get an object to communicate with the isolated box
-  IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBox(
-        _boxChannel,
-        IsolateEventChannel('box_$name', _connection),
-        name,
-        true,
-      );
+  Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
+    name = name.toLowerCase();
+    await _hiveChannel.invokeMethod('lazyBox', {'name': name});
+    return IsolatedLazyBox(_boxChannel, _connection, name, true);
+  }
 
   /// Check if a box is open in the isolate
   Future<bool> isBoxOpen(String name) =>
-      _hiveChannel.invokeMethod('isBoxOpen', name);
+      _hiveChannel.invokeMethod('isBoxOpen', name.toLowerCase());
 
   /// Shutdown the isolate
   Future<void> close() async {
@@ -159,15 +149,18 @@ RECOMMENDED ACTIONS:
   }
 
   /// Delete a box from the disk
-  Future<void> deleteBoxFromDisk(String name, {String? path}) => _hiveChannel
-      .invokeMethod('deleteBoxFromDisk', {'name': name, 'path': path});
+  Future<void> deleteBoxFromDisk(String name, {String? path}) =>
+      _hiveChannel.invokeMethod(
+        'deleteBoxFromDisk',
+        {'name': name.toLowerCase(), 'path': path},
+      );
 
   /// Delete all boxes from the disk
   Future<void> deleteFromDisk() => _hiveChannel.invokeMethod('deleteFromDisk');
 
   /// Check if a box exists in the isolate
-  Future<bool> boxExists(String name, {String? path}) =>
-      _hiveChannel.invokeMethod('boxExists', {'name': name, 'path': path});
+  Future<bool> boxExists(String name, {String? path}) => _hiveChannel
+      .invokeMethod('boxExists', {'name': name.toLowerCase(), 'path': path});
 
   /// Register an adapter in the isolate
   Future<void> registerAdapter<T>(

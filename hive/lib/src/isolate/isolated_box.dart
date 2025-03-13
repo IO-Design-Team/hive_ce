@@ -12,7 +12,12 @@ abstract class IsolatedBoxBase<E> {
   Stream<BoxEvent>? _stream;
 
   /// Constructor
-  IsolatedBoxBase(this._channel, this._eventChannel, this.name, this.lazy);
+  IsolatedBoxBase(
+    this._channel,
+    IsolateConnection connection,
+    this.name,
+    this.lazy,
+  ) : _eventChannel = IsolateEventChannel('box_$name', connection);
 
   /// The name of the box
   final String name;
@@ -20,10 +25,8 @@ abstract class IsolatedBoxBase<E> {
   /// Whether the box is lazy
   final bool lazy;
 
-  bool _open = true;
-
   /// Whether the box is open
-  bool get isOpen => _open;
+  Future<bool> get isOpen => _channel.invokeMethod('isOpen', {'name': name});
 
   /// The path of the box
   Future<String?> get path => _channel.invokeMethod('path', {'name': name});
@@ -94,16 +97,11 @@ abstract class IsolatedBoxBase<E> {
   Future<int> clear() => _channel.invokeMethod('clear', {'name': name});
 
   /// Close the box
-  Future<void> close() async {
-    await _channel.invokeMethod('close', {'name': name});
-    _open = false;
-  }
+  Future<void> close() => _channel.invokeMethod('close', {'name': name});
 
   /// Delete the box from the disk
-  Future<void> deleteFromDisk() async {
-    await _channel.invokeMethod('deleteFromDisk', {'name': name});
-    _open = false;
-  }
+  Future<void> deleteFromDisk() =>
+      _channel.invokeMethod('deleteFromDisk', {'name': name});
 
   /// Flush the box
   Future<void> flush() => _channel.invokeMethod('flush', {'name': name});
@@ -124,20 +122,19 @@ abstract class IsolatedBoxBase<E> {
 /// Isolated implementation of [LazyBoxBase]
 class IsolatedLazyBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
-  IsolatedLazyBox(super._channel, super._eventChannel, super.name, super.lazy);
+  IsolatedLazyBox(super._channel, super.connection, super.name, super.lazy);
 }
 
 /// Isolated implementation of [Box]
 class IsolatedBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
-  IsolatedBox(super._channel, super._eventChannel, super.name, super.lazy);
+  IsolatedBox(super._channel, super.connection, super.name, super.lazy);
 
   /// The values of the box
-  Future<Iterable<E>> get values =>
-      _channel.invokeMethod('values', {'name': name});
+  Future<List<E>> get values => _channel.invokeMethod('values', {'name': name});
 
   /// The values of the box between the given keys
-  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
+  Future<List<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
       _channel.invokeMethod('valuesBetween', {
         'name': name,
         'startKey': startKey,
