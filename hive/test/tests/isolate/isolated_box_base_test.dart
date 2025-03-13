@@ -86,7 +86,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBoxBase();
         await box.close();
-        expect(box.watch, throwsHiveError('closed'));
+        expect(box.watch().drain(), throwsIsolatedHiveError('closed'));
       });
     });
 
