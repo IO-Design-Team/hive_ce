@@ -29,6 +29,7 @@ its own box cache, potentially causing data inconsistency and corruption.
 
 RECOMMENDED ACTIONS:
 - Use IsolatedHive to perform box operations
+- Close boxes after use
 
 ''';
 
