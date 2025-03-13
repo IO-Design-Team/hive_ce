@@ -18,7 +18,10 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   void onListen(dynamic arguments, IsolateEventSink events) {
     if (_subscription != null) return;
 
-    final subscription = _subscription = box.watch().listen(events.success);
+    final subscription = _subscription = box
+        .watch()
+        .map((e) => {'key': e.key, 'value': e.value, 'deleted': e.deleted})
+        .listen(events.success);
     subscription.onError(
       (e) => events.error(
         code: 'box_watch_error',
