@@ -151,48 +151,40 @@ void main() {
       expect(await box.get(2), 3);
     });
 
-    group('.putAt()', () {
-      test('override existing', () async {
-        final box = await _openBoxBase(
-          frames: [
-            Frame.lazy('a'),
-            Frame.lazy('b'),
-          ],
-        );
+    test('.putAt()', () async {
+      final box = await _openBoxBase(
+        frames: [
+          Frame.lazy('a'),
+          Frame.lazy('b'),
+        ],
+      );
 
-        await box.putAt(1, 'test');
-        expect(await box.get(1), 'test');
-      });
+      await box.putAt(1, 'test');
+      expect(await box.get(1), 'test');
     });
 
-    group('.deleteAt()', () {
-      test('delete frame', () async {
-        final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('a'),
-              Frame.lazy('b'),
-            ],
-          ),
-        );
+    test('.deleteAt()', () async {
+      final box = await _openBoxBase(
+        frames: [
+          Frame.lazy('a'),
+          Frame.lazy('b'),
+        ],
+      );
 
-        await box.deleteAt(1);
-        expect(await box.get(1), null);
-      });
+      await box.deleteAt(1);
+      expect(await box.get(1), null);
     });
 
-    group('.clear()', () {
-      test('clears keystore and backend', () async {
-        final box = await _openBoxBase(
-          frames: [
-            Frame.lazy('a'),
-            Frame.lazy('b'),
-          ],
-        );
+    test('.clear()', () async {
+      final box = await _openBoxBase(
+        frames: [
+          Frame.lazy('a'),
+          Frame.lazy('b'),
+        ],
+      );
 
-        expect(await box.clear(), 2);
-        expect(await box.get(0), null);
-      });
+      expect(await box.clear(), 2);
+      expect(await box.get(0), null);
     });
 
     test('.compact()', () async {
