@@ -96,28 +96,22 @@ void main() {
     });
 
     group('.box()', () {
-      test('throws HiveError if box type does not match', () async {
+      test('does not call isolate', () async {
         final hive = await initHive();
 
         await hive.openLazyBox('LAZYBOX');
-        expect(
-          () => hive.box('lazyBox'),
-          throwsIsolatedHiveError(
-            'is already open and of type LazyBox<dynamic>',
-          ),
-        );
+        // This would throw if it called the isolate
+        expect(() => hive.box('lazyBox'), returnsNormally);
       });
     });
 
     group('.lazyBox()', () {
-      test('throws HiveError if box type does not match', () async {
+      test('does not call isolate', () async {
         final hive = await initHive();
 
         await hive.openBox('BOX');
-        expect(
-          () => hive.lazyBox('box'),
-          throwsIsolatedHiveError('is already open and of type Box<dynamic>'),
-        );
+        // This would throw if it called the isolate
+        expect(() => hive.lazyBox('box'), returnsNormally);
       });
     });
 

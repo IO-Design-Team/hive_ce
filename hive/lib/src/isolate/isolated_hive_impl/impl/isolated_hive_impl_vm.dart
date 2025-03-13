@@ -104,18 +104,12 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
   }
 
   @override
-  Future<IsolatedBox<E>> box<E>(String name) async {
-    name = name.toLowerCase();
-    await _hiveChannel.invokeMethod('box', {'name': name});
-    return IsolatedBoxImpl(_boxChannel, connection, name, false);
-  }
+  IsolatedBox<E> box<E>(String name) =>
+      IsolatedBoxImpl(_boxChannel, connection, name.toLowerCase(), false);
 
   @override
-  Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
-    name = name.toLowerCase();
-    await _hiveChannel.invokeMethod('lazyBox', {'name': name});
-    return IsolatedLazyBoxImpl(_boxChannel, connection, name, true);
-  }
+  IsolatedLazyBox<E> lazyBox<E>(String name) =>
+      IsolatedLazyBoxImpl(_boxChannel, connection, name.toLowerCase(), true);
 
   @override
   Future<bool> isBoxOpen(String name) =>
