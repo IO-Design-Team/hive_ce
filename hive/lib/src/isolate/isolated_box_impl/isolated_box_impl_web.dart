@@ -82,25 +82,19 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   @override
   Future<E?> get(dynamic key, {E? defaultValue}) async {
-    final box = _box;
-    if (box is Box<E>) {
-      return box.get(key, defaultValue: defaultValue);
-    } else if (box is LazyBox<E>) {
-      return box.get(key, defaultValue: defaultValue);
+    if (lazy) {
+      return (_box as LazyBox<E>).get(key, defaultValue: defaultValue);
     } else {
-      throw UnimplementedError();
+      return (_box as Box<E>).get(key, defaultValue: defaultValue);
     }
   }
 
   @override
   Future<E?> getAt(int index) async {
-    final box = _box;
-    if (box is Box<E>) {
-      return box.getAt(index);
-    } else if (box is LazyBox<E>) {
-      return box.getAt(index);
+    if (lazy) {
+      return (_box as LazyBox<E>).getAt(index);
     } else {
-      throw UnimplementedError();
+      return (_box as Box<E>).getAt(index);
     }
   }
 }
