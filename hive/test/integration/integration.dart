@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart' hide IsolatedHive;
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:isolate_channel/isolate_channel.dart';
@@ -101,7 +101,7 @@ Future<HiveWrapper> createHive({
 }) async {
   final HiveWrapper hive;
   if (isolated) {
-    final isolatedHive = IsolatedHive();
+    final isolatedHive = IsolatedHiveImpl();
     if (entryPoint != null) {
       isolatedHive.entryPoint = entryPoint;
     }

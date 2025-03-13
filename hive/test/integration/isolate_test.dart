@@ -4,7 +4,7 @@ library;
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:hive_ce/hive.dart' hide IsolatedHive;
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
@@ -55,7 +55,7 @@ void main() async {
     bool close = false,
   }) {
     return Isolate.run(() async {
-      final hive = IsolatedHive();
+      final hive = IsolatedHiveImpl();
       hive.entryPoint = (send) => silenceOutput(() => isolateEntryPoint(send));
       await hive.init(path, isolateNameServer: ins);
       final box = await hive.openBox<int>('test');
@@ -71,7 +71,7 @@ void main() async {
     () {
       test('single without INS', () async {
         final dir = await getTempDir();
-        final hive = IsolatedHive();
+        final hive = IsolatedHiveImpl();
         await hive.init(dir.path, isolateNameServer: StubIns());
         await expectLater(
           runIsolate(ins: StubIns(), path: dir.path, close: true),
@@ -84,7 +84,7 @@ void main() async {
       group('multiple', () {
         test('without INS', () async {
           final dir = await getTempDir();
-          final hive = IsolatedHive();
+          final hive = IsolatedHiveImpl();
           hive.entryPoint =
               (send) => silenceOutput(() => isolateEntryPoint(send));
           await hive.init(dir.path, isolateNameServer: StubIns());
@@ -102,7 +102,7 @@ void main() async {
         test('with INS', () async {
           final dir = await getTempDir();
           final ins = TestIns();
-          final hive = IsolatedHive();
+          final hive = IsolatedHiveImpl();
           await hive.init(dir.path, isolateNameServer: ins);
           await expectLater(
             Future.wait([
@@ -135,7 +135,7 @@ void main() async {
         });
 
         test('safe hive isolate', () async {
-          final hive = IsolatedHive();
+          final hive = IsolatedHiveImpl();
           addTearDown(hive.close);
 
           hive.entryPoint = (send) async {
@@ -155,14 +155,14 @@ void main() async {
 
         test('no INS', () async {
           final unsafeOutput =
-              await captureOutput(() => IsolatedHive().init(null)).toList();
+              await captureOutput(() => IsolatedHiveImpl().init(null)).toList();
           expect(
             unsafeOutput,
-            contains(IsolatedHive.noIsolateNameServerWarning),
+            contains(IsolatedHiveImpl.noIsolateNameServerWarning),
           );
 
           final safeOutput = await captureOutput(
-            () => IsolatedHive().init(null, isolateNameServer: TestIns()),
+            () => IsolatedHiveImpl().init(null, isolateNameServer: TestIns()),
           ).toList();
           expect(safeOutput, isEmpty);
         });

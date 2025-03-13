@@ -8,6 +8,9 @@ import 'package:meta/meta.dart';
 
 part 'isolated_hive_internal.dart';
 
+/// This is for consistency with [HiveImpl]
+typedef IsolatedHiveImpl = IsolatedHive;
+
 /// Handles Hive operations in an isolate
 ///
 /// Limitations:

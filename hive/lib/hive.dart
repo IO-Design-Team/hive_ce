@@ -1,6 +1,6 @@
 import 'package:hive_ce/src/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart' as isolated_hive;
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 
 export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.js_interop) 'package:hive_ce/src/box_collection/box_collection_indexed_db.dart'
@@ -34,4 +34,7 @@ final HiveInterface Hive = HiveImpl();
 
 /// Global constant to access IsolatedHive
 // ignore: non_constant_identifier_names
-final IsolatedHive = isolated_hive.IsolatedHive();
+final IsolatedHive = IsolatedHiveImpl();
+
+/// This is for consistency with [HiveInterface]
+typedef IsolatedHiveInterface = IsolatedHiveImpl;
