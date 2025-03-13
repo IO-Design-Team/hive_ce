@@ -1,3 +1,6 @@
+@TestOn('vm')
+library;
+
 import 'package:hive_ce/hive.dart' hide IsolatedHive;
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';

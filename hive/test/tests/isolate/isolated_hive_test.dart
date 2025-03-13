@@ -1,5 +1,3 @@
-// This is a test
-// ignore_for_file: prefer_async_await
 @TestOn('vm')
 library;
 
