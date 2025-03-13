@@ -31,10 +31,15 @@ export 'src/isolate/isolate_name_server.dart';
 export 'src/isolate/isolated_hive.dart';
 export 'src/isolate/isolated_box.dart';
 
-/// Global constant to access Hive
+/// Global constant to access [Hive]
 // ignore: non_constant_identifier_names
 final HiveInterface Hive = HiveImpl();
 
-/// Global constant to access IsolatedHive
+/// Global constant to access [IsolatedHive]
+///
+/// [IsolatedHive] delegates method calls to an isolate. This allows safe
+/// usage of Hive across multiple isolates.
+///
+/// On web, [IsolatedHive] directly calls [Hive]
 // ignore: non_constant_identifier_names
 final IsolatedHiveInterface IsolatedHive = IsolatedHiveImpl();
