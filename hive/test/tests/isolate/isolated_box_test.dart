@@ -1,23 +1,22 @@
-@TestOn('vm')
-library;
-
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/frame.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
+import '../../util/is_browser/is_browser.dart';
 import '../common.dart';
 
 Future<IsolatedBox> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
-  name ??= 'testBox';
+  name ??= generateBoxName();
 
-  final tempDir = await getTempDir();
   final hive = IsolatedHiveImpl();
   addTearDown(hive.close);
-  await hive.init(tempDir.path, isolateNameServer: StubIns());
+
+  final dir = isBrowser ? null : await getTempDir();
+  await hive.init(dir?.path, isolateNameServer: StubIns());
   final box = await hive.openBox(name);
   for (final frame in frames) {
     await box.put(frame.key, frame.value);

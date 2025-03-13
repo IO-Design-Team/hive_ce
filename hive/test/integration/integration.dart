@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../tests/common.dart';
-import '../util/is_browser.dart';
+import '../util/is_browser/is_browser.dart';
 import '../util/print_utils.dart';
 
 class HiveWrapper {
@@ -102,8 +102,8 @@ Future<HiveWrapper> createHive({
   final HiveWrapper hive;
   if (isolated) {
     final isolatedHive = IsolatedHiveImpl();
-    if (entryPoint != null) {
-      isolatedHive.entryPoint = entryPoint;
+    if (isolatedHive is HiveIsolate && entryPoint != null) {
+      (isolatedHive as HiveIsolate).entryPoint = entryPoint;
     }
     hive = HiveWrapper(isolatedHive);
   } else {
@@ -127,7 +127,7 @@ Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   List<int>? encryptionKey,
 }) async {
   hive ??= await createHive(isolated: isolated);
-  final id = Random.secure().nextInt(99999999);
+  final boxName = generateBoxName();
   HiveCipher? cipher;
   if (encryptionKey != null) {
     cipher = HiveAesCipher(encryptionKey);
@@ -135,13 +135,13 @@ Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   final BoxBaseWrapper<T> box;
   if (lazy) {
     box = await hive.openLazyBox<T>(
-      'box$id',
+      boxName,
       crashRecovery: false,
       encryptionCipher: cipher,
     );
   } else {
     box = await hive.openBox<T>(
-      'box$id',
+      boxName,
       crashRecovery: false,
       encryptionCipher: cipher,
     );
@@ -179,11 +179,5 @@ const longTimeout = Timeout(Duration(minutes: 2));
 
 void hiveIntegrationTest(void Function(bool isolated) test) {
   test(false);
-  group(
-    'IsolatedHive',
-    () => test(true),
-    onPlatform: {
-      'chrome': Skip('Isolates are not supported on web'),
-    },
-  );
+  group('IsolatedHive', () => test(true));
 }

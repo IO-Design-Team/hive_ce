@@ -24,8 +24,11 @@ Matcher throwsHiveError([String? containing]) {
 
 Matcher throwsIsolatedHiveError([String? containing]) {
   return throwsA(
-    isA<IsolateException>()
-        .having((e) => e.details, 'details', contains(contains(containing))),
+    anyOf([
+      isAHiveError(containing),
+      isA<IsolateException>()
+          .having((e) => e.details, 'details', contains(contains(containing))),
+    ]),
   );
 }
 
@@ -143,3 +146,8 @@ Future<void> expectDirEqualsAssetDir(
 
 void returnFutureVoid(When<Future<void>> v) =>
     v.thenAnswer((i) => Future.value(null));
+
+String generateBoxName() {
+  final id = Random.secure().nextInt(99999999);
+  return 'box$id';
+}

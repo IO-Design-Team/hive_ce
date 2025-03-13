@@ -1,23 +1,22 @@
-@TestOn('vm')
-library;
-
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/frame.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
+import '../../util/is_browser/is_browser.dart';
 import '../common.dart';
 
-Future<IsolatedLazyBox> _openLazyBoxBase({
+Future<IsolatedLazyBox> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
-  name ??= 'testBox';
+  name ??= generateBoxName();
 
-  final tempDir = await getTempDir();
   final hive = IsolatedHiveImpl();
   addTearDown(hive.close);
-  await hive.init(tempDir.path, isolateNameServer: StubIns());
+
+  final dir = isBrowser ? null : await getTempDir();
+  await hive.init(dir?.path, isolateNameServer: StubIns());
   final box = await hive.openLazyBox(name);
   for (final frame in frames) {
     await box.put(frame.key, frame.value);
@@ -29,14 +28,14 @@ void main() {
   group('LazyBoxImpl', () {
     group('.get()', () {
       test('returns defaultValue if key does not exist', () async {
-        final box = await _openLazyBoxBase();
+        final box = await _openBox();
 
         expect(await box.get('someKey'), null);
         expect(await box.get('otherKey', defaultValue: -12), -12);
       });
 
       test('reads value from storage', () async {
-        final box = await _openLazyBoxBase(
+        final box = await _openBox(
           frames: [
             Frame('testKey', 'testVal'),
           ],
@@ -47,7 +46,7 @@ void main() {
     });
 
     test('.getAt()', () async {
-      final box = await _openLazyBoxBase(
+      final box = await _openBox(
         frames: [
           Frame(0, 'zero'),
           Frame('a', 'A'),
@@ -59,7 +58,7 @@ void main() {
 
     group('.putAll()', () {
       test('values', () async {
-        final box = await _openLazyBoxBase();
+        final box = await _openBox();
 
         await box.putAll({'key1': 'value1', 'key2': 'value2'});
 
@@ -70,7 +69,7 @@ void main() {
       test('handles exceptions gracefully', () async {
         // This is a simplified test since we can't easily mock exceptions
         // with the actual box implementation
-        final box = await _openLazyBoxBase();
+        final box = await _openBox();
 
         await box.putAll({'key1': 'value1', 'key2': 'value2'});
         expect(await box.get('key1'), 'value1');
@@ -79,7 +78,7 @@ void main() {
 
     group('.deleteAll()', () {
       test('does nothing when deleting non existing keys', () async {
-        final box = await _openLazyBoxBase();
+        final box = await _openBox();
         final lengthBefore = await box.length;
 
         await box.deleteAll(['key1', 'key2', 'key3']);
@@ -88,7 +87,7 @@ void main() {
       });
 
       test('delete keys', () async {
-        final box = await _openLazyBoxBase(
+        final box = await _openBox(
           frames: [
             Frame('key1', 'value1'),
             Frame('key2', 'value2'),
@@ -105,7 +104,7 @@ void main() {
     });
 
     test('.close() properly closes the box', () async {
-      final box = await _openLazyBoxBase();
+      final box = await _openBox();
       await box.close();
       expect(await box.isOpen, false);
     });

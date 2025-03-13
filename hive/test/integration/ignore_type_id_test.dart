@@ -29,20 +29,17 @@ class TestAdapter extends TypeAdapter<TestObject> {
 void main() {
   hiveIntegrationTest((isolated) {
     test('ignore typeId with IgnoredTypeAdapter', () async {
-      final hive = await createHive(isolated: isolated);
-      final box1 = await hive.openBox('test');
+      final (hive, box1) = await openBox(false, isolated: isolated);
 
       await hive.registerAdapter(TestAdapter());
 
       await box1.put(1, TestObject(5));
       await box1.put(2, 42);
       await box1.put(3, 78);
-      await box1.close();
 
       await hive.resetAdapters();
       await hive.ignoreTypeId(10);
-
-      final box2 = await hive.openBox('test');
+      final box2 = await hive.reopenBox(box1);
 
       expect(box2, isNotNull);
       expect(await box2.get(1), null);
