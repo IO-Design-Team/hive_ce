@@ -26,7 +26,7 @@ void main() {
   group('BoxBase', () {
     test('.name', () async {
       final box = await _openBoxBase(name: 'testName');
-      expect(box.name, 'testName');
+      expect(box.name, 'testname');
     });
 
     test('.path', () async {
@@ -152,8 +152,8 @@ void main() {
     test('.putAt()', () async {
       final box = await _openBoxBase(
         frames: [
-          Frame.lazy('a'),
-          Frame.lazy('b'),
+          Frame(0, 'a'),
+          Frame(1, 'b'),
         ],
       );
 

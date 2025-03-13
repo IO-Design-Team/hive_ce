@@ -77,7 +77,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'compact':
         await box.compact();
       case 'clear':
-        await box.clear();
+        return box.clear();
       case 'close':
         await box.close();
         _close();
