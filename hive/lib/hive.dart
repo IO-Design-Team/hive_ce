@@ -34,7 +34,7 @@ final HiveInterface Hive = HiveImpl();
 
 /// Global constant to access IsolatedHive
 // ignore: non_constant_identifier_names
-final IsolatedHive = IsolatedHiveImpl();
+final IsolatedHiveInterface IsolatedHive = IsolatedHiveImpl();
 
 /// This is for consistency with [HiveInterface]
 typedef IsolatedHiveInterface = IsolatedHiveImpl;
