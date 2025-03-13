@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
@@ -40,6 +41,8 @@ RECOMMENDED ACTIONS:
   late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
+
+  bool _open = true;
 
   IsolateEntryPoint _entryPoint = isolateEntryPoint;
 
@@ -147,8 +150,10 @@ RECOMMENDED ACTIONS:
 
   /// Shutdown the isolate
   Future<void> close() async {
+    if (!_open) return;
     await _hiveChannel.invokeMethod('close');
     _connection.close();
+    _open = false;
   }
 
   /// Delete a box from the disk
@@ -166,16 +171,25 @@ RECOMMENDED ACTIONS:
       .invokeMethod('boxExists', {'name': name.toLowerCase(), 'path': path});
 
   /// Register an adapter in the isolate
+  ///
+  /// WARNING: Validation checks are not as strong as with [Hive]
   Future<void> registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
     bool override = false,
-  }) =>
-      _hiveChannel.invokeMethod('registerAdapter', {
-        'adapter': adapter,
-        'internal': internal,
-        'override': override,
-      });
+  }) {
+    final typeId =
+        TypeRegistryImpl.calculateTypeId(adapter.typeId, internal: internal);
+    final resolved = ResolvedAdapter(adapter, typeId);
+    TypeRegistryImpl.validateAdapterType(resolved);
+    return _hiveChannel.invokeMethod('registerAdapter', {
+      // We must pass a ResolvedAdapter into the isolate to preserve type
+      // information
+      'adapter': resolved,
+      'internal': internal,
+      'override': override,
+    });
+  }
 
   /// Check if an adapter is registered in the isolate
   Future<bool> isAdapterRegistered(int typeId) =>

@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 @visibleForTesting
 class ResolvedAdapter<T> {
   /// The [TypeAdapter] for type [T]
-  final TypeAdapter adapter;
+  final TypeAdapter<T> adapter;
 
   /// The [adapter]'s [typeId]
   final int typeId;
@@ -59,6 +59,13 @@ class _NullTypeRegistry implements TypeRegistryImpl {
   }) =>
       throw UnimplementedError();
 
+  @override
+  void registerResolvedAdapter<T>(
+    ResolvedAdapter<T> adapter, {
+    bool internal = false,
+    bool override = false,
+  }) =>
+      throw UnimplementedError();
   @override
   Never resetAdapters() => throw UnimplementedError();
 }
@@ -129,12 +136,8 @@ class TypeRegistryImpl implements TypeRegistry {
     return null;
   }
 
-  @override
-  void registerAdapter<T>(
-    TypeAdapter<T> adapter, {
-    bool internal = false,
-    bool override = false,
-  }) {
+  /// Validate the type of the adapter
+  static void validateAdapterType<T>(ResolvedAdapter<T> adapter) {
     if (T == dynamic || T == Object) {
       debugPrint(
         'Registering type adapters for dynamic type is must be avoided, '
@@ -145,9 +148,32 @@ class TypeRegistryImpl implements TypeRegistry {
         'registerAdapter<MyType>(MyTypeAdapter())',
       );
     }
+  }
+
+  @override
+  void registerAdapter<T>(
+    TypeAdapter<T> adapter, {
+    bool internal = false,
+    bool override = false,
+  }) {
     final typeId = calculateTypeId(adapter.typeId, internal: internal);
+    final resolved = ResolvedAdapter(adapter, typeId);
+    validateAdapterType(resolved);
+    registerResolvedAdapter(
+      resolved,
+      internal: internal,
+      override: override,
+    );
+  }
+
+  /// Register a resolved adapter
+  void registerResolvedAdapter<T>(
+    ResolvedAdapter<T> adapter, {
+    bool internal = false,
+    bool override = false,
+  }) {
     if (!internal) {
-      final oldAdapter = findAdapterForTypeId(typeId)?.adapter;
+      final oldAdapter = findAdapterForTypeId(adapter.typeId)?.adapter;
       if (oldAdapter != null) {
         if (override) {
           final oldAdapterType = oldAdapter.runtimeType;
@@ -162,7 +188,7 @@ class TypeRegistryImpl implements TypeRegistry {
           );
         } else {
           throw HiveError('There is already a TypeAdapter for '
-              'typeId ${typeId - reservedTypeIds}.');
+              'typeId ${adapter.typeId - reservedTypeIds}.');
         }
       }
 
@@ -186,7 +212,7 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
 
-    _typeAdapters[typeId] = ResolvedAdapter<T>(adapter, typeId);
+    _typeAdapters[adapter.typeId] = adapter;
   }
 
   @override
@@ -206,7 +232,6 @@ class TypeRegistryImpl implements TypeRegistry {
   }
 
   /// Resolve the real type ID for the given [typeId]
-  @visibleForTesting
   static int calculateTypeId(int typeId, {required bool internal}) {
     if (internal) {
       assert(typeId >= 0 && typeId <= maxInternalTypeId);
