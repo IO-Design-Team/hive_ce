@@ -9,7 +9,7 @@ import '../common.dart';
 
 Future<IsolatedBoxBase> _openBoxBase({
   String? name,
-  Keystore? keystore,
+  List<Frame> frames = const [],
 }) async {
   name ??= 'testBox';
 
@@ -18,10 +18,8 @@ Future<IsolatedBoxBase> _openBoxBase({
   addTearDown(hive.close);
   await hive.init(tempDir.path, isolateNameServer: StubIns());
   final box = await hive.openBox(name);
-  if (keystore != null) {
-    for (final frame in keystore.frames) {
-      await box.put(frame.key, frame.value);
-    }
+  for (final frame in frames) {
+    await box.put(frame.key, frame.value);
   }
   return box;
 }
@@ -41,13 +39,11 @@ void main() {
     group('.keys', () {
       test('returns keys from keystore', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('key1'),
-              Frame.lazy('key4'),
-              Frame.lazy('key2'),
-            ],
-          ),
+          frames: [
+            Frame.lazy('key1'),
+            Frame.lazy('key4'),
+            Frame.lazy('key2'),
+          ],
         );
         expect(await box.keys, ['key1', 'key2', 'key4']);
       });
@@ -68,13 +64,12 @@ void main() {
       });
 
       test('non empty box', () async {
-        final keystore = Keystore.debug(
+        final box = await _openBoxBase(
           frames: [
-            Frame('key1', null),
-            Frame('key2', null),
+            Frame.lazy('key1'),
+            Frame.lazy('key2'),
           ],
         );
-        final box = await _openBoxBase(keystore: keystore);
         expect(await box.length, 2);
         expect(await box.isEmpty, false);
         expect(await box.isNotEmpty, true);
@@ -100,12 +95,10 @@ void main() {
     group('.keyAt()', () {
       test('returns key at index', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy(0),
-              Frame.lazy('test'),
-            ],
-          ),
+          frames: [
+            Frame.lazy(0),
+            Frame.lazy('test'),
+          ],
         );
         expect(await box.keyAt(1), 'test');
       });
@@ -120,22 +113,18 @@ void main() {
     group('.containsKey()', () {
       test('returns true if key exists', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('existingKey'),
-            ],
-          ),
+          frames: [
+            Frame.lazy('existingKey'),
+          ],
         );
         expect(await box.containsKey('existingKey'), true);
       });
 
       test('returns false if key does not exist', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('existingKey'),
-            ],
-          ),
+          frames: [
+            Frame.lazy('existingKey'),
+          ],
         );
         expect(await box.containsKey('nonExistingKey'), false);
       });
@@ -165,12 +154,10 @@ void main() {
     group('.putAt()', () {
       test('override existing', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('a'),
-              Frame.lazy('b'),
-            ],
-          ),
+          frames: [
+            Frame.lazy('a'),
+            Frame.lazy('b'),
+          ],
         );
 
         await box.putAt(1, 'test');
@@ -197,12 +184,10 @@ void main() {
     group('.clear()', () {
       test('clears keystore and backend', () async {
         final box = await _openBoxBase(
-          keystore: Keystore.debug(
-            frames: [
-              Frame.lazy('a'),
-              Frame.lazy('b'),
-            ],
-          ),
+          frames: [
+            Frame.lazy('a'),
+            Frame.lazy('b'),
+          ],
         );
 
         expect(await box.clear(), 2);
