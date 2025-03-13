@@ -11,7 +11,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import '../tests/common.dart';
-import '../util/is_browser.dart';
+import '../util/is_browser/is_browser.dart';
 import '../util/print_utils.dart';
 
 class HiveWrapper {

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:test/test.dart';
 
-import '../util/is_browser.dart';
+import '../util/is_browser/is_browser.dart';
 import 'integration.dart';
 
 Future _performTest(bool lazy, {required bool isolated}) async {

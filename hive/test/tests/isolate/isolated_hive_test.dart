@@ -5,6 +5,7 @@ import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 
 import '../../integration/isolate_test.dart';
+import '../../util/is_browser/is_browser.dart';
 import '../common.dart';
 
 class _TestAdapter extends TypeAdapter<int> {
@@ -23,10 +24,11 @@ class _TestAdapter extends TypeAdapter<int> {
 void main() {
   group('IsolatedHive', () {
     Future<IsolatedHiveImpl> initHive() async {
-      final tempDir = await getTempDir();
       final hive = IsolatedHiveImpl();
       addTearDown(hive.close);
-      await hive.init(tempDir.path, isolateNameServer: StubIns());
+
+      final dir = isBrowser ? null : await getTempDir();
+      await hive.init(dir?.path, isolateNameServer: StubIns());
       return hive;
     }
 

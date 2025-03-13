@@ -3,6 +3,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
+import '../../util/is_browser/is_browser.dart';
 import '../common.dart';
 
 Future<IsolatedBoxBase> _openBox({
@@ -11,10 +12,11 @@ Future<IsolatedBoxBase> _openBox({
 }) async {
   name ??= 'testBox';
 
-  final tempDir = await getTempDir();
   final hive = IsolatedHiveImpl();
   addTearDown(hive.close);
-  await hive.init(tempDir.path, isolateNameServer: StubIns());
+
+  final dir = isBrowser ? null : await getTempDir();
+  await hive.init(dir?.path, isolateNameServer: StubIns());
   final box = await hive.openBox(name);
   for (final frame in frames) {
     await box.put(frame.key, frame.value);
