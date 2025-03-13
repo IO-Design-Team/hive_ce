@@ -1,7 +1,7 @@
 ## NEXT
 
 - Isolate support through `IsolatedHive`
-- Prints a warning when accessing Hive from an unsafe isolate
+- Warning messages for potentially unsafe isolate usage
 - Updates suggested placement of `GenerateAdapters` annotation
 
 ## 2.10.1

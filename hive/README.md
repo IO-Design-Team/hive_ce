@@ -26,6 +26,7 @@ For a quick tutorial, see [this wonderful post](https://onlyflutter.com/how-to-a
 
 Hive CE is a spiritual continuation of Hive v2 with the following new features:
 
+- Isolate support through `IsolatedHive`
 - Flutter web WASM support
 - Support for Sets
 - A built in Duration adapter
