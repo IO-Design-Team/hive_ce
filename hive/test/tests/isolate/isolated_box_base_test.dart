@@ -3,7 +3,6 @@ import 'package:hive_ce/src/binary/frame.dart';
 
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
 import '../common.dart';
