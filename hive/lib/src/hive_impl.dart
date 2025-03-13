@@ -14,7 +14,7 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
-import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
@@ -74,7 +74,7 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (!{'main', IsolatedHiveImpl.isolateName}.contains(isolateDebugName)) {
+    if (!{'main', HiveIsolate.isolateName}.contains(isolateDebugName)) {
       debugPrint(unsafeIsolateWarning);
     }
     homePath = path;

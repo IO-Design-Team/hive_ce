@@ -8,6 +8,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -56,7 +57,8 @@ void main() async {
   }) {
     return Isolate.run(() async {
       final hive = IsolatedHiveImpl();
-      hive.entryPoint = (send) => silenceOutput(() => isolateEntryPoint(send));
+      (hive as HiveIsolate).entryPoint =
+          (send) => silenceOutput(() => isolateEntryPoint(send));
       await hive.init(path, isolateNameServer: ins);
       final box = await hive.openBox<int>('test');
       for (var i = 0; i < 100; i++) {
@@ -85,7 +87,7 @@ void main() async {
         test('without INS', () async {
           final dir = await getTempDir();
           final hive = IsolatedHiveImpl();
-          hive.entryPoint =
+          (hive as HiveIsolate).entryPoint =
               (send) => silenceOutput(() => isolateEntryPoint(send));
           await hive.init(dir.path, isolateNameServer: StubIns());
           await expectLater(
@@ -138,7 +140,7 @@ void main() async {
           final hive = IsolatedHiveImpl();
           addTearDown(hive.close);
 
-          hive.entryPoint = (send) async {
+          (hive as HiveIsolate).entryPoint = (send) async {
             final connection = setupIsolate(send);
             final hiveChannel = IsolateMethodChannel('hive', connection);
             final testChannel = IsolateMethodChannel('test', connection);
@@ -148,7 +150,8 @@ void main() async {
             );
           };
           await hive.init(null, isolateNameServer: StubIns());
-          final channel = IsolateMethodChannel('test', hive.connection);
+          final channel =
+              IsolateMethodChannel('test', (hive as HiveIsolate).connection);
           final result = await channel.invokeListMethod('');
           expect(result, isEmpty);
         });
@@ -158,7 +161,7 @@ void main() async {
               await captureOutput(() => IsolatedHiveImpl().init(null)).toList();
           expect(
             unsafeOutput,
-            contains(IsolatedHiveImpl.noIsolateNameServerWarning),
+            contains(HiveIsolate.noIsolateNameServerWarning),
           );
 
           final safeOutput = await captureOutput(

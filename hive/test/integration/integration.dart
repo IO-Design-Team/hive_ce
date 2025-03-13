@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -102,8 +103,8 @@ Future<HiveWrapper> createHive({
   final HiveWrapper hive;
   if (isolated) {
     final isolatedHive = IsolatedHiveImpl();
-    if (entryPoint != null) {
-      isolatedHive.entryPoint = entryPoint;
+    if (isolatedHive is HiveIsolate && entryPoint != null) {
+      (isolatedHive as HiveIsolate).entryPoint = entryPoint;
     }
     hive = HiveWrapper(isolatedHive);
   } else {
@@ -179,11 +180,5 @@ const longTimeout = Timeout(Duration(minutes: 2));
 
 void hiveIntegrationTest(void Function(bool isolated) test) {
   test(false);
-  group(
-    'IsolatedHive',
-    () => test(true),
-    onPlatform: {
-      'chrome': Skip('Isolates are not supported on web'),
-    },
-  );
+  group('IsolatedHive', () => test(true));
 }

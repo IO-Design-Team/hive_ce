@@ -1,52 +1,25 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
-
-part 'isolated_hive_impl_vm_internal.dart';
 
 /// Handles Hive operations in an isolate
 ///
 /// Limitations:
 /// - [IsolatedHive] does not support [HiveObject]s
 /// - Most methods are async due to isolate communication
-class IsolatedHiveImpl implements IsolatedHiveInterface{
-  /// The name of the hive isolate
-  static const isolateName = '_hive_isolate';
-
-  /// Warning message printed when using [IsolatedHive] without an [IsolateNameServer]
-  @visibleForTesting
-  static final noIsolateNameServerWarning = '''
-⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
-
-Using IsolatedHive without an IsolateNameServer is unsafe. This can lead to
-DATA CORRUPTION as Hive boxes are not designed for concurrent access across
-isolates. Using an IsolateNameServer allows IsolatedHive to maintain a single
-isolate for all Hive operations.
-
-RECOMMENDED ACTIONS:
-- Initialize IsolatedHive with IsolatedHive.initFlutter from hive_ce_flutter
-- Provide your own IsolateNameServer
-
-''';
-
+class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
   late final IsolateNameServer? _isolateNameServer;
-  late final IsolateConnection _connection;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
 
   bool _open = true;
 
-  IsolateEntryPoint _entryPoint = isolateEntryPoint;
-
-  /// Must only be called once per isolate
-  ///
-  /// If accessing Hive in multiple isolates, an [isolateNameSever] MUST be
-  /// passed to avoid box corruption
+  @override
   Future<void> init(
     String? path, {
     IsolateNameServer? isolateNameServer,
@@ -54,32 +27,34 @@ RECOMMENDED ACTIONS:
     _isolateNameServer = isolateNameServer;
 
     if (_isolateNameServer == null) {
-      debugPrint(noIsolateNameServerWarning);
+      debugPrint(HiveIsolate.noIsolateNameServerWarning);
     }
 
-    final send = _isolateNameServer?.lookupPortByName(isolateName);
+    final send = _isolateNameServer?.lookupPortByName(HiveIsolate.isolateName);
     if (send != null) {
-      _connection = connectToIsolate(send);
+      connection = connectToIsolate(send);
     } else {
-      _connection = await spawnIsolate(
-        _entryPoint,
-        debugName: isolateName,
+      connection = await spawnIsolate(
+        entryPoint,
+        debugName: HiveIsolate.isolateName,
         onExit: () {
-          _isolateNameServer?.removePortNameMapping(isolateName);
+          _isolateNameServer?.removePortNameMapping(HiveIsolate.isolateName);
           close();
         },
-        onConnect: (send) =>
-            _isolateNameServer?.registerPortWithName(send, isolateName),
+        onConnect: (send) => _isolateNameServer?.registerPortWithName(
+          send,
+          HiveIsolate.isolateName,
+        ),
       );
     }
 
-    _hiveChannel = IsolateMethodChannel('hive', _connection);
-    _boxChannel = IsolateMethodChannel('box', _connection);
+    _hiveChannel = IsolateMethodChannel('hive', connection);
+    _boxChannel = IsolateMethodChannel('box', connection);
 
     return _hiveChannel.invokeMethod('init', path);
   }
 
-  /// Open a box in the isolate
+  @override
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -101,10 +76,10 @@ RECOMMENDED ACTIONS:
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBox(_boxChannel, _connection, name, false);
+    return IsolatedBox(_boxChannel, connection, name, false);
   }
 
-  /// Open a lazy box in the isolate
+  @override
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -124,52 +99,50 @@ RECOMMENDED ACTIONS:
       'path': path,
       'collection': collection,
     });
-    return IsolatedLazyBox(_boxChannel, _connection, name, true);
+    return IsolatedLazyBox(_boxChannel, connection, name, true);
   }
 
-  /// Get an object to communicate with the isolated box
+  @override
   Future<IsolatedBox<E>> box<E>(String name) async {
     name = name.toLowerCase();
     await _hiveChannel.invokeMethod('box', {'name': name});
-    return IsolatedBox(_boxChannel, _connection, name, false);
+    return IsolatedBox(_boxChannel, connection, name, false);
   }
 
-  /// Get an object to communicate with the isolated box
+  @override
   Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
     name = name.toLowerCase();
     await _hiveChannel.invokeMethod('lazyBox', {'name': name});
-    return IsolatedLazyBox(_boxChannel, _connection, name, true);
+    return IsolatedLazyBox(_boxChannel, connection, name, true);
   }
 
-  /// Check if a box is open in the isolate
+  @override
   Future<bool> isBoxOpen(String name) =>
       _hiveChannel.invokeMethod('isBoxOpen', name.toLowerCase());
 
-  /// Shutdown the isolate
+  @override
   Future<void> close() async {
     if (!_open) return;
     await _hiveChannel.invokeMethod('close');
-    _connection.close();
+    connection.close();
     _open = false;
   }
 
-  /// Delete a box from the disk
+  @override
   Future<void> deleteBoxFromDisk(String name, {String? path}) =>
       _hiveChannel.invokeMethod(
         'deleteBoxFromDisk',
         {'name': name.toLowerCase(), 'path': path},
       );
 
-  /// Delete all boxes from the disk
+  @override
   Future<void> deleteFromDisk() => _hiveChannel.invokeMethod('deleteFromDisk');
 
-  /// Check if a box exists in the isolate
+  @override
   Future<bool> boxExists(String name, {String? path}) => _hiveChannel
       .invokeMethod('boxExists', {'name': name.toLowerCase(), 'path': path});
 
-  /// Register an adapter in the isolate
-  ///
-  /// WARNING: Validation checks are not as strong as with [Hive]
+  @override
   Future<void> registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
@@ -188,15 +161,15 @@ RECOMMENDED ACTIONS:
     });
   }
 
-  /// Check if an adapter is registered in the isolate
+  @override
   Future<bool> isAdapterRegistered(int typeId) =>
       _hiveChannel.invokeMethod('isAdapterRegistered', typeId);
 
-  /// Reset the adapters in the isolate
+  @override
   @visibleForTesting
   Future<void> resetAdapters() => _hiveChannel.invokeMethod('resetAdapters');
 
-  /// Ignore a type id in the isolate
+  @override
   Future<void> ignoreTypeId<T>(int typeId) =>
       _hiveChannel.invokeMethod('ignoreTypeId', typeId);
 }
