@@ -3,7 +3,7 @@ library;
 
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart' hide IsolatedHive;
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:test/test.dart';
 
@@ -25,16 +25,16 @@ class _TestAdapter extends TypeAdapter<int> {
 
 void main() {
   group('IsolatedHive', () {
-    Future<IsolatedHive> initHive() async {
+    Future<IsolatedHiveImpl> initHive() async {
       final tempDir = await getTempDir();
-      final hive = IsolatedHive();
+      final hive = IsolatedHiveImpl();
       addTearDown(hive.close);
       await hive.init(tempDir.path, isolateNameServer: StubIns());
       return hive;
     }
 
     test('.init()', () {
-      final hive = IsolatedHive();
+      final hive = IsolatedHiveImpl();
       expect(hive.init('MYPATH', isolateNameServer: StubIns()), completes);
     });
 

@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart' hide IsolatedHive;
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
@@ -14,13 +14,13 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
+import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/backend/storage_backend.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
@@ -74,7 +74,7 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (!{'main', IsolatedHive.isolateName}.contains(isolateDebugName)) {
+    if (!{'main', IsolatedHiveImpl.isolateName}.contains(isolateDebugName)) {
       debugPrint(unsafeIsolateWarning);
     }
     homePath = path;
