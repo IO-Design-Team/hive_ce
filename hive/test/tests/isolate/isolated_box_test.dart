@@ -10,7 +10,7 @@ Future<IsolatedBox> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
-  name ??= 'testBox';
+  name ??= generateBoxName();
 
   final hive = IsolatedHiveImpl();
   addTearDown(hive.close);

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
@@ -128,7 +127,7 @@ Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   List<int>? encryptionKey,
 }) async {
   hive ??= await createHive(isolated: isolated);
-  final id = Random.secure().nextInt(99999999);
+  final boxName = generateBoxName();
   HiveCipher? cipher;
   if (encryptionKey != null) {
     cipher = HiveAesCipher(encryptionKey);
@@ -136,13 +135,13 @@ Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   final BoxBaseWrapper<T> box;
   if (lazy) {
     box = await hive.openLazyBox<T>(
-      'box$id',
+      boxName,
       crashRecovery: false,
       encryptionCipher: cipher,
     );
   } else {
     box = await hive.openBox<T>(
-      'box$id',
+      boxName,
       crashRecovery: false,
       encryptionCipher: cipher,
     );

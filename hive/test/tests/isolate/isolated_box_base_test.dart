@@ -10,7 +10,7 @@ Future<IsolatedBoxBase> _openBox({
   String? name,
   List<Frame> frames = const [],
 }) async {
-  name ??= 'testBox';
+  name ??= generateBoxName();
 
   final hive = IsolatedHiveImpl();
   addTearDown(hive.close);
@@ -33,7 +33,7 @@ void main() {
 
     test('.path', () async {
       final box = await _openBox();
-      expect(await box.path, isNotEmpty);
+      expect(await box.path, isBrowser ? null : isNotEmpty);
     });
 
     group('.keys', () {
@@ -88,7 +88,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(box.watch().drain(), throwsIsolatedHiveError('closed'));
+        expect(() => box.watch().drain(), throwsIsolatedHiveError('closed'));
       });
     });
 
@@ -199,11 +199,15 @@ void main() {
     });
 
     group('.deleteFromDisk()', () {
-      test('closes and deletes box', () async {
-        final box = await _openBox(name: 'myBox');
-        await box.deleteFromDisk();
-        expect(await box.isOpen, false);
-      });
+      test(
+        'closes and deletes box',
+        () async {
+          final box = await _openBox(name: 'myBox');
+          await box.deleteFromDisk();
+          expect(await box.isOpen, false);
+        },
+        skip: isBrowser,
+      );
     });
   });
 }
