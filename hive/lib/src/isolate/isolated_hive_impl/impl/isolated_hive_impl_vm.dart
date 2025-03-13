@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
@@ -76,7 +77,7 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBox(_boxChannel, connection, name, false);
+    return IsolatedBoxImpl(_boxChannel, connection, name, false);
   }
 
   @override
@@ -99,21 +100,21 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
       'path': path,
       'collection': collection,
     });
-    return IsolatedLazyBox(_boxChannel, connection, name, true);
+    return IsolatedLazyBoxImpl(_boxChannel, connection, name, true);
   }
 
   @override
   Future<IsolatedBox<E>> box<E>(String name) async {
     name = name.toLowerCase();
     await _hiveChannel.invokeMethod('box', {'name': name});
-    return IsolatedBox(_boxChannel, connection, name, false);
+    return IsolatedBoxImpl(_boxChannel, connection, name, false);
   }
 
   @override
   Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
     name = name.toLowerCase();
     await _hiveChannel.invokeMethod('lazyBox', {'name': name});
-    return IsolatedLazyBox(_boxChannel, connection, name, true);
+    return IsolatedLazyBoxImpl(_boxChannel, connection, name, true);
   }
 
   @override

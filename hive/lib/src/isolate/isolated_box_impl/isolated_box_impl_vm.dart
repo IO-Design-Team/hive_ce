@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/isolate/isolated_box.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
@@ -127,10 +126,11 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   IsolatedBoxImpl(super._channel, super.connection, super.name, super.lazy);
 
   @override
-  Future<List<E>> get values => _channel.invokeMethod('values', {'name': name});
+  Future<Iterable<E>> get values =>
+      _channel.invokeMethod('values', {'name': name});
 
   @override
-  Future<List<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
+  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
       _channel.invokeMethod('valuesBetween', {
         'name': name,
         'startKey': startKey,

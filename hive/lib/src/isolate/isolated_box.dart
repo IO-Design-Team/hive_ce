@@ -84,10 +84,10 @@ abstract class IsolatedBoxBase<E> {
 /// Isolated version of [Box]
 abstract class IsolatedBox<E> extends IsolatedBoxBase<E> {
   /// The values of the box
-  Future<List<E>> get values;
+  Future<Iterable<E>> get values;
 
   /// The values of the box between the given keys
-  Future<List<E>> valuesBetween({dynamic startKey, dynamic endKey});
+  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey});
 
   /// Convert the box to a map
   Future<Map<dynamic, E>> toMap();

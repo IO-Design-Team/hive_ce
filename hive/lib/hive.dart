@@ -29,7 +29,7 @@ export 'src/registry/type_registry.dart';
 
 export 'src/isolate/isolate_name_server.dart';
 export 'src/isolate/isolated_hive.dart';
-export 'src/isolate/isolated_box_impl/impl/isolated_box_impl_vm.dart';
+export 'src/isolate/isolated_box.dart';
 
 /// Global constant to access Hive
 // ignore: non_constant_identifier_names
