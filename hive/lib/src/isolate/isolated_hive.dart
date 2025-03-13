@@ -97,12 +97,7 @@ RECOMMENDED ACTIONS:
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      false,
-    );
+    return IsolatedBox(_boxChannel, _connection, name, false);
   }
 
   /// Open a lazy box in the isolate
@@ -124,34 +119,19 @@ RECOMMENDED ACTIONS:
       'path': path,
       'collection': collection,
     });
-    return IsolatedLazyBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      true,
-    );
+    return IsolatedLazyBox(_boxChannel, _connection, name, true);
   }
 
   /// Get an object to communicate with the isolated box
   Future<IsolatedBox<E>> box<E>(String name) async {
     await _hiveChannel.invokeMethod('box', {'name': name});
-    return IsolatedBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      false,
-    );
+    return IsolatedBox(_boxChannel, _connection, name, false);
   }
 
   /// Get an object to communicate with the isolated box
   Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async {
     await _hiveChannel.invokeMethod('lazyBox', {'name': name});
-    return IsolatedLazyBox(
-      _boxChannel,
-      IsolateEventChannel('box_$name', _connection),
-      name,
-      true,
-    );
+    return IsolatedLazyBox(_boxChannel, _connection, name, true);
   }
 
   /// Check if a box is open in the isolate

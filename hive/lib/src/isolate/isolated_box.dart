@@ -12,7 +12,12 @@ abstract class IsolatedBoxBase<E> {
   Stream<BoxEvent>? _stream;
 
   /// Constructor
-  IsolatedBoxBase(this._channel, this._eventChannel, this.name, this.lazy);
+  IsolatedBoxBase(
+    this._channel,
+    IsolateConnection connection,
+    this.name,
+    this.lazy,
+  ) : _eventChannel = IsolateEventChannel('box_$name', connection);
 
   /// The name of the box
   final String name;
@@ -117,13 +122,13 @@ abstract class IsolatedBoxBase<E> {
 /// Isolated implementation of [LazyBoxBase]
 class IsolatedLazyBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
-  IsolatedLazyBox(super._channel, super._eventChannel, super.name, super.lazy);
+  IsolatedLazyBox(super._channel, super.connection, super.name, super.lazy);
 }
 
 /// Isolated implementation of [Box]
 class IsolatedBox<E> extends IsolatedBoxBase<E> {
   /// Constructor
-  IsolatedBox(super._channel, super._eventChannel, super.name, super.lazy);
+  IsolatedBox(super._channel, super.connection, super.name, super.lazy);
 
   /// The values of the box
   Future<Iterable<E>> get values =>
