@@ -1,9 +1,6 @@
-@TestOn('vm')
-library;
-
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/frame.dart';
-import 'package:hive_ce/src/isolate/isolated_hive.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 import '../../integration/isolate_test.dart';
 import '../common.dart';
