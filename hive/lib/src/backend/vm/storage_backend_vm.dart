@@ -13,7 +13,6 @@ import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
@@ -108,7 +107,11 @@ RECOMMENDED ACTIONS:
     this.registry = registry;
 
     if (_lockFile.existsSync()) {
-      debugPrint(lockFileExistsWarning(p.split(_lockFile.path).last));
+      debugPrint(
+        lockFileExistsWarning(
+          _lockFile.path.split(Platform.pathSeparator).last,
+        ),
+      );
     }
 
     lockRaf = await _lockFile.open(mode: FileMode.write);
