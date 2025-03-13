@@ -13,18 +13,19 @@ import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
   /// Warning for lock file already existing
   @visibleForTesting
-  static const lockFileExistsWarning = '''
+  static String lockFileExistsWarning(String fileName) => '''
 ⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
 
-A lock file already exists for this box. This could mean another isolate has
-this box open. This can lead to DATA CORRUPTION as Hive boxes are not designed
-for concurrent access across isolates. Each isolate would maintain its own box
-cache, potentially causing data inconsistency and corruption.
+A lock file already exists for this box ($fileName). This could mean another
+isolate has this box open. This can lead to DATA CORRUPTION as Hive boxes are
+not designed for concurrent access across isolates. Each isolate would maintain
+its own box cache, potentially causing data inconsistency and corruption.
 
 RECOMMENDED ACTIONS:
 - Use IsolatedHive to perform box operations
@@ -106,7 +107,7 @@ RECOMMENDED ACTIONS:
     this.registry = registry;
 
     if (_lockFile.existsSync()) {
-      debugPrint(lockFileExistsWarning);
+      debugPrint(lockFileExistsWarning(p.split(_lockFile.path).last));
     }
 
     lockRaf = await _lockFile.open(mode: FileMode.write);

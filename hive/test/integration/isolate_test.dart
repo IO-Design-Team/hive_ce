@@ -178,7 +178,7 @@ void main() async {
 
           expect(
             output,
-            contains(StorageBackendVm.lockFileExistsWarning),
+            contains(StorageBackendVm.lockFileExistsWarning('test.lock')),
           );
         });
 
