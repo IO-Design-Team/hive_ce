@@ -63,11 +63,10 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
       );
 
   @override
-  Future<IsolatedBox<E>> box<E>(String name) async =>
-      IsolatedBoxImpl(Hive.box(name));
+  IsolatedBox<E> box<E>(String name) => IsolatedBoxImpl(Hive.box(name));
 
   @override
-  Future<IsolatedLazyBox<E>> lazyBox<E>(String name) async =>
+  IsolatedLazyBox<E> lazyBox<E>(String name) =>
       IsolatedLazyBoxImpl(Hive.lazyBox(name));
 
   @override

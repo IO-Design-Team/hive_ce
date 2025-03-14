@@ -37,10 +37,10 @@ abstract class IsolatedHiveInterface {
   });
 
   /// Get an object to communicate with the isolated box
-  Future<IsolatedBox<E>> box<E>(String name);
+  IsolatedBox<E> box<E>(String name);
 
   /// Get an object to communicate with the isolated box
-  Future<IsolatedLazyBox<E>> lazyBox<E>(String name);
+  IsolatedLazyBox<E> lazyBox<E>(String name);
 
   /// Check if a box is open in the isolate
   Future<bool> isBoxOpen(String name);

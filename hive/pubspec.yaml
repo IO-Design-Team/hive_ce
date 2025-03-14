@@ -11,7 +11,8 @@ dependencies:
   meta: ^1.14.0
   crypto: ^3.0.0
   web: ">=0.5.0 <2.0.0"
-  isolate_channel: ^0.1.1
+  isolate_channel:
+    path: ../../isolate_channel
 
 dev_dependencies:
   test: ^1.17.12

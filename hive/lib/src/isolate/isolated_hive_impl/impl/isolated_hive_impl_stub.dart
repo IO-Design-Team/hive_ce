@@ -40,12 +40,12 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
-  Future<IsolatedBox<E>> box<E>(String name) {
+  IsolatedBox<E> box<E>(String name) {
     throw UnimplementedError();
   }
 
   @override
-  Future<IsolatedLazyBox<E>> lazyBox<E>(String name) {
+  IsolatedLazyBox<E> lazyBox<E>(String name) {
     throw UnimplementedError();
   }
 
