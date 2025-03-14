@@ -17,7 +17,6 @@ Future<dynamic> handleHiveMethodCall(
       final name = call.arguments['name'];
       final box = await Hive.openBox(
         name,
-        encryptionCipher: call.arguments['encryptionCipher'],
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
         compactionStrategy:
             call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
@@ -31,7 +30,6 @@ Future<dynamic> handleHiveMethodCall(
       final name = call.arguments['name'];
       final box = await Hive.openLazyBox(
         name,
-        encryptionCipher: call.arguments['encryptionCipher'],
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
         compactionStrategy:
             call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
