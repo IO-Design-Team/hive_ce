@@ -159,7 +159,7 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   @override
   Future<Iterable<E>> get values async {
     final bytes = await _channel.invokeMethod('values', {'name': name});
-    return bytes.map(_readValue).cast<E>();
+    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
   }
 
   @override
@@ -169,7 +169,7 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
       'startKey': startKey,
       'endKey': endKey,
     });
-    return bytes.map(_readValue).cast<E>();
+    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
   }
 
   @override
