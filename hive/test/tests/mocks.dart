@@ -36,7 +36,10 @@ class MockBinaryReader extends Mock implements BinaryReader {}
 
 class MockBinaryWriter extends Mock implements BinaryWriter {}
 
-class MockFile extends Mock implements File {}
+class MockFile extends Mock implements File {
+  @override
+  bool existsSync() => false;
+}
 
 class MockFrameIoHelper extends Mock implements FrameIoHelper {}
 

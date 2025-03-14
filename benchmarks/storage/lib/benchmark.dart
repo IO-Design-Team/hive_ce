@@ -20,12 +20,13 @@ const _model = TestModel(
 );
 
 Future<BenchResult> runBenchmark({
+  required String name,
   required int operations,
   required DbType type,
   required FutureOr<dynamic> Function(String name) openBox,
 }) async {
   print('');
-  print('Running $operations operation ${type.name} benchmark...');
+  print('Running $operations operation $name benchmark...');
 
   var box = await openBox(_boxName);
   await box.deleteFromDisk();
@@ -38,8 +39,9 @@ Future<BenchResult> runBenchmark({
     }
     await box.add(_model);
   }
-
   final elapsed = stopwatch.elapsed;
+
+  await box.close();
 
   final boxFile = File(type.boxFileName(_boxName));
   final size = boxFile.lengthSync();

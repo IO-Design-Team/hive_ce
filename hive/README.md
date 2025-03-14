@@ -26,6 +26,7 @@ For a quick tutorial, see [this wonderful post](https://onlyflutter.com/how-to-a
 
 Hive CE is a spiritual continuation of Hive v2 with the following new features:
 
+- Isolate support through `IsolatedHive`
 - Flutter web WASM support
 - Support for Sets
 - A built in Duration adapter
@@ -38,20 +39,20 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
   - Generate adapters for classes outside the current package
 - Extends the maximum type ID from `223` to `65439`
 
-## Hive CE (v2) vs Hive v4 (Isar)
+## Hive CE (v2) vs IsolatedHive vs Hive v4 (Isar)
 
 You may be considering attempting to make the dev version of Hive v4 work in your project. I _strongly_ advise against this. Not only is Hive v4 not stable, but it is also much slower and less efficient than Hive CE.
 
 This is a comparison of the time to complete a given number of write operations and the resulting database file size:
 
-| Operations | Hive CE |           | Hive v4 |           |
-| ---------- | ------- | --------- | ------- | --------- |
-| 10         | 0.00 s  | 0.00 MB   | 0.01 s  | 1.00 MB   |
-| 100        | 0.01 s  | 0.01 MB   | 0.01 s  | 1.00 MB   |
-| 1,000      | 0.05 s  | 0.11 MB   | 0.07 s  | 1.00 MB   |
-| 10,000     | 0.21 s  | 1.10 MB   | 0.69 s  | 5.00 MB   |
-| 100,000    | 1.53 s  | 10.97 MB  | 7.01 s  | 30.00 MB  |
-| 1,000,000  | 19.97 s | 109.67 MB | 89.81 s | 290.00 MB |
+| Operations | Hive CE Time | IsolatedHive Time | Hive CE Size | Hive v4 Time | Hive v4 Size |
+| ---------- | ------------ | ----------------- | ------------ | ------------ | ------------ |
+| 10         | 0.00 s       | 0.00 s            | 0.00 MB      | 0.00 s       | 1.00 MB      |
+| 100        | 0.00 s       | 0.01 s            | 0.01 MB      | 0.01 s       | 1.00 MB      |
+| 1000       | 0.03 s       | 0.05 s            | 0.11 MB      | 0.07 s       | 1.00 MB      |
+| 10000      | 0.17 s       | 0.27 s            | 1.10 MB      | 0.69 s       | 5.00 MB      |
+| 100000     | 1.46 s       | 2.38 s            | 10.97 MB     | 7.28 s       | 30.00 MB     |
+| 1000000    | 19.11 s      | 29.52 s           | 109.67 MB    | 97.32 s      | 290.00 MB    |
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
