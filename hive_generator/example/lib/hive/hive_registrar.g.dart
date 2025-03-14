@@ -25,19 +25,17 @@ extension HiveRegistrar on HiveInterface {
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
-  Future<void> registerAdapters() {
-    return Future.wait([
-      registerAdapter(Class1Adapter()),
-      registerAdapter(Class2Adapter()),
-      registerAdapter(ClassSpec1Adapter()),
-      registerAdapter(ClassSpec2Adapter()),
-      registerAdapter(ConstructorDefaultsAdapter()),
-      registerAdapter(EmptyClassAdapter()),
-      registerAdapter(Enum1Adapter()),
-      registerAdapter(EnumSpecAdapter()),
-      registerAdapter(IterableClassAdapter()),
-      registerAdapter(NamedImportsAdapter()),
-      registerAdapter(NullableTypesAdapter()),
-    ]);
+  void registerAdapters() {
+    registerAdapter(Class1Adapter());
+    registerAdapter(Class2Adapter());
+    registerAdapter(ClassSpec1Adapter());
+    registerAdapter(ClassSpec2Adapter());
+    registerAdapter(ConstructorDefaultsAdapter());
+    registerAdapter(EmptyClassAdapter());
+    registerAdapter(Enum1Adapter());
+    registerAdapter(EnumSpecAdapter());
+    registerAdapter(IterableClassAdapter());
+    registerAdapter(NamedImportsAdapter());
+    registerAdapter(NullableTypesAdapter());
   }
 }
