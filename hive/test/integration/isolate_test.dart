@@ -15,6 +15,7 @@ import 'package:test/test.dart';
 
 import '../util/print_utils.dart';
 import '../tests/common.dart';
+import 'integration.dart';
 
 /// Exists to silence the warning about not passing an INS
 class StubIns extends IsolateNameServer {
@@ -196,6 +197,25 @@ void main() async {
               await captureOutput(() => Hive.openBox('test')).toList();
           expect(output, isEmpty);
         });
+      });
+
+      test('IsolatedHive data compatable with Hive', () async {
+        final dir = await getTempDir();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox = await isolatedHive.openBox('test');
+        await isolatedBox.put('key', 'value');
+        await isolatedBox.close();
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test');
+        expect(await box.get('key'), 'value');
       });
     },
     onPlatform: {
