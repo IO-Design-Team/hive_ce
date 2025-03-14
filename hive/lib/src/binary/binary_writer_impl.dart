@@ -260,7 +260,7 @@ class BinaryWriterImpl extends BinaryWriter {
     writeKey(frame.key);
 
     if (frame.verbatim) {
-      writeBytes(frame.value as Uint8List);
+      _writeBytes(frame.value as Uint8List);
     } else {
       if (!frame.deleted) {
         if (cipher == null) {
@@ -286,7 +286,7 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Add the given bytes to the buffer verbatim
-  int writeBytes(Uint8List bytes) {
+  int _writeBytes(Uint8List bytes) {
     final length = bytes.length;
     _reserveBytes(length);
     _buffer.setRange(_offset, _offset + length, bytes);
