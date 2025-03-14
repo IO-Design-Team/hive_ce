@@ -15,6 +15,7 @@ import 'package:test/test.dart';
 
 import '../util/print_utils.dart';
 import '../tests/common.dart';
+import 'integration.dart';
 
 /// Exists to silence the warning about not passing an INS
 class StubIns extends IsolateNameServer {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
@@ -28,10 +29,25 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   @override
   IsolateConnection get connection => _connection;
 
-  IsolateEntryPoint _entryPoint = isolateEntryPoint;
+  late Future<IsolateConnection> Function() _spawnHiveIsolate =
+      () => spawnIsolate(
+            isolateEntryPoint,
+            debugName: HiveIsolate.isolateName,
+            onConnect: onConnect,
+            onExit: onExit,
+          );
 
   @override
-  set entryPoint(IsolateEntryPoint entryPoint) => _entryPoint = entryPoint;
+  void onConnect(SendPort send) =>
+      _isolateNameServer?.registerPortWithName(send, HiveIsolate.isolateName);
+
+  @override
+  void onExit() =>
+      _isolateNameServer?.removePortNameMapping(HiveIsolate.isolateName);
+
+  @override
+  set spawnHiveIsolate(Future<IsolateConnection> Function() spawnHiveIsolate) =>
+      _spawnHiveIsolate = spawnHiveIsolate;
 
   @override
   Future<void> init(
@@ -48,18 +64,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     if (send != null) {
       _connection = connectToIsolate(send);
     } else {
-      _connection = await spawnIsolate(
-        _entryPoint,
-        debugName: HiveIsolate.isolateName,
-        onExit: () {
-          _isolateNameServer?.removePortNameMapping(HiveIsolate.isolateName);
-          close();
-        },
-        onConnect: (send) => _isolateNameServer?.registerPortWithName(
-          send,
-          HiveIsolate.isolateName,
-        ),
-      );
+      _connection = await _spawnHiveIsolate();
     }
 
     _hiveChannel = IsolateMethodChannel('hive', _connection);

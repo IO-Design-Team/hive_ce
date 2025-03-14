@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
 
@@ -27,7 +29,15 @@ RECOMMENDED ACTIONS:
   @visibleForTesting
   IsolateConnection get connection;
 
-  /// Override the entry point for testing
+  /// Override the isolate spawn method for testing
   @visibleForTesting
-  set entryPoint(IsolateEntryPoint entryPoint);
+  set spawnHiveIsolate(Future<IsolateConnection> Function() spawnHiveIsolate);
+
+  /// Called when the hive isolate connects
+  @visibleForTesting
+  void onConnect(SendPort send);
+
+  /// Called when the hive isolate exits
+  @visibleForTesting
+  void onExit();
 }

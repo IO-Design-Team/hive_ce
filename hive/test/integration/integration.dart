@@ -94,6 +94,17 @@ class BoxWrapper<E> extends BoxBaseWrapper<E> {
   FutureOr<Map<dynamic, E>> toMap() => box.toMap();
 }
 
+extension HiveIsolateExtension on HiveIsolate {
+  set entryPoint(IsolateEntryPoint entryPoint) {
+    spawnHiveIsolate = () => spawnIsolate(
+          entryPoint,
+          debugName: HiveIsolate.isolateName,
+          onConnect: onConnect,
+          onExit: onExit,
+        );
+  }
+}
+
 Future<HiveWrapper> createHive({
   required bool isolated,
   Directory? directory,
