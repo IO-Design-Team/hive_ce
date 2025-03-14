@@ -10,6 +10,10 @@ import 'package:isolate_channel/isolate_channel.dart';
 ///
 /// Most methods are async due to isolate communication
 abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
+  /// Value to inform the get method to return the default value
+  static const defaultValuePlaceholder =
+      '_hive_ce.IsolatedBoxBaseImpl.defaultValue';
+
   final TypeRegistry _registry;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
@@ -131,9 +135,10 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   @override
   Future<E?> get(dynamic key, {E? defaultValue}) async {
-    final bytes =
+    final result =
         await _channel.invokeMethod('get', {'name': name, 'key': key});
-    return _readValue(bytes) ?? defaultValue;
+    if (result == defaultValuePlaceholder) return defaultValue;
+    return _readValue(result);
   }
 
   @override

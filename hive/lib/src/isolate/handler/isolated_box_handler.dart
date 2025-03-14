@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Class to handle method calls to the isolated box
@@ -103,9 +104,15 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
             .toList();
       case 'get':
         if (box.lazy) {
-          return (box as LazyBox).get(call.arguments['key']);
+          return (box as LazyBox).get(
+            call.arguments['key'],
+            defaultValue: IsolatedBoxBaseImpl.defaultValuePlaceholder,
+          );
         } else {
-          return (box as Box).get(call.arguments['key']);
+          return (box as Box).get(
+            call.arguments['key'],
+            defaultValue: IsolatedBoxBaseImpl.defaultValuePlaceholder,
+          );
         }
       case 'getAt':
         if (box.lazy) {
