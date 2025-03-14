@@ -291,9 +291,9 @@ class BinaryReaderImpl extends BinaryReader {
     if (availableBytes == 0) {
       frame = Frame.deleted(key);
     } else if (lazy) {
-      frame = Frame.lazy(key);
+      frame = Frame.lazy(key, verbatim: verbatim);
     } else if (verbatim) {
-      frame = Frame.verbatim(key, viewBytes(availableBytes));
+      frame = Frame(key, viewBytes(availableBytes), verbatim: verbatim);
     } else if (cipher == null) {
       frame = Frame(key, read());
     } else {

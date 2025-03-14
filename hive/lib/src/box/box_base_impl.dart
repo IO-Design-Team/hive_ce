@@ -37,7 +37,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
   /// Create a new frame
   Frame createFrame(dynamic key, E? value) {
     if (verbatimFrames) {
-      return Frame.verbatim(key, value);
+      return Frame(key, value, verbatim: true);
     } else {
       return Frame(key, value);
     }

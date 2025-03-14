@@ -26,10 +26,14 @@ class Frame {
   int offset = -1;
 
   /// Create a new frame
-  Frame(this.key, this.value, {this.length, this.offset = -1})
-      : lazy = false,
-        deleted = false,
-        verbatim = false {
+  Frame(
+    this.key,
+    this.value, {
+    this.verbatim = false,
+    this.length,
+    this.offset = -1,
+  })  : lazy = false,
+        deleted = false {
     assert(assertKey(key));
   }
 
@@ -44,19 +48,14 @@ class Frame {
   }
 
   /// Create a lazy frame
-  Frame.lazy(this.key, {this.length, this.offset = -1})
-      : value = null,
+  Frame.lazy(
+    this.key, {
+    this.verbatim = false,
+    this.length,
+    this.offset = -1,
+  })  : value = null,
         lazy = true,
-        verbatim = false,
         deleted = false {
-    assert(assertKey(key));
-  }
-
-  /// Create a verbatim frame
-  Frame.verbatim(this.key, this.value, {this.length, this.offset = -1})
-      : lazy = false,
-        deleted = false,
-        verbatim = true {
     assert(assertKey(key));
   }
 
@@ -82,6 +81,7 @@ class Frame {
     if (deleted) return this;
     return Frame.lazy(
       key,
+      verbatim: verbatim,
       length: length,
       offset: offset,
     );
