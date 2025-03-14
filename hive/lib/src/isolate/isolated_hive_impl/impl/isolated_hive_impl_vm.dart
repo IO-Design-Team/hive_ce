@@ -102,7 +102,6 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       try {
         final params = {
           'name': name,
-          'encryptionCipher': cipher,
           'keyComparator': comparator,
           'compactionStrategy': compaction,
           'crashRecovery': recovery,
