@@ -50,7 +50,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'path':
         return box.path;
       case 'keys':
-        return box.keys;
+        return box.keys.toList();
       case 'length':
         return box.length;
       case 'isEmpty':
@@ -70,7 +70,8 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'add':
         return box.add(call.arguments['value']);
       case 'addAll':
-        return box.addAll(call.arguments['values']);
+        final keys = await box.addAll(call.arguments['values']);
+        return keys.toList();
       case 'delete':
         await box.delete(call.arguments['key']);
       case 'deleteAt':
@@ -102,15 +103,9 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
             .toList();
       case 'get':
         if (box.lazy) {
-          return (box as LazyBox).get(
-            call.arguments['key'],
-            defaultValue: call.arguments['defaultValue'],
-          );
+          return (box as LazyBox).get(call.arguments['key']);
         } else {
-          return (box as Box).get(
-            call.arguments['key'],
-            defaultValue: call.arguments['defaultValue'],
-          );
+          return (box as Box).get(call.arguments['key']);
         }
       case 'getAt':
         if (box.lazy) {
