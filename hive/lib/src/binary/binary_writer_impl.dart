@@ -281,6 +281,15 @@ class BinaryWriterImpl extends BinaryWriter {
     return frameLength;
   }
 
+  /// Add the given bytes to the buffer verbatim
+  int writeBytes(Uint8List bytes) {
+    final length = bytes.length;
+    _reserveBytes(length);
+    _buffer.setRange(_offset, _offset + length, bytes);
+    _offset += length;
+    return length;
+  }
+
   @override
   void write<T>(T value, {bool withTypeId = true}) {
     final int typeId;

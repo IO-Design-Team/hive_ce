@@ -2,17 +2,22 @@ import 'package:hive_ce/hive.dart';
 
 /// Not part of public API
 class Frame {
-  /// Not part of public API
+  /// The key
   final Object? key;
 
-  /// Not part of public API
+  /// The value
   final Object? value;
 
-  /// Not part of public API
+  /// If this frame is deleted
   final bool deleted;
 
-  /// Not part of public API
+  /// If this frame is lazy
+  ///
+  /// Lazy frames do not yet have a value
   final bool lazy;
+
+  /// If this frame's value should be writtern to the disk with no transformation
+  final bool verbatim;
 
   /// Not part of public API
   int? length;
@@ -20,27 +25,38 @@ class Frame {
   /// Not part of public API
   int offset = -1;
 
-  /// Not part of public API
+  /// Create a new frame
   Frame(this.key, this.value, {this.length, this.offset = -1})
       : lazy = false,
-        deleted = false {
+        deleted = false,
+        verbatim = false {
     assert(assertKey(key));
   }
 
-  /// Not part of public API
+  /// Crate a deleted frame
   Frame.deleted(this.key, {this.length})
       : value = null,
         lazy = false,
         deleted = true,
+        verbatim = false,
         offset = -1 {
     assert(assertKey(key));
   }
 
-  /// Not part of public API
+  /// Create a lazy frame
   Frame.lazy(this.key, {this.length, this.offset = -1})
       : value = null,
         lazy = true,
+        verbatim = false,
         deleted = false {
+    assert(assertKey(key));
+  }
+
+  /// Create a verbatim frame
+  Frame.verbatim(this.key, this.value, {this.length, this.offset = -1})
+      : lazy = false,
+        deleted = false,
+        verbatim = true {
     assert(assertKey(key));
   }
 

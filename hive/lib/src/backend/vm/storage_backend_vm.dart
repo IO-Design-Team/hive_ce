@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
@@ -163,7 +164,11 @@ RECOMMENDED ACTIONS:
       final writer = BinaryWriterImpl(registry);
 
       for (final frame in frames) {
-        frame.length = writer.writeFrame(frame, cipher: _cipher);
+        if (frame.verbatim) {
+          frame.length = writer.writeBytes(frame.value as Uint8List);
+        } else {
+          frame.length = writer.writeFrame(frame, cipher: _cipher);
+        }
       }
 
       try {
