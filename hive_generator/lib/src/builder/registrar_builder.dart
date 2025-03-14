@@ -92,16 +92,14 @@ extension HiveRegistrar on HiveInterface {
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
-  Future<void> registerAdapters() {
-    return Future.wait([
+  void registerAdapters() {
 ''');
 
     for (final adapter in adapters) {
-      buffer.writeln('      registerAdapter($adapter()),');
+      buffer.writeln('    registerAdapter($adapter());');
     }
 
     buffer.write('''
-    ]);
   }
 }
 ''');

@@ -95,11 +95,10 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
       Hive.registerAdapter(adapter, internal: internal, override: override);
 
   @override
-  Future<bool> isAdapterRegistered(int typeId) async =>
-      Hive.isAdapterRegistered(typeId);
+  bool isAdapterRegistered(int typeId) => Hive.isAdapterRegistered(typeId);
 
   @override
-  Future<void> resetAdapters() async {
+  void resetAdapters() {
     // This is an override
     // ignore: invalid_use_of_visible_for_testing_member
     Hive.resetAdapters();

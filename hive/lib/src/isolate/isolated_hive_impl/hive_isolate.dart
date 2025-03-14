@@ -1,5 +1,5 @@
-import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:meta/meta.dart';
 
 /// Base class for managing the Hive isolate
 ///
@@ -23,9 +23,11 @@ RECOMMENDED ACTIONS:
 
 ''';
 
-  /// The connection to the isolate
-  late final IsolateConnection connection;
+  /// Access to the isolate connection for testing
+  @visibleForTesting
+  IsolateConnection get connection;
 
-  /// The entry point for the isolate
-  IsolateEntryPoint entryPoint = isolateEntryPoint;
+  /// Override the entry point for testing
+  @visibleForTesting
+  set entryPoint(IsolateEntryPoint entryPoint);
 }

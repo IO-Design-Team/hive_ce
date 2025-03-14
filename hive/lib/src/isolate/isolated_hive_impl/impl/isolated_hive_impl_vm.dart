@@ -1,22 +1,33 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:meta/meta.dart';
 
 /// Handles Hive operations in an isolate
 ///
 /// Limitations:
 /// - [IsolatedHive] does not support [HiveObject]s
 /// - Most methods are async due to isolate communication
-class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
+class IsolatedHiveImpl extends TypeRegistryImpl
+    implements IsolatedHiveInterface, HiveIsolate {
   late final IsolateNameServer? _isolateNameServer;
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
+
+  late final IsolateConnection _connection;
+
+  @override
+  IsolateConnection get connection => _connection;
+
+  IsolateEntryPoint _entryPoint = isolateEntryPoint;
+
+  @override
+  set entryPoint(IsolateEntryPoint entryPoint) => _entryPoint = entryPoint;
 
   bool _open = true;
 
@@ -33,10 +44,10 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
 
     final send = _isolateNameServer?.lookupPortByName(HiveIsolate.isolateName);
     if (send != null) {
-      connection = connectToIsolate(send);
+      _connection = connectToIsolate(send);
     } else {
-      connection = await spawnIsolate(
-        entryPoint,
+      _connection = await spawnIsolate(
+        _entryPoint,
         debugName: HiveIsolate.isolateName,
         onExit: () {
           _isolateNameServer?.removePortNameMapping(HiveIsolate.isolateName);
@@ -49,8 +60,8 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
       );
     }
 
-    _hiveChannel = IsolateMethodChannel('hive', connection);
-    _boxChannel = IsolateMethodChannel('box', connection);
+    _hiveChannel = IsolateMethodChannel('hive', _connection);
+    _boxChannel = IsolateMethodChannel('box', _connection);
 
     return _hiveChannel.invokeMethod('init', path);
   }
@@ -77,7 +88,7 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
       'bytes': bytes,
       'collection': collection,
     });
-    return IsolatedBoxImpl(_boxChannel, connection, name, false);
+    return IsolatedBoxImpl(this, _boxChannel, _connection, name, false);
   }
 
   @override
@@ -100,16 +111,26 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
       'path': path,
       'collection': collection,
     });
-    return IsolatedLazyBoxImpl(_boxChannel, connection, name, true);
+    return IsolatedLazyBoxImpl(this, _boxChannel, _connection, name, true);
   }
 
   @override
-  IsolatedBox<E> box<E>(String name) =>
-      IsolatedBoxImpl(_boxChannel, connection, name.toLowerCase(), false);
+  IsolatedBox<E> box<E>(String name) => IsolatedBoxImpl(
+        this,
+        _boxChannel,
+        _connection,
+        name.toLowerCase(),
+        false,
+      );
 
   @override
-  IsolatedLazyBox<E> lazyBox<E>(String name) =>
-      IsolatedLazyBoxImpl(_boxChannel, connection, name.toLowerCase(), true);
+  IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBoxImpl(
+        this,
+        _boxChannel,
+        _connection,
+        name.toLowerCase(),
+        true,
+      );
 
   @override
   Future<bool> isBoxOpen(String name) =>
@@ -119,7 +140,7 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
   Future<void> close() async {
     if (!_open) return;
     await _hiveChannel.invokeMethod('close');
-    connection.close();
+    _connection.close();
     _open = false;
   }
 
@@ -136,35 +157,4 @@ class IsolatedHiveImpl extends HiveIsolate implements IsolatedHiveInterface {
   @override
   Future<bool> boxExists(String name, {String? path}) => _hiveChannel
       .invokeMethod('boxExists', {'name': name.toLowerCase(), 'path': path});
-
-  @override
-  Future<void> registerAdapter<T>(
-    TypeAdapter<T> adapter, {
-    bool internal = false,
-    bool override = false,
-  }) {
-    final typeId =
-        TypeRegistryImpl.calculateTypeId(adapter.typeId, internal: internal);
-    final resolved = ResolvedAdapter(adapter, typeId);
-    TypeRegistryImpl.validateAdapterType(resolved);
-    return _hiveChannel.invokeMethod('registerAdapter', {
-      // We must pass a ResolvedAdapter into the isolate to preserve type
-      // information
-      'adapter': resolved,
-      'internal': internal,
-      'override': override,
-    });
-  }
-
-  @override
-  Future<bool> isAdapterRegistered(int typeId) =>
-      _hiveChannel.invokeMethod('isAdapterRegistered', typeId);
-
-  @override
-  @visibleForTesting
-  Future<void> resetAdapters() => _hiveChannel.invokeMethod('resetAdapters');
-
-  @override
-  Future<void> ignoreTypeId<T>(int typeId) =>
-      _hiveChannel.invokeMethod('ignoreTypeId', typeId);
 }

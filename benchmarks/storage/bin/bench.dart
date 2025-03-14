@@ -24,7 +24,7 @@ void main() async {
     ..registerAdapter(TestModelAdapter());
 
   await ce.IsolatedHive.init('.');
-  await ce.IsolatedHive.registerAdapter(TestModelAdapter());
+  ce.IsolatedHive.registerAdapter(TestModelAdapter());
 
   await Isar.initialize('assets/libisar_macos.dylib');
 

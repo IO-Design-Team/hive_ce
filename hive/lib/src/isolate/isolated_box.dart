@@ -2,6 +2,8 @@ import 'package:hive_ce/hive.dart';
 
 /// Isolated version of [BoxBase]
 abstract class IsolatedBoxBase<E> {
+  
+
   /// The name of the box
   String get name;
 

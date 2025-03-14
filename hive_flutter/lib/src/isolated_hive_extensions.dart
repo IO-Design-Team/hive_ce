@@ -22,13 +22,13 @@ extension IsolatedHiveX on IsolatedHiveInterface {
     await init(hivePath, isolateNameServer: const IsolateNameServer());
 
     final colorAdapter = ColorAdapter();
-    if (!await isAdapterRegistered(colorAdapter.typeId)) {
-      await registerAdapter(colorAdapter);
+    if (!isAdapterRegistered(colorAdapter.typeId)) {
+      registerAdapter(colorAdapter);
     }
 
     final timeOfDayAdapter = TimeOfDayAdapter();
-    if (!await isAdapterRegistered(timeOfDayAdapter.typeId)) {
-      await registerAdapter(timeOfDayAdapter);
+    if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
+      registerAdapter(timeOfDayAdapter);
     }
   }
 }

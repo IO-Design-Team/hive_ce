@@ -75,7 +75,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
-  Future<void> registerAdapter<T>(
+  void registerAdapter<T>(
     TypeAdapter<T> adapter, {
     bool internal = false,
     bool override = false,
@@ -84,7 +84,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
-  Future<bool> isAdapterRegistered(int typeId) {
+  bool isAdapterRegistered(int typeId) {
     throw UnimplementedError();
   }
 

@@ -1,7 +1,6 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
-import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
@@ -57,20 +56,6 @@ Future<dynamic> handleHiveMethodCall(
         call.arguments['name'],
         path: call.arguments['path'],
       );
-    case 'registerAdapter':
-      (Hive as HiveImpl).registerResolvedAdapter(
-        call.arguments['adapter'],
-        internal: call.arguments['internal'],
-        override: call.arguments['override'],
-      );
-    case 'isAdapterRegistered':
-      return Hive.isAdapterRegistered(call.arguments);
-    case 'resetAdapters':
-      // This is a proxy
-      // ignore: invalid_use_of_visible_for_testing_member
-      Hive.resetAdapters();
-    case 'ignoreTypeId':
-      Hive.ignoreTypeId(call.arguments);
     default:
       return IsolateException.notImplemented(call.method);
   }

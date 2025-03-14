@@ -4,19 +4,20 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
-import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
 ///
 /// Most methods are async due to isolate communication
 abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
+  final TypeRegistry _registry;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
   Stream<BoxEvent>? _stream;
 
   /// Constructor
   IsolatedBoxBaseImpl(
+    this._registry,
     this._channel,
     IsolateConnection connection,
     this.name,
@@ -57,7 +58,10 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       .receiveBroadcastStream()
       .map(
         (event) => BoxEvent(
-            event['key'], _readValue(event['value']), event['deleted']),
+          event['key'],
+          _readValue(event['value']),
+          event['deleted'],
+        ),
       )
       .where((event) => key == null || event.key == key);
 
@@ -142,13 +146,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   }
 
   Uint8List _writeValue(E value) {
-    final writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl);
+    final writer = BinaryWriterImpl(_registry);
     writer.write(value);
     return writer.toBytes();
   }
 
   E? _readValue(Uint8List bytes) {
-    final reader = BinaryReaderImpl(bytes, TypeRegistryImpl.nullImpl);
+    final reader = BinaryReaderImpl(bytes, _registry);
     return reader.read() as E?;
   }
 }
@@ -157,7 +161,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedBox<E> {
   /// Constructor
-  IsolatedBoxImpl(super._channel, super.connection, super.name, super.lazy);
+  IsolatedBoxImpl(
+    super._registry,
+    super._channel,
+    super.connection,
+    super.name,
+    super.lazy,
+  );
 
   @override
   Future<Iterable<E>> get values async {
@@ -186,5 +196,11 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
 class IsolatedLazyBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedLazyBox<E> {
   /// Constructor
-  IsolatedLazyBoxImpl(super._channel, super.connection, super.name, super.lazy);
+  IsolatedLazyBoxImpl(
+    super._registry,
+    super._channel,
+    super.connection,
+    super.name,
+    super.lazy,
+  );
 }

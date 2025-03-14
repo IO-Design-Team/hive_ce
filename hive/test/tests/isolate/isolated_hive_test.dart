@@ -236,12 +236,12 @@ void main() {
         final hive = await initHive();
         final adapter = _TestAdapter(1);
 
-        expect(await hive.isAdapterRegistered(adapter.typeId), isFalse);
-        await hive.registerAdapter(adapter);
-        expect(await hive.isAdapterRegistered(adapter.typeId), isTrue);
+        expect(hive.isAdapterRegistered(adapter.typeId), isFalse);
+        hive.registerAdapter(adapter);
+        expect(hive.isAdapterRegistered(adapter.typeId), isTrue);
 
         await hive.resetAdapters();
-        expect(await hive.isAdapterRegistered(adapter.typeId), isFalse);
+        expect(hive.isAdapterRegistered(adapter.typeId), isFalse);
       });
     });
   });
