@@ -103,20 +103,35 @@ extension HiveIsolateExtension on HiveIsolate {
           onExit: onExit,
         );
   }
+
+  void useUriIsolate() {
+    spawnHiveIsolate = () => spawnUriIsolate(
+          Uri.file(
+            '${Directory.current.path}/test/util/isolate_entry_point.dart',
+          ),
+          debugName: HiveIsolate.isolateName,
+          onConnect: onConnect,
+          onExit: onExit,
+        );
+  }
 }
 
 Future<HiveWrapper> createHive({
   required TestType type,
   Directory? directory,
-  UriIsolateEntryPoint? entryPoint,
+  IsolateEntryPoint? entryPoint,
 }) async {
   final HiveWrapper hive;
   if (type == TestType.normal) {
     hive = HiveWrapper(HiveImpl());
   } else {
     final isolatedHive = IsolatedHiveImpl();
-    if (isolatedHive is HiveIsolate && entryPoint != null) {
-      (isolatedHive as HiveIsolate).entryPoint = entryPoint;
+    if (isolatedHive is HiveIsolate) {
+      if (entryPoint != null) {
+        (isolatedHive as HiveIsolate).entryPoint = entryPoint;
+      } else if (type == TestType.uriIsolate) {
+        (isolatedHive as HiveIsolate).useUriIsolate();
+      }
     }
     hive = HiveWrapper(isolatedHive);
   }
@@ -196,6 +211,8 @@ enum TestType {
 
 void hiveIntegrationTest(void Function(TestType type) test) {
   test(TestType.normal);
-  group('IsolatedHive.spawn', () => test(TestType.isolate));
-  group('IsolatedHive.spawnUri', () => test(TestType.uriIsolate));
+  group('IsolatedHive', () => test(TestType.isolate));
+  if (!isBrowser) {
+    group('IsolatedHive.spawnUri', () => test(TestType.uriIsolate));
+  }
 }

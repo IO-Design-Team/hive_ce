@@ -31,12 +31,12 @@ Future<void> expectNextEvent(
 }
 
 void main() {
-  hiveIntegrationTest((isolated) {
+  hiveIntegrationTest((type) {
     group('watch() emits box updates when', () {
       late BoxBaseWrapper box;
 
       setUp(() async {
-        (_, box) = await openBox(false, type: isolated);
+        (_, box) = await openBox(false, type: type);
       });
 
       test('.put() is called', () async {
