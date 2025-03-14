@@ -15,6 +15,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       '_hive_ce.IsolatedBoxBaseImpl.defaultValue';
 
   final TypeRegistry _registry;
+  final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
   Stream<BoxEvent>? _stream;
@@ -22,17 +23,17 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   /// Constructor
   IsolatedBoxBaseImpl(
     this._registry,
-    this._channel,
-    IsolateConnection connection,
     this.name,
-    this.lazy,
+    this._cipher,
+    IsolateConnection connection,
+    this._channel,
   ) : _eventChannel = IsolateEventChannel('box_$name', connection);
+
+  /// Not part of public API
+  Type get valueType => E;
 
   @override
   final String name;
-
-  @override
-  final bool lazy;
 
   @override
   Future<bool> get isOpen => _channel.invokeMethod('isOpen', {'name': name});
@@ -150,14 +151,24 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   Uint8List _writeValue(E value) {
     final writer = BinaryWriterImpl(_registry);
-    writer.write(value);
+    if (_cipher != null) {
+      writer.writeEncrypted(value, _cipher);
+    } else {
+      writer.write(value);
+    }
     return writer.toBytes();
   }
 
   E? _readValue(Uint8List? bytes) {
     if (bytes == null) return null;
     final reader = BinaryReaderImpl(bytes, _registry);
-    return reader.read() as E?;
+    final E? value;
+    if (_cipher != null) {
+      value = reader.readEncrypted(_cipher);
+    } else {
+      value = reader.read();
+    }
+    return value;
   }
 }
 
@@ -167,11 +178,14 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   /// Constructor
   IsolatedBoxImpl(
     super._registry,
-    super._channel,
-    super.connection,
     super.name,
-    super.lazy,
+    super._cipher,
+    super.connection,
+    super._channel,
   );
+
+  @override
+  final bool lazy = false;
 
   @override
   Future<Iterable<E>> get values async {
@@ -202,9 +216,12 @@ class IsolatedLazyBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   /// Constructor
   IsolatedLazyBoxImpl(
     super._registry,
-    super._channel,
-    super.connection,
     super.name,
-    super.lazy,
+    super._cipher,
+    super.connection,
+    super._channel,
   );
+
+  @override
+  final bool lazy = true;
 }

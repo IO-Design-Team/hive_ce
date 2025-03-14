@@ -40,8 +40,6 @@ Future<dynamic> handleHiveMethodCall(
         collection: call.arguments['collection'],
       );
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
-    case 'isBoxOpen':
-      return Hive.isBoxOpen(call.arguments);
     case 'close':
       await Hive.close();
     case 'deleteBoxFromDisk':

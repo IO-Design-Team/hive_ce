@@ -50,7 +50,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
-  Future<bool> isBoxOpen(String name) {
+  bool isBoxOpen(String name) {
     throw UnimplementedError();
   }
 

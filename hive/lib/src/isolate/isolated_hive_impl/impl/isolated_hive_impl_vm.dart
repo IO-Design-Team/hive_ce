@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
@@ -20,6 +21,9 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   late final IsolateMethodChannel _boxChannel;
 
   late final IsolateConnection _connection;
+
+  final _boxes = <String, IsolatedBoxBaseImpl>{};
+  final _openingBoxes = <String, Future>{};
 
   @override
   IsolateConnection get connection => _connection;
@@ -66,6 +70,83 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     return _hiveChannel.invokeMethod('init', path);
   }
 
+  Future<IsolatedBoxBase<E>> _openBox<E>(
+    String name,
+    bool lazy,
+    HiveCipher? cipher,
+    KeyComparator? comparator,
+    CompactionStrategy? compaction,
+    bool recovery,
+    String? path,
+    Uint8List? bytes,
+    String? collection,
+  ) async {
+    name = name.toLowerCase();
+    if (isBoxOpen(name)) {
+      if (lazy) {
+        return lazyBox(name);
+      } else {
+        return box(name);
+      }
+    } else {
+      if (_openingBoxes.containsKey(name)) {
+        await _openingBoxes[name];
+        if (lazy) {
+          return lazyBox(name);
+        } else {
+          return box(name);
+        }
+      }
+
+      final completer = Completer();
+      _openingBoxes[name] = completer.future;
+
+      try {
+        final params = {
+          'name': name,
+          'encryptionCipher': cipher,
+          'keyComparator': comparator,
+          'compactionStrategy': compaction,
+          'crashRecovery': recovery,
+          'path': path,
+          'bytes': bytes,
+          'collection': collection,
+        };
+
+        final IsolatedBoxBaseImpl<E> newBox;
+        if (lazy) {
+          await _hiveChannel.invokeMethod('openLazyBox', params);
+          newBox = IsolatedLazyBoxImpl<E>(
+            this,
+            name,
+            cipher,
+            _connection,
+            _boxChannel,
+          );
+        } else {
+          await _hiveChannel.invokeMethod('openBox', params);
+          newBox = IsolatedBoxImpl<E>(
+            this,
+            name,
+            cipher,
+            _connection,
+            _boxChannel,
+          );
+        }
+
+        _boxes[name] = newBox;
+
+        completer.complete();
+        return newBox;
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+        rethrow;
+      } finally {
+        unawaited(_openingBoxes.remove(name));
+      }
+    }
+  }
+
   @override
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
@@ -76,20 +157,18 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     String? path,
     Uint8List? bytes,
     String? collection,
-  }) async {
-    name = name.toLowerCase();
-    await _hiveChannel.invokeMethod('openBox', {
-      'name': name,
-      'encryptionCipher': encryptionCipher,
-      'keyComparator': keyComparator,
-      'compactionStrategy': compactionStrategy,
-      'crashRecovery': crashRecovery,
-      'path': path,
-      'bytes': bytes,
-      'collection': collection,
-    });
-    return IsolatedBoxImpl(this, _boxChannel, _connection, name, false);
-  }
+  }) async =>
+      await _openBox<E>(
+        name,
+        false,
+        encryptionCipher,
+        keyComparator,
+        compactionStrategy,
+        crashRecovery,
+        path,
+        bytes,
+        collection,
+      ) as IsolatedBox<E>;
 
   @override
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
@@ -100,41 +179,49 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     bool crashRecovery = true,
     String? path,
     String? collection,
-  }) async {
-    name = name.toLowerCase();
-    await _hiveChannel.invokeMethod('openLazyBox', {
-      'name': name,
-      'encryptionCipher': encryptionCipher,
-      'keyComparator': keyComparator,
-      'compactionStrategy': compactionStrategy,
-      'crashRecovery': crashRecovery,
-      'path': path,
-      'collection': collection,
-    });
-    return IsolatedLazyBoxImpl(this, _boxChannel, _connection, name, true);
+  }) async =>
+      await _openBox<E>(
+        name,
+        true,
+        encryptionCipher,
+        keyComparator,
+        compactionStrategy,
+        crashRecovery,
+        path,
+        null,
+        collection,
+      ) as IsolatedLazyBox<E>;
+
+  IsolatedBoxBase<E> _getBoxInternal<E>(String name, bool lazy) {
+    final lowerCaseName = name.toLowerCase();
+    final box = _boxes[lowerCaseName];
+    if (box != null) {
+      if (box.lazy == lazy && box.valueType == E) {
+        return box as IsolatedBoxBase<E>;
+      } else {
+        final typeName = box is IsolatedLazyBox
+            ? 'IsolatedLazyBox<${box.valueType}>'
+            : 'IsolatedBox<${box.valueType}>';
+        throw HiveError('The box "$lowerCaseName" is already open '
+            'and of type $typeName.');
+      }
+    } else {
+      throw HiveError(
+        'Box not found. Did you forget to call IsolatedHive.openBox()?',
+      );
+    }
   }
 
   @override
-  IsolatedBox<E> box<E>(String name) => IsolatedBoxImpl(
-        this,
-        _boxChannel,
-        _connection,
-        name.toLowerCase(),
-        false,
-      );
+  IsolatedBox<E> box<E>(String name) =>
+      _getBoxInternal<E>(name, false) as IsolatedBox<E>;
 
   @override
-  IsolatedLazyBox<E> lazyBox<E>(String name) => IsolatedLazyBoxImpl(
-        this,
-        _boxChannel,
-        _connection,
-        name.toLowerCase(),
-        true,
-      );
+  IsolatedLazyBox<E> lazyBox<E>(String name) =>
+      _getBoxInternal<E>(name, true) as IsolatedLazyBox<E>;
 
   @override
-  Future<bool> isBoxOpen(String name) =>
-      _hiveChannel.invokeMethod('isBoxOpen', name.toLowerCase());
+  bool isBoxOpen(String name) => _boxes.containsKey(name.toLowerCase());
 
   @override
   Future<void> close() async {

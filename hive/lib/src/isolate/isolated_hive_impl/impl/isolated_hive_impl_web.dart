@@ -70,7 +70,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
       IsolatedLazyBoxImpl(Hive.lazyBox(name));
 
   @override
-  Future<bool> isBoxOpen(String name) async => Hive.isBoxOpen(name);
+  bool isBoxOpen(String name) => Hive.isBoxOpen(name);
 
   @override
   Future<void> close() => Hive.close();

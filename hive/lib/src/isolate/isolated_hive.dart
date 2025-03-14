@@ -44,7 +44,7 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   IsolatedLazyBox<E> lazyBox<E>(String name);
 
   /// Check if a box is open in the isolate
-  Future<bool> isBoxOpen(String name);
+  bool isBoxOpen(String name);
 
   /// Shutdown the isolate
   Future<void> close();
