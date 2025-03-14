@@ -195,7 +195,7 @@ void main() {
     test('.close()', () async {
       final box = await _openBox(name: 'myBox');
       await box.close();
-      expect(await box.isOpen, false);
+      expect(box.isOpen, false);
     });
 
     group('.deleteFromDisk()', () {
@@ -204,7 +204,7 @@ void main() {
         () async {
           final box = await _openBox(name: 'myBox');
           await box.deleteFromDisk();
-          expect(await box.isOpen, false);
+          expect(box.isOpen, false);
         },
         // TODO: Figure out why deleteFromDisk never completes on web
         skip: isBrowser,

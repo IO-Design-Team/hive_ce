@@ -46,8 +46,6 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   /// The method call handler for the box
   Future<dynamic> call(IsolateMethodCall call) async {
     switch (call.method) {
-      case 'isOpen':
-        return box.isOpen;
       case 'path':
         return box.path;
       case 'keys':

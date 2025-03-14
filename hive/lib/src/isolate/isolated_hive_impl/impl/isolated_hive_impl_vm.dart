@@ -33,8 +33,6 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   @override
   set entryPoint(IsolateEntryPoint entryPoint) => _entryPoint = entryPoint;
 
-  bool _open = true;
-
   @override
   Future<void> init(
     String? path, {
@@ -224,22 +222,43 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   bool isBoxOpen(String name) => _boxes.containsKey(name.toLowerCase());
 
   @override
-  Future<void> close() async {
-    if (!_open) return;
-    await _hiveChannel.invokeMethod('close');
-    _connection.close();
-    _open = false;
+  Future<void> close() {
+    final closeFutures = _boxes.values.map((box) {
+      return box.close();
+    });
+
+    return Future.wait(closeFutures);
+  }
+
+  /// Not part of public API
+  void unregisterBox(String name) {
+    name = name.toLowerCase();
+    _openingBoxes.remove(name);
+    _boxes.remove(name);
   }
 
   @override
-  Future<void> deleteBoxFromDisk(String name, {String? path}) =>
-      _hiveChannel.invokeMethod(
+  Future<void> deleteBoxFromDisk(String name, {String? path}) async {
+    final lowerCaseName = name.toLowerCase();
+    final box = _boxes[lowerCaseName];
+    if (box != null) {
+      await box.deleteFromDisk();
+    } else {
+      await _hiveChannel.invokeMethod(
         'deleteBoxFromDisk',
         {'name': name.toLowerCase(), 'path': path},
       );
+    }
+  }
 
   @override
-  Future<void> deleteFromDisk() => _hiveChannel.invokeMethod('deleteFromDisk');
+  Future<void> deleteFromDisk() {
+    final deleteFutures = _boxes.values.toList().map((box) {
+      return box.deleteFromDisk();
+    });
+
+    return Future.wait(deleteFutures);
+  }
 
   @override
   Future<bool> boxExists(String name, {String? path}) => _hiveChannel

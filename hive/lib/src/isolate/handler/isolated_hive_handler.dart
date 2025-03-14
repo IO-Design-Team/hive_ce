@@ -47,8 +47,6 @@ Future<dynamic> handleHiveMethodCall(
         call.arguments['name'],
         path: call.arguments['path'],
       );
-    case 'deleteFromDisk':
-      await Hive.deleteFromDisk();
     case 'boxExists':
       return Hive.boxExists(
         call.arguments['name'],

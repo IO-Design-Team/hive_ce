@@ -15,7 +15,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   bool get lazy => _box.lazy;
 
   @override
-  Future<bool> get isOpen async => _box.isOpen;
+  bool get isOpen => _box.isOpen;
 
   @override
   Future<String?> get path async => _box.path;

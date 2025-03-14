@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/impl/isolated_hive_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
@@ -14,15 +15,17 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   static const defaultValuePlaceholder =
       '_hive_ce.IsolatedBoxBaseImpl.defaultValue';
 
-  final TypeRegistry _registry;
+  final IsolatedHiveImpl _hive;
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
   Stream<BoxEvent>? _stream;
 
+  bool _open = true;
+
   /// Constructor
   IsolatedBoxBaseImpl(
-    this._registry,
+    this._hive,
     this.name,
     this._cipher,
     IsolateConnection connection,
@@ -36,7 +39,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   final String name;
 
   @override
-  Future<bool> get isOpen => _channel.invokeMethod('isOpen', {'name': name});
+  bool get isOpen => _open;
 
   @override
   Future<String?> get path => _channel.invokeMethod('path', {'name': name});
@@ -125,11 +128,20 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   Future<int> clear() => _channel.invokeMethod('clear', {'name': name});
 
   @override
-  Future<void> close() => _channel.invokeMethod('close', {'name': name});
+  Future<void> close() async {
+    if (!_open) return;
+    await _channel.invokeMethod('close', {'name': name});
+    _open = false;
+    _hive.unregisterBox(name);
+  }
 
   @override
-  Future<void> deleteFromDisk() =>
-      _channel.invokeMethod('deleteFromDisk', {'name': name});
+  Future<void> deleteFromDisk() async {
+    if (!_open) return;
+    await _channel.invokeMethod('deleteFromDisk', {'name': name});
+    _open = false;
+    _hive.unregisterBox(name);
+  }
 
   @override
   Future<void> flush() => _channel.invokeMethod('flush', {'name': name});
@@ -150,7 +162,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   }
 
   Uint8List _writeValue(E value) {
-    final writer = BinaryWriterImpl(_registry);
+    final writer = BinaryWriterImpl(_hive);
     if (_cipher != null) {
       writer.writeEncrypted(value, _cipher);
     } else {
@@ -161,7 +173,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   E? _readValue(Uint8List? bytes) {
     if (bytes == null) return null;
-    final reader = BinaryReaderImpl(bytes, _registry);
+    final reader = BinaryReaderImpl(bytes, _hive);
     final E? value;
     if (_cipher != null) {
       value = reader.readEncrypted(_cipher);

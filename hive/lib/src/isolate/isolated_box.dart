@@ -9,7 +9,7 @@ abstract class IsolatedBoxBase<E> {
   bool get lazy;
 
   /// Whether the box is open
-  Future<bool> get isOpen;
+  bool get isOpen;
 
   /// The path of the box
   Future<String?> get path;

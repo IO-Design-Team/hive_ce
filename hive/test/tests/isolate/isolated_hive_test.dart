@@ -239,14 +239,14 @@ void main() {
 
       final box1 = await hive.openBox('box1');
       final box2 = await hive.openBox('box2');
-      expect(await box1.isOpen, true);
-      expect(await box2.isOpen, true);
+      expect(box1.isOpen, true);
+      expect(box2.isOpen, true);
 
       await box1.close();
       await box2.close();
 
-      expect(await box1.isOpen, false);
-      expect(await box2.isOpen, false);
+      expect(box1.isOpen, false);
+      expect(box2.isOpen, false);
     });
 
     group(
