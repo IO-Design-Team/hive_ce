@@ -13,8 +13,9 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
     super.name,
     super.keyComparator,
     super.compactionStrategy,
-    super.backend,
-  );
+    super.backend, {
+    super.verbatimFrames = false,
+  });
 
   @override
   final bool lazy = false;
@@ -59,7 +60,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   Future<void> putAll(Map<dynamic, E> kvPairs) {
     final frames = <Frame>[];
     for (final key in kvPairs.keys) {
-      frames.add(Frame(key, kvPairs[key]));
+      frames.add(createFrame(key, kvPairs[key]));
     }
 
     return _writeFrames(frames);

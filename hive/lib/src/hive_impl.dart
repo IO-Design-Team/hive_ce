@@ -44,6 +44,12 @@ RECOMMENDED ACTIONS:
   BackendManagerInterface? _managerOverride;
   final Random _secureRandom = Random.secure();
 
+  /// Whether to write frames to the disk verbatim
+  bool _verbatimFrames = false;
+
+  /// Set [_verbatimFrames] to true
+  void useVerbatimFrames() => _verbatimFrames = true;
+
   /// Not part of public API
   @visibleForTesting
   String? homePath;
@@ -118,9 +124,23 @@ RECOMMENDED ACTIONS:
         }
 
         if (lazy) {
-          newBox = LazyBoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = LazyBoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            verbatimFrames: _verbatimFrames,
+          );
         } else {
-          newBox = BoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = BoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            verbatimFrames: _verbatimFrames,
+          );
         }
 
         await newBox.initialize();

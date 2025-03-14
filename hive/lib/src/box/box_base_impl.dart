@@ -1,5 +1,6 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/hive_impl.dart';
@@ -30,6 +31,18 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
   @visibleForTesting
   late Keystore<E> keystore;
 
+  /// Whether to write frames to the disk verbatim
+  final bool verbatimFrames;
+
+  /// Create a new frame
+  Frame createFrame(dynamic key, E? value) {
+    if (verbatimFrames) {
+      return Frame.verbatim(key, value);
+    } else {
+      return Frame(key, value);
+    }
+  }
+
   bool _open = true;
 
   /// Not part of public API
@@ -38,8 +51,9 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
     this.name,
     KeyComparator? keyComparator,
     this._compactionStrategy,
-    this.backend,
-  ) {
+    this.backend, {
+    this.verbatimFrames = false,
+  }) {
     keystore = Keystore(this, ChangeNotifier(), keyComparator);
   }
 

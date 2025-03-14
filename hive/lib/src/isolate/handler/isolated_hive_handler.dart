@@ -1,6 +1,7 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
@@ -13,6 +14,7 @@ Future<dynamic> handleHiveMethodCall(
   switch (call.method) {
     case 'init':
       Hive.init(call.arguments);
+      (Hive as HiveImpl).useVerbatimFrames();
     case 'openBox':
       final name = call.arguments['name'];
       final box = await Hive.openBox(
