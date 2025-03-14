@@ -25,7 +25,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     final frame = keystore.get(key);
 
     if (frame != null) {
-      final value = await backend.readValue(frame);
+      final value = await backend.readValue(frame, verbatim: verbatimFrames);
       if (value is HiveObjectMixin) {
         value.init(key, this);
       }
@@ -49,14 +49,14 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
 
     final frames = <Frame>[];
     for (final key in kvPairs.keys) {
-      frames.add(createFrame(key, kvPairs[key]));
+      frames.add(Frame(key, kvPairs[key]));
       if (key is int) {
         keystore.updateAutoIncrement(key);
       }
     }
 
     if (frames.isEmpty) return;
-    await backend.writeFrames(frames);
+    await backend.writeFrames(frames, verbatim: verbatimFrames);
 
     for (final frame in frames) {
       if (frame.value is HiveObjectMixin) {
@@ -80,7 +80,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     }
 
     if (frames.isEmpty) return;
-    await backend.writeFrames(frames);
+    await backend.writeFrames(frames, verbatim: verbatimFrames);
 
     for (final frame in frames) {
       keystore.insert(frame);

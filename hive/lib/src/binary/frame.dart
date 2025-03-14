@@ -16,9 +16,6 @@ class Frame {
   /// Lazy frames do not yet have a value
   final bool lazy;
 
-  /// If this frame's value should be writtern to the disk with no transformation
-  final bool verbatim;
-
   /// Not part of public API
   int? length;
 
@@ -26,13 +23,8 @@ class Frame {
   int offset = -1;
 
   /// Create a new frame
-  Frame(
-    this.key,
-    this.value, {
-    this.verbatim = false,
-    this.length,
-    this.offset = -1,
-  })  : lazy = false,
+  Frame(this.key, this.value, {this.length, this.offset = -1})
+      : lazy = false,
         deleted = false {
     assert(assertKey(key));
   }
@@ -42,18 +34,13 @@ class Frame {
       : value = null,
         lazy = false,
         deleted = true,
-        verbatim = false,
         offset = -1 {
     assert(assertKey(key));
   }
 
   /// Create a lazy frame
-  Frame.lazy(
-    this.key, {
-    this.verbatim = false,
-    this.length,
-    this.offset = -1,
-  })  : value = null,
+  Frame.lazy(this.key, {this.length, this.offset = -1})
+      : value = null,
         lazy = true,
         deleted = false {
     assert(assertKey(key));
@@ -79,12 +66,7 @@ class Frame {
   /// Not part of public API
   Frame toLazy() {
     if (deleted) return this;
-    return Frame.lazy(
-      key,
-      verbatim: verbatim,
-      length: length,
-      offset: offset,
-    );
+    return Frame.lazy(key, length: length, offset: offset);
   }
 
   @override

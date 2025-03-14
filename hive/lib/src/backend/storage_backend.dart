@@ -25,10 +25,10 @@ abstract class StorageBackend {
   });
 
   /// Read value from backend
-  Future<dynamic> readValue(Frame frame);
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false});
 
   /// Write a list of frames to the backend
-  Future<void> writeFrames(List<Frame> frames);
+  Future<void> writeFrames(List<Frame> frames, {bool verbatim = false});
 
   /// Compact database
   Future<void> compact(Iterable<Frame> frames);

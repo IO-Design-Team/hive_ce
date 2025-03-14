@@ -60,7 +60,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   Future<void> putAll(Map<dynamic, E> kvPairs) {
     final frames = <Frame>[];
     for (final key in kvPairs.keys) {
-      frames.add(createFrame(key, kvPairs[key]));
+      frames.add(Frame(key, kvPairs[key]));
     }
 
     return _writeFrames(frames);
@@ -84,7 +84,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
     if (!keystore.beginTransaction(frames)) return;
 
     try {
-      await backend.writeFrames(frames);
+      await backend.writeFrames(frames, verbatim: verbatimFrames);
       keystore.commitTransaction();
     } catch (e) {
       keystore.cancelTransaction();

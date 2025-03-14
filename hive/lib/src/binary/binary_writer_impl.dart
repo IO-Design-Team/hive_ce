@@ -252,14 +252,14 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Not part of public API
-  int writeFrame(Frame frame, {HiveCipher? cipher}) {
+  int writeFrame(Frame frame, {HiveCipher? cipher, bool verbatim = false}) {
     final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
 
     writeKey(frame.key);
 
-    if (frame.verbatim) {
+    if (verbatim) {
       _writeBytes(frame.value as Uint8List);
     } else {
       if (!frame.deleted) {
