@@ -15,7 +15,7 @@ import '../tests/frames.dart';
 import '../util/print_utils.dart';
 import 'integration.dart';
 
-Future _performTest(bool lazy, {required bool isolated}) async {
+Future _performTest(bool lazy, {required TestType type}) async {
   final bytes = getFrameBytes(testFrames);
   final frames = testFrames;
 
@@ -23,7 +23,7 @@ Future _performTest(bool lazy, {required bool isolated}) async {
 
   final dir = await getTempDir();
   final hive = await createHive(
-    isolated: isolated,
+    type: type,
     directory: dir,
     entryPoint: (send) => silenceOutput(() => isolateEntryPoint(send)),
   );
@@ -56,20 +56,20 @@ Future _performTest(bool lazy, {required bool isolated}) async {
 }
 
 void main() {
-  hiveIntegrationTest((isolated) {
+  hiveIntegrationTest((type) {
     group(
       'test recovery',
       () {
         test(
           'normal box',
-          () => silenceOutput(() => _performTest(false, isolated: isolated)),
+          () => silenceOutput(() => _performTest(false, type: type)),
           // TODO: fix this
-          skip: isolated,
+          skip: type != TestType.normal,
         );
 
         test(
           'lazy box',
-          () => silenceOutput(() => _performTest(true, isolated: isolated)),
+          () => silenceOutput(() => _performTest(true, type: type)),
         );
       },
       timeout: longTimeout,

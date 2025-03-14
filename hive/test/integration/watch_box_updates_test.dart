@@ -36,7 +36,7 @@ void main() {
       late BoxBaseWrapper box;
 
       setUp(() async {
-        (_, box) = await openBox(false, isolated: isolated);
+        (_, box) = await openBox(false, type: isolated);
       });
 
       test('.put() is called', () async {

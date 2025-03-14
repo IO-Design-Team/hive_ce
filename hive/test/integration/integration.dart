@@ -106,19 +106,19 @@ extension HiveIsolateExtension on HiveIsolate {
 }
 
 Future<HiveWrapper> createHive({
-  required bool isolated,
+  required TestType type,
   Directory? directory,
-  IsolateEntryPoint? entryPoint,
+  UriIsolateEntryPoint? entryPoint,
 }) async {
   final HiveWrapper hive;
-  if (isolated) {
+  if (type == TestType.normal) {
+    hive = HiveWrapper(HiveImpl());
+  } else {
     final isolatedHive = IsolatedHiveImpl();
     if (isolatedHive is HiveIsolate && entryPoint != null) {
       (isolatedHive as HiveIsolate).entryPoint = entryPoint;
     }
     hive = HiveWrapper(isolatedHive);
-  } else {
-    hive = HiveWrapper(HiveImpl());
   }
 
   addTearDown(hive.close);
@@ -134,10 +134,10 @@ Future<HiveWrapper> createHive({
 Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   bool lazy, {
   HiveWrapper? hive,
-  required bool isolated,
+  required TestType type,
   List<int>? encryptionKey,
 }) async {
-  hive ??= await createHive(isolated: isolated);
+  hive ??= await createHive(type: type);
   final boxName = generateBoxName();
   HiveCipher? cipher;
   if (encryptionKey != null) {
@@ -188,7 +188,14 @@ extension HiveWrapperX on HiveWrapper {
 
 const longTimeout = Timeout(Duration(minutes: 2));
 
-void hiveIntegrationTest(void Function(bool isolated) test) {
-  test(false);
-  group('IsolatedHive', () => test(true));
+enum TestType {
+  normal,
+  isolate,
+  uriIsolate,
+}
+
+void hiveIntegrationTest(void Function(TestType type) test) {
+  test(TestType.normal);
+  group('IsolatedHive.spawn', () => test(TestType.isolate));
+  group('IsolatedHive.spawnUri', () => test(TestType.uriIsolate));
 }
