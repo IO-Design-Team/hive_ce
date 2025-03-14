@@ -17,7 +17,12 @@ abstract class StorageBackend {
   bool get supportsCompaction;
 
   /// Prepare backend
-  Future<void> initialize(TypeRegistry registry, Keystore keystore, bool lazy);
+  Future<void> initialize(
+    TypeRegistry registry,
+    Keystore keystore,
+    bool lazy, {
+    bool verbatimFrames = false,
+  });
 
   /// Read value from backend
   Future<dynamic> readValue(Frame frame);

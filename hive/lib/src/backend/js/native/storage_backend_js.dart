@@ -172,8 +172,9 @@ class StorageBackendJs extends StorageBackend {
   Future<int> initialize(
     TypeRegistry registry,
     Keystore keystore,
-    bool lazy,
-  ) async {
+    bool lazy, {
+    bool verbatimFrames = false,
+  }) async {
     _registry = registry;
     final keys = await getKeys();
     if (!lazy) {

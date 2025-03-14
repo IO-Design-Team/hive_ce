@@ -29,8 +29,9 @@ class StorageBackendMemory extends StorageBackend {
   Future<void> initialize(
     TypeRegistry registry,
     Keystore? keystore,
-    bool lazy,
-  ) {
+    bool lazy, {
+    bool verbatimFrames = false,
+  }) {
     final recoveryOffset = _frameHelper.framesFromBytes(
       _bytes!, // Initialized at constructor and nulled after initialization
       keystore,

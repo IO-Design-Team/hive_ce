@@ -106,7 +106,12 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
 
   /// Not part of public API
   Future<void> initialize() {
-    return backend.initialize(hive, keystore, lazy);
+    return backend.initialize(
+      hive,
+      keystore,
+      lazy,
+      verbatimFrames: verbatimFrames,
+    );
   }
 
   @override

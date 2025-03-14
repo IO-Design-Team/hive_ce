@@ -102,8 +102,9 @@ RECOMMENDED ACTIONS:
   Future<void> initialize(
     TypeRegistry registry,
     Keystore keystore,
-    bool lazy,
-  ) async {
+    bool lazy, {
+    bool verbatimFrames = false,
+  }) async {
     this.registry = registry;
 
     if (_lockFile.existsSync()) {
@@ -119,8 +120,13 @@ RECOMMENDED ACTIONS:
 
     int recoveryOffset;
     if (!lazy) {
-      recoveryOffset =
-          await _frameHelper.framesFromFile(path, keystore, registry, _cipher);
+      recoveryOffset = await _frameHelper.framesFromFile(
+        path,
+        keystore,
+        registry,
+        _cipher,
+        verbatim: verbatimFrames,
+      );
     } else {
       recoveryOffset = await _frameHelper.keysFromFile(path, keystore, _cipher);
     }
