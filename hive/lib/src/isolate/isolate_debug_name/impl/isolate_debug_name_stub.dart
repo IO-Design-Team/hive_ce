@@ -1,0 +1,2 @@
+/// Stub
+const isolateDebugName = 'main';
