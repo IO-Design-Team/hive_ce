@@ -240,7 +240,7 @@ void main() {
         hive.registerAdapter(adapter);
         expect(hive.isAdapterRegistered(adapter.typeId), isTrue);
 
-        await hive.resetAdapters();
+        hive.resetAdapters();
         expect(hive.isAdapterRegistered(adapter.typeId), isFalse);
       });
     });

@@ -54,17 +54,16 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       _channel.invokeMethod('keyAt', {'name': name, 'index': index});
 
   @override
-  Stream<BoxEvent> watch({dynamic key}) =>
-      _stream ??= _eventChannel.receiveBroadcastStream().map(
-        (event) {
-          final value = event['value'];
-          return BoxEvent(
-            event['key'],
-            value == null ? null : _readValue(value),
-            event['deleted'],
-          );
-        },
-      ).where((event) => key == null || event.key == key);
+  Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
+      .receiveBroadcastStream()
+      .map(
+        (event) => BoxEvent(
+          event['key'],
+          _readValue(event['value']),
+          event['deleted'],
+        ),
+      )
+      .where((event) => key == null || event.key == key);
 
   @override
   Future<bool> containsKey(dynamic key) =>
@@ -134,15 +133,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   Future<E?> get(dynamic key, {E? defaultValue}) async {
     final bytes =
         await _channel.invokeMethod('get', {'name': name, 'key': key});
-    if (bytes == null) return defaultValue;
-    return _readValue(bytes);
+    return _readValue(bytes) ?? defaultValue;
   }
 
   @override
   Future<E?> getAt(int index) async {
     final bytes =
         await _channel.invokeMethod('getAt', {'name': name, 'index': index});
-    if (bytes == null) return null;
     return _readValue(bytes);
   }
 
@@ -152,7 +149,8 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
     return writer.toBytes();
   }
 
-  E? _readValue(Uint8List bytes) {
+  E? _readValue(Uint8List? bytes) {
+    if (bytes == null) return null;
     final reader = BinaryReaderImpl(bytes, _registry);
     return reader.read() as E?;
   }

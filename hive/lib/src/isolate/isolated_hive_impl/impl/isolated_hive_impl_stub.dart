@@ -89,7 +89,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
-  Future<void> resetAdapters() {
+  void resetAdapters() {
     throw UnimplementedError();
   }
 
