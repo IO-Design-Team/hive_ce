@@ -121,7 +121,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'toMap':
         return (box as Box).toMap();
       default:
-        return IsolateException.notImplemented(call.method);
+        return call.notImplemented();
     }
   }
 }

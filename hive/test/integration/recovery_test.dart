@@ -63,8 +63,6 @@ void main() {
         test(
           'normal box',
           () => silenceOutput(() => _performTest(false, type: type)),
-          // TODO: fix this
-          skip: type != TestType.normal,
         );
 
         test(

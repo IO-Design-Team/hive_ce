@@ -53,6 +53,6 @@ Future<dynamic> handleHiveMethodCall(
         path: call.arguments['path'],
       );
     default:
-      return IsolateException.notImplemented(call.method);
+      return call.notImplemented();
   }
 }
