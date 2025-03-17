@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 import 'integration.dart';
 
-Future _performTest(bool lazy, {required TestType type}) async {  
+Future _performTest(bool lazy, {required TestType type}) async {
   var (hive, box) = await openBox(lazy, type: type);
 
   final nullableStringList =
