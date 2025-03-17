@@ -32,15 +32,15 @@ Future _performTest(bool lazy, {required TestType type}) async {
 }
 
 void main() {
-  // hiveIntegrationTest((type) {
+  hiveIntegrationTest((type) {
     group(
       'delete many entries in a single batch',
       () {
-        test('normal box', () => _performTest(false, type: TestType.isolate));
+        test('normal box', () => _performTest(false, type: type));
 
-        test('lazy box', () => _performTest(true, type: TestType.isolate));
+        test('lazy box', () => _performTest(true, type: type));
       },
       timeout: longTimeout,
     );
-  // });
+  });
 }

@@ -2,18 +2,16 @@ import 'package:hive_ce/hive.dart';
 
 /// Not part of public API
 class Frame {
-  /// The key
+  /// Not part of public API
   final Object? key;
 
-  /// The value
+  /// Not part of public API
   final Object? value;
 
-  /// If this frame is deleted
+  /// Not part of public API
   final bool deleted;
 
-  /// If this frame is lazy
-  ///
-  /// Lazy frames do not yet have a value
+  /// Not part of public API
   final bool lazy;
 
   /// Not part of public API
@@ -22,14 +20,14 @@ class Frame {
   /// Not part of public API
   int offset = -1;
 
-  /// Create a new frame
+  /// Not part of public API
   Frame(this.key, this.value, {this.length, this.offset = -1})
       : lazy = false,
         deleted = false {
     assert(assertKey(key));
   }
 
-  /// Crate a deleted frame
+  /// Not part of public API
   Frame.deleted(this.key, {this.length})
       : value = null,
         lazy = false,
@@ -38,7 +36,7 @@ class Frame {
     assert(assertKey(key));
   }
 
-  /// Create a lazy frame
+  /// Not part of public API
   Frame.lazy(this.key, {this.length, this.offset = -1})
       : value = null,
         lazy = true,
@@ -66,7 +64,11 @@ class Frame {
   /// Not part of public API
   Frame toLazy() {
     if (deleted) return this;
-    return Frame.lazy(key, length: length, offset: offset);
+    return Frame.lazy(
+      key,
+      length: length,
+      offset: offset,
+    );
   }
 
   @override
