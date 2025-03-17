@@ -11,8 +11,9 @@ class FrameHelper {
     Uint8List bytes,
     Keystore? keystore,
     TypeRegistry registry,
-    HiveCipher? cipher,
-  ) {
+    HiveCipher? cipher, {
+    bool verbatim = false,
+  }) {
     final reader = BinaryReaderImpl(bytes, registry);
 
     while (reader.availableBytes != 0) {
@@ -22,6 +23,7 @@ class FrameHelper {
         cipher: cipher,
         lazy: false,
         frameOffset: frameOffset,
+        verbatim: verbatim,
       );
       if (frame == null) return frameOffset;
 

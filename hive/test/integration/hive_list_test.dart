@@ -40,10 +40,10 @@ void main() {
   test(
     'add and remove objects to / from HiveList',
     () async {
-      final hive = await createHive(isolated: false);
+      final hive = await createHive(type: TestType.normal);
       await hive.registerAdapter(_TestObjectAdapter());
       var (_, box) =
-          await openBox<_TestObject>(false, isolated: false, hive: hive);
+          await openBox<_TestObject>(false, type: TestType.normal, hive: hive);
 
       var obj = _TestObject('obj');
       obj.list = HiveListImpl(box.box as Box<_TestObject>);

@@ -4,9 +4,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/adapters/big_int_adapter.dart';
-import 'package:hive_ce/src/adapters/date_time_adapter.dart';
-import 'package:hive_ce/src/adapters/duration_adapter.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';
@@ -47,26 +44,20 @@ RECOMMENDED ACTIONS:
   BackendManagerInterface? _managerOverride;
   final Random _secureRandom = Random.secure();
 
+  /// Whether to write frames to the disk verbatim
+  bool _verbatimFrames = false;
+
+  /// Set [_verbatimFrames] to true
+  void useVerbatimFrames() => _verbatimFrames = true;
+
   /// Not part of public API
   @visibleForTesting
   String? homePath;
-
-  /// Not part of public API
-  HiveImpl() {
-    _registerDefaultAdapters();
-  }
 
   /// either returns the preferred [BackendManagerInterface] or the
   /// platform default fallback
   BackendManagerInterface get _manager =>
       _managerOverride ?? _defaultBackendManager;
-
-  void _registerDefaultAdapters() {
-    registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
-    registerAdapter(DateTimeAdapter<DateTimeWithoutTZ>(), internal: true);
-    registerAdapter(BigIntAdapter(), internal: true);
-    registerAdapter(DurationAdapter(), internal: true);
-  }
 
   @override
   void init(
@@ -133,9 +124,23 @@ RECOMMENDED ACTIONS:
         }
 
         if (lazy) {
-          newBox = LazyBoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = LazyBoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            verbatimFrames: _verbatimFrames,
+          );
         } else {
-          newBox = BoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = BoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            verbatimFrames: _verbatimFrames,
+          );
         }
 
         await newBox.initialize();

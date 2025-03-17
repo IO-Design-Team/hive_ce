@@ -4,8 +4,8 @@ import 'package:test/test.dart';
 
 import 'integration.dart';
 
-Future _performTest(bool lazy, {required bool isolated}) async {
-  var (hive, box) = await openBox(lazy, isolated: isolated);
+Future _performTest(bool lazy, {required TestType type}) async {
+  var (hive, box) = await openBox(lazy, type: type);
 
   final nullableStringList =
       List<String?>.filled(1000000, 'test', growable: true)..add(null);
@@ -32,13 +32,13 @@ Future _performTest(bool lazy, {required bool isolated}) async {
 }
 
 void main() {
-  hiveIntegrationTest((isolated) {
+  hiveIntegrationTest((type) {
     group(
       'put large lists',
       () {
-        test('normal box', () => _performTest(false, isolated: isolated));
+        test('normal box', () => _performTest(false, type: type));
 
-        test('lazy box', () => _performTest(true, isolated: isolated));
+        test('lazy box', () => _performTest(true, type: type));
       },
       timeout: longTimeout,
     );

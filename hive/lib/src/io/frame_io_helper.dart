@@ -43,10 +43,17 @@ class FrameIoHelper extends FrameHelper {
     String path,
     Keystore keystore,
     TypeRegistry registry,
-    HiveCipher? cipher,
-  ) async {
+    HiveCipher? cipher, {
+    bool verbatim = false,
+  }) async {
     final bytes = await readFile(path);
-    return framesFromBytes(bytes as Uint8List, keystore, registry, cipher);
+    return framesFromBytes(
+      bytes as Uint8List,
+      keystore,
+      registry,
+      cipher,
+      verbatim: verbatim,
+    );
   }
 }
 

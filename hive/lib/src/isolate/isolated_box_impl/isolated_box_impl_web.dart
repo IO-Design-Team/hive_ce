@@ -15,13 +15,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   bool get lazy => _box.lazy;
 
   @override
-  Future<bool> get isOpen async => _box.isOpen;
+  bool get isOpen => _box.isOpen;
 
   @override
   Future<String?> get path async => _box.path;
 
   @override
-  Future<Iterable> get keys async => _box.keys;
+  Future<List> get keys async => _box.keys.toList();
 
   @override
   Future<int> get length async => _box.length;
@@ -54,7 +54,10 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   Future<int> add(E value) => _box.add(value);
 
   @override
-  Future<Iterable<int>> addAll(Iterable<E> values) => _box.addAll(values);
+  Future<List<int>> addAll(Iterable<E> values) async {
+    final keys = await _box.addAll(values);
+    return keys.toList();
+  }
 
   @override
   Future<void> delete(dynamic key) => _box.delete(key);

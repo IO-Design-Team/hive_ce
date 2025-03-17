@@ -9,13 +9,13 @@ abstract class IsolatedBoxBase<E> {
   bool get lazy;
 
   /// Whether the box is open
-  Future<bool> get isOpen;
+  bool get isOpen;
 
   /// The path of the box
   Future<String?> get path;
 
   /// The keys of the box
-  Future<Iterable> get keys;
+  Future<List> get keys;
 
   /// The length of the box
   Future<int> get length;
@@ -48,7 +48,7 @@ abstract class IsolatedBoxBase<E> {
   Future<int> add(E value);
 
   /// Add all the given values to the box
-  Future<Iterable<int>> addAll(Iterable<E> values);
+  Future<List<int>> addAll(Iterable<E> values);
 
   /// Delete a value from the box
   Future<void> delete(dynamic key);

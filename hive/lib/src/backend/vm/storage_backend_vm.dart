@@ -102,8 +102,9 @@ RECOMMENDED ACTIONS:
   Future<void> initialize(
     TypeRegistry registry,
     Keystore keystore,
-    bool lazy,
-  ) async {
+    bool lazy, {
+    bool verbatimFrames = false,
+  }) async {
     this.registry = registry;
 
     if (_lockFile.existsSync()) {
@@ -119,8 +120,13 @@ RECOMMENDED ACTIONS:
 
     int recoveryOffset;
     if (!lazy) {
-      recoveryOffset =
-          await _frameHelper.framesFromFile(path, keystore, registry, _cipher);
+      recoveryOffset = await _frameHelper.framesFromFile(
+        path,
+        keystore,
+        registry,
+        _cipher,
+        verbatim: verbatimFrames,
+      );
     } else {
       recoveryOffset = await _frameHelper.keysFromFile(path, keystore, _cipher);
     }
@@ -138,14 +144,15 @@ RECOMMENDED ACTIONS:
   }
 
   @override
-  Future<dynamic> readValue(Frame frame) {
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
       final bytes = await readRaf.read(frame.length!);
 
       final reader = BinaryReaderImpl(bytes, registry);
-      final readFrame = reader.readFrame(cipher: _cipher, lazy: false);
+      final readFrame =
+          reader.readFrame(cipher: _cipher, lazy: false, verbatim: verbatim);
 
       if (readFrame == null) {
         throw HiveError(
@@ -158,12 +165,13 @@ RECOMMENDED ACTIONS:
   }
 
   @override
-  Future<void> writeFrames(List<Frame> frames) {
+  Future<void> writeFrames(List<Frame> frames, {bool verbatim = false}) {
     return _sync.syncWrite(() async {
       final writer = BinaryWriterImpl(registry);
 
       for (final frame in frames) {
-        frame.length = writer.writeFrame(frame, cipher: _cipher);
+        frame.length =
+            writer.writeFrame(frame, cipher: _cipher, verbatim: verbatim);
       }
 
       try {

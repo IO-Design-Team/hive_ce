@@ -14,11 +14,11 @@ Future<dynamic> handleHiveMethodCall(
   switch (call.method) {
     case 'init':
       Hive.init(call.arguments);
+      (Hive as HiveImpl).useVerbatimFrames();
     case 'openBox':
       final name = call.arguments['name'];
       final box = await Hive.openBox(
         name,
-        encryptionCipher: call.arguments['encryptionCipher'],
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
         compactionStrategy:
             call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
@@ -32,7 +32,6 @@ Future<dynamic> handleHiveMethodCall(
       final name = call.arguments['name'];
       final box = await Hive.openLazyBox(
         name,
-        encryptionCipher: call.arguments['encryptionCipher'],
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
         compactionStrategy:
             call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
@@ -41,8 +40,6 @@ Future<dynamic> handleHiveMethodCall(
         collection: call.arguments['collection'],
       );
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
-    case 'isBoxOpen':
-      return Hive.isBoxOpen(call.arguments);
     case 'close':
       await Hive.close();
     case 'deleteBoxFromDisk':
@@ -50,27 +47,11 @@ Future<dynamic> handleHiveMethodCall(
         call.arguments['name'],
         path: call.arguments['path'],
       );
-    case 'deleteFromDisk':
-      await Hive.deleteFromDisk();
     case 'boxExists':
       return Hive.boxExists(
         call.arguments['name'],
         path: call.arguments['path'],
       );
-    case 'registerAdapter':
-      (Hive as HiveImpl).registerResolvedAdapter(
-        call.arguments['adapter'],
-        internal: call.arguments['internal'],
-        override: call.arguments['override'],
-      );
-    case 'isAdapterRegistered':
-      return Hive.isAdapterRegistered(call.arguments);
-    case 'resetAdapters':
-      // This is a proxy
-      // ignore: invalid_use_of_visible_for_testing_member
-      Hive.resetAdapters();
-    case 'ignoreTypeId':
-      Hive.ignoreTypeId(call.arguments);
     default:
       return IsolateException.notImplemented(call.method);
   }

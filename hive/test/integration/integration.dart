@@ -94,20 +94,46 @@ class BoxWrapper<E> extends BoxBaseWrapper<E> {
   FutureOr<Map<dynamic, E>> toMap() => box.toMap();
 }
 
+extension HiveIsolateExtension on HiveIsolate {
+  set entryPoint(IsolateEntryPoint entryPoint) {
+    spawnHiveIsolate = () => spawnIsolate(
+          entryPoint,
+          debugName: HiveIsolate.isolateName,
+          onConnect: onConnect,
+          onExit: onExit,
+        );
+  }
+
+  void useUriIsolate() {
+    spawnHiveIsolate = () => spawnUriIsolate(
+          Uri.file(
+            '${Directory.current.path}/test/util/isolate_entry_point.dart',
+          ),
+          debugName: HiveIsolate.isolateName,
+          onConnect: onConnect,
+          onExit: onExit,
+        );
+  }
+}
+
 Future<HiveWrapper> createHive({
-  required bool isolated,
+  required TestType type,
   Directory? directory,
   IsolateEntryPoint? entryPoint,
 }) async {
   final HiveWrapper hive;
-  if (isolated) {
+  if (type == TestType.normal) {
+    hive = HiveWrapper(HiveImpl());
+  } else {
     final isolatedHive = IsolatedHiveImpl();
-    if (isolatedHive is HiveIsolate && entryPoint != null) {
-      (isolatedHive as HiveIsolate).entryPoint = entryPoint;
+    if (isolatedHive is HiveIsolate) {
+      if (entryPoint != null) {
+        (isolatedHive as HiveIsolate).entryPoint = entryPoint;
+      } else if (type == TestType.uriIsolate) {
+        (isolatedHive as HiveIsolate).useUriIsolate();
+      }
     }
     hive = HiveWrapper(isolatedHive);
-  } else {
-    hive = HiveWrapper(HiveImpl());
   }
 
   addTearDown(hive.close);
@@ -123,10 +149,10 @@ Future<HiveWrapper> createHive({
 Future<(HiveWrapper, BoxBaseWrapper<T>)> openBox<T>(
   bool lazy, {
   HiveWrapper? hive,
-  required bool isolated,
+  required TestType type,
   List<int>? encryptionKey,
 }) async {
-  hive ??= await createHive(isolated: isolated);
+  hive ??= await createHive(type: type);
   final boxName = generateBoxName();
   HiveCipher? cipher;
   if (encryptionKey != null) {
@@ -177,7 +203,16 @@ extension HiveWrapperX on HiveWrapper {
 
 const longTimeout = Timeout(Duration(minutes: 2));
 
-void hiveIntegrationTest(void Function(bool isolated) test) {
-  test(false);
-  group('IsolatedHive', () => test(true));
+enum TestType {
+  normal,
+  isolate,
+  uriIsolate,
+}
+
+void hiveIntegrationTest(void Function(TestType type) test) {
+  test(TestType.normal);
+  group('IsolatedHive', () => test(TestType.isolate));
+  if (!isBrowser) {
+    group('IsolatedHive.spawnUri', () => test(TestType.uriIsolate));
+  }
 }

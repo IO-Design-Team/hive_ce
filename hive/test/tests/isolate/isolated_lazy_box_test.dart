@@ -106,7 +106,7 @@ void main() {
     test('.close() properly closes the box', () async {
       final box = await _openBox();
       await box.close();
-      expect(await box.isOpen, false);
+      expect(box.isOpen, false);
     });
   });
 }

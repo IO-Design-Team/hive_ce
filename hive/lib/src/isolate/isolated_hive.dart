@@ -1,9 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
 /// Interface for [IsolatedHive]
-abstract class IsolatedHiveInterface {
+abstract class IsolatedHiveInterface implements TypeRegistry {
   /// Initialize the isolated Hive instance
   ///
   /// If accessing Hive in multiple isolates, an [isolateNameSever] MUST be
@@ -43,7 +44,7 @@ abstract class IsolatedHiveInterface {
   IsolatedLazyBox<E> lazyBox<E>(String name);
 
   /// Check if a box is open in the isolate
-  Future<bool> isBoxOpen(String name);
+  bool isBoxOpen(String name);
 
   /// Shutdown the isolate
   Future<void> close();
@@ -57,21 +58,7 @@ abstract class IsolatedHiveInterface {
   /// Check if a box exists in the isolate
   Future<bool> boxExists(String name, {String? path});
 
-  /// Register an adapter in the isolate
-  ///
-  /// WARNING: Validation checks are not as strong as with [Hive]
-  Future<void> registerAdapter<T>(
-    TypeAdapter<T> adapter, {
-    bool internal = false,
-    bool override = false,
-  });
-
-  /// Check if an adapter is registered in the isolate
-  Future<bool> isAdapterRegistered(int typeId);
-
   /// Reset the adapters in the isolate
-  Future<void> resetAdapters();
-
-  /// Ignore a type id in the isolate
-  Future<void> ignoreTypeId<T>(int typeId);
+  @visibleForTesting
+  void resetAdapters();
 }

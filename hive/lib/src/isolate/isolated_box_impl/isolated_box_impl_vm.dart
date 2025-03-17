@@ -1,38 +1,51 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/impl/isolated_hive_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
 ///
 /// Most methods are async due to isolate communication
 abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
+  /// Value to inform the get method to return the default value
+  static const defaultValuePlaceholder =
+      '_hive_ce.IsolatedBoxBaseImpl.defaultValue';
+
+  final IsolatedHiveImpl _hive;
+  final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
   Stream<BoxEvent>? _stream;
 
+  bool _open = true;
+
   /// Constructor
   IsolatedBoxBaseImpl(
-    this._channel,
-    IsolateConnection connection,
+    this._hive,
     this.name,
-    this.lazy,
+    this._cipher,
+    IsolateConnection connection,
+    this._channel,
   ) : _eventChannel = IsolateEventChannel('box_$name', connection);
+
+  /// Not part of public API
+  Type get valueType => E;
 
   @override
   final String name;
 
   @override
-  final bool lazy;
-
-  @override
-  Future<bool> get isOpen => _channel.invokeMethod('isOpen', {'name': name});
+  bool get isOpen => _open;
 
   @override
   Future<String?> get path => _channel.invokeMethod('path', {'name': name});
 
   @override
-  Future<Iterable> get keys => _channel.invokeMethod('keys', {'name': name});
+  Future<List> get keys => _channel.invokeMethod('keys', {'name': name});
 
   @override
   Future<int> get length => _channel.invokeMethod('length', {'name': name});
@@ -51,7 +64,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   @override
   Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
       .receiveBroadcastStream()
-      .map((event) => BoxEvent(event['key'], event['value'], event['deleted']))
+      .map(
+        (event) => BoxEvent(
+          event['key'],
+          _readValue(event['value']),
+          event['deleted'],
+        ),
+      )
       .where((event) => key == null || event.key == key);
 
   @override
@@ -59,24 +78,36 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       _channel.invokeMethod('containsKey', {'name': name, 'key': key});
 
   @override
-  Future<void> put(dynamic key, E value) =>
-      _channel.invokeMethod('put', {'name': name, 'key': key, 'value': value});
+  Future<void> put(dynamic key, E value) => _channel.invokeMethod(
+        'put',
+        {'name': name, 'key': key, 'value': _writeValue(value)},
+      );
 
   @override
-  Future<void> putAt(int index, E value) => _channel
-      .invokeMethod('putAt', {'name': name, 'index': index, 'value': value});
+  Future<void> putAt(int index, E value) => _channel.invokeMethod(
+        'putAt',
+        {'name': name, 'index': index, 'value': _writeValue(value)},
+      );
 
   @override
-  Future<void> putAll(Map<dynamic, E> entries) =>
-      _channel.invokeMethod('putAll', {'name': name, 'entries': entries});
+  Future<void> putAll(Map<dynamic, E> entries) => _channel.invokeMethod(
+        'putAll',
+        {
+          'name': name,
+          'entries':
+              entries.map((key, value) => MapEntry(key, _writeValue(value))),
+        },
+      );
 
   @override
   Future<int> add(E value) =>
-      _channel.invokeMethod('add', {'name': name, 'value': value});
+      _channel.invokeMethod('add', {'name': name, 'value': _writeValue(value)});
 
   @override
-  Future<Iterable<int>> addAll(Iterable<E> values) =>
-      _channel.invokeMethod('addAll', {'name': name, 'values': values});
+  Future<List<int>> addAll(Iterable<E> values) => _channel.invokeMethod(
+        'addAll',
+        {'name': name, 'values': values.map(_writeValue).toList()},
+      );
 
   @override
   Future<void> delete(dynamic key) =>
@@ -88,7 +119,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   @override
   Future<void> deleteAll(Iterable keys) =>
-      _channel.invokeMethod('deleteAll', {'name': name, 'keys': keys});
+      _channel.invokeMethod('deleteAll', {'name': name, 'keys': keys.toList()});
 
   @override
   Future<void> compact() => _channel.invokeMethod('compact', {'name': name});
@@ -97,54 +128,112 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   Future<int> clear() => _channel.invokeMethod('clear', {'name': name});
 
   @override
-  Future<void> close() => _channel.invokeMethod('close', {'name': name});
+  Future<void> close() async {
+    if (!_open) return;
+    await _channel.invokeMethod('close', {'name': name});
+    _open = false;
+    _hive.unregisterBox(name);
+  }
 
   @override
-  Future<void> deleteFromDisk() =>
-      _channel.invokeMethod('deleteFromDisk', {'name': name});
+  Future<void> deleteFromDisk() async {
+    if (!_open) return;
+    await _channel.invokeMethod('deleteFromDisk', {'name': name});
+    _open = false;
+    _hive.unregisterBox(name);
+  }
 
   @override
   Future<void> flush() => _channel.invokeMethod('flush', {'name': name});
 
   @override
-  Future<E?> get(dynamic key, {E? defaultValue}) =>
-      _channel.invokeMethod('get', {
-        'name': name,
-        'key': key,
-        'defaultValue': defaultValue,
-      });
+  Future<E?> get(dynamic key, {E? defaultValue}) async {
+    final result =
+        await _channel.invokeMethod('get', {'name': name, 'key': key});
+    if (result == defaultValuePlaceholder) return defaultValue;
+    return _readValue(result);
+  }
 
   @override
-  Future<E?> getAt(int index) =>
-      _channel.invokeMethod('getAt', {'name': name, 'index': index});
+  Future<E?> getAt(int index) async {
+    final bytes =
+        await _channel.invokeMethod('getAt', {'name': name, 'index': index});
+    return _readValue(bytes);
+  }
+
+  Uint8List _writeValue(E value) {
+    final writer = BinaryWriterImpl(_hive);
+    if (_cipher != null) {
+      writer.writeEncrypted(value, _cipher);
+    } else {
+      writer.write(value);
+    }
+    return writer.toBytes();
+  }
+
+  E? _readValue(Uint8List? bytes) {
+    if (bytes == null) return null;
+    final reader = BinaryReaderImpl(bytes, _hive);
+    final E? value;
+    if (_cipher != null) {
+      value = reader.readEncrypted(_cipher);
+    } else {
+      value = reader.read();
+    }
+    return value;
+  }
 }
 
 /// Isolated implementation of [Box]
 class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedBox<E> {
   /// Constructor
-  IsolatedBoxImpl(super._channel, super.connection, super.name, super.lazy);
+  IsolatedBoxImpl(
+    super._registry,
+    super.name,
+    super._cipher,
+    super.connection,
+    super._channel,
+  );
 
   @override
-  Future<Iterable<E>> get values =>
-      _channel.invokeMethod('values', {'name': name});
+  final bool lazy = false;
 
   @override
-  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) =>
-      _channel.invokeMethod('valuesBetween', {
-        'name': name,
-        'startKey': startKey,
-        'endKey': endKey,
-      });
+  Future<Iterable<E>> get values async {
+    final bytes = await _channel.invokeMethod('values', {'name': name});
+    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
+  }
 
   @override
-  Future<Map<dynamic, E>> toMap() =>
-      _channel.invokeMethod('toMap', {'name': name});
+  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) async {
+    final bytes = await _channel.invokeMethod('valuesBetween', {
+      'name': name,
+      'startKey': startKey,
+      'endKey': endKey,
+    });
+    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
+  }
+
+  @override
+  Future<Map<dynamic, E>> toMap() async {
+    final bytes = await _channel.invokeMethod('toMap', {'name': name});
+    return bytes.map((key, value) => MapEntry(key, _readValue(value)));
+  }
 }
 
 /// Isolated implementation of [LazyBoxBase]
 class IsolatedLazyBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedLazyBox<E> {
   /// Constructor
-  IsolatedLazyBoxImpl(super._channel, super.connection, super.name, super.lazy);
+  IsolatedLazyBoxImpl(
+    super._registry,
+    super.name,
+    super._cipher,
+    super.connection,
+    super._channel,
+  );
+
+  @override
+  final bool lazy = true;
 }
