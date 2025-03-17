@@ -49,10 +49,10 @@ This is a comparison of the time to complete a given number of write operations 
 | ---------- | ------------ | ----------------- | ------------ | ------------ | ------------ |
 | 10         | 0.00 s       | 0.00 s            | 0.00 MB      | 0.00 s       | 1.00 MB      |
 | 100        | 0.00 s       | 0.01 s            | 0.01 MB      | 0.01 s       | 1.00 MB      |
-| 1000       | 0.03 s       | 0.05 s            | 0.11 MB      | 0.07 s       | 1.00 MB      |
-| 10000      | 0.17 s       | 0.27 s            | 1.10 MB      | 0.69 s       | 5.00 MB      |
-| 100000     | 1.46 s       | 2.38 s            | 10.97 MB     | 7.28 s       | 30.00 MB     |
-| 1000000    | 19.11 s      | 29.52 s           | 109.67 MB    | 97.32 s      | 290.00 MB    |
+| 1000       | 0.02 s       | 0.04 s            | 0.11 MB      | 0.06 s       | 1.00 MB      |
+| 10000      | 0.14 s       | 0.32 s            | 1.10 MB      | 0.69 s       | 5.00 MB      |
+| 100000     | 1.48 s       | 3.23 s            | 10.97 MB     | 8.69 s       | 30.00 MB     |
+| 1000000    | 20.59 s      | 47.45 s           | 109.67 MB    | 104.74 s     | 290.00 MB    |
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
