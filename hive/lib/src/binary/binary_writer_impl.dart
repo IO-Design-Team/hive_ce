@@ -259,10 +259,10 @@ class BinaryWriterImpl extends BinaryWriter {
 
     writeKey(frame.key);
 
-    if (verbatim) {
-      _writeBytes(frame.value as Uint8List);
-    } else {
-      if (!frame.deleted) {
+    if (!frame.deleted) {
+      if (verbatim) {
+        _writeBytes(frame.value as Uint8List);
+      } else {
         if (cipher == null) {
           write(frame.value);
         } else {
