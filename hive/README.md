@@ -99,6 +99,7 @@ Here are some common examples of multi-isolate scenarios:
 - The `init` call takes an `isolateNameServer` parameter
 - Most methods are asynchronous due to isolate communication
 - `IsolatedHive` does not support `HiveObject` or `HiveList`
+- Isolate communication does add some overhead. See the benchmarks above.
 
 NOTE: On web, `IsolatedHive` directly calls `Hive` since web does not support isolates
 
