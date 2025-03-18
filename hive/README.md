@@ -3,7 +3,7 @@
 </p>
 <h2 align="center">Fast, Enjoyable & Secure NoSQL Database</h2>
 
-[![Dart CI](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml/badge.svg)](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/IO-Design-Team/hive_ce/graph/badge.svg?token=ODO2JA4286)](https://codecov.io/gh/IO-Design-Team/hive_ce) [![Pub Version](https://img.shields.io/pub/v/hive_ce?label=pub.dev&labelColor=333940&logo=dart)](https://pub.dev/packages/hive_ce) [![GitHub](https://img.shields.io/github/license/IO-Design-Team/hive_ce?color=%23007A88&labelColor=333940&logo=bsd)](https://github.com/IO-Design-Team/hive_ce/blob/master/LICENSE)
+[![Dart CI](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml/badge.svg)](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/IO-Design-Team/hive_ce/graph/badge.svg?token=ODO2JA4286)](https://codecov.io/gh/IO-Design-Team/hive_ce) [![Pub Version](https://img.shields.io/pub/v/hive_ce?label=pub.dev&labelColor=333940&logo=dart)](https://pub.dev/packages/hive_ce) [![License](https://img.shields.io/badge/License-BSD_3--Clause-007A88.svg?logo=bsd)](https://github.com/IO-Design-Team/hive_ce/blob/master/LICENSE)
 
 [![PubStats Popularity](https://pubstats.dev/badges/packages/hive_ce/popularity.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Rank](https://pubstats.dev/badges/packages/hive_ce/rank.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Dependents](https://pubstats.dev/badges/packages/hive_ce/dependents.svg)](https://pubstats.dev/packages/hive_ce)
 
@@ -60,10 +60,10 @@ The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark
 
 ## Migration guides
 
-- [Hive v2 to Hive CE](MIGRATION.md#v2-to-ce)
-- [Transitive Hive dependencies](MIGRATION.md#transitive-hive-dependencies)
-- [Migrating to `GenerateAdapters`](MIGRATION.md#generate-adapters)
-- [Add fields to objects](MIGRATION.md#add-fields)
+- [Hive v2 to Hive CE](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#v2-to-ce)
+- [Transitive Hive dependencies](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#transitive-hive-dependencies)
+- [Migrating to `GenerateAdapters`](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#generate-adapters)
+- [Add fields to objects](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#add-fields)
 
 ## Usage
 
@@ -83,8 +83,10 @@ void example() {
 
 ```
 
+## Guides
+
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">IsolatedHive</span></summary>
+<summary>IsolatedHive (isolate support)</summary>
 
 `IsolatedHive` allows you to safely use `Hive` in a multi-isolate environment by maintaining its own separate isolate for `Hive` operations
 
@@ -135,7 +137,7 @@ See an example of a multi-window Flutter app using `IsolatedHive` [here](https:/
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">Store objects</span></summary>
+<summary>Store objects</summary>
 
 Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
 
@@ -251,7 +253,7 @@ Unfortunately it is not possible for `GenerateAdapters` to handle private fields
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">BoxCollections</span></summary>
+<summary>BoxCollection</summary>
 
 `BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
 they dramatically improve speed on web. They support opening and closing all boxes of a collection
@@ -329,7 +331,7 @@ void example() async {
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">Hive ❤️ Flutter</span></summary>
+<summary>Hive ❤️ Flutter</summary>
 
 Hive was written with Flutter in mind. It is a perfect fit if you need a lightweight datastore for your app. After adding the required dependencies and initializing Hive, you can use Hive in your project:
 
