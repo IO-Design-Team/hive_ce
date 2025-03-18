@@ -28,20 +28,18 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
 
 - Isolate support through `IsolatedHive`
 - Flutter web WASM support
-- Support for Sets
-- A built in Duration adapter
-- A `HiveRegistrar` extension that lets you register all your generated adapters in one call
-- Support for constructor parameter defaults
-- Freezed support
-- Support for generating adapters with classes that use named imports
 - Automatic type adapter generation using the `GenerateAdapters` annotation
   - No more manually adding annotations to every type and field
   - Generate adapters for classes outside the current package
+- A `HiveRegistrar` extension that lets you register all your generated adapters in one call
 - Extends the maximum type ID from `223` to `65439`
+- Support for constructor parameter defaults
+- Support for Sets
+- A built in Duration adapter
+- Freezed support
+- Support for generating adapters with classes that use named imports
 
-## Hive CE (v2) vs IsolatedHive vs Hive v4 (Isar)
-
-You may be considering attempting to make the dev version of Hive v4 work in your project. I _strongly_ advise against this. Not only is Hive v4 not stable, but it is also much slower and less efficient than Hive CE.
+## Benchmark
 
 This is a comparison of the time to complete a given number of write operations and the resulting database file size:
 
@@ -56,60 +54,16 @@ This is a comparison of the time to complete a given number of write operations 
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
 
+IsolatedHive is slower than Hive, but it is much faster than Hive v4 and you still get the benefit of multiple isolate support.
+
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/bin/bench.dart).
 
-## Migrating from Hive v2
+## Migration guides
 
-The `hive_ce` package is a drop in replacement for Hive v2. Make the following replacements in your project:
-
-pubspec.yaml
-
-```yaml
-# old dependencies
-dependencies:
-  hive: ^2.0.0
-  hive_flutter: ^1.0.0
-
-dev_dependencies:
-  hive_generator: ^1.0.0
-
-# new dependencies
-dependencies:
-  hive_ce: latest
-  hive_ce_flutter: latest
-
-dev_dependencies:
-  hive_ce_generator: latest
-```
-
-Dart files
-
-```dart
-// old imports
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-
-// new imports
-import 'package:hive_ce/hive.dart';
-import 'package:hive_ce_flutter/hive_flutter.dart';
-```
-
-## Workaround for transitive Hive dependencies
-
-If you are using a package that depends on Hive v2, you can use the following workaround to force it to use Hive CE:
-
-```yaml
-dependencies:
-  # Depend on hive_ce to prevent resolving breaking versions
-  hive_ce: latest
-
-dependency_overrides:
-  hive:
-    git:
-      url: https://github.com/IO-Design-Team/hive_ce
-      ref: 18f92b53295e9eb77ebd4830d905a72cd404a126
-      path: overrides/hive
-```
+- [Hive v2 to Hive CE](MIGRATION.md#v2-to-ce)
+- [Transitive Hive dependencies](MIGRATION.md#transitive-hive-dependencies)
+- [Migrating to `GenerateAdapters`](MIGRATION.md#generate-adapters)
+- [Add fields to objects](MIGRATION.md#add-fields)
 
 ## Usage
 
@@ -311,70 +265,11 @@ The Hive schema is a generated yaml file that contains the information necessary
 
 Some migrations may require manual modifications to the Hive schema file. One example is class/field renaming. Without manual intervention, the generator will see both an added and removed class/field. To resolve this, manually rename the class/field in the schema.
 
-### Migrating to `GenerateAdapters`
-
-If you already have model classes with `HiveType` and `HiveField` annotations, you can take the following steps to migrate to the new `GenerateAdapters` annotation:
-
-1. Convert all default values to constructor parameter defaults
-2. Add the following to your `build.yaml` file:
-
-```yaml
-targets:
-  $default:
-    builders:
-      hive_ce_generator|hive_schema_migrator:
-        enabled: true
-```
-
-3. Run the `build_runner`. This will generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`.
-4. Revert the `build.yaml` changes
-5. Remove all explicit `HiveType` and `HiveField` annotations from your model classes
-6. Run the `build_runner` again
-
 ### Explicitly defining HiveTypes
 
 The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
 
 Unfortunately it is not possible for `GenerateAdapters` to handle private fields. You can use `@protected` instead if necessary.
-
-## Add fields to objects
-
-When adding a new non-nullable field to an existing object, you need to specify a default value to ensure compatibility with existing data.
-
-For example, consider an existing database with a `Person` object:
-
-<!-- embedme readme/add_fields/person_1.dart -->
-
-```dart
-import 'package:hive_ce/hive.dart';
-
-class Person extends HiveObject {
-  Person({required this.name, required this.age});
-
-  String name;
-  int age;
-}
-
-```
-
-If you want to add a `balance` field, you must specify a default value or else reading existing data will result in null errors:
-
-<!-- embedme readme/add_fields/person_2.dart -->
-
-```dart
-import 'package:hive_ce/hive.dart';
-
-class Person extends HiveObject {
-  Person({required this.name, required this.age, this.balance = 0});
-
-  String name;
-  int age;
-  double balance;
-}
-
-```
-
-After modifying the model, remember to run `build_runner` to regenerate the TypeAdapters
 
 ## Hive ❤️ Flutter
 
@@ -403,14 +298,3 @@ class SettingsPage extends StatelessWidget {
 ```
 
 Boxes are cached and therefore fast enough to be used directly in the `build()` method of Flutter widgets.
-
-## Benchmark
-
-|                                         1000 read iterations                                         |                                      1000 write iterations                                       |
-| :--------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------: |
-|   ![](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/master/.github/benchmark_read.png)    | ![](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/master/.github/benchmark_write.png) |
-| SharedPreferences is on par with Hive when it comes to read performance. SQLite performs much worse. |   Hive greatly outperforms SQLite and SharedPreferences when it comes to writing or deleting.    |
-
-The benchmark was performed on a Oneplus 6T with Android Q. You can [run the benchmark yourself](https://github.com/hivedb/hive_benchmark).
-
-\*Take this benchmark with a grain of salt. It is very hard to compare databases objectively since they were made for different purposes.
