@@ -82,7 +82,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.keys, throwsHiveError('closed'));
+        expect(() => box.keys, throwsHiveError(['closed']));
       });
     });
 
@@ -113,9 +113,9 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.length, throwsHiveError('closed'));
-        expect(() => box.isEmpty, throwsHiveError('closed'));
-        expect(() => box.isNotEmpty, throwsHiveError('closed'));
+        expect(() => box.length, throwsHiveError(['closed']));
+        expect(() => box.isEmpty, throwsHiveError(['closed']));
+        expect(() => box.isNotEmpty, throwsHiveError(['closed']));
       });
     });
 
@@ -135,7 +135,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(box.watch, throwsHiveError('closed'));
+        expect(box.watch, throwsHiveError(['closed']));
       });
     });
 
@@ -154,7 +154,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.keyAt(0), throwsHiveError('closed'));
+        expect(() => box.keyAt(0), throwsHiveError(['closed']));
       });
     });
 
@@ -199,7 +199,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(() => box.containsKey(0), throwsHiveError('closed'));
+        expect(() => box.containsKey(0), throwsHiveError(['closed']));
       });
     });
 
@@ -315,7 +315,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(box.clear, throwsHiveError('closed'));
+        expect(box.clear, throwsHiveError(['closed']));
       });
     });
 
@@ -371,7 +371,7 @@ void main() {
 
         final box = _openBoxBaseMock(backend: backend);
         await box.close();
-        expect(box.compact, throwsHiveError('closed'));
+        expect(box.compact, throwsHiveError(['closed']));
       });
     });
 

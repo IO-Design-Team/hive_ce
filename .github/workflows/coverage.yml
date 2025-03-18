@@ -18,11 +18,11 @@ jobs:
         working-directory: hive
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: dart-lang/setup-dart@v1
       - name: Collect coverage
         run: |
           dart pub get
-          flutter test --coverage
+          dart test --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --package=. --report-on=lib
       - uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true

@@ -31,9 +31,9 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 }
 
 Future _performTest(bool lazy) async {
-  final hive = await createHive();
-  hive.registerAdapter<_TestObject>(_TestObjectAdapter());
-  var box = await openBox(lazy, hive: hive);
+  final hive = await createHive(type: TestType.normal);
+  await hive.registerAdapter<_TestObject>(_TestObjectAdapter());
+  var (_, box) = await openBox(lazy, type: TestType.normal, hive: hive);
 
   var obj1 = _TestObject('test1');
   await box.add(obj1);
@@ -43,7 +43,7 @@ Future _performTest(bool lazy) async {
   await box.put('someKey', obj2);
   expect(obj2.key, 'someKey');
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   obj1 = await box.get(0) as _TestObject;
   obj2 = await box.get('someKey') as _TestObject;
   expect(obj1.name, 'test1');
@@ -53,7 +53,7 @@ Future _performTest(bool lazy) async {
   await obj1.save();
   await obj2.delete();
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   final newObj1 = await box.get(0) as _TestObject;
   final newObj2 = await box.get('someKey') as _TestObject?;
   expect(newObj1.name, 'test1 updated');
@@ -73,27 +73,30 @@ void main() {
     timeout: longTimeout,
   );
 
-  test('move HiveObject between lazy boxes', () async {
-    final hive = await createHive();
-    hive.registerAdapter<_TestObject>(_TestObjectAdapter());
+  test(
+    'move HiveObject between lazy boxes',
+    () async {
+      final hive = await createHive(type: TestType.normal);
+      await hive.registerAdapter<_TestObject>(_TestObjectAdapter());
 
-    final box1 = await openBox(true, hive: hive);
-    final box2 = await openBox(true, hive: hive);
+      final (_, box1) = await openBox(true, type: TestType.normal, hive: hive);
+      final (_, box2) = await openBox(true, type: TestType.normal, hive: hive);
 
-    final obj = _TestObject('test');
-    expect(obj.box, null);
-    expect(obj.key, null);
+      final obj = _TestObject('test');
+      expect(obj.box, null);
+      expect(obj.key, null);
 
-    final key1 = await box1.add(obj);
-    expect(obj.box, box1);
-    expect(obj.key, key1);
+      final key1 = await box1.add(obj);
+      expect(obj.box, box1.box);
+      expect(obj.key, key1);
 
-    await obj.delete();
-    expect(obj.box, null);
-    expect(obj.key, null);
+      await obj.delete();
+      expect(obj.box, null);
+      expect(obj.key, null);
 
-    final key2 = await box2.add(obj);
-    expect(obj.box, box2);
-    expect(obj.key, key2);
-  });
+      final key2 = await box2.add(obj);
+      expect(obj.box, box2.box);
+      expect(obj.key, key2);
+    },
+  );
 }

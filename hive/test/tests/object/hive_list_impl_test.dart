@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 import 'package:mocktail/mocktail.dart';
@@ -51,16 +52,21 @@ void main() {
 
     group('.box', () {
       test('throws HiveError if box is not open', () async {
-        final hive = await createHive();
-        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
-        expect(() => hiveList.box, throwsHiveError('you have to open the box'));
+        final hive = await createHive(type: TestType.normal);
+        final hiveList = HiveListImpl.lazy('someBox', [])
+          ..debugHive = hive.hive as HiveImpl;
+        expect(
+          () => hiveList.box,
+          throwsHiveError(['you have to open the box']),
+        );
       });
 
       test('returns the box', () async {
-        final hive = await createHive();
+        final hive = await createHive(type: TestType.normal);
         final box = await hive.openBox<int>('someBox', bytes: Uint8List(0));
-        final hiveList = HiveListImpl.lazy('someBox', [])..debugHive = hive;
-        expect(hiveList.box, box);
+        final hiveList = HiveListImpl.lazy('someBox', [])
+          ..debugHive = hive.hive as HiveImpl;
+        expect(hiveList.box, box.box);
       });
     });
 
@@ -68,7 +74,7 @@ void main() {
       test('throws exception if HiveList is disposed', () {
         final list = HiveListImpl.lazy('box', []);
         list.dispose();
-        expect(() => list.delegate, throwsHiveError('already been disposed'));
+        expect(() => list.delegate, throwsHiveError(['already been disposed']));
       });
 
       test('removes correct elements if invalidated', () {
@@ -170,7 +176,10 @@ void main() {
         final box = _mockBox();
         final item = _getHiveObject('item', MockBox());
         final list = HiveListImpl(box);
-        expect(() => list.add(item), throwsHiveError('needs to be in the box'));
+        expect(
+          () => list.add(item),
+          throwsHiveError(['needs to be in the box']),
+        );
       });
     });
 
@@ -194,7 +203,7 @@ void main() {
         final list = HiveListImpl(box);
         expect(
           () => list.addAll([item]),
-          throwsHiveError('needs to be in the box'),
+          throwsHiveError(['needs to be in the box']),
         );
       });
     });

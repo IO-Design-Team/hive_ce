@@ -79,12 +79,12 @@ class StorageBackendJs extends StorageBackend {
           value is List<num> ||
           value is List<bool> ||
           value is List<String>) {
-        ifDebug(() {
+        if (kDebugMode) {
           final isIntType = value is int || value is List<int>;
           if (isIntType && isWasm) {
-            print(wasmIntWarning);
+            debugPrint(wasmIntWarning);
           }
-        });
+        }
 
         return value.jsify();
       }
@@ -172,8 +172,9 @@ class StorageBackendJs extends StorageBackend {
   Future<int> initialize(
     TypeRegistry registry,
     Keystore keystore,
-    bool lazy,
-  ) async {
+    bool lazy, {
+    bool verbatimFrames = false,
+  }) async {
     _registry = registry;
     final keys = await getKeys();
     if (!lazy) {
@@ -193,13 +194,13 @@ class StorageBackendJs extends StorageBackend {
   }
 
   @override
-  Future<Object?> readValue(Frame frame) async {
+  Future<Object?> readValue(Frame frame, {bool verbatim = false}) async {
     final value = await getStore(false).get(frame.key.jsify()).asFuture();
     return decodeValue(value);
   }
 
   @override
-  Future<void> writeFrames(List<Frame> frames) async {
+  Future<void> writeFrames(List<Frame> frames, {bool verbatim = false}) async {
     final store = getStore(true);
     for (final frame in frames) {
       if (frame.deleted) {
