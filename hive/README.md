@@ -107,28 +107,12 @@ NOTE: On web, `IsolatedHive` directly calls `Hive` since web does not support is
 <!-- embedme readme/isolated_hive.dart -->
 
 ```dart
-import 'dart:isolate';
-
 import 'package:hive_ce/hive.dart';
 
-class TestNameServer extends IsolateNameServer {
-  final ports = <String, SendPort>{};
-
-  @override
-  SendPort? lookupPortByName(String name) => ports[name];
-
-  @override
-  bool registerPortWithName(SendPort port, String name) {
-    ports[name] = port;
-    return true;
-  }
-
-  @override
-  bool removePortNameMapping(String name) => ports.remove(name) != null;
-}
+import 'stub_ins.dart';
 
 void main() async {
-  await IsolatedHive.init('.', isolateNameServer: TestNameServer());
+  await IsolatedHive.init('.', isolateNameServer: StubIns());
   final box = await IsolatedHive.openBox('box');
   await box.put('key', 'value');
   print(await box.get('key')); // reading is async
