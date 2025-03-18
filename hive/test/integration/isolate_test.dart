@@ -124,8 +124,10 @@ void main() async {
           final patchedWarning =
               HiveImpl.unsafeIsolateWarning.replaceFirst(isolateNameRegex, '');
 
-          final safeOutput =
-              await captureOutput(() => Hive.init(null)).toList();
+          final safeOutput = await Isolate.run(
+            debugName: 'main',
+            () => captureOutput(() => Hive.init(null)).toList(),
+          );
           expect(safeOutput, isEmpty);
 
           final unsafeOutput = await Isolate.run(
