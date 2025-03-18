@@ -7,15 +7,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-Matcher isAHiveError([List<String> containing = const []]) {
-  return allOf(
-    isA<HiveError>(),
-    predicate(
+Matcher hiveErrorPredicate(List<String> containing) => predicate(
       (e) {
         final message = e.toString().toLowerCase();
         return containing.every((c) => message.contains(c.toLowerCase()));
       },
-    ),
+    );
+
+Matcher isAHiveError([List<String> containing = const []]) {
+  return allOf(
+    isA<HiveError>(),
+    hiveErrorPredicate(containing),
   );
 }
 
@@ -29,12 +31,7 @@ Matcher throwsIsolatedHiveError([List<String> containing = const []]) {
       isAHiveError(containing),
       allOf(
         isA<IsolateException>(),
-        predicate(
-          (e) {
-            final message = e.toString().toLowerCase();
-            return containing.every((c) => message.contains(c.toLowerCase()));
-          },
-        ),
+        hiveErrorPredicate(containing),
       )
     ]),
   );
