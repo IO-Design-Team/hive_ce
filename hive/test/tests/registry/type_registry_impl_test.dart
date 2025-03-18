@@ -85,13 +85,13 @@ void main() {
         final registry = TypeRegistryImpl();
         expect(
           () => registry.registerAdapter(TestAdapter(-1)),
-          throwsHiveError('not allowed'),
+          throwsHiveError(['not allowed']),
         );
         expect(
           () => registry.registerAdapter(
             TestAdapter(TypeRegistryImpl.maxExtendedExternalTypeId + 1),
           ),
-          throwsHiveError('not allowed'),
+          throwsHiveError(['not allowed']),
         );
       });
 
@@ -100,7 +100,7 @@ void main() {
         registry.registerAdapter(TestAdapter());
         expect(
           () => registry.registerAdapter(TestAdapter()),
-          throwsHiveError('already a TypeAdapter for typeId'),
+          throwsHiveError(['already a TypeAdapter for typeId']),
         );
       });
 
@@ -246,13 +246,13 @@ void main() {
         final registry = TypeRegistryImpl();
         expect(
           () => registry.isAdapterRegistered(-1),
-          throwsHiveError('not allowed'),
+          throwsHiveError(['not allowed']),
         );
         expect(
           () => registry.isAdapterRegistered(
             TypeRegistryImpl.maxExtendedExternalTypeId + 1,
           ),
-          throwsHiveError('not allowed'),
+          throwsHiveError(['not allowed']),
         );
       });
     });
@@ -270,7 +270,7 @@ void main() {
         registry.registerAdapter(TestAdapter());
         expect(
           () => registry.ignoreTypeId(0),
-          throwsHiveError('already a TypeAdapter for typeId'),
+          throwsHiveError(['already a TypeAdapter for typeId']),
         );
       });
     });

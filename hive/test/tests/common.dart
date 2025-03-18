@@ -7,27 +7,31 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-Matcher isAHiveError([String? containing]) {
+Matcher isAHiveError([List<String> containing = const []]) {
   return allOf(
     isA<HiveError>(),
     predicate(
-      (e) =>
-          containing == null ||
-          e.toString().toLowerCase().contains(containing.toLowerCase()),
+      (e) {
+        final message = e.toString().toLowerCase();
+        return containing.every((c) => message.contains(c.toLowerCase()));
+      },
     ),
   );
 }
 
-Matcher throwsHiveError([String? containing]) {
+Matcher throwsHiveError([List<String> containing = const []]) {
   return throwsA(isAHiveError(containing));
 }
 
-Matcher throwsIsolatedHiveError([String? containing]) {
+Matcher throwsIsolatedHiveError([List<String> containing = const []]) {
   return throwsA(
     anyOf([
       isAHiveError(containing),
-      isA<IsolateException>()
-          .having((e) => e.details, 'details', contains(contains(containing))),
+      isA<IsolateException>().having(
+        (e) => e.details,
+        'details',
+        contains(allOf(containing.map(contains))),
+      ),
     ]),
   );
 }

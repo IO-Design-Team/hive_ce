@@ -51,7 +51,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(box.keys, throwsIsolatedHiveError('closed'));
+        expect(box.keys, throwsIsolatedHiveError(['closed']));
       });
     });
 
@@ -78,9 +78,9 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(box.length, throwsIsolatedHiveError('closed'));
-        expect(box.isEmpty, throwsIsolatedHiveError('closed'));
-        expect(box.isNotEmpty, throwsIsolatedHiveError('closed'));
+        expect(box.length, throwsIsolatedHiveError(['closed']));
+        expect(box.isEmpty, throwsIsolatedHiveError(['closed']));
+        expect(box.isNotEmpty, throwsIsolatedHiveError(['closed']));
       });
     });
 
@@ -88,7 +88,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(() => box.watch().drain(), throwsIsolatedHiveError('closed'));
+        expect(() => box.watch().drain(), throwsIsolatedHiveError(['closed']));
       });
     });
 
@@ -106,7 +106,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(box.keyAt(0), throwsIsolatedHiveError('closed'));
+        expect(box.keyAt(0), throwsIsolatedHiveError(['closed']));
       });
     });
 
@@ -132,7 +132,7 @@ void main() {
       test('throws if box is closed', () async {
         final box = await _openBox();
         await box.close();
-        expect(box.containsKey(0), throwsIsolatedHiveError('closed'));
+        expect(box.containsKey(0), throwsIsolatedHiveError(['closed']));
       });
     });
 

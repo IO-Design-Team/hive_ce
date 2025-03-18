@@ -55,7 +55,10 @@ void main() {
         final hive = await createHive(type: TestType.normal);
         final hiveList = HiveListImpl.lazy('someBox', [])
           ..debugHive = hive.hive as HiveImpl;
-        expect(() => hiveList.box, throwsHiveError('you have to open the box'));
+        expect(
+          () => hiveList.box,
+          throwsHiveError(['you have to open the box']),
+        );
       });
 
       test('returns the box', () async {
@@ -71,7 +74,7 @@ void main() {
       test('throws exception if HiveList is disposed', () {
         final list = HiveListImpl.lazy('box', []);
         list.dispose();
-        expect(() => list.delegate, throwsHiveError('already been disposed'));
+        expect(() => list.delegate, throwsHiveError(['already been disposed']));
       });
 
       test('removes correct elements if invalidated', () {
@@ -173,7 +176,10 @@ void main() {
         final box = _mockBox();
         final item = _getHiveObject('item', MockBox());
         final list = HiveListImpl(box);
-        expect(() => list.add(item), throwsHiveError('needs to be in the box'));
+        expect(
+          () => list.add(item),
+          throwsHiveError(['needs to be in the box']),
+        );
       });
     });
 
@@ -197,7 +203,7 @@ void main() {
         final list = HiveListImpl(box);
         expect(
           () => list.addAll([item]),
-          throwsHiveError('needs to be in the box'),
+          throwsHiveError(['needs to be in the box']),
         );
       });
     });

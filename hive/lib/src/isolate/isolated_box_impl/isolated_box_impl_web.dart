@@ -100,7 +100,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       return (_box as Box<E>).getAt(index);
     }
   }
-  
+
   @override
   bool operator ==(Object other) {
     return other is IsolatedBoxBaseImpl && other._box == _box;
