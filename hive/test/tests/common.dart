@@ -32,7 +32,7 @@ Matcher throwsIsolatedHiveError([List<String> containing = const []]) {
       allOf(
         isA<IsolateException>(),
         hiveErrorPredicate(containing),
-      )
+      ),
     ]),
   );
 }
