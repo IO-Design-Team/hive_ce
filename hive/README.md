@@ -60,10 +60,10 @@ The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark
 
 ## Migration guides
 
-- [Hive v2 to Hive CE](MIGRATION.md#v2-to-ce)
-- [Transitive Hive dependencies](MIGRATION.md#transitive-hive-dependencies)
-- [Migrating to `GenerateAdapters`](MIGRATION.md#generate-adapters)
-- [Add fields to objects](MIGRATION.md#add-fields)
+- [Hive v2 to Hive CE](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#v2-to-ce)
+- [Transitive Hive dependencies](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#transitive-hive-dependencies)
+- [Migrating to `GenerateAdapters`](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#generate-adapters)
+- [Add fields to objects](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#add-fields)
 
 ## Usage
 
@@ -84,7 +84,7 @@ void example() {
 ```
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">IsolatedHive</span></summary>
+<summary>IsolatedHive (isolate support)</summary>
 
 `IsolatedHive` allows you to safely use `Hive` in a multi-isolate environment by maintaining its own separate isolate for `Hive` operations
 
@@ -135,7 +135,7 @@ See an example of a multi-window Flutter app using `IsolatedHive` [here](https:/
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">Store objects</span></summary>
+<summary>Store objects</summary>
 
 Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
 
@@ -251,7 +251,7 @@ Unfortunately it is not possible for `GenerateAdapters` to handle private fields
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">BoxCollections</span></summary>
+<summary>BoxCollection</summary>
 
 `BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
 they dramatically improve speed on web. They support opening and closing all boxes of a collection
@@ -329,7 +329,7 @@ void example() async {
 </details>
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">Hive ❤️ Flutter</span></summary>
+<summary>Hive ❤️ Flutter</summary>
 
 Hive was written with Flutter in mind. It is a perfect fit if you need a lightweight datastore for your app. After adding the required dependencies and initializing Hive, you can use Hive in your project:
 
