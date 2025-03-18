@@ -128,6 +128,10 @@ Additional notes:
 - With Flutter, use `IsolatedHive.initFlutter` from `hive_ce_flutter` to initialize `IsolatedHive` with Flutter's `IsolateNameServer`
 - There is also an `IsolatedHive.registerAdapters` method if you use `hive_ce_generator` to generate adapters
 
+### Example
+
+See an example of a multi-window Flutter app using `IsolatedHive` [here](https://github.com/Rexios80/hive_ce_multiwindow)
+
 </details>
 
 <details>
