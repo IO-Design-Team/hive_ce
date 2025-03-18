@@ -1,4 +1,4 @@
-## NEXT
+## 2.3.0-pre.1
 
 - Adds `IsolatedHive.initFlutter`
 

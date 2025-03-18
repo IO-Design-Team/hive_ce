@@ -1,4 +1,4 @@
-## NEXT
+## 1.9.0-pre.1
 
 - Generates `IsolatedHiveRegistrar` extension for `IsolatedHiveInterface`
 
