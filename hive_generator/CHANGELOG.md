@@ -1,3 +1,7 @@
+## 1.9.0-pre.1
+
+- Generates `IsolatedHiveRegistrar` extension for `IsolatedHiveInterface`
+
 ## 1.8.2
 
 - Supports analyzer 7
