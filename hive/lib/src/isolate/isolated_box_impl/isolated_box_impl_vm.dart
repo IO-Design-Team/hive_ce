@@ -201,24 +201,25 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
 
   @override
   Future<Iterable<E>> get values async {
-    final bytes = await _channel.invokeMethod('values', {'name': name});
-    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
+    final bytes =
+        await _channel.invokeListMethod<Uint8List>('values', {'name': name});
+    return bytes.map(_readValue).cast<E>();
   }
 
   @override
   Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) async {
-    final bytes = await _channel.invokeMethod('valuesBetween', {
-      'name': name,
-      'startKey': startKey,
-      'endKey': endKey,
-    });
-    return bytes.cast<Uint8List>().map(_readValue).cast<E>();
+    final bytes = await _channel.invokeListMethod<Uint8List>(
+      'valuesBetween',
+      {'name': name, 'startKey': startKey, 'endKey': endKey},
+    );
+    return bytes.map(_readValue).cast<E>();
   }
 
   @override
   Future<Map<dynamic, E>> toMap() async {
-    final bytes = await _channel.invokeMethod('toMap', {'name': name});
-    return bytes.map((key, value) => MapEntry(key, _readValue(value)));
+    final bytes = await _channel
+        .invokeMapMethod<dynamic, Uint8List>('toMap', {'name': name});
+    return bytes.map((key, value) => MapEntry(key, _readValue(value) as E));
   }
 }
 
