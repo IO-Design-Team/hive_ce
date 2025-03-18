@@ -40,9 +40,9 @@ final HiveInterface Hive = HiveImpl();
 /// [IsolatedHive] delegates method calls to an isolate. This allows safe
 /// usage of Hive across multiple isolates.
 ///
-/// On web, [IsolatedHive] directly calls [Hive]
-///
 /// Limitations:
+/// - On web, [IsolatedHive] directly calls [Hive] since web does not support
+///   isolates
 /// - [IsolatedHive] does not support [HiveObject] or [HiveList]
 /// - Most methods are async due to isolate communication
 // ignore: non_constant_identifier_names
