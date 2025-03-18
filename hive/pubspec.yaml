@@ -1,6 +1,6 @@
 name: hive_ce
 description: Hive Community Edition - A spiritual continuation of Hive v2
-version: 2.11.0-pre.3
+version: 2.11.0-pre.4
 homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive
 documentation: https://docs.hivedb.dev/
 
