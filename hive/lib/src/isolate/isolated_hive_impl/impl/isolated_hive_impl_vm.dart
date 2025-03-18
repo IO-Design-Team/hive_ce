@@ -11,10 +11,6 @@ import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Handles Hive operations in an isolate
-///
-/// Limitations:
-/// - [IsolatedHive] does not support [HiveObject]s
-/// - Most methods are async due to isolate communication
 class IsolatedHiveImpl extends TypeRegistryImpl
     implements IsolatedHiveInterface, HiveIsolate {
   late final IsolateNameServer? _isolateNameServer;
@@ -70,7 +66,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     _hiveChannel = IsolateMethodChannel('hive', _connection);
     _boxChannel = IsolateMethodChannel('box', _connection);
 
-    return _hiveChannel.invokeMethod('init', path);
+    return _hiveChannel.invokeMethod('init', {'path': path});
   }
 
   Future<IsolatedBoxBase<E>> _openBox<E>(

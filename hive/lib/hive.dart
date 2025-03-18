@@ -41,5 +41,9 @@ final HiveInterface Hive = HiveImpl();
 /// usage of Hive across multiple isolates.
 ///
 /// On web, [IsolatedHive] directly calls [Hive]
+///
+/// Limitations:
+/// - [IsolatedHive] does not support [HiveObject] or [HiveList]
+/// - Most methods are async due to isolate communication
 // ignore: non_constant_identifier_names
 final IsolatedHiveInterface IsolatedHive = IsolatedHiveImpl();
