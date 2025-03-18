@@ -3,7 +3,7 @@
 </p>
 <h2 align="center">Fast, Enjoyable & Secure NoSQL Database</h2>
 
-[![Dart CI](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml/badge.svg)](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/IO-Design-Team/hive_ce/graph/badge.svg?token=ODO2JA4286)](https://codecov.io/gh/IO-Design-Team/hive_ce) [![Pub Version](https://img.shields.io/pub/v/hive_ce?label=pub.dev&labelColor=333940&logo=dart)](https://pub.dev/packages/hive_ce) [![GitHub](https://img.shields.io/github/license/IO-Design-Team/hive_ce?color=%23007A88&labelColor=333940&logo=bsd)](https://github.com/IO-Design-Team/hive_ce/blob/master/LICENSE)
+[![Dart CI](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml/badge.svg)](https://github.com/IO-Design-Team/hive_ce/actions/workflows/test.yml) [![codecov](https://codecov.io/gh/IO-Design-Team/hive_ce/graph/badge.svg?token=ODO2JA4286)](https://codecov.io/gh/IO-Design-Team/hive_ce) [![Pub Version](https://img.shields.io/pub/v/hive_ce?label=pub.dev&labelColor=333940&logo=dart)](https://pub.dev/packages/hive_ce) [![License](https://img.shields.io/badge/License-BSD_3--Clause-007A88.svg?logo=bsd)](https://github.com/IO-Design-Team/hive_ce/blob/master/LICENSE)
 
 [![PubStats Popularity](https://pubstats.dev/badges/packages/hive_ce/popularity.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Rank](https://pubstats.dev/badges/packages/hive_ce/rank.svg)](https://pubstats.dev/packages/hive_ce) [![PubStats Dependents](https://pubstats.dev/badges/packages/hive_ce/dependents.svg)](https://pubstats.dev/packages/hive_ce)
 
