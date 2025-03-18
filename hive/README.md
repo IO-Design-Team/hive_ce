@@ -414,21 +414,3 @@ Boxes are cached and therefore fast enough to be used directly in the `build()` 
 The benchmark was performed on a Oneplus 6T with Android Q. You can [run the benchmark yourself](https://github.com/hivedb/hive_benchmark).
 
 \*Take this benchmark with a grain of salt. It is very hard to compare databases objectively since they were made for different purposes.
-
-### Licence
-
-```
-Copyright 2019 Simon Leier
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
