@@ -13,7 +13,7 @@ Future<dynamic> handleHiveMethodCall(
 ) async {
   switch (call.method) {
     case 'init':
-      Hive.init(call.arguments);
+      Hive.init(call.arguments['path']);
       (Hive as HiveImpl).useVerbatimFrames();
     case 'openBox':
       final name = call.arguments['name'];
@@ -40,8 +40,6 @@ Future<dynamic> handleHiveMethodCall(
         collection: call.arguments['collection'],
       );
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
-    case 'close':
-      await Hive.close();
     case 'deleteBoxFromDisk':
       await Hive.deleteBoxFromDisk(
         call.arguments['name'],
