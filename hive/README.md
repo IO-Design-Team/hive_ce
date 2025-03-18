@@ -84,84 +84,6 @@ void example() {
 ```
 
 <details>
-<summary><span style="font-size: 1.5em; font-weight: bold;">BoxCollections</span></summary>
-
-`BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
-they dramatically improve speed on web. They support opening and closing all boxes of a collection
-at once and more efficiently store data in indexed DB on web.
-
-Aside, they also expose Transactions which can be used to speed up tremendous numbers of database
-transactions on web.
-
-On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
-BoxCollections might be useful for some box hierarchy and development experience.
-
-<!-- embedme readme/box_collections.dart -->
-
-```dart
-import 'package:hive_ce/hive.dart';
-import 'hive_cipher_impl.dart';
-
-void example() async {
-  // Create a box collection
-  final collection = await BoxCollection.open(
-    // Name of your database
-    'MyFirstFluffyBox',
-    // Names of your boxes
-    {'cats', 'dogs'},
-    // Path where to store your boxes (Only used in Flutter / Dart IO)
-    path: './',
-    // Key to encrypt your boxes (Only used in Flutter / Dart IO)
-    key: HiveCipherImpl(),
-  );
-
-  // Open your boxes. Optional: Give it a type.
-  final catsBox = await collection.openBox<Map>('cats');
-
-  // Put something in
-  await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
-  await catsBox.put('loki', {'name': 'Loki', 'age': 2});
-
-  // Get values of type (immutable) Map?
-  final loki = await catsBox.get('loki');
-  print('Loki is ${loki?['age']} years old.');
-
-  // Returns a List of values
-  final cats = await catsBox.getAll(['loki', 'fluffy']);
-  print(cats);
-
-  // Returns a List<String> of all keys
-  final allCatKeys = await catsBox.getAllKeys();
-  print(allCatKeys);
-
-  // Returns a Map<String, Map> with all keys and entries
-  final catMap = await catsBox.getAllValues();
-  print(catMap);
-
-  // delete one or more entries
-  await catsBox.delete('loki');
-  await catsBox.deleteAll(['loki', 'fluffy']);
-
-  // ...or clear the whole box at once
-  await catsBox.clear();
-
-  // Speed up write actions with transactions
-  await collection.transaction(
-    () async {
-      await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
-      await catsBox.put('loki', {'name': 'Loki', 'age': 2});
-      // ...
-    },
-    boxNames: ['cats'], // By default all boxes become blocked.
-    readOnly: false,
-  );
-}
-
-```
-
-</details>
-
-<details>
 <summary><span style="font-size: 1.5em; font-weight: bold;">Store objects</span></summary>
 
 Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
@@ -274,6 +196,84 @@ Some migrations may require manual modifications to the Hive schema file. One ex
 The old method of defining HiveTypes is still supported, but should be unnecessary now that Hive CE supports constructor parameter defaults. If you have a use-case that `GenerateAdapters` does not support, please [create an issue on GitHub](https://github.com/IO-Design-Team/hive_ce/issues/new).
 
 Unfortunately it is not possible for `GenerateAdapters` to handle private fields. You can use `@protected` instead if necessary.
+
+</details>
+
+<details>
+<summary><span style="font-size: 1.5em; font-weight: bold;">BoxCollections</span></summary>
+
+`BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
+they dramatically improve speed on web. They support opening and closing all boxes of a collection
+at once and more efficiently store data in indexed DB on web.
+
+Aside, they also expose Transactions which can be used to speed up tremendous numbers of database
+transactions on web.
+
+On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
+BoxCollections might be useful for some box hierarchy and development experience.
+
+<!-- embedme readme/box_collections.dart -->
+
+```dart
+import 'package:hive_ce/hive.dart';
+import 'hive_cipher_impl.dart';
+
+void example() async {
+  // Create a box collection
+  final collection = await BoxCollection.open(
+    // Name of your database
+    'MyFirstFluffyBox',
+    // Names of your boxes
+    {'cats', 'dogs'},
+    // Path where to store your boxes (Only used in Flutter / Dart IO)
+    path: './',
+    // Key to encrypt your boxes (Only used in Flutter / Dart IO)
+    key: HiveCipherImpl(),
+  );
+
+  // Open your boxes. Optional: Give it a type.
+  final catsBox = await collection.openBox<Map>('cats');
+
+  // Put something in
+  await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
+  await catsBox.put('loki', {'name': 'Loki', 'age': 2});
+
+  // Get values of type (immutable) Map?
+  final loki = await catsBox.get('loki');
+  print('Loki is ${loki?['age']} years old.');
+
+  // Returns a List of values
+  final cats = await catsBox.getAll(['loki', 'fluffy']);
+  print(cats);
+
+  // Returns a List<String> of all keys
+  final allCatKeys = await catsBox.getAllKeys();
+  print(allCatKeys);
+
+  // Returns a Map<String, Map> with all keys and entries
+  final catMap = await catsBox.getAllValues();
+  print(catMap);
+
+  // delete one or more entries
+  await catsBox.delete('loki');
+  await catsBox.deleteAll(['loki', 'fluffy']);
+
+  // ...or clear the whole box at once
+  await catsBox.clear();
+
+  // Speed up write actions with transactions
+  await collection.transaction(
+    () async {
+      await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
+      await catsBox.put('loki', {'name': 'Loki', 'age': 2});
+      // ...
+    },
+    boxNames: ['cats'], // By default all boxes become blocked.
+    readOnly: false,
+  );
+}
+
+```
 
 </details>
 
