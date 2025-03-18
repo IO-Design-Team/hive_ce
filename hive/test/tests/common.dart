@@ -27,11 +27,15 @@ Matcher throwsIsolatedHiveError([List<String> containing = const []]) {
   return throwsA(
     anyOf([
       isAHiveError(containing),
-      isA<IsolateException>().having(
-        (e) => e.details,
-        'details',
-        contains(allOf(containing.map(contains))),
-      ),
+      allOf(
+        isA<IsolateException>(),
+        predicate(
+          (e) {
+            final message = e.toString().toLowerCase();
+            return containing.every((c) => message.contains(c.toLowerCase()));
+          },
+        ),
+      )
     ]),
   );
 }
