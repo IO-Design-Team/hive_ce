@@ -84,7 +84,7 @@ void example() {
 ```
 
 <details>
-<summary>BoxCollections</summary>
+<summary><span style="font-size: 1.5em; font-weight: bold;">BoxCollections</span></summary>
 
 `BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
 they dramatically improve speed on web. They support opening and closing all boxes of a collection
@@ -162,7 +162,7 @@ void example() async {
 </details>
 
 <details>
-<summary>Store objects</summary>
+<summary><span style="font-size: 1.5em; font-weight: bold;">Store objects</span></summary>
 
 Hive not only supports primitives, lists, and maps but also any Dart object you like. You need to generate type adapters before you can store custom objects.
 
@@ -278,7 +278,7 @@ Unfortunately it is not possible for `GenerateAdapters` to handle private fields
 </details>
 
 <details>
-<summary>Hive ❤️ Flutter</summary>
+<summary><span style="font-size: 1.5em; font-weight: bold;">Hive ❤️ Flutter</span></summary>
 
 Hive was written with Flutter in mind. It is a perfect fit if you need a lightweight datastore for your app. After adding the required dependencies and initializing Hive, you can use Hive in your project:
 
