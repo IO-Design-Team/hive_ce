@@ -18,7 +18,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
-  Stream? _stream;
+  Stream<BoxEvent>? _stream;
 
   bool _open = true;
 
@@ -63,14 +63,14 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   @override
   Stream<BoxEvent> watch({dynamic key}) {
     final stream = _stream ??=
-        _eventChannel.receiveBroadcastStream(identityHashCode(this));
-    return stream.where((event) => key == null || event['key'] == key).map(
-          (event) => BoxEvent(
-            event['key'],
-            _readValue(event['value']),
-            event['deleted'],
-          ),
-        );
+        _eventChannel.receiveBroadcastStream(identityHashCode(this)).map(
+              (event) => BoxEvent(
+                event['key'],
+                _readValue(event['value']),
+                event['deleted'],
+              ),
+            );
+    return stream.where((event) => key == null || event.key == key);
   }
 
   @override

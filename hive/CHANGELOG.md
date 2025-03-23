@@ -1,3 +1,7 @@
+## 2.11.0-pre.6
+
+- Improves `watch` mapping efficiency so that events are only deserialized once
+
 ## 2.11.0-pre.5
 
 - Fixes issues with box handlers
