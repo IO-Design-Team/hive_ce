@@ -63,14 +63,14 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   @override
   Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
       .receiveBroadcastStream()
+      .where((event) => key == null || event['key'] == key)
       .map(
         (event) => BoxEvent(
           event['key'],
           _readValue(event['value']),
           event['deleted'],
         ),
-      )
-      .where((event) => key == null || event.key == key);
+      );
 
   @override
   Future<bool> containsKey(dynamic key) =>
