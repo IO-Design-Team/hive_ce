@@ -231,10 +231,11 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   }
 
   /// Not part of public API
-  void unregisterBox(String name) {
+  Future<void> unregisterBox(String name) async {
     name = name.toLowerCase();
-    _openingBoxes.remove(name);
+    unawaited(_openingBoxes.remove(name));
     _boxes.remove(name);
+    await _hiveChannel.invokeMethod('unregisterBox', {'name': name});
   }
 
   @override
