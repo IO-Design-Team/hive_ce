@@ -19,6 +19,13 @@ void isolateEntryPoint(SendPort send) {
   boxChannel.setMethodCallHandler((call) {
     final name = call.arguments['name'];
     final handler = boxHandlers[name];
-    return handler?.call(call);
+    if (handler == null) {
+      return IsolateException(
+        code: 'no_box_handler',
+        message: 'No box handler found for box: $name',
+        details: 'Box may have been closed',
+      );
+    }
+    return handler(call);
   });
 }
