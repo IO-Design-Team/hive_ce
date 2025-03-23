@@ -17,7 +17,11 @@ Future<dynamic> handleHiveMethodCall(
       (Hive as HiveImpl).useVerbatimFrames();
     case 'openBox':
       final name = call.arguments['name'];
-      if (boxHandlers.containsKey(name)) return;
+      if (boxHandlers.containsKey(name)) {
+        // Ensure this is a valid `openBox` call
+        Hive.box(name);
+        return;
+      }
 
       final box = await Hive.openBox(
         name,
@@ -32,7 +36,11 @@ Future<dynamic> handleHiveMethodCall(
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
     case 'openLazyBox':
       final name = call.arguments['name'];
-      if (boxHandlers.containsKey(name)) return;
+      if (boxHandlers.containsKey(name)) {
+        // Ensure this is a valid `openLazyBox` call
+        Hive.lazyBox(name);
+        return;
+      }
 
       final box = await Hive.openLazyBox(
         name,
