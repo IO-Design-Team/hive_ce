@@ -17,6 +17,8 @@ Future<dynamic> handleHiveMethodCall(
       (Hive as HiveImpl).useVerbatimFrames();
     case 'openBox':
       final name = call.arguments['name'];
+      if (boxHandlers.containsKey(name)) return;
+
       final box = await Hive.openBox(
         name,
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
@@ -30,6 +32,8 @@ Future<dynamic> handleHiveMethodCall(
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
     case 'openLazyBox':
       final name = call.arguments['name'];
+      if (boxHandlers.containsKey(name)) return;
+
       final box = await Hive.openLazyBox(
         name,
         keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
@@ -50,6 +54,8 @@ Future<dynamic> handleHiveMethodCall(
         call.arguments['name'],
         path: call.arguments['path'],
       );
+    case 'unregisterBox':
+      boxHandlers.remove(call.arguments['name']);
     default:
       return call.notImplemented();
   }

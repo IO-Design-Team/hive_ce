@@ -8,7 +8,9 @@ import 'package:isolate_channel/isolate_channel.dart';
 class IsolatedBoxHandler extends IsolateStreamHandler {
   /// The wrapped box
   final BoxBase box;
-  StreamSubscription? _subscription;
+
+  /// Map of identity hash codes to subscriptions
+  final _subscriptions = <int, StreamSubscription>{};
 
   /// Constructor
   IsolatedBoxHandler(this.box, IsolateConnection connection) {
@@ -17,9 +19,10 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
 
   @override
   void onListen(dynamic arguments, IsolateEventSink events) {
-    if (_subscription != null) return;
+    final id = arguments as int;
+    if (_subscriptions.containsKey(id)) return;
 
-    final subscription = _subscription = box
+    final subscription = box
         .watch()
         .map((e) => {'key': e.key, 'value': e.value, 'deleted': e.deleted})
         .listen(events.success);
@@ -31,16 +34,20 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       ),
     );
     subscription.onDone(events.endOfStream);
+    _subscriptions[id] = subscription;
   }
 
   @override
   void onCancel(dynamic arguments) {
-    // Don't need to do anything
+    final id = arguments as int;
+    _subscriptions.remove(id);
   }
 
   void _close() {
-    _subscription?.cancel();
-    _subscription = null;
+    for (final subscription in _subscriptions.values) {
+      subscription.cancel();
+    }
+    _subscriptions.clear();
   }
 
   /// The method call handler for the box

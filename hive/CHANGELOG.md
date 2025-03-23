@@ -1,5 +1,6 @@
 ## 2.11.0-pre.5
 
+- Fixes issues with box handlers
 - Filters `watch` events by key before deserializing them
 
 ## 2.11.0-pre

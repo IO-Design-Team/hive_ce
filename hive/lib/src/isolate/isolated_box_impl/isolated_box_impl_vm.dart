@@ -18,7 +18,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
-  Stream<BoxEvent>? _stream;
+  Stream? _stream;
 
   bool _open = true;
 
@@ -61,16 +61,17 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
       _channel.invokeMethod('keyAt', {'name': name, 'index': index});
 
   @override
-  Stream<BoxEvent> watch({dynamic key}) => _stream ??= _eventChannel
-      .receiveBroadcastStream()
-      .where((event) => key == null || event['key'] == key)
-      .map(
-        (event) => BoxEvent(
-          event['key'],
-          _readValue(event['value']),
-          event['deleted'],
-        ),
-      );
+  Stream<BoxEvent> watch({dynamic key}) {
+    final stream = _stream ??=
+        _eventChannel.receiveBroadcastStream(identityHashCode(this));
+    return stream.where((event) => key == null || event['key'] == key).map(
+          (event) => BoxEvent(
+            event['key'],
+            _readValue(event['value']),
+            event['deleted'],
+          ),
+        );
+  }
 
   @override
   Future<bool> containsKey(dynamic key) =>
@@ -131,7 +132,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
     if (!_open) return;
     await _channel.invokeMethod('close', {'name': name});
     _open = false;
-    _hive.unregisterBox(name);
+    await _hive.unregisterBox(name);
   }
 
   @override
@@ -139,7 +140,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
     if (!_open) return;
     await _channel.invokeMethod('deleteFromDisk', {'name': name});
     _open = false;
-    _hive.unregisterBox(name);
+    await _hive.unregisterBox(name);
   }
 
   @override
