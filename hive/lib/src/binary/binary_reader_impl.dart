@@ -371,4 +371,19 @@ class BinaryReaderImpl extends BinaryReader {
     final valueReader = BinaryReaderImpl(out, _typeRegistry, outLength);
     return valueReader.read();
   }
+
+  /// Read the bytes into lists of primitive values
+  Object? readAsObject() {
+    final typeId = readTypeId();
+    try {
+      return read(typeId);
+    } catch (e) {
+      final length = readUint32();
+      final list = List<Object?>.filled(length, null);
+      for (var i = 0; i < length; i++) {
+        list[i] = readAsObject();
+      }
+      return list;
+    }
+  }
 }

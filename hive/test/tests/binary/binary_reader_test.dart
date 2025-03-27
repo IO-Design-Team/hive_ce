@@ -632,4 +632,31 @@ void main() {
       }
     }
   });
+
+  group('.readAsObject()', () {
+    test('primitive', () {
+      final br = fromByteData(
+        ByteData(9)
+          ..setUint8(0, FrameValueType.intT)
+          ..setFloat64(1, 123, Endian.little),
+      );
+
+      expect(br.readAsObject(), 123);
+    });
+
+    test('custom object', () {
+      final br = fromByteData(
+        ByteData(24)
+          ..setUint8(0, 200) // type id
+          ..setUint32(1, 3, Endian.little) // length
+          ..setUint8(5, FrameValueType.intT)
+          ..setFloat64(6, 12345, Endian.little)
+          ..setUint8(14, FrameValueType.intT)
+          ..setFloat64(15, 123, Endian.little)
+          ..setUint8(23, FrameValueType.nullT),
+      );
+
+      expect(br.readAsObject(), [12345, 123, null]);
+    });
+  });
 }
