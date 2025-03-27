@@ -54,16 +54,6 @@ class InspectorFrame {
     required this.lazy,
   });
 
-  /// Copy with
-  InspectorFrame copyWith({
-    Object? value,
-  }) =>
-      InspectorFrame(
-        key: key,
-        value: value ?? this.value,
-        lazy: lazy,
-      );
-
   /// From frame
   factory InspectorFrame.fromFrame(Frame frame) => InspectorFrame(
         key: frame.key,
@@ -77,6 +67,16 @@ class InspectorFrame {
 
   /// To json
   Map<String, dynamic> toJson() => _$InspectorFrameToJson(this);
+
+  /// Copy with
+  InspectorFrame copyWith({
+    Object? value,
+  }) =>
+      InspectorFrame(
+        key: key,
+        value: value ?? this.value,
+        lazy: lazy,
+      );
 }
 
 /// Payload for a box event
