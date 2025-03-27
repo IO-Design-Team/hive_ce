@@ -5,8 +5,14 @@ import 'package:hive_ce_inspector/connect_client.dart';
 import 'package:hive_ce_inspector/error_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
-  const ConnectionScreen({required this.port, required this.secret, super.key});
+  const ConnectionScreen({
+    required this.version,
+    required this.port,
+    required this.secret,
+    super.key,
+  });
 
+  final String version;
   final String port;
   final String secret;
 
@@ -58,7 +64,7 @@ class _BoxesLoader extends StatefulWidget {
 }
 
 class _BoxesLoaderState extends State<_BoxesLoader> {
-  final Set<String> boxes = {};
+  final boxes = <String>{};
   late StreamSubscription<String> boxRegisteredSubscription;
   late StreamSubscription<String> boxUnregisteredSubscription;
 
@@ -76,7 +82,7 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
 
   void _initState() async {
     final boxes = await widget.client.listBoxes();
-    setState(() => boxes.addAll(boxes));
+    setState(() => this.boxes.addAll(boxes));
   }
 
   @override

@@ -76,7 +76,7 @@ class ConnectClient {
     final response = await _call(ConnectAction.listBoxes);
     if (response == null) return [];
 
-    return (response as List).cast<String>();
+    return (response as List).cast<String>().toList();
   }
 
   Future<List<InspectorFrame>> getBoxFrames(String name) async {

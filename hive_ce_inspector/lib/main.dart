@@ -25,7 +25,7 @@ final _router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/:port/:secret',
+      path: '/:version/:port/:secret',
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
@@ -34,6 +34,7 @@ final _router = GoRouter(
           child: Scaffold(
             body: Material(
               child: ConnectionScreen(
+                version: state.pathParameters['version']!,
                 port: state.pathParameters['port']!,
                 secret: state.pathParameters['secret']!,
               ),
