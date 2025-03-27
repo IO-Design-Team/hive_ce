@@ -378,6 +378,7 @@ class BinaryReaderImpl extends BinaryReader {
     try {
       return read(typeId);
     } catch (e) {
+      // This is a custom object
       final length = readUint32();
       final list = List<Object?>.filled(length, null);
       for (var i = 0; i < length; i++) {
