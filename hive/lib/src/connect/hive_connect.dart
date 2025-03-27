@@ -106,12 +106,15 @@ class HiveConnect {
     );
 
     _subscriptions[box.name] = box.watch().listen((event) {
-      postEvent(ConnectEvent.boxEvent.event, {
-        'name': box.name,
-        'key': event.key,
-        'value': _writeValue(box.typeRegistry, event.value),
-        'deleted': event.deleted,
-      });
+      postEvent(
+        ConnectEvent.boxEvent.event,
+        BoxEventPayload(
+          name: box.name,
+          key: event.key,
+          value: _writeValue(box.typeRegistry, event.value),
+          deleted: event.deleted,
+        ).toJson(),
+      );
     });
   }
 

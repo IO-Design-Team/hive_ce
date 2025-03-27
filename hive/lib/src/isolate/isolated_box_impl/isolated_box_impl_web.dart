@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/connect/hive_connect.dart';
+import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 
 /// Web implementation of [IsolatedBoxBase]
