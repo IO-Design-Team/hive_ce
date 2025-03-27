@@ -4,13 +4,16 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
+import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/impl/isolated_hive_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
 ///
 /// Most methods are async due to isolate communication
-abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
+abstract class IsolatedBoxBaseImpl<E>
+    implements IsolatedBoxBase<E>, InspectableBox {
   /// Value to inform the get method to return the default value
   static const defaultValuePlaceholder = '_hive_ce.defaultValue';
 
@@ -182,6 +185,22 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
     }
     return value;
   }
+
+  @override
+  void inspect() => HiveConnect.inspectBox(this);
+
+  @override
+  Future<Iterable<InspectorFrame>> getFrames() async {
+    final result =
+        await _channel.invokeListMethod<Map>('getFrames', {'name': name});
+    return result
+        .map((e) => e.cast<String, dynamic>())
+        .map(InspectorFrame.fromJson);
+  }
+
+  @override
+  Future<Object?> getValue(Object key) =>
+      _channel.invokeMethod('getValue', {'name': name, 'key': key});
 }
 
 /// Isolated implementation of [Box]
