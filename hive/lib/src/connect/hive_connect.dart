@@ -12,8 +12,7 @@ import 'package:hive_ce/src/connect/inspectable_box.dart';
 class HiveConnect {
   static const _version = 1;
 
-  static const _handlers =
-      <ConnectAction, FutureOr Function(Map<String, dynamic>)>{
+  static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
     ConnectAction.listBoxes: _listBoxes,
     ConnectAction.getBoxFrames: _getBoxFrames,
     ConnectAction.getValue: _getValue,
@@ -39,10 +38,9 @@ class HiveConnect {
     for (final handler in _handlers.entries) {
       registerExtension(handler.key.method, (method, parameters) async {
         try {
-          final args = parameters.containsKey('args')
-              ? jsonDecode(parameters['args']!) as Map<String, dynamic>
-              : <String, dynamic>{};
-          final result = <String, dynamic>{'result': await handler.value(args)};
+          final result = <String, dynamic>{
+            'result': await handler.value(parameters['args']),
+          };
           return ServiceExtensionResponse.result(jsonEncode(result));
         } catch (e) {
           return ServiceExtensionResponse.error(
@@ -76,7 +74,7 @@ class HiveConnect {
     }
 
     print('╔${line('', '═')}╗');
-    print('║${line('HIVE CONNECT STARTED', ' ')}║');
+    print('║${line('HIVE CE CONNECT STARTED', ' ')}║');
     print('╟${line('', '─')}╢');
     print('║${line('Open the link to connect to the Hive', ' ')}║');
     print('║${line('Inspector while this build is running.', ' ')}║');
@@ -127,9 +125,7 @@ class HiveConnect {
 
   static List<String> _listBoxes(_) => _boxes.keys.toList();
 
-  static Future<List<InspectorFrame>> _getBoxFrames(
-    Map<String, dynamic> args,
-  ) async {
+  static Future<List<InspectorFrame>> _getBoxFrames(dynamic args) async {
     final name = args['name'] as String;
     final box = _boxes[name];
     if (box == null) return [];
@@ -138,7 +134,7 @@ class HiveConnect {
     return frames.toList();
   }
 
-  static Future<Object?> _getValue(Map<String, dynamic> args) async {
+  static Future<Object?> _getValue(dynamic args) async {
     final name = args['name'] as String;
     final box = _boxes[name];
     if (box == null) return null;
