@@ -181,6 +181,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
     _open = false;
     await keystore.close();
     hive.unregisterBox(name);
+    HiveConnect.unregisterBox(this);
 
     await backend.close();
   }
@@ -197,7 +198,10 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   }
 
   @override
-  void inspect() => HiveConnect.inspectBox(this);
+  void inspect() => HiveConnect.registerBox(this);
+
+  @override
+  TypeRegistry get typeRegistry => hive;
 
   @override
   Future<Iterable<InspectorFrame>> getFrames() async =>

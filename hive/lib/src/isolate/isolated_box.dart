@@ -79,6 +79,9 @@ abstract class IsolatedBoxBase<E> {
 
   /// Get a value at the given index
   Future<E?> getAt(int index);
+
+  /// Register the box for inspection
+  void inspect();
 }
 
 /// Isolated version of [Box]

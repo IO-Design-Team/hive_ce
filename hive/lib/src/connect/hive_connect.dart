@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 
@@ -19,6 +22,8 @@ class HiveConnect {
   const HiveConnect._();
 
   static final _boxes = <String, InspectableBox>{};
+  static final _subscriptions = <String, StreamSubscription>{};
+
   static var _initialized = false;
 
   static void _initialize() {
@@ -81,10 +86,40 @@ class HiveConnect {
   }
 
   /// Register a box for inspection
-  static void inspectBox(InspectableBox box) {
+  static void registerBox(InspectableBox box) async {
     if (_boxes.containsKey(box.name)) return;
     _initialize();
+
     _boxes[box.name] = box;
+
+    final frames = await box.getFrames();
+    postEvent(
+      ConnectEvent.boxRegistered.event,
+      {
+        'name': box.name,
+        'frames': frames
+            .map(
+              (e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)),
+            )
+            .toList(),
+      },
+    );
+
+    _subscriptions[box.name] = box.watch().listen((event) {
+      postEvent(ConnectEvent.boxEvent.event, {
+        'name': box.name,
+        'key': event.key,
+        'value': _writeValue(box.typeRegistry, event.value),
+        'deleted': event.deleted,
+      });
+    });
+  }
+
+  /// Remove a box from inspection
+  static void unregisterBox(InspectableBox box) {
+    _boxes.remove(box.name);
+    _subscriptions.remove(box.name)?.cancel();
+    postEvent(ConnectEvent.boxUnregistered.event, {'name': box.name});
   }
 
   static List<String> _listBoxes(_) => _boxes.keys.toList();
@@ -107,5 +142,13 @@ class HiveConnect {
 
     final key = args['key'];
     return box.getValue(key);
+  }
+
+  static Uint8List _writeValue(TypeRegistry registry, Object? value) {
+    if (value is Uint8List) return value;
+
+    final writer = BinaryWriterImpl(registry);
+    writer.write(value);
+    return writer.toBytes();
   }
 }

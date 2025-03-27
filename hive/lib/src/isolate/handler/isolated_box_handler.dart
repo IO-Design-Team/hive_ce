@@ -131,8 +131,6 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'getFrames':
         final frames = await (box as InspectableBox).getFrames();
         return frames.map((e) => e.toJson()).toList();
-      case 'getValue':
-        return (box as InspectableBox).getValue(call.arguments['key']);
       default:
         return call.notImplemented();
     }

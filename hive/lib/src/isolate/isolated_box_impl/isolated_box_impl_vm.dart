@@ -136,6 +136,7 @@ abstract class IsolatedBoxBaseImpl<E>
     await _channel.invokeMethod('close', {'name': name});
     _open = false;
     await _hive.unregisterBox(name);
+    HiveConnect.unregisterBox(this);
   }
 
   @override
@@ -187,7 +188,10 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   @override
-  void inspect() => HiveConnect.inspectBox(this);
+  void inspect() => HiveConnect.registerBox(this);
+
+  @override
+  TypeRegistry get typeRegistry => _hive;
 
   @override
   Future<Iterable<InspectorFrame>> getFrames() async {
@@ -199,8 +203,7 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   @override
-  Future<Object?> getValue(Object key) =>
-      _channel.invokeMethod('getValue', {'name': name, 'key': key});
+  Future<Object?> getValue(Object key) => get(key);
 }
 
 /// Isolated implementation of [Box]

@@ -9,6 +9,9 @@ abstract interface class InspectableBox {
   /// The name of the box
   String get name;
 
+  /// The box's type registry
+  TypeRegistry get typeRegistry;
+
   /// Returns all of the frames currently loaded in the box
   Future<Iterable<InspectorFrame>> getFrames();
 
@@ -17,9 +20,6 @@ abstract interface class InspectableBox {
 
   /// Watch the box for changes
   Stream<BoxEvent> watch();
-
-  /// Register the box for inspection
-  void inspect();
 }
 
 /// An inspector frame
@@ -42,6 +42,16 @@ class InspectorFrame {
     required this.value,
     required this.lazy,
   });
+
+  /// Copy with
+  InspectorFrame copyWith({
+    Object? value,
+  }) =>
+      InspectorFrame(
+        key: key,
+        value: value ?? this.value,
+        lazy: lazy,
+      );
 
   /// From frame
   factory InspectorFrame.fromFrame(Frame frame) => InspectorFrame(

@@ -113,7 +113,10 @@ abstract class IsolatedBoxBaseImpl<E>
   int get hashCode => _box.hashCode;
 
   @override
-  void inspect() => HiveConnect.inspectBox(this);
+  void inspect() => HiveConnect.registerBox(this);
+
+  @override
+  TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
 
   @override
   Future<Iterable<InspectorFrame>> getFrames() =>
