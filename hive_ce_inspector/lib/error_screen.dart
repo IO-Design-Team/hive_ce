@@ -15,7 +15,7 @@ class ErrorScreen extends StatelessWidget {
           const Text('Please make sure your Hive CE instance is running.'),
           const SizedBox(height: 40),
           ElevatedButton(
-            onPressed: window.location.reload,
+            onPressed: () => window.location.reload(),
             child: const Text('Retry Connection'),
           ),
         ],

@@ -37,7 +37,7 @@ class _ConnectionPageState extends State<ConnectionScreen> {
       future: clientFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _InstancesLoader(client: snapshot.data!);
+          return _BoxesLoader(client: snapshot.data!);
         } else if (snapshot.hasError) {
           return const ErrorScreen();
         } else {
@@ -48,58 +48,53 @@ class _ConnectionPageState extends State<ConnectionScreen> {
   }
 }
 
-class _InstancesLoader extends StatefulWidget {
-  const _InstancesLoader({required this.client});
+class _BoxesLoader extends StatefulWidget {
+  const _BoxesLoader({required this.client});
 
   final ConnectClient client;
 
   @override
-  State<_InstancesLoader> createState() => _InstancesLoaderState();
+  State<_BoxesLoader> createState() => _BoxesLoaderState();
 }
 
-class _InstancesLoaderState extends State<_InstancesLoader> {
-  late Future<List<String>> instancesFuture;
-  late StreamSubscription<void> _instancesSubscription;
+class _BoxesLoaderState extends State<_BoxesLoader> {
+  final Set<String> boxes = {};
+  late StreamSubscription<String> boxRegisteredSubscription;
+  late StreamSubscription<String> boxUnregisteredSubscription;
 
   @override
   void initState() {
-    instancesFuture = widget.client.listInstances();
-    _instancesSubscription = widget.client.instancesChanged.listen((event) {
-      setState(() {
-        instancesFuture = widget.client.listInstances();
-      });
-    });
+    _initState();
+    boxRegisteredSubscription = widget.client.boxRegistered.listen(
+      (name) => setState(() => boxes.add(name)),
+    );
+    boxUnregisteredSubscription = widget.client.boxUnregistered.listen(
+      (name) => setState(() => boxes.remove(name)),
+    );
     super.initState();
   }
 
-  @override
-  void didUpdateWidget(covariant _InstancesLoader oldWidget) {
-    instancesFuture = widget.client.listInstances();
-    super.didUpdateWidget(oldWidget);
+  void _initState() async {
+    final boxes = await widget.client.listBoxes();
+    setState(() => boxes.addAll(boxes));
   }
 
   @override
   void dispose() {
-    _instancesSubscription.cancel();
+    boxRegisteredSubscription.cancel();
+    boxUnregisteredSubscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: instancesFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ConnectedLayout(
-            client: widget.client,
-            instances: snapshot.data!,
-          );
-        } else if (snapshot.hasError) {
-          return const ErrorScreen();
-        } else {
-          return const Loading();
-        }
-      },
+    if (boxes.isEmpty) {
+      return const Loading();
+    }
+
+    return ListView.builder(
+      itemBuilder: (context, index) => Text(boxes.elementAt(index)),
+      itemCount: boxes.length,
     );
   }
 }

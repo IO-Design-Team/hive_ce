@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:hive_ce_inspector/connection_screen.dart';
 
-void main() async {
+void main() {
   runApp(DarkMode(notifier: DarkModeNotifier(), child: const App()));
 }
 
