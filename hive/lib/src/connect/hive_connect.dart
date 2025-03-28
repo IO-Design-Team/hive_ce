@@ -89,19 +89,7 @@ class HiveConnect {
     _initialize();
 
     _boxes[box.name] = box;
-
-    final frames = await box.getFrames();
-    postEvent(
-      ConnectEvent.boxRegistered.event,
-      {
-        'name': box.name,
-        'frames': frames
-            .map(
-              (e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)),
-            )
-            .toList(),
-      },
-    );
+    postEvent(ConnectEvent.boxRegistered.event, {'name': box.name});
 
     _subscriptions[box.name] = box.watch().listen((event) {
       postEvent(

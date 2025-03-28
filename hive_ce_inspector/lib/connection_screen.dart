@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/connect_client.dart';
+import 'package:hive_ce_inspector/connected_layout.dart';
 import 'package:hive_ce_inspector/error_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
@@ -98,10 +99,7 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
       return const Loading();
     }
 
-    return ListView.builder(
-      itemBuilder: (context, index) => Text(boxes.elementAt(index)),
-      itemCount: boxes.length,
-    );
+    return ConnectedLayout(boxes: boxes);
   }
 }
 
