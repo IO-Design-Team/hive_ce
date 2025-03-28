@@ -646,9 +646,9 @@ void main() {
 
     test('custom object', () {
       final br = fromByteData(
-        ByteData(27)
+        ByteData(30)
           ..setUint8(0, 200) // object type id
-          ..setUint32(1, 3, Endian.little) // object field count
+          ..setUint32(1, 4, Endian.little) // object field count
           ..setUint8(5, 0) // field index
           ..setUint8(6, FrameValueType.intT) // field type id
           ..setFloat64(7, 12345, Endian.little) // field value
@@ -656,7 +656,10 @@ void main() {
           ..setUint8(16, FrameValueType.intT) // field type id
           ..setFloat64(17, 123, Endian.little) // field value
           ..setUint8(25, 2) // field index
-          ..setUint8(26, FrameValueType.nullT), // field type id
+          ..setUint8(26, FrameValueType.nullT) // field type id
+          ..setUint8(27, 3) // field index
+          ..setUint8(28, 201) // enum type id
+          ..setUint8(29, 1), // enum value
       );
 
       expect(
@@ -674,6 +677,13 @@ void main() {
             isA<RawField>()
                 .having((f) => f.index, 'index', 2)
                 .having((f) => f.value, 'value', null),
+            isA<RawField>().having((f) => f.index, 'index', 3).having(
+                  (f) => f.value,
+                  'value',
+                  isA<RawEnum>()
+                      .having((e) => e.typeId, 'typeId', 201)
+                      .having((e) => e.value, 'value', 1),
+                ),
           ],
         ),
       );

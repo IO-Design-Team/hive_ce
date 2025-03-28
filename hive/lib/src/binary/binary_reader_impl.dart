@@ -378,6 +378,11 @@ class BinaryReaderImpl extends BinaryReader {
     try {
       return read(typeId);
     } catch (e) {
+      if (availableBytes == 1) {
+        // This is a custom enum
+        return RawEnum(typeId, readByte());
+      }
+
       // This is a custom object
       final length = readUint32();
       final fields = List<RawField>.filled(length, RawField(-1, null));
@@ -387,6 +392,18 @@ class BinaryReaderImpl extends BinaryReader {
       return RawObject(typeId, fields);
     }
   }
+}
+
+/// A raw enum value read from the buffer
+class RawEnum {
+  /// The type ID of the enum
+  final int typeId;
+
+  /// The value of the enum
+  final int value;
+
+  /// Constructor
+  const RawEnum(this.typeId, this.value);
 }
 
 /// A raw custom object read from the buffer
