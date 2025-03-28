@@ -24,12 +24,12 @@ Map<String, dynamic> _$InspectorFrameToJson(InspectorFrame instance) =>
 
 BoxEventPayload _$BoxEventPayloadFromJson(Map<String, dynamic> json) =>
     BoxEventPayload(
-      name: json['name'] as String,
+      box: json['name'] as String,
       frame: InspectorFrame.fromJson(json['frame'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$BoxEventPayloadToJson(BoxEventPayload instance) =>
     <String, dynamic>{
-      'name': instance.name,
+      'name': instance.box,
       'frame': instance.frame,
     };

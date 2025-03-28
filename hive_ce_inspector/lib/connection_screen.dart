@@ -65,39 +65,23 @@ class _BoxesLoader extends StatefulWidget {
 }
 
 class _BoxesLoaderState extends State<_BoxesLoader> {
-  final boxes = <String>{};
-
-  late final StreamSubscription<String> boxRegisteredSubscription;
-  late final StreamSubscription<String> boxUnregisteredSubscription;
+  late final List<String> boxes;
 
   var error = false;
 
   @override
   void initState() {
     _initState();
-    boxRegisteredSubscription = widget.client.boxRegistered.listen(
-      (name) => setState(() => boxes.add(name)),
-    );
-    boxUnregisteredSubscription = widget.client.boxUnregistered.listen(
-      (name) => setState(() => boxes.remove(name)),
-    );
     super.initState();
   }
 
   void _initState() async {
     try {
       final boxes = await widget.client.listBoxes();
-      setState(() => this.boxes.addAll(boxes));
+      setState(() => this.boxes = boxes);
     } catch (_) {
       setState(() => error = true);
     }
-  }
-
-  @override
-  void dispose() {
-    boxRegisteredSubscription.cancel();
-    boxUnregisteredSubscription.cancel();
-    super.dispose();
   }
 
   @override

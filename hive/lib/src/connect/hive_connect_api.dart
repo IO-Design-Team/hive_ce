@@ -90,14 +90,14 @@ class InspectorFrame {
 @JsonSerializable()
 class BoxEventPayload {
   /// The box name
-  final String name;
+  final String box;
 
   /// The event frame
   final InspectorFrame frame;
 
   /// Constructor
   const BoxEventPayload({
-    required this.name,
+    required this.box,
     required this.frame,
   });
 

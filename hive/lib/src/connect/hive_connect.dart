@@ -95,7 +95,7 @@ class HiveConnect {
       postEvent(
         ConnectEvent.boxEvent.event,
         BoxEventPayload(
-          name: box.name,
+          box: box.name,
           frame: InspectorFrame(
             key: event.key,
             value: _writeValue(box.typeRegistry, event.value),
