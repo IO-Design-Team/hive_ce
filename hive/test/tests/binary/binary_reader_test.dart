@@ -677,7 +677,9 @@ void main() {
             isA<RawField>()
                 .having((f) => f.index, 'index', 2)
                 .having((f) => f.value, 'value', null),
-            isA<RawField>().having((f) => f.index, 'index', 3).having(
+            isA<RawField>()
+                .having((f) => f.index, 'index', 3) //
+                .having(
                   (f) => f.value,
                   'value',
                   isA<RawEnum>()
