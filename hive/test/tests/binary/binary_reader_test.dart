@@ -659,7 +659,7 @@ void main() {
           ..setUint8(26, FrameValueType.nullT) // field type id
           ..setUint8(27, 3) // field index
           ..setUint8(28, 201) // enum type id
-          ..setUint8(29, 1), // enum value
+          ..setUint8(29, 1), // enum index
       );
 
       expect(
@@ -682,7 +682,7 @@ void main() {
                   'value',
                   isA<RawEnum>()
                       .having((e) => e.typeId, 'typeId', 201)
-                      .having((e) => e.value, 'value', 1),
+                      .having((e) => e.index, 'index', 1),
                 ),
           ],
         ),

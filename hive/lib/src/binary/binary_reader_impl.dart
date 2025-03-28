@@ -399,11 +399,11 @@ class RawEnum {
   /// The type ID of the enum
   final int typeId;
 
-  /// The value of the enum
-  final int value;
+  /// The index of the enum
+  final int index;
 
   /// Constructor
-  const RawEnum(this.typeId, this.value);
+  const RawEnum(this.typeId, this.index);
 }
 
 /// A raw custom object read from the buffer
