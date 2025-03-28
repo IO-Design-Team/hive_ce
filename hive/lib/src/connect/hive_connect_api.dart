@@ -37,7 +37,7 @@ enum ConnectEvent {
 @JsonSerializable()
 class InspectorFrame {
   /// The frame key
-  final Object? key;
+  final Object key;
 
   /// The frame value
   final Object? value;
@@ -47,11 +47,15 @@ class InspectorFrame {
   /// If true, the value will be null
   final bool lazy;
 
+  /// Whether the frame is deleted
+  final bool deleted;
+
   /// Constructor
   const InspectorFrame({
     required this.key,
     required this.value,
-    required this.lazy,
+    this.lazy = false,
+    this.deleted = false,
   });
 
   /// From frame
@@ -59,6 +63,7 @@ class InspectorFrame {
         key: frame.key,
         value: frame.value,
         lazy: frame.lazy,
+        deleted: frame.deleted,
       );
 
   /// From json
@@ -77,6 +82,7 @@ class InspectorFrame {
         key: key,
         value: value ?? this.value,
         lazy: lazy ?? this.lazy,
+        deleted: deleted,
       );
 }
 
@@ -86,21 +92,13 @@ class BoxEventPayload {
   /// The box name
   final String name;
 
-  /// The event key
-  final Object? key;
-
-  /// The encoded event value
-  final List<int>? value;
-
-  /// Whether the event is a deletion
-  final bool deleted;
+  /// The event frame
+  final InspectorFrame frame;
 
   /// Constructor
   const BoxEventPayload({
     required this.name,
-    required this.key,
-    required this.value,
-    required this.deleted,
+    required this.frame,
   });
 
   /// From json

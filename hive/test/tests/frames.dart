@@ -140,9 +140,9 @@ Frame frameWithLength(Frame frame, int length) {
 
 Frame frameBodyWithLength(Frame frame, int length) {
   if (frame.deleted) {
-    return Frame.deleted(null, length: length);
+    return Frame.deleted(frame.key, length: length);
   } else {
-    return Frame(null, frame.value, length: length);
+    return Frame(frame.key, frame.value, length: length);
   }
 }
 

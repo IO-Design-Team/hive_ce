@@ -10,7 +10,8 @@ InspectorFrame _$InspectorFrameFromJson(Map<String, dynamic> json) =>
     InspectorFrame(
       key: json['key'],
       value: json['value'],
-      lazy: json['lazy'] as bool,
+      lazy: json['lazy'] as bool? ?? false,
+      deleted: json['deleted'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$InspectorFrameToJson(InspectorFrame instance) =>
@@ -18,22 +19,17 @@ Map<String, dynamic> _$InspectorFrameToJson(InspectorFrame instance) =>
       'key': instance.key,
       'value': instance.value,
       'lazy': instance.lazy,
+      'deleted': instance.deleted,
     };
 
 BoxEventPayload _$BoxEventPayloadFromJson(Map<String, dynamic> json) =>
     BoxEventPayload(
       name: json['name'] as String,
-      key: json['key'],
-      value: (json['value'] as List<dynamic>?)
-          ?.map((e) => (e as num).toInt())
-          .toList(),
-      deleted: json['deleted'] as bool,
+      frame: InspectorFrame.fromJson(json['frame'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$BoxEventPayloadToJson(BoxEventPayload instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'key': instance.key,
-      'value': instance.value,
-      'deleted': instance.deleted,
+      'frame': instance.frame,
     };

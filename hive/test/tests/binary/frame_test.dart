@@ -43,7 +43,6 @@ void main() {
       });
 
       test('non int or string keys', () {
-        expect(() => Frame(null, null), throwsHiveError());
         expect(() => Frame(true, null), throwsHiveError());
         expect(() => Frame(Object(), null), throwsHiveError());
         expect(() => Frame(() => 0, null), throwsHiveError());

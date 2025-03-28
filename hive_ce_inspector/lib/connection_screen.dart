@@ -66,8 +66,9 @@ class _BoxesLoader extends StatefulWidget {
 
 class _BoxesLoaderState extends State<_BoxesLoader> {
   final boxes = <String>{};
-  late StreamSubscription<String> boxRegisteredSubscription;
-  late StreamSubscription<String> boxUnregisteredSubscription;
+
+  late final StreamSubscription<String> boxRegisteredSubscription;
+  late final StreamSubscription<String> boxUnregisteredSubscription;
 
   var error = false;
 
@@ -109,6 +110,6 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return ConnectedLayout(boxes: boxes);
+    return ConnectedLayout(client: widget.client, boxes: boxes);
   }
 }

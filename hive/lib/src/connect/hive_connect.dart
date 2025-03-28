@@ -96,9 +96,11 @@ class HiveConnect {
         ConnectEvent.boxEvent.event,
         BoxEventPayload(
           name: box.name,
-          key: event.key,
-          value: _writeValue(box.typeRegistry, event.value),
-          deleted: event.deleted,
+          frame: InspectorFrame(
+            key: event.key,
+            value: _writeValue(box.typeRegistry, event.value),
+            deleted: event.deleted,
+          ),
         ).toJson(),
       );
     });
