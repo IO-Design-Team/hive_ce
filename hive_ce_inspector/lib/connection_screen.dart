@@ -48,7 +48,7 @@ class _ConnectionPageState extends State<ConnectionScreen> {
         } else if (snapshot.hasError) {
           return const ErrorScreen();
         } else {
-          return const Loading();
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
@@ -69,6 +69,8 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
   late StreamSubscription<String> boxRegisteredSubscription;
   late StreamSubscription<String> boxUnregisteredSubscription;
 
+  var error = false;
+
   @override
   void initState() {
     _initState();
@@ -82,8 +84,12 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
   }
 
   void _initState() async {
-    final boxes = await widget.client.listBoxes();
-    setState(() => this.boxes.addAll(boxes));
+    try {
+      final boxes = await widget.client.listBoxes();
+      setState(() => this.boxes.addAll(boxes));
+    } catch (_) {
+      setState(() => error = true);
+    }
   }
 
   @override
@@ -95,19 +101,14 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
 
   @override
   Widget build(BuildContext context) {
+    if (error) {
+      return const ErrorScreen();
+    }
+
     if (boxes.isEmpty) {
-      return const Loading();
+      return const Center(child: CircularProgressIndicator());
     }
 
     return ConnectedLayout(boxes: boxes);
-  }
-}
-
-class Loading extends StatelessWidget {
-  const Loading({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
   }
 }
