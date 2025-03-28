@@ -646,17 +646,37 @@ void main() {
 
     test('custom object', () {
       final br = fromByteData(
-        ByteData(24)
-          ..setUint8(0, 200) // type id
-          ..setUint32(1, 3, Endian.little) // length
-          ..setUint8(5, FrameValueType.intT)
-          ..setFloat64(6, 12345, Endian.little)
-          ..setUint8(14, FrameValueType.intT)
-          ..setFloat64(15, 123, Endian.little)
-          ..setUint8(23, FrameValueType.nullT),
+        ByteData(27)
+          ..setUint8(0, 200) // object type id
+          ..setUint32(1, 3, Endian.little) // object field count
+          ..setUint8(5, 0) // field index
+          ..setUint8(6, FrameValueType.intT) // field type id
+          ..setFloat64(7, 12345, Endian.little) // field value
+          ..setUint8(15, 1) // field index
+          ..setUint8(16, FrameValueType.intT) // field type id
+          ..setFloat64(17, 123, Endian.little) // field value
+          ..setUint8(25, 2) // field index
+          ..setUint8(26, FrameValueType.nullT), // field type id
       );
 
-      expect(br.readAsObject(), [200, 12345, 123, null]);
+      expect(
+        br.readAsObject(),
+        isA<RawObject>().having((o) => o.typeId, 'typeId', 200).having(
+          (o) => o.fields,
+          'fields',
+          [
+            isA<RawField>()
+                .having((f) => f.index, 'index', 0)
+                .having((f) => f.value, 'value', 12345),
+            isA<RawField>()
+                .having((f) => f.index, 'index', 1)
+                .having((f) => f.value, 'value', 123),
+            isA<RawField>()
+                .having((f) => f.index, 'index', 2)
+                .having((f) => f.value, 'value', null),
+          ],
+        ),
+      );
     });
   });
 }

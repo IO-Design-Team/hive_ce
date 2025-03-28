@@ -380,12 +380,35 @@ class BinaryReaderImpl extends BinaryReader {
     } catch (e) {
       // This is a custom object
       final length = readUint32();
-      final list = List<Object?>.filled(length + 1, null);
-      list[0] = typeId;
-      for (var i = 1; i <= length; i++) {
-        list[i] = readAsObject();
+      final fields = List<RawField>.filled(length, RawField(-1, null));
+      for (var i = 0; i < fields.length; i++) {
+        fields[i] = RawField(readByte(), readAsObject());
       }
-      return list;
+      return RawObject(typeId, fields);
     }
   }
+}
+
+/// A raw custom object read from the buffer
+class RawObject {
+  /// The type ID of the object
+  final int typeId;
+
+  /// The fields of the object
+  final List<RawField> fields;
+
+  /// Constructor
+  const RawObject(this.typeId, this.fields);
+}
+
+/// A raw field of a custom object
+class RawField {
+  /// The index of the field
+  final int index;
+
+  /// The value of the field
+  final Object? value;
+
+  /// Constructor
+  const RawField(this.index, this.value);
 }
