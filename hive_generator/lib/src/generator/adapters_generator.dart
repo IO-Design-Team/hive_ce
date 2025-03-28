@@ -73,7 +73,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     // Not the safest thing to do, but there doesn't seem to be a better way
     buildStep.forceWriteAsString(
       schemaAsset,
-      HiveSchema(nextTypeId: nextTypeId, types: newTypes).toString(),
+      writeSchema(HiveSchema(nextTypeId: nextTypeId, types: newTypes)),
     );
 
     return content.toString();
