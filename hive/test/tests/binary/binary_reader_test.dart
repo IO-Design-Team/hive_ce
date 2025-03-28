@@ -656,7 +656,7 @@ void main() {
           ..setUint8(23, FrameValueType.nullT),
       );
 
-      expect(br.readAsObject(), [12345, 123, null]);
+      expect(br.readAsObject(), [200, 12345, 123, null]);
     });
   });
 }
