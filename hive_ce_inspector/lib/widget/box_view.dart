@@ -113,4 +113,34 @@ class _BoxViewState extends State<BoxView> {
       ],
     );
   }
+
+  Map<Object, List<Object?>> fieldsForFrames(List<InspectorFrame> frames) {
+    final fields = <Object, List<Object?>>{};
+
+    for (final frame in frames) {
+      final value = frame.value;
+      if (value is RawObject) {
+        fields[frame.key] = fieldsForObject([0], value);
+      } else {
+        fields[frame.key] = [value];
+      }
+    }
+
+    return fields;
+  }
+
+  List<Object?> fieldsForObject(List<int> index, RawObject object) {
+    final fields = <Object?>[];
+
+    for (final field in object.fields) {
+      final value = field.value;
+      if (value is RawObject) {
+        fields.addAll(fieldsForObject(value));
+      } else {
+        fields.add(value);
+      }
+    }
+
+    return fields;
+  }
 }
