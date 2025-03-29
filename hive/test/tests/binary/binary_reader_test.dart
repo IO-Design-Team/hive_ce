@@ -646,20 +646,20 @@ void main() {
 
     test('custom object', () {
       final br = fromByteData(
-        ByteData(30)
+        ByteData(27)
           ..setUint8(0, 200) // object type id
-          ..setUint32(1, 4, Endian.little) // object field count
-          ..setUint8(5, 0) // field index
-          ..setUint8(6, FrameValueType.intT) // field type id
-          ..setFloat64(7, 12345, Endian.little) // field value
-          ..setUint8(15, 1) // field index
-          ..setUint8(16, FrameValueType.intT) // field type id
-          ..setFloat64(17, 123, Endian.little) // field value
-          ..setUint8(25, 2) // field index
-          ..setUint8(26, FrameValueType.nullT) // field type id
-          ..setUint8(27, 3) // field index
-          ..setUint8(28, 201) // enum type id
-          ..setUint8(29, 1), // enum index
+          ..setUint8(1, 4) // object field count
+          ..setUint8(2, 0) // field index
+          ..setUint8(3, FrameValueType.intT) // field type id
+          ..setFloat64(4, 12345, Endian.little) // field value
+          ..setUint8(12, 1) // field index
+          ..setUint8(13, FrameValueType.intT) // field type id
+          ..setFloat64(14, 123, Endian.little) // field value
+          ..setUint8(22, 2) // field index
+          ..setUint8(23, FrameValueType.nullT) // field type id
+          ..setUint8(24, 3) // field index
+          ..setUint8(25, 201) // enum type id
+          ..setUint8(26, 1), // enum index
       );
 
       expect(

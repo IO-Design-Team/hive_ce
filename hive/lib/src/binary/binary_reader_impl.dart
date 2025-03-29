@@ -384,7 +384,7 @@ class BinaryReaderImpl extends BinaryReader {
       }
 
       // This is a custom object
-      final length = readUint32();
+      final length = readByte();
       final fields = List<RawField>.filled(length, RawField(-1, null));
       for (var i = 0; i < length; i++) {
         fields[i] = RawField(readByte(), readAsObject());
