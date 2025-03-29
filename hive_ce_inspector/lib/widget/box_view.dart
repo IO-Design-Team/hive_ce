@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
+import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class BoxView extends StatefulWidget {
   final BoxData data;
@@ -46,6 +47,12 @@ class _BoxViewState extends State<BoxView> {
           }).toList();
     }
 
+    if (filteredFrames.isEmpty) {
+      return const Center(child: Text('Box is empty'));
+    }
+
+    final columnCount = 2;
+
     return Column(
       children: [
         if (typeIds.length > 1)
@@ -66,17 +73,41 @@ class _BoxViewState extends State<BoxView> {
             ],
           ),
         Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final frame = filteredFrames.reversed.elementAt(index);
-              return Row(
-                children: [
-                  Text(frame.key.toString()),
-                  Text(frame.value.toString()),
-                ],
-              );
-            },
-            itemCount: filteredFrames.length,
+          child: TableView(
+            delegate: TableCellBuilderDelegate(
+              rowCount: filteredFrames.length + 1,
+              columnCount: columnCount,
+              pinnedRowCount: 1,
+              pinnedColumnCount: 1,
+              rowBuilder:
+                  (index) => const TableSpan(extent: FixedSpanExtent(20)),
+              columnBuilder:
+                  (index) => const TableSpan(extent: FixedSpanExtent(100)),
+              cellBuilder: (context, vicinity) {
+                final TableVicinity(:row, :column) = vicinity;
+                final rowIndex = row - 1;
+                final columnIndex = column - 1;
+
+                if (row == 0 && column == 0) {
+                  return const TableViewCell(child: Text('Key'));
+                }
+
+                if (row == 0) {
+                  if (columnCount == 2) {
+                    return const TableViewCell(child: Text('Value'));
+                  } else {
+                    return TableViewCell(child: Text('Field $columnIndex'));
+                  }
+                }
+
+                final frame = filteredFrames.reversed.elementAt(rowIndex);
+                if (column == 0) {
+                  return TableViewCell(child: Text(frame.key.toString()));
+                }
+
+                return TableViewCell(child: Text(frame.value.toString()));
+              },
+            ),
           ),
         ),
       ],
