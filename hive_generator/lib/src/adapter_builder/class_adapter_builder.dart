@@ -47,7 +47,10 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
     // Empty classes
     if (constr.parameters.isEmpty && fields.isEmpty) {
-      return 'return ${cls.name}();';
+      return '''
+    reader.readByte();
+    return ${cls.name}();
+    ''';
     }
 
     final code = StringBuffer();
