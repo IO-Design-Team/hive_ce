@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:hive_ce_inspector/connect_client.dart';
-import 'package:hive_ce_inspector/connected_layout.dart';
-import 'package:hive_ce_inspector/error_screen.dart';
+import 'package:hive_ce_inspector/service/connect_client.dart';
+import 'package:hive_ce_inspector/widget/connected_layout.dart';
+import 'package:hive_ce_inspector/widget/error_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
   const ConnectionScreen({

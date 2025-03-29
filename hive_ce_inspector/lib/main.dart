@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:hive_ce_inspector/connection_screen.dart';
+import 'package:hive_ce_inspector/widget/connection_screen.dart';
 
 void main() {
   runApp(DarkMode(notifier: DarkModeNotifier(), child: const App()));
