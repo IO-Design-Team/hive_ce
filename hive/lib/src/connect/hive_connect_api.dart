@@ -107,4 +107,13 @@ class BoxEventPayload {
 
   /// To json
   Map<String, dynamic> toJson() => _$BoxEventPayloadToJson(this);
+
+  /// Copy with
+  BoxEventPayload copyWith({
+    InspectorFrame? frame,
+  }) =>
+      BoxEventPayload(
+        box: box,
+        frame: frame ?? this.frame,
+      );
 }

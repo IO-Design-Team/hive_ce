@@ -65,7 +65,7 @@ class _BoxesLoader extends StatefulWidget {
 }
 
 class _BoxesLoaderState extends State<_BoxesLoader> {
-  late final List<String> boxes;
+  final boxes = <String>[];
 
   var error = false;
 
@@ -78,7 +78,7 @@ class _BoxesLoaderState extends State<_BoxesLoader> {
   void _initState() async {
     try {
       final boxes = await widget.client.listBoxes();
-      setState(() => this.boxes = boxes);
+      setState(() => this.boxes.addAll(boxes));
     } catch (_) {
       setState(() => error = true);
     }

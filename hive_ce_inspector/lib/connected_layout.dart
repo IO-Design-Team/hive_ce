@@ -97,7 +97,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
       drawer: isWide ? null : drawer,
       body: Row(
         children: [
-          if (!isWide) drawer,
+          if (isWide) drawer,
           if (selectedBox == null)
             const Expanded(child: Center(child: Text('Select a box')))
           else if (selectedBoxData == null)
@@ -129,7 +129,12 @@ class BoxView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-      itemBuilder: (context, index) => Text('bruh'),
+      itemBuilder: (context, index) {
+        final frame = data.frames.values.toList().reversed.elementAt(index);
+        return Row(
+          children: [Text(frame.key.toString()), Text(frame.value.toString())],
+        );
+      },
       itemCount: data.frames.length,
     );
   }

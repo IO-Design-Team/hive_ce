@@ -16,7 +16,7 @@ final _router = GoRouter(
           child: Center(
             child: Text(
               'Welcome to the Hive CE Inspector!\nPlease open the link '
-              'displayed when running the debug version of an Hive CE app.',
+              'displayed when running the debug version of a Hive CE app.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18),
             ),

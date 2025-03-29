@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_inspector/hive_internal.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -39,7 +38,14 @@ class ConnectClient {
         client._boxUnregisteredController.add(json['name']);
       },
       ConnectEvent.boxEvent.event: (Map<String, dynamic> json) {
-        client._boxEventController.add(BoxEventPayload.fromJson(json));
+        final payload = BoxEventPayload.fromJson(json);
+        client._boxEventController.add(
+          payload.copyWith(
+            frame: payload.frame.copyWith(
+              value: client._readValue(payload.frame.value),
+            ),
+          ),
+        );
       },
     };
     service.onExtensionEvent.listen((event) {
@@ -76,18 +82,17 @@ class ConnectClient {
   }
 
   Future<List<InspectorFrame>> getBoxFrames(String name) async {
-    final response = await _call(ConnectAction.getBoxFrames, param: name);
+    final response = await _call(
+      ConnectAction.getBoxFrames,
+      param: {'name': name},
+    );
     if (response == null) return [];
 
-    return (response as List).map((e) => InspectorFrame.fromJson(e)).map((e) {
-      if (e.lazy) return e;
-      return e.copyWith(
-        value:
-            BinaryReaderImpl(
-              e.value as Uint8List,
-              StubRegistry(),
-            ).readAsObject(),
-      );
+    return (response as List).map((e) => InspectorFrame.fromJson(e)).map((
+      frame,
+    ) {
+      if (frame.lazy) return frame;
+      return frame.copyWith(value: _readValue(frame.value));
     }).toList();
   }
 
@@ -98,21 +103,15 @@ class ConnectClient {
     );
     if (value == null) return null;
 
-    return BinaryReaderImpl(value as Uint8List, StubRegistry()).readAsObject();
+    return _readValue(value);
   }
-}
 
-class StubRegistry extends TypeRegistry {
-  @override
-  void ignoreTypeId<T>(int typeId) => throw UnimplementedError();
+  Object? _readValue(Object? value) {
+    if (value == null) return null;
 
-  @override
-  bool isAdapterRegistered(int typeId) => throw UnimplementedError();
-
-  @override
-  void registerAdapter<T>(
-    TypeAdapter<T> adapter, {
-    bool internal = false,
-    bool override = false,
-  }) => throw UnimplementedError();
+    return BinaryReaderImpl(
+      Uint8List.fromList((value as List).cast<int>()),
+      TypeRegistryImpl.nullImpl,
+    ).readAsObject();
+  }
 }

@@ -38,8 +38,10 @@ class HiveConnect {
     for (final handler in _handlers.entries) {
       registerExtension(handler.key.method, (method, parameters) async {
         try {
+          final args = parameters['args'];
           final result = <String, dynamic>{
-            'result': await handler.value(parameters['args']),
+            'result':
+                await handler.value(args == null ? null : jsonDecode(args)),
           };
           return ServiceExtensionResponse.result(jsonEncode(result));
         } catch (e) {
@@ -121,7 +123,9 @@ class HiveConnect {
     if (box == null) return [];
 
     final frames = await box.getFrames();
-    return frames.toList();
+    return frames
+        .map((e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)))
+        .toList();
   }
 
   static Future<Object?> _getValue(dynamic args) async {
