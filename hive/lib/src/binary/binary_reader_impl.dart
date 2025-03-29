@@ -394,28 +394,31 @@ class BinaryReaderImpl extends BinaryReader {
   }
 }
 
-/// A raw enum value read from the buffer
-class RawEnum {
-  /// The type ID of the enum
+/// A raw type read from the buffer
+abstract class RawType {
+  /// The type ID
   final int typeId;
 
+  /// Constructor
+  const RawType(this.typeId);
+}
+
+/// A raw enum value read from the buffer
+class RawEnum extends RawType {
   /// The index of the enum
   final int index;
 
   /// Constructor
-  const RawEnum(this.typeId, this.index);
+  const RawEnum(super.typeId, this.index);
 }
 
 /// A raw custom object read from the buffer
-class RawObject {
-  /// The type ID of the object
-  final int typeId;
-
+class RawObject extends RawType {
   /// The fields of the object
   final List<RawField> fields;
 
   /// Constructor
-  const RawObject(this.typeId, this.fields);
+  const RawObject(super.typeId, this.fields);
 }
 
 /// A raw field of a custom object

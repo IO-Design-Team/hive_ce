@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
+import 'package:hive_ce_inspector/widget/box_view.dart';
 
 class ConnectedLayout extends StatefulWidget {
   final ConnectClient client;
@@ -103,25 +104,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
             name: box,
             frames: {for (final frame in frames) frame.key: frame},
           ),
-    );
-  }
-}
-
-class BoxView extends StatelessWidget {
-  final BoxData data;
-
-  const BoxView({super.key, required this.data});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        final frame = data.frames.values.toList().reversed.elementAt(index);
-        return Row(
-          children: [Text(frame.key.toString()), Text(frame.value.toString())],
-        );
-      },
-      itemCount: data.frames.length,
     );
   }
 }
