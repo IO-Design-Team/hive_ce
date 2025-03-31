@@ -48,6 +48,9 @@ abstract class CollectionBox<V> {
   /// TODO: Document this!
   BoxCollection get boxCollection;
 
+  /// From json
+  V Function(Map<String, dynamic>)? get fromJson;
+
   /// TODO: Document this!
   Future<List<String>> getAllKeys();
 

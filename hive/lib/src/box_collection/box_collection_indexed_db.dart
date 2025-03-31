@@ -45,6 +45,7 @@ class BoxCollection implements implementation.BoxCollection {
     String name, {
     bool preload = false,
     implementation.CollectionBox<V> Function(String, BoxCollection)? boxCreator,
+    V Function(Map<String, dynamic>)? fromJson,
   }) async {
     if (!boxNames.contains(name)) {
       throw Exception(
@@ -56,7 +57,7 @@ class BoxCollection implements implementation.BoxCollection {
       return _openBoxes[i] as CollectionBox<V>;
     }
     final box = boxCreator?.call(name, this) as CollectionBox<V>? ??
-        CollectionBox<V>(name, this);
+        CollectionBox<V>(name, this, fromJson);
     if (preload) {
       box._cache.addAll(await box.getAllValues());
     }
@@ -120,11 +121,14 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   final String name;
   @override
   final BoxCollection boxCollection;
+  @override
+  final V Function(Map<String, dynamic>)? fromJson;
+
   final Map<String, V?> _cache = {};
   Set<String>? _cachedKeys;
 
   /// TODO: Document this!
-  CollectionBox(this.name, this.boxCollection);
+  CollectionBox(this.name, this.boxCollection, this.fromJson);
 
   @override
   Future<List<String>> getAllKeys([IDBTransaction? txn]) async {

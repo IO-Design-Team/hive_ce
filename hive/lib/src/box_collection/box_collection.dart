@@ -47,6 +47,7 @@ class BoxCollection implements implementation.BoxCollection {
     String name, {
     bool preload = false,
     implementation.CollectionBox<V> Function(String, BoxCollection)? boxCreator,
+    V Function(Map<String, dynamic>)? fromJson,
   }) async {
     if (!boxNames.contains(name)) {
       throw Exception(
@@ -117,6 +118,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   final String name;
   @override
   final BoxCollection boxCollection;
+  @override
+  final V Function(Map<String, dynamic>)? fromJson = null;
 
   /// TODO: Document this!
   static final transactionBoxes = <Zone, Set<String>>{};
