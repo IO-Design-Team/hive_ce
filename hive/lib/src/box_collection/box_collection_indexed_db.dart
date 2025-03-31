@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:hive_ce/hive.dart';
@@ -159,9 +160,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (_cache.containsKey(key)) return _cache[key];
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final value = await store.get(key.toJS).asFuture();
-    _cache[key] = value.dartify() as V?;
-    return _cache[key];
+    final val = _readValue(await store.get(key.toJS).asFuture());
+    return _cache[key] = val as V?;
   }
 
   @override
@@ -171,12 +171,22 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     }
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final list =
-        await Future.wait(keys.map((e) => store.get(e.toJS).asFuture()));
+    final list = await Future.wait(
+      keys.map((e) async => _readValue(await store.get(e.toJS).asFuture())),
+    );
     for (var i = 0; i < keys.length; i++) {
-      _cache[keys[i]] = list[i].dartify() as V?;
+      _cache[keys[i]] = list[i] as V?;
     }
     return list.cast<V?>();
+  }
+
+  Object? _readValue(JSAny? val) {
+    if (val == null) return null;
+    final value = val.dartify();
+    if (fromJson != null) {
+      return fromJson?.call((value as Map).cast<String, dynamic>());
+    }
+    return value;
   }
 
   @override
@@ -198,10 +208,44 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.put(val.jsify(), key.toJS).asFuture();
+
+    JSAny? value;
+    if (_isPrimitive(val) ||
+        _isPrimitiveIterable(val) ||
+        _isPrimitiveMap(val)) {
+      value = val.jsify();
+    } else {
+      if (fromJson == null) {
+        throw HiveError(
+          'Non-primitive CollectionBoxes must be provided a fromJson converter',
+        );
+      }
+      try {
+        value = jsonDecode(jsonEncode(val)).jsify();
+      } catch (_) {
+        throw HiveError('Failed to convert type $V to JSON');
+      }
+    }
+
+    await store.put(value, key.toJS).asFuture();
     _cache[key] = val;
     _cachedKeys?.add(key);
     return;
+  }
+
+  bool _isPrimitive(Object? val) {
+    return val is num || val is bool || val is String;
+  }
+
+  bool _isPrimitiveIterable(Object val) {
+    return val is Iterable && val.every(_isPrimitive);
+  }
+
+  bool _isPrimitiveMap(Object val) {
+    return val is Map &&
+        val.entries.every(
+          (entry) => _isPrimitive(entry.key) && _isPrimitive(entry.value),
+        );
   }
 
   @override
