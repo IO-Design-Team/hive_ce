@@ -14,7 +14,7 @@ Future<dynamic> handleHiveMethodCall(
   switch (call.method) {
     case 'init':
       Hive.init(call.arguments['path']);
-      (Hive as HiveImpl).useVerbatimFrames();
+      (Hive as HiveImpl).setIsolated();
     case 'openBox':
       final name = call.arguments['name'];
       if (boxHandlers.containsKey(name)) {
