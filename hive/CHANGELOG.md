@@ -3,7 +3,6 @@
 - Isolate support through `IsolatedHive`
 - Warning messages for potentially unsafe isolate usage
 - Updates suggested placement of `GenerateAdapters` annotation
-- Bumps minimum Dart SDK to 3.5.0
 
 ## 2.10.1
 
