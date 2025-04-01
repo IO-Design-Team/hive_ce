@@ -1,9 +1,9 @@
-// import 'package:json_annotation/json_annotation.dart';
+import 'package:hive_ce/src/util/json_annotation.dart';
 
 part 'lock_props.g.dart';
 
 /// Properties stored in box lock files
-// @JsonSerializable()
+@JsonSerializable()
 class LockProps {
   /// Whether the box is isolated
   final bool isolated;
