@@ -10,6 +10,7 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
   addTearDown(collection.close);
   if (withData) {
     final catsBox = await collection.openBox('cats');
+    await catsBox.clear();
     await catsBox.put('fluffy', {'name': 'Fluffy', 'age': 4});
     await catsBox.put('loki', {'name': 'Loki', 'age': 2});
   }
