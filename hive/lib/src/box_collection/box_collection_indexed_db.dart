@@ -150,7 +150,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
     final map = <String, V>{};
     await for (final entry in store.iterate()) {
-      map[(entry.key as JSString).toDart] = entry.value.dartify() as V;
+      map[(entry.key as JSString).toDart] = _decodeValue(entry.value) as V;
     }
     return map;
   }
@@ -160,7 +160,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (_cache.containsKey(key)) return _cache[key];
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final val = _readValue(await store.get(key.toJS).asFuture());
+    final val = _decodeValue(await store.get(key.toJS).asFuture());
     return _cache[key] = val as V?;
   }
 
@@ -172,7 +172,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final list = await Future.wait(
-      keys.map((e) async => _readValue(await store.get(e.toJS).asFuture())),
+      keys.map((e) async => _decodeValue(await store.get(e.toJS).asFuture())),
     );
     for (var i = 0; i < keys.length; i++) {
       _cache[keys[i]] = list[i] as V?;
@@ -180,7 +180,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     return list.cast<V?>();
   }
 
-  Object? _readValue(JSAny? val) {
+  Object? _decodeValue(JSAny? val) {
     if (val == null) return null;
     final value = val.dartify();
     if (fromJson != null) {
