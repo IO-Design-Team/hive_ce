@@ -24,6 +24,7 @@ abstract class BoxCollection {
     String name, {
     bool preload = false,
     CollectionBox<V> Function(String, BoxCollection)? boxCreator,
+    V Function(Map<String, dynamic>)? fromJson,
   });
 
   /// TODO: Document this!
