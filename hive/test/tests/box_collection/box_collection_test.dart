@@ -150,28 +150,23 @@ void main() {
     test('json', () async {
       final collection = await _openCollection();
       final box = await collection.openBox('cats', fromJson: Test.fromJson);
-      await box.put('json_test', Test(a: 1, b: 'test'));
-      expect(await box.get('json_test'), Test(a: 1, b: 'test'));
+      await box.put('json_test', testObject);
+      expect(await box.get('json_test'), testObject);
     });
   });
 }
+
+const testObject = Test(a: 1, b: 'test');
 
 class Test {
   final int a;
   final String b;
 
-  Test({required this.a, required this.b});
+  const Test({required this.a, required this.b});
 
   factory Test.fromJson(Map<String, dynamic> json) =>
       Test(a: json['a'], b: json['b']);
   Map<String, dynamic> toJson() => {'a': a, 'b': b};
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || other is Test && a == other.a && b == other.b;
-
-  @override
-  int get hashCode => a.hashCode ^ b.hashCode;
 }
 
 class TestAdapter extends TypeAdapter<Test> {
@@ -179,16 +174,7 @@ class TestAdapter extends TypeAdapter<Test> {
   final int typeId = 0;
 
   @override
-  Test read(BinaryReader reader) {
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return Test(
-      a: fields[0] as int,
-      b: fields[1] as String,
-    );
-  }
+  Test read(BinaryReader reader) => testObject;
 
   @override
   void write(BinaryWriter writer, Test obj) {
