@@ -100,7 +100,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
       hive,
       keystore,
       lazy,
-      verbatimFrames: isolated,
+      isolated: isolated,
     );
   }
 
