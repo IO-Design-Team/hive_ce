@@ -20,23 +20,18 @@ import 'package:meta/meta.dart';
 class StorageBackendVm extends StorageBackend {
   /// Warning for existing lock of unmatched isolation
   @visibleForTesting
-  static String unmatchedIsolationWarning(bool oldIsolated, bool newIsolated) {
-    final oldHiveName = oldIsolated ? 'IsolatedHive' : 'Hive';
-    final newHiveName = newIsolated ? 'IsolatedHive' : 'Hive';
-
-    return '''
+  static const unmatchedIsolationWarning = '''
 ⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
 
-You are opening this box with $newHiveName, but this box was previously opened
-with $oldHiveName. This can lead to DATA CORRUPTION as Hive boxes are not
-designed for concurrent access across isolates. Each isolate would maintain its
-own box cache, potentially causing data inconsistency and corruption.
+You are opening this box with Hive, but this box was previously opened with
+IsolatedHive. This can lead to DATA CORRUPTION as Hive boxes are not designed
+for concurrent access across isolates. Each isolate would maintain its own box
+cache, potentially causing data inconsistency and corruption.
 
 RECOMMENDED ACTIONS:
 - ALWAYS use IsolatedHive to perform box operations when working with multiple
   isolates
 ''';
-  }
 
   final File _file;
   final File _lockFile;
@@ -120,8 +115,8 @@ RECOMMENDED ACTIONS:
       } catch (_) {
         props = LockProps();
       }
-      if (props.isolated != isolated) {
-        debugPrint(unmatchedIsolationWarning(props.isolated, isolated));
+      if (props.isolated && !isolated) {
+        debugPrint(unmatchedIsolationWarning);
       }
     }
 

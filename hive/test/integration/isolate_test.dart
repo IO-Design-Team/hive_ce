@@ -177,7 +177,7 @@ void main() async {
           final dir = await getTempDir();
           final path = dir.path;
 
-          await IsolatedHive.init(path);
+          await IsolatedHive.init(path, isolateNameServer: StubIns());
           Hive.init(path);
 
           await IsolatedHive.openBox('test');
@@ -186,7 +186,7 @@ void main() async {
 
           expect(
             output,
-            contains(StorageBackendVm.unmatchedIsolationWarning(true, false)),
+            contains(StorageBackendVm.unmatchedIsolationWarning),
           );
         });
       });
