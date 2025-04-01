@@ -20,7 +20,7 @@ import 'package:meta/meta.dart';
 class StorageBackendVm extends StorageBackend {
   /// Warning for existing lock of unmatched isolation
   @visibleForTesting
-  static String lockFileExistsWarning(bool oldIsolated, bool newIsolated) {
+  static String unmatchedIsolationWarning(bool oldIsolated, bool newIsolated) {
     final oldHiveName = oldIsolated ? 'IsolatedHive' : 'Hive';
     final newHiveName = newIsolated ? 'IsolatedHive' : 'Hive';
 
@@ -121,7 +121,7 @@ RECOMMENDED ACTIONS:
         props = LockProps();
       }
       if (props.isolated != isolated) {
-        debugPrint(lockFileExistsWarning(props.isolated, isolated));
+        debugPrint(unmatchedIsolationWarning(props.isolated, isolated));
       }
     }
 
