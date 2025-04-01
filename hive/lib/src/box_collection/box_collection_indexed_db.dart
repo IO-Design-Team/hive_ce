@@ -223,7 +223,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       try {
         value = (jsonDecode(jsonEncode(val)) as Map).jsify();
       } catch (_) {
-        throw HiveError('Failed to convert type $V to JSON');
+        throw HiveError(
+          'Failed to convert type $V to JSON. Non-primitive types must implement a toJson method to be stored in a CollectionBox.',
+        );
       }
     }
 
