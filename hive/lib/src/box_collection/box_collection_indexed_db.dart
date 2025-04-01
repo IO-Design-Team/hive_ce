@@ -221,7 +221,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
         );
       }
       try {
-        value = jsonDecode(jsonEncode(val)).jsify();
+        value = (jsonDecode(jsonEncode(val)) as Map).jsify();
       } catch (_) {
         throw HiveError('Failed to convert type $V to JSON');
       }

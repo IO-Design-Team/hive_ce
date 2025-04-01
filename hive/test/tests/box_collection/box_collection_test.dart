@@ -18,6 +18,7 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
 
 void main() {
   final hive = Hive as HiveImpl;
+  hive.registerAdapter(TestAdapter());
 
   // web: The indexed db name identifies the collection
   // other: The box name identifies the collection
@@ -145,5 +146,57 @@ void main() {
       await box.clear();
       expect(await box.getAllKeys(), []);
     });
+
+    test('json', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox('cats', fromJson: Test.fromJson);
+      await box.put('json_test', Test(a: 1, b: 'test'));
+      expect(await box.get('json_test'), Test(a: 1, b: 'test'));
+    });
   });
+}
+
+class Test {
+  final int a;
+  final String b;
+
+  Test({required this.a, required this.b});
+
+  factory Test.fromJson(Map<String, dynamic> json) =>
+      Test(a: json['a'], b: json['b']);
+  Map<String, dynamic> toJson() => {'a': a, 'b': b};
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Test && a == other.a && b == other.b;
+
+  @override
+  int get hashCode => a.hashCode ^ b.hashCode;
+}
+
+class TestAdapter extends TypeAdapter<Test> {
+  @override
+  final int typeId = 0;
+
+  @override
+  Test read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Test(
+      a: fields[0] as int,
+      b: fields[1] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Test obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.a)
+      ..writeByte(1)
+      ..write(obj.b);
+  }
 }
