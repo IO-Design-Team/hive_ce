@@ -274,7 +274,7 @@ transactions on web.
 On `dart:io` platforms, there is no performance gain by BoxCollections or Transactions. Only
 BoxCollections might be useful for some box hierarchy and development experience.
 
-Custom objects require `toJson` and `fromJson` methods in order to be used with BoxCollections. This can be achieved with the `json_serializable` package.
+Custom objects must be json serializable in order to be used with BoxCollections.
 
 <!-- embedme readme/box_collections.dart -->
 
