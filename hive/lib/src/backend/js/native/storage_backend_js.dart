@@ -173,7 +173,7 @@ class StorageBackendJs extends StorageBackend {
     TypeRegistry registry,
     Keystore keystore,
     bool lazy, {
-    bool verbatimFrames = false,
+    bool isolated = false,
   }) async {
     _registry = registry;
     final keys = await getKeys();

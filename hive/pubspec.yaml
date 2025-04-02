@@ -19,4 +19,6 @@ dev_dependencies:
   rexios_lints: ^9.1.0
   path: ^1.7.0
   pointycastle: ^3.4.0
-  build_runner: ^2.1.2
+  # build_runner: ^2.4.15
+  # json_annotation: ^4.9.0
+  # json_serializable: ^6.9.4

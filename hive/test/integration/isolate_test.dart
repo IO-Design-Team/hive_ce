@@ -173,31 +173,21 @@ void main() async {
           expect(safeOutput, isEmpty);
         });
 
-        test('lock file exists', () async {
+        test('unmatched isolation', () async {
           final dir = await getTempDir();
           final path = dir.path;
-          await Isolate.run(() async {
-            silenceOutput(() => Hive.init(path));
-            await Hive.openBox('test');
-          });
 
+          await IsolatedHive.init(path, isolateNameServer: StubIns());
           Hive.init(path);
+
+          await IsolatedHive.openBox('test');
           final output =
               await captureOutput(() => Hive.openBox('test')).toList();
 
           expect(
             output,
-            contains(StorageBackendVm.lockFileExistsWarning('test.lock')),
+            contains(StorageBackendVm.unmatchedIsolationWarning),
           );
-        });
-
-        test('lock file does not exist', () async {
-          final dir = await getTempDir();
-          final path = dir.path;
-          Hive.init(path);
-          final output =
-              await captureOutput(() => Hive.openBox('test')).toList();
-          expect(output, isEmpty);
         });
       });
 

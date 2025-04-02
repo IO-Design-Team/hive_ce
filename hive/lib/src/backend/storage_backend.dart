@@ -21,7 +21,7 @@ abstract class StorageBackend {
     TypeRegistry registry,
     Keystore keystore,
     bool lazy, {
-    bool verbatimFrames = false,
+    bool isolated = false,
   });
 
   /// Read value from backend
