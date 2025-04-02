@@ -1,6 +1,7 @@
-## 1.9.0-pre.1
+## 1.9.0
 
 - Generates `IsolatedHiveRegistrar` extension for `IsolatedHiveInterface`
+- Fixes generated read method for empty classes
 
 ## 1.8.2
 
