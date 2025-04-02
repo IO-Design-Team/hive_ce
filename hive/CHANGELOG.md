@@ -1,17 +1,9 @@
-## 2.11.0-pre.6
-
-- Improves `watch` mapping efficiency so that events are only deserialized once
-
-## 2.11.0-pre.5
-
-- Fixes issues with box handlers
-- Filters `watch` events by key before deserializing them
-
 ## 2.11.0-pre
 
 - Isolate support through `IsolatedHive`
 - Warning messages for potentially unsafe isolate usage
 - Updates suggested placement of `GenerateAdapters` annotation
+- Fixes custom objects in `BoxCollection`. Custom objects must now be json serializable.
 
 ## 2.10.1
 
