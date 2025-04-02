@@ -1,4 +1,4 @@
-## 2.11.0-pre
+## 2.11.0
 
 - Isolate support through `IsolatedHive`
 - Warning messages for potentially unsafe isolate usage
