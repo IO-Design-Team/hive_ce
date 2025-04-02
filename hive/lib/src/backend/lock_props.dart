@@ -1,4 +1,4 @@
-import 'package:hive_ce/src/util/json_annotation.dart';
+import 'package:json_annotation/json_annotation.dart';
 
 part 'lock_props.g.dart';
 
