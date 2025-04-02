@@ -1,3 +1,8 @@
+## 1.9.0
+
+- Generates `IsolatedHiveRegistrar` extension for `IsolatedHiveInterface`
+- Fixes generated read method for empty classes
+
 ## 1.8.2
 
 - Supports analyzer 7

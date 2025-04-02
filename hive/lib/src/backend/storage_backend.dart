@@ -17,13 +17,18 @@ abstract class StorageBackend {
   bool get supportsCompaction;
 
   /// Prepare backend
-  Future<void> initialize(TypeRegistry registry, Keystore keystore, bool lazy);
+  Future<void> initialize(
+    TypeRegistry registry,
+    Keystore keystore,
+    bool lazy, {
+    bool isolated = false,
+  });
 
   /// Read value from backend
-  Future<dynamic> readValue(Frame frame);
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false});
 
   /// Write a list of frames to the backend
-  Future<void> writeFrames(List<Frame> frames);
+  Future<void> writeFrames(List<Frame> frames, {bool verbatim = false});
 
   /// Compact database
   Future<void> compact(Iterable<Frame> frames);

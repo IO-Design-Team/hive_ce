@@ -1,3 +1,7 @@
+## 2.3.0
+
+- Adds `IsolatedHive.initFlutter`
+
 ## 2.2.0
 
 - Fixes deprecation of `Color.value`

@@ -25,7 +25,7 @@ void main() {
         final backend = StorageBackendMemory(bytes, null);
         expect(
           () => backend.initialize(TypeRegistryImpl.nullImpl, null, false),
-          throwsHiveError('Wrong checksum'),
+          throwsHiveError(['Wrong checksum']),
         );
       });
     });

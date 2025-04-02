@@ -4,16 +4,16 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/adapters/big_int_adapter.dart';
-import 'package:hive_ce/src/adapters/date_time_adapter.dart';
-import 'package:hive_ce/src/adapters/duration_adapter.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
+import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
@@ -21,6 +21,21 @@ import 'package:hive_ce/src/backend/storage_backend.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
+  /// Warning message printed when accessing Hive from an unsafe isolate
+  @visibleForTesting
+  static final unsafeIsolateWarning = '''
+⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
+
+Accessing Hive from an unsafe isolate (current isolate: "$isolateDebugName")
+This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent
+access across isolates. Each isolate would maintain its own box cache,
+potentially causing data inconsistency and corruption.
+
+RECOMMENDED ACTIONS:
+- Use IsolatedHive instead
+
+''';
+
   static final BackendManagerInterface _defaultBackendManager =
       BackendManager.select();
 
@@ -29,26 +44,20 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   BackendManagerInterface? _managerOverride;
   final Random _secureRandom = Random.secure();
 
+  /// Whether this Hive instance is isolated
+  bool _isolated = false;
+
+  /// Set [_isolated] to true
+  void setIsolated() => _isolated = true;
+
   /// Not part of public API
   @visibleForTesting
   String? homePath;
-
-  /// Not part of public API
-  HiveImpl() {
-    _registerDefaultAdapters();
-  }
 
   /// either returns the preferred [BackendManagerInterface] or the
   /// platform default fallback
   BackendManagerInterface get _manager =>
       _managerOverride ?? _defaultBackendManager;
-
-  void _registerDefaultAdapters() {
-    registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
-    registerAdapter(DateTimeAdapter<DateTimeWithoutTZ>(), internal: true);
-    registerAdapter(BigIntAdapter(), internal: true);
-    registerAdapter(DurationAdapter(), internal: true);
-  }
 
   @override
   void init(
@@ -56,6 +65,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
+    if (!{'main', HiveIsolate.isolateName}.contains(isolateDebugName)) {
+      debugPrint(unsafeIsolateWarning);
+    }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);
   }
@@ -112,9 +124,23 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
         }
 
         if (lazy) {
-          newBox = LazyBoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = LazyBoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            isolated: _isolated,
+          );
         } else {
-          newBox = BoxImpl<E>(this, name, comparator, compaction, backend);
+          newBox = BoxImpl<E>(
+            this,
+            name,
+            comparator,
+            compaction,
+            backend,
+            isolated: _isolated,
+          );
         }
 
         await newBox.initialize();

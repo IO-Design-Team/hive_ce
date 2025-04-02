@@ -1,7 +1,5 @@
 import 'package:hive_ce/hive.dart';
 
-part 'hive_adapters.g.dart';
-
 @GenerateAdapters(
   [
     AdapterSpec<ClassSpec1>(),
@@ -10,9 +8,7 @@ part 'hive_adapters.g.dart';
   ],
   firstTypeId: 50,
 )
-// This is for code generation
-// ignore: unused_element
-void _() {}
+part 'hive_adapters.g.dart';
 
 class ClassSpec1 {
   final int value;

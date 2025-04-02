@@ -2,23 +2,39 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:hive_ce/hive.dart';
+import 'package:isolate_channel/isolate_channel.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-Matcher isAHiveError([String? contains]) {
+Matcher hiveErrorPredicate(List<String> containing) => predicate(
+      (e) {
+        final message = e.toString().toLowerCase();
+        return containing.every((c) => message.contains(c.toLowerCase()));
+      },
+    );
+
+Matcher isAHiveError([List<String> containing = const []]) {
   return allOf(
     isA<HiveError>(),
-    predicate(
-      (e) =>
-          contains == null ||
-          e.toString().toLowerCase().contains(contains.toLowerCase()),
-    ),
+    hiveErrorPredicate(containing),
   );
 }
 
-Matcher throwsHiveError([String? contains]) {
-  return throwsA(isAHiveError(contains));
+Matcher throwsHiveError([List<String> containing = const []]) {
+  return throwsA(isAHiveError(containing));
+}
+
+Matcher throwsIsolatedHiveError([List<String> containing = const []]) {
+  return throwsA(
+    anyOf([
+      isAHiveError(containing),
+      allOf(
+        isA<IsolateException>(),
+        hiveErrorPredicate(containing),
+      ),
+    ]),
+  );
 }
 
 final random = Random();
@@ -135,3 +151,8 @@ Future<void> expectDirEqualsAssetDir(
 
 void returnFutureVoid(When<Future<void>> v) =>
     v.thenAnswer((i) => Future.value(null));
+
+String generateBoxName() {
+  final id = Random.secure().nextInt(99999999);
+  return 'box$id';
+}

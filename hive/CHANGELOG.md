@@ -1,3 +1,10 @@
+## 2.11.0
+
+- Isolate support through `IsolatedHive`
+- Warning messages for potentially unsafe isolate usage
+- Updates suggested placement of `GenerateAdapters` annotation
+- Fixes custom objects in `BoxCollection`. Custom objects must now be json serializable.
+
 ## 2.10.1
 
 - Fixes `HiveObject` disposal in lazy boxes

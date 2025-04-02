@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/backend/lock_props.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
@@ -16,6 +18,21 @@ import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
+  /// Warning for existing lock of unmatched isolation
+  @visibleForTesting
+  static const unmatchedIsolationWarning = '''
+⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
+
+You are opening this box with Hive, but this box was previously opened with
+IsolatedHive. This can lead to DATA CORRUPTION as Hive boxes are not designed
+for concurrent access across isolates. Each isolate would maintain its own box
+cache, potentially causing data inconsistency and corruption.
+
+RECOMMENDED ACTIONS:
+- ALWAYS use IsolatedHive to perform box operations when working with multiple
+  isolates
+''';
+
   final File _file;
   final File _lockFile;
   final bool _crashRecovery;
@@ -86,17 +103,37 @@ class StorageBackendVm extends StorageBackend {
   Future<void> initialize(
     TypeRegistry registry,
     Keystore keystore,
-    bool lazy,
-  ) async {
+    bool lazy, {
+    bool isolated = false,
+  }) async {
     this.registry = registry;
 
+    if (_lockFile.existsSync()) {
+      late final LockProps props;
+      try {
+        props = LockProps.fromJson(jsonDecode(_lockFile.readAsStringSync()));
+      } catch (_) {
+        props = LockProps();
+      }
+      if (props.isolated && !isolated) {
+        debugPrint(unmatchedIsolationWarning);
+      }
+    }
+
     lockRaf = await _lockFile.open(mode: FileMode.write);
+    lockRaf.writeStringSync(jsonEncode(LockProps(isolated: isolated)));
+    lockRaf.flushSync();
     await lockRaf.lock();
 
     int recoveryOffset;
     if (!lazy) {
-      recoveryOffset =
-          await _frameHelper.framesFromFile(path, keystore, registry, _cipher);
+      recoveryOffset = await _frameHelper.framesFromFile(
+        path,
+        keystore,
+        registry,
+        _cipher,
+        verbatim: isolated,
+      );
     } else {
       recoveryOffset = await _frameHelper.keysFromFile(path, keystore, _cipher);
     }
@@ -114,14 +151,15 @@ class StorageBackendVm extends StorageBackend {
   }
 
   @override
-  Future<dynamic> readValue(Frame frame) {
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
       final bytes = await readRaf.read(frame.length!);
 
       final reader = BinaryReaderImpl(bytes, registry);
-      final readFrame = reader.readFrame(cipher: _cipher, lazy: false);
+      final readFrame =
+          reader.readFrame(cipher: _cipher, lazy: false, verbatim: verbatim);
 
       if (readFrame == null) {
         throw HiveError(
@@ -134,12 +172,13 @@ class StorageBackendVm extends StorageBackend {
   }
 
   @override
-  Future<void> writeFrames(List<Frame> frames) {
+  Future<void> writeFrames(List<Frame> frames, {bool verbatim = false}) {
     return _sync.syncWrite(() async {
       final writer = BinaryWriterImpl(registry);
 
       for (final frame in frames) {
-        frame.length = writer.writeFrame(frame, cipher: _cipher);
+        frame.length =
+            writer.writeFrame(frame, cipher: _cipher, verbatim: verbatim);
       }
 
       try {

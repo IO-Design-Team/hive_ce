@@ -11,3 +11,10 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(PersonAdapter());
   }
 }
+
+extension IsolatedHiveRegistrar on IsolatedHiveInterface {
+  void registerAdapters() {
+    registerAdapter(FreezedPersonAdapter());
+    registerAdapter(PersonAdapter());
+  }
+}

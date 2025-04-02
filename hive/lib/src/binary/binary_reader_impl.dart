@@ -261,6 +261,7 @@ class BinaryReaderImpl extends BinaryReader {
     HiveCipher? cipher,
     bool lazy = false,
     int frameOffset = 0,
+    bool verbatim = false,
   }) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;
@@ -291,6 +292,8 @@ class BinaryReaderImpl extends BinaryReader {
       frame = Frame.deleted(key);
     } else if (lazy) {
       frame = Frame.lazy(key);
+    } else if (verbatim) {
+      frame = Frame(key, viewBytes(availableBytes));
     } else if (cipher == null) {
       frame = Frame(key, read());
     } else {

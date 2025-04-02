@@ -30,6 +30,9 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
   @visibleForTesting
   late Keystore<E> keystore;
 
+  /// Whether this box is isolated
+  final bool isolated;
+
   bool _open = true;
 
   /// Not part of public API
@@ -38,8 +41,9 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
     this.name,
     KeyComparator? keyComparator,
     this._compactionStrategy,
-    this.backend,
-  ) {
+    this.backend, {
+    this.isolated = false,
+  }) {
     keystore = Keystore(this, ChangeNotifier(), keyComparator);
   }
 
@@ -92,7 +96,12 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
 
   /// Not part of public API
   Future<void> initialize() {
-    return backend.initialize(hive, keystore, lazy);
+    return backend.initialize(
+      hive,
+      keystore,
+      lazy,
+      isolated: isolated,
+    );
   }
 
   @override

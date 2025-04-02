@@ -1,6 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/adapters/big_int_adapter.dart';
+import 'package:hive_ce/src/adapters/date_time_adapter.dart';
+import 'package:hive_ce/src/adapters/duration_adapter.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:meta/meta.dart';
@@ -99,6 +102,21 @@ class TypeRegistryImpl implements TypeRegistry {
       maxExtendedTypeId - maxInternalTypeId - 1;
 
   final _typeAdapters = <int, ResolvedAdapter>{};
+
+  /// Constructor
+  TypeRegistryImpl() {
+    _registerDefaultAdapters(this);
+  }
+
+  static void _registerDefaultAdapters(TypeRegistry registry) {
+    registry.registerAdapter(DateTimeWithTimezoneAdapter(), internal: true);
+    registry.registerAdapter(
+      DateTimeAdapter<DateTimeWithoutTZ>(),
+      internal: true,
+    );
+    registry.registerAdapter(BigIntAdapter(), internal: true);
+    registry.registerAdapter(DurationAdapter(), internal: true);
+  }
 
   /// Not part of public API
   ResolvedAdapter? findAdapterForValue(dynamic value) {

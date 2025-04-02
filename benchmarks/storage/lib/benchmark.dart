@@ -18,36 +18,47 @@ const _model = TestModel(
   testModelFieldEight: 8,
   testModelFieldNine: 9,
 );
+const _passes = 5;
 
 Future<BenchResult> runBenchmark({
+  required String name,
   required int operations,
   required DbType type,
   required FutureOr<dynamic> Function(String name) openBox,
 }) async {
-  print('');
-  print('Running $operations operation ${type.name} benchmark...');
+  final boxFile = File(type.boxFileName(_boxName));
 
-  var box = await openBox(_boxName);
-  await box.deleteFromDisk();
-  box = await openBox(_boxName);
+  var totalTime = Duration.zero;
+  for (var run = 1; run <= _passes; run++) {
+    print('\nRunning $operations operation $name benchmark pass $run...');
 
-  final stopwatch = Stopwatch()..start();
-  for (var i = 0; i < operations; i++) {
-    if (i % 10000 == 0) {
-      print('Operation: $i');
+    boxFile.deleteSync();
+    final box = await openBox(_boxName);
+
+    final stopwatch = Stopwatch()..start();
+    for (var i = 0; i < operations; i++) {
+      if (i % 10000 == 0) {
+        print('Operation: $i');
+      }
+      await box.add(_model);
     }
-    await box.add(_model);
+    final elapsed = stopwatch.elapsed;
+    totalTime += elapsed;
+
+    await box.close();
+
+    print('Time: $elapsed');
   }
 
-  final elapsed = stopwatch.elapsed;
+  final avgTime = Duration(microseconds: totalTime.inMicroseconds ~/ _passes);
 
-  final boxFile = File(type.boxFileName(_boxName));
   final size = boxFile.lengthSync();
   final megabytes = size / 1024 / 1024;
   final megabytesString = megabytes.toStringAsFixed(2);
 
-  print('Time: $elapsed');
+  print('\nAverage Results:');
+  print('Time: $avgTime');
   print('Size: $megabytesString MB');
 
-  return BenchResult(time: elapsed, size: megabytes);
+  return BenchResult(time: avgTime, size: megabytes);
 }

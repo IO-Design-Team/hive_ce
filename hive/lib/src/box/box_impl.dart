@@ -13,8 +13,9 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
     super.name,
     super.keyComparator,
     super.compactionStrategy,
-    super.backend,
-  );
+    super.backend, {
+    super.isolated = false,
+  });
 
   @override
   final bool lazy = false;
@@ -83,7 +84,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
     if (!keystore.beginTransaction(frames)) return;
 
     try {
-      await backend.writeFrames(frames);
+      await backend.writeFrames(frames, verbatim: isolated);
       keystore.commitTransaction();
     } catch (e) {
       keystore.cancelTransaction();

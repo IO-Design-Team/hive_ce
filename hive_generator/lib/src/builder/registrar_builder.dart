@@ -90,6 +90,18 @@ extension HiveRegistrar on HiveInterface {
     buffer.write('''
   }
 }
+
+extension IsolatedHiveRegistrar on IsolatedHiveInterface {
+  void registerAdapters() {
+''');
+
+    for (final adapter in adapters) {
+      buffer.writeln('    registerAdapter($adapter());');
+    }
+
+    buffer.write('''
+  }
+}
 ''');
 
     var registrarLocation = 'lib';

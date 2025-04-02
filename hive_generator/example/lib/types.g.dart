@@ -103,6 +103,7 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
 
   @override
   EmptyClass read(BinaryReader reader) {
+    reader.readByte();
     return EmptyClass();
   }
 

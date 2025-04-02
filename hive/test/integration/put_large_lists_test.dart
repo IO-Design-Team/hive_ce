@@ -4,8 +4,8 @@ import 'package:test/test.dart';
 
 import 'integration.dart';
 
-Future _performTest(bool lazy) async {
-  var box = await openBox(lazy);
+Future _performTest(bool lazy, {required TestType type}) async {
+  var (hive, box) = await openBox(lazy, type: type);
 
   final nullableStringList =
       List<String?>.filled(1000000, 'test', growable: true)..add(null);
@@ -18,11 +18,11 @@ Future _performTest(bool lazy) async {
     await box.put('byteList$i', byteList);
   }
 
-  box = await box.reopen();
+  box = await hive.reopenBox(box);
   for (var i = 0; i < 5; i++) {
-    final readStringList = await await box.get('stringList$i');
-    final readDoubleList = await await box.get('doubleList$i');
-    final readByteList = await await box.get('byteList$i');
+    final readStringList = await box.get('stringList$i');
+    final readDoubleList = await box.get('doubleList$i');
+    final readByteList = await box.get('byteList$i');
 
     expect(readStringList, nullableStringList);
     expect(readDoubleList, doubleList);
@@ -32,13 +32,15 @@ Future _performTest(bool lazy) async {
 }
 
 void main() {
-  group(
-    'put large lists',
-    () {
-      test('normal box', () => _performTest(false));
+  hiveIntegrationTest((type) {
+    group(
+      'put large lists',
+      () {
+        test('normal box', () => _performTest(false, type: type));
 
-      test('lazy box', () => _performTest(true));
-    },
-    timeout: longTimeout,
-  );
+        test('lazy box', () => _performTest(true, type: type));
+      },
+      timeout: longTimeout,
+    );
+  });
 }
