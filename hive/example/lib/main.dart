@@ -4,11 +4,11 @@ import 'package:example/hive/hive_registrar.g.dart';
 import 'package:hive_ce/hive.dart';
 
 class Person {
-  Person({required this.name, required this.age, required this.friends});
+  Person({required this.name, required this.age, this.friends = const []});
 
-  String name;
-  int age;
-  List<String> friends;
+  final String name;
+  final int age;
+  final List<String> friends;
 
   @override
   String toString() {
