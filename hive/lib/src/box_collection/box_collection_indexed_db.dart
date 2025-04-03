@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:hive_ce/hive.dart';
@@ -45,6 +46,7 @@ class BoxCollection implements implementation.BoxCollection {
     String name, {
     bool preload = false,
     implementation.CollectionBox<V> Function(String, BoxCollection)? boxCreator,
+    V Function(Map<String, dynamic>)? fromJson,
   }) async {
     if (!boxNames.contains(name)) {
       throw Exception(
@@ -56,7 +58,7 @@ class BoxCollection implements implementation.BoxCollection {
       return _openBoxes[i] as CollectionBox<V>;
     }
     final box = boxCreator?.call(name, this) as CollectionBox<V>? ??
-        CollectionBox<V>(name, this);
+        CollectionBox<V>(name, this, fromJson);
     if (preload) {
       box._cache.addAll(await box.getAllValues());
     }
@@ -120,11 +122,14 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   final String name;
   @override
   final BoxCollection boxCollection;
+  @override
+  final V Function(Map<String, dynamic>)? fromJson;
+
   final Map<String, V?> _cache = {};
   Set<String>? _cachedKeys;
 
   /// TODO: Document this!
-  CollectionBox(this.name, this.boxCollection);
+  CollectionBox(this.name, this.boxCollection, this.fromJson);
 
   @override
   Future<List<String>> getAllKeys([IDBTransaction? txn]) async {
@@ -145,7 +150,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
     final map = <String, V>{};
     await for (final entry in store.iterate()) {
-      map[(entry.key as JSString).toDart] = entry.value.dartify() as V;
+      map[(entry.key as JSString).toDart] = _decodeValue(entry.value) as V;
     }
     return map;
   }
@@ -155,9 +160,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (_cache.containsKey(key)) return _cache[key];
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final value = await store.get(key.toJS).asFuture();
-    _cache[key] = value.dartify() as V?;
-    return _cache[key];
+    final val = _decodeValue(await store.get(key.toJS).asFuture());
+    return _cache[key] = val as V?;
   }
 
   @override
@@ -167,12 +171,22 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     }
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
-    final list =
-        await Future.wait(keys.map((e) => store.get(e.toJS).asFuture()));
+    final list = await Future.wait(
+      keys.map((e) async => _decodeValue(await store.get(e.toJS).asFuture())),
+    );
     for (var i = 0; i < keys.length; i++) {
-      _cache[keys[i]] = list[i].dartify() as V?;
+      _cache[keys[i]] = list[i] as V?;
     }
     return list.cast<V?>();
+  }
+
+  Object? _decodeValue(JSAny? val) {
+    if (val == null) return null;
+    final value = val.dartify();
+    if (fromJson != null) {
+      return fromJson?.call((value as Map).cast<String, dynamic>());
+    }
+    return value;
   }
 
   @override
@@ -194,10 +208,46 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
     txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
     final store = txn.objectStore(name);
-    await store.put(val.jsify(), key.toJS).asFuture();
+
+    JSAny? value;
+    if (_isPrimitive(val) ||
+        _isPrimitiveIterable(val) ||
+        _isPrimitiveMap(val)) {
+      value = val.jsify();
+    } else {
+      if (fromJson == null) {
+        throw HiveError(
+          'Non-primitive CollectionBoxes must be provided a fromJson converter',
+        );
+      }
+      try {
+        value = (jsonDecode(jsonEncode(val)) as Map).jsify();
+      } catch (_) {
+        throw HiveError(
+          'Failed to convert type $V to JSON. Non-primitive types must implement a toJson method to be stored in a CollectionBox.',
+        );
+      }
+    }
+
+    await store.put(value, key.toJS).asFuture();
     _cache[key] = val;
     _cachedKeys?.add(key);
     return;
+  }
+
+  bool _isPrimitive(Object? val) {
+    return val is num || val is bool || val is String;
+  }
+
+  bool _isPrimitiveIterable(Object val) {
+    return val is Iterable && val.every(_isPrimitive);
+  }
+
+  bool _isPrimitiveMap(Object val) {
+    return val is Map &&
+        val.entries.every(
+          (entry) => _isPrimitive(entry.key) && _isPrimitive(entry.value),
+        );
   }
 
   @override

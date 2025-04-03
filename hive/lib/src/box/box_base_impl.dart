@@ -33,8 +33,8 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   @visibleForTesting
   late Keystore<E> keystore;
 
-  /// Whether to write frames to the disk verbatim
-  final bool verbatimFrames;
+  /// Whether this box is isolated
+  final bool isolated;
 
   bool _open = true;
 
@@ -45,7 +45,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
     KeyComparator? keyComparator,
     this._compactionStrategy,
     this.backend, {
-    this.verbatimFrames = false,
+    this.isolated = false,
   }) {
     keystore = Keystore(this, ChangeNotifier(), keyComparator);
   }
@@ -103,7 +103,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
       hive,
       keystore,
       lazy,
-      verbatimFrames: verbatimFrames,
+      isolated: isolated,
     );
   }
 

@@ -12,7 +12,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     super.keyComparator,
     super.compactionStrategy,
     super.backend, {
-    super.verbatimFrames = false,
+    super.isolated = false,
   });
 
   @override
@@ -25,7 +25,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     final frame = keystore.get(key);
 
     if (frame != null) {
-      final value = await backend.readValue(frame, verbatim: verbatimFrames);
+      final value = await backend.readValue(frame, verbatim: isolated);
       if (value is HiveObjectMixin) {
         value.init(key, this);
       }
@@ -56,7 +56,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     }
 
     if (frames.isEmpty) return;
-    await backend.writeFrames(frames, verbatim: verbatimFrames);
+    await backend.writeFrames(frames, verbatim: isolated);
 
     for (final frame in frames) {
       if (frame.value is HiveObjectMixin) {
@@ -80,7 +80,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     }
 
     if (frames.isEmpty) return;
-    await backend.writeFrames(frames, verbatim: verbatimFrames);
+    await backend.writeFrames(frames, verbatim: isolated);
 
     for (final frame in frames) {
       keystore.insert(frame);

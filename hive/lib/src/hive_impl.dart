@@ -44,11 +44,11 @@ RECOMMENDED ACTIONS:
   BackendManagerInterface? _managerOverride;
   final Random _secureRandom = Random.secure();
 
-  /// Whether to write frames to the disk verbatim
-  bool _verbatimFrames = false;
+  /// Whether this Hive instance is isolated
+  bool _isolated = false;
 
-  /// Set [_verbatimFrames] to true
-  void useVerbatimFrames() => _verbatimFrames = true;
+  /// Set [_isolated] to true
+  void setIsolated() => _isolated = true;
 
   /// Not part of public API
   @visibleForTesting
@@ -130,7 +130,7 @@ RECOMMENDED ACTIONS:
             comparator,
             compaction,
             backend,
-            verbatimFrames: _verbatimFrames,
+            isolated: _isolated,
           );
         } else {
           newBox = BoxImpl<E>(
@@ -139,7 +139,7 @@ RECOMMENDED ACTIONS:
             comparator,
             compaction,
             backend,
-            verbatimFrames: _verbatimFrames,
+            isolated: _isolated,
           );
         }
 
