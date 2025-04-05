@@ -6,6 +6,7 @@ part 'freezed.freezed.dart';
 class FreezedPerson with _$FreezedPerson {
   const factory FreezedPerson({
     required String firstName,
+    @Default('') String middleName,
     required String lastName,
     required int age,
   }) = _FreezedPerson;

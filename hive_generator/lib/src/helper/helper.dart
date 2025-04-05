@@ -9,6 +9,9 @@ import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as path;
 
 final _hiveFieldChecker = const TypeChecker.fromRuntime(HiveField);
+final _freezedDefaultChecker = const TypeChecker.fromUrl(
+  'package:freezed_annotation/freezed_annotation.dart#Default',
+);
 
 /// TODO: Document this!
 class HiveFieldInfo {
@@ -32,6 +35,16 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
     obj.getField('index')!.toIntValue()!,
     obj.getField('defaultValue'),
   );
+}
+
+/// Get the string representation of the freezed default value
+DartObject? getFreezedDefault(Element? element) {
+  if (element == null) return null;
+  final obj = _freezedDefaultChecker.firstAnnotationOfExact(element);
+  if (obj == null) return null;
+
+  // Get the source code of the default value
+  return obj.getField('defaultValue');
 }
 
 /// Get a classes default constructor or throw
