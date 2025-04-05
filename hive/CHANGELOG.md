@@ -4,6 +4,7 @@
 - Warning messages for potentially unsafe isolate usage
 - Updates suggested placement of `GenerateAdapters` annotation
 - Fixes custom objects in `BoxCollection`. Custom objects must now be json serializable.
+- Supports `freezed` default values
 
 ## 2.10.1
 
