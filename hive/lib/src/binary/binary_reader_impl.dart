@@ -352,8 +352,22 @@ class BinaryReaderImpl extends BinaryReader {
       default:
         final resolved = _typeRegistry.findAdapterForTypeId(typeId);
         if (resolved == null) {
-          throw HiveError('Cannot read, unknown typeId: $typeId. '
-              'Did you forget to register an adapter?');
+          throw HiveError('''
+Cannot read, unknown typeId: $typeId. Did you forget to register an adapter?
+
+If you recently migrated to the GenerateAdapters annotation, make sure to follow
+the migration guide:
+https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#generate-adapters
+
+If you are using Hive in multiple isolates and do not recognize this type ID,
+this is box corruption. There is no way to automatically recover from this. To
+prevent this in the future, replace all Hive calls in your project with calls to
+IsolatedHive. Examples of isolate usage include:
+- Flutter multi-window
+- flutter_workmanager
+- background_fetch
+- Push notification processing (firebase_cloud_messaging, etc.)
+''');
         }
         return resolved.adapter.read(this);
     }
