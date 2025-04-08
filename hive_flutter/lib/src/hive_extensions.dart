@@ -15,6 +15,8 @@ extension HiveX on HiveInterface {
     String? subDir,
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
+    int? colorAdapterTypeId,
+    int? timeOfDayAdapterTypeId,
   ]) async {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -29,12 +31,12 @@ extension HiveX on HiveInterface {
       backendPreference: backendPreference,
     );
 
-    final colorAdapter = ColorAdapter();
+    final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
     if (!isAdapterRegistered(colorAdapter.typeId)) {
       registerAdapter(colorAdapter);
     }
 
-    final timeOfDayAdapter = TimeOfDayAdapter();
+    final timeOfDayAdapter = TimeOfDayAdapter(typeId: timeOfDayAdapterTypeId);
     if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
       registerAdapter(timeOfDayAdapter);
     }
