@@ -106,18 +106,29 @@ jobs:
       - name: Run tests
         run: dart test
 
-  # TODO: Fix this
-  # ensure-codegen:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: subosito/flutter-action@v2
-  #     - run: |
-  #         dart pub global activate puby
-  #         puby link
-  #         puby gen
-  #         dart format .
-  #         git diff --exit-code
+  ensure-codegen:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: 
+          - benchmarks/storage
+          - hive
+          - hive/example
+          - hive_flutter
+          - hive_flutter/example
+          - hive_generator
+          - hive_generator/example
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - run: |
+          dart pub get
+          dart pub run build_runner build --delete-conflicting-outputs
+          dart format .
+          git diff --exit-code
 
   ensure-embedme:
     runs-on: ubuntu-latest
