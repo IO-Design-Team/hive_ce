@@ -13,7 +13,11 @@ extension IsolatedHiveX on IsolatedHiveInterface {
   /// You can provide a [subDirectory] where the boxes should be stored
   ///
   /// Also registers the flutter type adapters
-  Future<void> initFlutter({String? subDirectory}) async {
+  Future<void> initFlutter({
+    String? subDirectory,
+    int? colorAdapterTypeId,
+    int? timeOfDayAdapterTypeId,
+  }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
     final appDir = await getApplicationDocumentsDirectory();
@@ -21,12 +25,12 @@ extension IsolatedHiveX on IsolatedHiveInterface {
 
     await init(hivePath, isolateNameServer: const IsolateNameServer());
 
-    final colorAdapter = ColorAdapter();
+    final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
     if (!isAdapterRegistered(colorAdapter.typeId)) {
       registerAdapter(colorAdapter);
     }
 
-    final timeOfDayAdapter = TimeOfDayAdapter();
+    final timeOfDayAdapter = TimeOfDayAdapter(typeId: timeOfDayAdapterTypeId);
     if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
       registerAdapter(timeOfDayAdapter);
     }

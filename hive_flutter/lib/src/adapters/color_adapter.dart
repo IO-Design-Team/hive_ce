@@ -2,11 +2,17 @@ import 'dart:ui';
 
 import 'package:hive_ce/hive.dart';
 
-part 'color_adapter.g.dart';
-
 /// TODO: Document this!
 class ColorAdapter extends TypeAdapter<Color> {
-  final _adapter = HiveColorAdapter();
+  static const _defaultTypeId = 200;
+
+  /// Constructor
+  ColorAdapter({int? typeId}) : typeId = typeId ?? _defaultTypeId;
+
+  @override
+  final int typeId;
+
+  late final _adapter = HiveColorAdapter(typeId: typeId);
 
   @override
   Color read(BinaryReader reader) {
@@ -21,32 +27,23 @@ class ColorAdapter extends TypeAdapter<Color> {
   @override
   void write(BinaryWriter writer, Color obj) =>
       _adapter.write(writer, HiveColor.fromColor(obj));
-
-  @override
-  int get typeId => 200;
 }
 
 /// Hive wrapper for the fields in [Color]
-@HiveType(typeId: 200)
 class HiveColor {
   /// alpha
-  @HiveField(0)
   final double a;
 
   /// red
-  @HiveField(1)
   final double r;
 
   /// green
-  @HiveField(2)
   final double g;
 
   /// blue
-  @HiveField(3)
   final double b;
 
   /// color space
-  @HiveField(4)
   final String colorSpace;
 
   /// Constructor
@@ -74,4 +71,54 @@ class HiveColor {
         blue: b,
         colorSpace: ColorSpace.values.byName(colorSpace),
       );
+}
+
+/// Adapter for the new Color fields
+class HiveColorAdapter extends TypeAdapter<HiveColor> {
+  /// Constructor
+  HiveColorAdapter({required this.typeId});
+
+  @override
+  final int typeId;
+
+  @override
+  HiveColor read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return HiveColor(
+      a: (fields[0] as num).toDouble(),
+      r: (fields[1] as num).toDouble(),
+      g: (fields[2] as num).toDouble(),
+      b: (fields[3] as num).toDouble(),
+      colorSpace: fields[4] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, HiveColor obj) {
+    writer
+      ..writeByte(5)
+      ..writeByte(0)
+      ..write(obj.a)
+      ..writeByte(1)
+      ..write(obj.r)
+      ..writeByte(2)
+      ..write(obj.g)
+      ..writeByte(3)
+      ..write(obj.b)
+      ..writeByte(4)
+      ..write(obj.colorSpace);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HiveColorAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }
