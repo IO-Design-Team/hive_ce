@@ -34,8 +34,14 @@ void main() {
       return hive;
     }
 
-    test('.init()', () {
+    test('.init()', () async {
       final hive = IsolatedHiveImpl();
+      await expectLater(
+        hive.init('MYPATH', isolateNameServer: StubIns()),
+        completes,
+      );
+
+      // Multiple init calls should work
       expect(hive.init('MYPATH', isolateNameServer: StubIns()), completes);
     });
 

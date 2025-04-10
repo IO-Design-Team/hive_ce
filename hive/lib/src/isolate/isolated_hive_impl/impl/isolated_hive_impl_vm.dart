@@ -14,16 +14,17 @@ import 'package:isolate_channel/isolate_channel.dart';
 class IsolatedHiveImpl extends TypeRegistryImpl
     implements IsolatedHiveInterface, HiveIsolate {
   late final IsolateNameServer? _isolateNameServer;
+
+  IsolateConnection? _connection;
+
   late final IsolateMethodChannel _hiveChannel;
   late final IsolateMethodChannel _boxChannel;
-
-  late final IsolateConnection _connection;
 
   final _boxes = <String, IsolatedBoxBaseImpl>{};
   final _openingBoxes = <String, Future>{};
 
   @override
-  IsolateConnection get connection => _connection;
+  IsolateConnection get connection => _connection!;
 
   late Future<IsolateConnection> Function() _spawnHiveIsolate =
       () => spawnIsolate(
@@ -50,21 +51,27 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     String? path, {
     IsolateNameServer? isolateNameServer,
   }) async {
-    _isolateNameServer = isolateNameServer;
+    if (_connection == null) {
+      _isolateNameServer = isolateNameServer;
 
-    if (_isolateNameServer == null) {
-      debugPrint(HiveIsolate.noIsolateNameServerWarning);
+      if (_isolateNameServer == null) {
+        debugPrint(HiveIsolate.noIsolateNameServerWarning);
+      }
+
+      final send =
+          _isolateNameServer?.lookupPortByName(HiveIsolate.isolateName);
+
+      final IsolateConnection connection;
+      if (send != null) {
+        connection = connectToIsolate(send);
+      } else {
+        connection = await _spawnHiveIsolate();
+      }
+      _connection = connection;
+
+      _hiveChannel = IsolateMethodChannel('hive', connection);
+      _boxChannel = IsolateMethodChannel('box', connection);
     }
-
-    final send = _isolateNameServer?.lookupPortByName(HiveIsolate.isolateName);
-    if (send != null) {
-      _connection = connectToIsolate(send);
-    } else {
-      _connection = await _spawnHiveIsolate();
-    }
-
-    _hiveChannel = IsolateMethodChannel('hive', _connection);
-    _boxChannel = IsolateMethodChannel('box', _connection);
 
     return _hiveChannel.invokeMethod('init', {'path': path});
   }
@@ -80,6 +87,11 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     Uint8List? bytes,
     String? collection,
   ) async {
+    final connection = _connection;
+    if (connection == null) {
+      throw HiveError('IsolatedHive is not initialized');
+    }
+
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
       if (lazy) {
@@ -118,7 +130,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
             this,
             name,
             cipher,
-            _connection,
+            connection,
             _boxChannel,
           );
         } else {
@@ -127,7 +139,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
             this,
             name,
             cipher,
-            _connection,
+            connection,
             _boxChannel,
           );
         }
