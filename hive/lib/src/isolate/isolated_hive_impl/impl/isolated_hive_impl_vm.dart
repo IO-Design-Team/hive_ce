@@ -13,11 +13,11 @@ import 'package:isolate_channel/isolate_channel.dart';
 /// Handles Hive operations in an isolate
 class IsolatedHiveImpl extends TypeRegistryImpl
     implements IsolatedHiveInterface, HiveIsolate {
-  late final IsolateNameServer? _isolateNameServer;
-  late final IsolateMethodChannel _hiveChannel;
-  late final IsolateMethodChannel _boxChannel;
+  IsolateNameServer? _isolateNameServer;
 
-  late final IsolateConnection _connection;
+  late IsolateConnection _connection;
+  late IsolateMethodChannel _hiveChannel;
+  late IsolateMethodChannel _boxChannel;
 
   final _boxes = <String, IsolatedBoxBaseImpl>{};
   final _openingBoxes = <String, Future>{};

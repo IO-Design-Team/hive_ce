@@ -37,6 +37,9 @@ void main() {
     test('.init()', () {
       final hive = IsolatedHiveImpl();
       expect(hive.init('MYPATH', isolateNameServer: StubIns()), completes);
+
+      // Multiple init calls should work
+      expect(hive.init('MYPATH', isolateNameServer: StubIns()), completes);
     });
 
     group('.openBox()', () {
