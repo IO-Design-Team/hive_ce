@@ -98,6 +98,36 @@ void main() {
           expect(box1 == box2, true);
         });
       });
+
+      group('typed map or iterable', () {
+        test('throws AssertionError if map or iterable is typed', () async {
+          final hive = await initHive();
+
+          expect(
+            hive.openBox<Map<String, dynamic>>('mapbox'),
+            throwsA(isA<AssertionError>()),
+          );
+          expect(hive.openBox<Map>('mapbox'), completes);
+
+          expect(
+            hive.openBox<Iterable<String>>('iterablebox'),
+            throwsA(isA<AssertionError>()),
+          );
+          expect(hive.openBox<Iterable>('iterablebox'), completes);
+
+          expect(
+            hive.openBox<List<String>>('listbox'),
+            throwsA(isA<AssertionError>()),
+          );
+          expect(hive.openBox<List>('listbox'), completes);
+
+          expect(
+            hive.openBox<Set<String>>('setbox'),
+            throwsA(isA<AssertionError>()),
+          );
+          expect(hive.openBox<Set>('setbox'), completes);
+        });
+      });
     });
 
     group('.openLazyBox()', () {
