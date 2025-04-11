@@ -6,6 +6,8 @@
 - Fixes custom objects in `BoxCollection`. Custom objects must now be json serializable.
 - Adds much more information to the unknown typeId error message
 - Supports `freezed` default values
+- Enforces that boxes of type `Map` _must_ be `Map<dynamic, dynamic>`
+- Enforces that boxes of type `Iterable` _must_ be `Iterable<dynamic>`
 
 ## 2.10.1
 
