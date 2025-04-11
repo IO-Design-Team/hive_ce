@@ -88,6 +88,20 @@ RECOMMENDED ACTIONS:
       name.length <= 255 && name.isAscii,
       'Box names need to be ASCII Strings with a max length of 255.',
     );
+    if (kDebugMode) {
+      final type = E.toString();
+      if (type.startsWith('Map<') && type != 'Map<dynamic, dynamic>') {
+        throw AssertionError(
+          'It is not possible to read typed Maps. Use Map.cast<RK, RV>() after reading.',
+        );
+      } else if ({'Iterable<', 'List<', 'Set<'}.any(type.startsWith) &&
+          !type.endsWith('<dynamic>')) {
+        throw AssertionError(
+          'It is not possible to read typed Iterables. Use Iterable.cast<R>() after reading.',
+        );
+      }
+    }
+
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
       if (lazy) {
