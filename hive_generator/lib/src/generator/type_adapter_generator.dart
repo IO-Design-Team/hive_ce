@@ -5,6 +5,7 @@ import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/adapter_builder/class_adapter_builder.dart';
 import 'package:hive_ce_generator/src/adapter_builder/enum_adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/helper/type_helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
@@ -133,9 +134,16 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final accessorNames = _getAllAccessorNames(cls);
 
     final constr = getConstructor(cls);
-    final parameterDefaults = {
-      for (final param in constr.parameters) param.name: param.defaultValueCode,
-    };
+
+    final parameterDefaults = <String, String?>{};
+    for (final param in constr.parameters) {
+      final freezedDefault = getFreezedDefault(param);
+      if (freezedDefault != null) {
+        parameterDefaults[param.name] = constantToString(freezedDefault);
+      } else {
+        parameterDefaults[param.name] = param.defaultValueCode;
+      }
+    }
 
     var nextIndex = schema?.nextIndex ?? 0;
     final newSchemaFields = <String, HiveSchemaField>{};

@@ -15,6 +15,7 @@ import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/backend/storage_backend.dart';
@@ -88,6 +89,8 @@ RECOMMENDED ACTIONS:
       name.length <= 255 && name.isAscii,
       'Box names need to be ASCII Strings with a max length of 255.',
     );
+    typedMapOrIterableCheck<E>();
+
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
       if (lazy) {

@@ -59,6 +59,7 @@ class FreezedPersonAdapter extends TypeAdapter<FreezedPerson> {
     };
     return FreezedPerson(
       firstName: fields[0] as String,
+      middleName: fields[3] == null ? '' : fields[3] as String,
       lastName: fields[1] as String,
       age: (fields[2] as num).toInt(),
     );
@@ -67,13 +68,15 @@ class FreezedPersonAdapter extends TypeAdapter<FreezedPerson> {
   @override
   void write(BinaryWriter writer, FreezedPerson obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.firstName)
       ..writeByte(1)
       ..write(obj.lastName)
       ..writeByte(2)
-      ..write(obj.age);
+      ..write(obj.age)
+      ..writeByte(3)
+      ..write(obj.middleName);
   }
 
   @override

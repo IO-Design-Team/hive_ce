@@ -17,6 +17,7 @@ final _privateConstructorUsedError = UnsupportedError(
 /// @nodoc
 mixin _$FreezedPerson {
   String get firstName => throw _privateConstructorUsedError;
+  String get middleName => throw _privateConstructorUsedError;
   String get lastName => throw _privateConstructorUsedError;
   int get age => throw _privateConstructorUsedError;
 
@@ -33,7 +34,7 @@ abstract class $FreezedPersonCopyWith<$Res> {
           FreezedPerson value, $Res Function(FreezedPerson) then) =
       _$FreezedPersonCopyWithImpl<$Res, FreezedPerson>;
   @useResult
-  $Res call({String firstName, String lastName, int age});
+  $Res call({String firstName, String middleName, String lastName, int age});
 }
 
 /// @nodoc
@@ -52,6 +53,7 @@ class _$FreezedPersonCopyWithImpl<$Res, $Val extends FreezedPerson>
   @override
   $Res call({
     Object? firstName = null,
+    Object? middleName = null,
     Object? lastName = null,
     Object? age = null,
   }) {
@@ -59,6 +61,10 @@ class _$FreezedPersonCopyWithImpl<$Res, $Val extends FreezedPerson>
       firstName: null == firstName
           ? _value.firstName
           : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
+      middleName: null == middleName
+          ? _value.middleName
+          : middleName // ignore: cast_nullable_to_non_nullable
               as String,
       lastName: null == lastName
           ? _value.lastName
@@ -80,7 +86,7 @@ abstract class _$$FreezedPersonImplCopyWith<$Res>
       __$$FreezedPersonImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String firstName, String lastName, int age});
+  $Res call({String firstName, String middleName, String lastName, int age});
 }
 
 /// @nodoc
@@ -97,6 +103,7 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? firstName = null,
+    Object? middleName = null,
     Object? lastName = null,
     Object? age = null,
   }) {
@@ -104,6 +111,10 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
       firstName: null == firstName
           ? _value.firstName
           : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
+      middleName: null == middleName
+          ? _value.middleName
+          : middleName // ignore: cast_nullable_to_non_nullable
               as String,
       lastName: null == lastName
           ? _value.lastName
@@ -121,10 +132,16 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
 
 class _$FreezedPersonImpl implements _FreezedPerson {
   const _$FreezedPersonImpl(
-      {required this.firstName, required this.lastName, required this.age});
+      {required this.firstName,
+      this.middleName = '',
+      required this.lastName,
+      required this.age});
 
   @override
   final String firstName;
+  @override
+  @JsonKey()
+  final String middleName;
   @override
   final String lastName;
   @override
@@ -132,7 +149,7 @@ class _$FreezedPersonImpl implements _FreezedPerson {
 
   @override
   String toString() {
-    return 'FreezedPerson(firstName: $firstName, lastName: $lastName, age: $age)';
+    return 'FreezedPerson(firstName: $firstName, middleName: $middleName, lastName: $lastName, age: $age)';
   }
 
   @override
@@ -142,13 +159,16 @@ class _$FreezedPersonImpl implements _FreezedPerson {
             other is _$FreezedPersonImpl &&
             (identical(other.firstName, firstName) ||
                 other.firstName == firstName) &&
+            (identical(other.middleName, middleName) ||
+                other.middleName == middleName) &&
             (identical(other.lastName, lastName) ||
                 other.lastName == lastName) &&
             (identical(other.age, age) || other.age == age));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, firstName, lastName, age);
+  int get hashCode =>
+      Object.hash(runtimeType, firstName, middleName, lastName, age);
 
   /// Create a copy of FreezedPerson
   /// with the given fields replaced by the non-null parameter values.
@@ -162,11 +182,14 @@ class _$FreezedPersonImpl implements _FreezedPerson {
 abstract class _FreezedPerson implements FreezedPerson {
   const factory _FreezedPerson(
       {required final String firstName,
+      final String middleName,
       required final String lastName,
       required final int age}) = _$FreezedPersonImpl;
 
   @override
   String get firstName;
+  @override
+  String get middleName;
   @override
   String get lastName;
   @override
