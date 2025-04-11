@@ -7,12 +7,12 @@ void typedMapOrIterableCheck<E>() {
   final type = E.toString();
   if (type.startsWith('Map<') && type != 'Map<dynamic, dynamic>') {
     throw AssertionError(
-      'It is not possible to read typed Maps. Use Map.cast<RK, RV>() after reading.',
+      'Cannot open a box of type $type. It is not possible to read typed Maps. Use Map.cast<RK, RV>() after reading.',
     );
   } else if ({'Iterable<', 'List<', 'Set<'}.any(type.startsWith) &&
       !type.endsWith('<dynamic>')) {
     throw AssertionError(
-      'It is not possible to read typed Iterables. Use Iterable.cast<R>() after reading.',
+      'Cannot open a box of type $type. It is not possible to read typed Iterables. Use Iterable.cast<R>() after reading.',
     );
   }
 }
