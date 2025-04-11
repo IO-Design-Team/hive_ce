@@ -8,6 +8,7 @@ import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart'
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Handles Hive operations in an isolate
@@ -91,6 +92,8 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     if (connection == null) {
       throw HiveError('IsolatedHive is not initialized');
     }
+
+    typedMapOrIterableCheck<E>();
 
     name = name.toLowerCase();
     if (isBoxOpen(name)) {
