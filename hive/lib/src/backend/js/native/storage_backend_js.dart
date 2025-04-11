@@ -136,22 +136,30 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  Future<List<Object?>> getKeys({bool cursor = false}) async {
+  Future<List<Object>> getKeys({bool cursor = false}) async {
     final store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture<JSArray>();
-      return result.toDart.map((e) {
-        if (e.isA<JSNumber>()) {
-          e as JSNumber;
-          return e.toDartInt;
-        } else if (e.isA<JSString>()) {
-          e as JSString;
-          return e.toDart;
-        }
-      }).toList();
+      return result.toDart
+          .map((e) {
+            if (e.isA<JSNumber>()) {
+              e as JSNumber;
+              return e.toDartInt;
+            } else if (e.isA<JSString>()) {
+              e as JSString;
+              return e.toDart;
+            }
+          })
+          .whereType<Object>()
+          .toList();
     } else {
-      return store.iterate().map((e) => e.key.dartify()).toList();
+      return store
+          .iterate()
+          .map((e) => e.key.dartify())
+          .where((e) => e is Object)
+          .cast<Object>()
+          .toList();
     }
   }
 

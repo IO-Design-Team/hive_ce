@@ -128,4 +128,7 @@ abstract class BoxBase<E> {
 
   /// Flushes all pending changes of the box to disk.
   Future<void> flush();
+
+  /// Register the box for inspection
+  void inspect();
 }

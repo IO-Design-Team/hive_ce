@@ -170,7 +170,7 @@ part 'hive_adapters.g.dart';
 
     buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.g.yaml'),
-      HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
+      writeSchema(HiveSchema(nextTypeId: nextTypeId, types: types)),
     );
   }
 }

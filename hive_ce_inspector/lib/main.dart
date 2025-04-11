@@ -1,0 +1,90 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+import 'package:hive_ce_inspector/widget/connection_screen.dart';
+
+void main() {
+  runApp(DarkMode(notifier: DarkModeNotifier(), child: const App()));
+}
+
+final _router = GoRouter(
+  routes: <GoRoute>[
+    GoRoute(
+      path: '/',
+      builder: (context, state) {
+        return const Material(
+          child: Center(
+            child: Text(
+              'Welcome to the Hive CE Inspector!\nPlease open the link '
+              'displayed when running the debug version of a Hive CE app.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/:version/:port/:secret',
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
+          },
+          child: Scaffold(
+            body: Material(
+              child: ConnectionScreen(
+                version: state.pathParameters['version']!,
+                port: state.pathParameters['port']!,
+                secret: state.pathParameters['secret']!,
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  ],
+);
+
+class App extends StatelessWidget {
+  const App({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Hive CE Inspector',
+      routeInformationProvider: _router.routeInformationProvider,
+      routeInformationParser: _router.routeInformationParser,
+      routerDelegate: _router.routerDelegate,
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF9FC9FF),
+          brightness:
+              DarkMode.of(context).darkMode
+                  ? Brightness.dark
+                  : Brightness.light,
+        ),
+        useMaterial3: true,
+      ),
+    );
+  }
+}
+
+class DarkMode extends InheritedNotifier<DarkModeNotifier> {
+  const DarkMode({required super.child, super.key, super.notifier});
+
+  static DarkModeNotifier of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<DarkMode>()!.notifier!;
+  }
+}
+
+class DarkModeNotifier extends ChangeNotifier {
+  var _darkMode = true;
+
+  bool get darkMode => _darkMode;
+
+  void toggle() {
+    _darkMode = !_darkMode;
+    notifyListeners();
+  }
+}

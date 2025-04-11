@@ -1,0 +1,23 @@
+name: hive_ce_inspector
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^14.8.1
+  hive_ce:
+    path: ../hive
+  two_dimensional_scrollables: ^0.3.3
+  vm_service: ^15.0.0
+  web: ^1.1.1
+  web_socket_channel: ^3.0.2
+
+dev_dependencies:
+  rexios_lints: ^10.1.0
+
+flutter:
+  uses-material-design: true
