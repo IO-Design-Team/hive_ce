@@ -52,7 +52,7 @@ class _BoxViewState extends State<BoxView> {
     }
 
     final frameFields = fieldsForFrames(filteredFrames);
-    final columnCount = 1 + (frameFields.values.firstOrNull?.length ?? 1);
+    final columnCount = 1 + (frameFields.values.firstOrNull?.length ?? 0);
 
     return Column(
       children: [
@@ -93,21 +93,18 @@ class _BoxViewState extends State<BoxView> {
                   return const TableViewCell(child: Text('Key'));
                 }
 
-                final frame = filteredFrames.reversed.elementAt(rowIndex);
-                final field = frameFields[frame.key]![columnIndex];
-
                 if (row == 0) {
-                  if (columnCount == 2) {
-                    return const TableViewCell(child: Text('Value'));
-                  } else {
-                    return TableViewCell(child: Text(field.index.toString()));
-                  }
+                  final field = frameFields.values.first[columnIndex];
+                  return TableViewCell(child: Text(field.index.toString()));
                 }
+
+                final frame = filteredFrames.reversed.elementAt(rowIndex);
 
                 if (column == 0) {
                   return TableViewCell(child: Text(frame.key.toString()));
                 }
 
+                final field = frameFields[frame.key]![columnIndex];
                 return TableViewCell(child: Text(field.value.toString()));
               },
             ),
@@ -134,14 +131,11 @@ class _BoxViewState extends State<BoxView> {
     return fields;
   }
 
-  List<IndexedObject> fieldsForObject(
-    RawObject object, {
-    List<int> index = const [0],
-  }) {
+  List<IndexedObject> fieldsForObject(RawObject object, {List<int>? index}) {
     final fields = <IndexedObject>[];
 
     for (final field in object.fields) {
-      final newIndex = [...index, field.index];
+      final newIndex = [...?index, field.index];
       final value = field.value;
       if (value is RawObject) {
         fields.addAll(fieldsForObject(value, index: newIndex));
