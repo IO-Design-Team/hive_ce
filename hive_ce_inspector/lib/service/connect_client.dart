@@ -109,9 +109,9 @@ class ConnectClient {
   Object? _readValue(Object? value) {
     if (value == null) return null;
 
-    return BinaryReaderImpl(
+    return RawObjectReader(
       Uint8List.fromList((value as List).cast<int>()),
       TypeRegistryImpl.nullImpl,
-    ).readAsObject();
+    ).read();
   }
 }
