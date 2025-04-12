@@ -111,7 +111,7 @@ class ConnectClient {
 
     return RawObjectReader(
       Uint8List.fromList((value as List).cast<int>()),
-      TypeRegistryImpl.nullImpl,
+      TypeRegistryImpl(),
     ).read();
   }
 }

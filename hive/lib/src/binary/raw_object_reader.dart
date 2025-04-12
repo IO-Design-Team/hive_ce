@@ -2,7 +2,6 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
-import 'package:hive_ce/src/registry/type_registry_impl.dart';
 
 /// A binary reader that reads raw objects
 class RawObjectReader extends BinaryReaderImpl {
@@ -12,7 +11,7 @@ class RawObjectReader extends BinaryReaderImpl {
   @override
   dynamic read([int? typeId]) {
     typeId ??= readTypeId();
-    if (typeId <= TypeRegistryImpl.maxInternalTypeId) {
+    if (typeId < 32) {
       // This is a built in type
       return super.read(typeId);
     }
