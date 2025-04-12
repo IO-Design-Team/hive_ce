@@ -131,16 +131,21 @@ class _BoxViewState extends State<BoxView> {
     return fields;
   }
 
-  List<IndexedObject> fieldsForObject(RawObject object, {List<int>? index}) {
+  List<IndexedObject> fieldsForObject(
+    RawObject object, {
+    List<int>? previousIndex,
+  }) {
     final fields = <IndexedObject>[];
 
     for (final field in object.fields) {
-      final newIndex = [...?index, field.index];
+      final index = [...?previousIndex, field.index];
       final value = field.value;
       if (value is RawObject) {
-        fields.addAll(fieldsForObject(value, index: newIndex));
+        print('INDEX: $index, VALUE: ${value.fields.map((e) => e.value)}');
+        fields.addAll(fieldsForObject(value, previousIndex: index));
       } else {
-        fields.add(IndexedObject(value, index: newIndex));
+        print('INDEX: $index, VALUE: $value');
+        fields.add(IndexedObject(value, index: index));
       }
     }
 

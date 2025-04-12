@@ -20,7 +20,7 @@ class PersonAdapter extends TypeAdapter<Person> {
       name: fields[0] as String,
       age: (fields[1] as num).toInt(),
       friends:
-          fields[2] == null ? const [] : (fields[2] as List).cast<String>(),
+          fields[2] == null ? const [] : (fields[2] as List).cast<Person>(),
     );
   }
 

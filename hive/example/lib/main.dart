@@ -8,7 +8,7 @@ class Person {
 
   final String name;
   final int age;
-  final List<String> friends;
+  final List<Person> friends;
 
   @override
   String toString() {
@@ -27,7 +27,11 @@ void main() async {
   final person = Person(
     name: 'Dave',
     age: 22,
-    friends: ['Linda', 'Marc', 'Anne'],
+    friends: [
+      Person(name: 'Linda', age: 20),
+      Person(name: 'Marc', age: 21),
+      Person(name: 'Anne', age: 22),
+    ],
   );
 
   await box.put('dave', person);

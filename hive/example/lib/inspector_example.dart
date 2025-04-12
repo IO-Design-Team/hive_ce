@@ -15,8 +15,9 @@ void main() async {
   final box2 = await Hive.openBox('testBox2');
   box2.inspect();
 
-  await box2.put('person1', Person(name: 'John', age: 30));
-  await box2.put('person2', Person(name: 'Jane', age: 25));
+  final john = Person(name: 'John', age: 30);
+  await box2.put('person1', john);
+  await box2.put('person2', Person(name: 'Jane', age: 25, friends: [john]));
 
   while (true) {
     await Future.delayed(const Duration(seconds: 1));
