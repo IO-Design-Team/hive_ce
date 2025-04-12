@@ -51,7 +51,8 @@ class _BoxViewState extends State<BoxView> {
       return const Center(child: Text('Box is empty'));
     }
 
-    final columnCount = 2;
+    final frameFields = fieldsForFrames(filteredFrames);
+    final columnCount = 1 + (frameFields.values.firstOrNull?.length ?? 1);
 
     return Column(
       children: [
@@ -92,20 +93,22 @@ class _BoxViewState extends State<BoxView> {
                   return const TableViewCell(child: Text('Key'));
                 }
 
+                final frame = filteredFrames.reversed.elementAt(rowIndex);
+                final field = frameFields[frame.key]![columnIndex];
+
                 if (row == 0) {
                   if (columnCount == 2) {
                     return const TableViewCell(child: Text('Value'));
                   } else {
-                    return TableViewCell(child: Text('Field $columnIndex'));
+                    return TableViewCell(child: Text(field.index.toString()));
                   }
                 }
 
-                final frame = filteredFrames.reversed.elementAt(rowIndex);
                 if (column == 0) {
                   return TableViewCell(child: Text(frame.key.toString()));
                 }
 
-                return TableViewCell(child: Text(frame.value.toString()));
+                return TableViewCell(child: Text(field.value.toString()));
               },
             ),
           ),
@@ -114,33 +117,46 @@ class _BoxViewState extends State<BoxView> {
     );
   }
 
-  Map<Object, List<Object?>> fieldsForFrames(List<InspectorFrame> frames) {
-    final fields = <Object, List<Object?>>{};
+  Map<Object, List<IndexedObject>> fieldsForFrames(
+    List<InspectorFrame> frames,
+  ) {
+    final fields = <Object, List<IndexedObject>>{};
 
     for (final frame in frames) {
       final value = frame.value;
       if (value is RawObject) {
-        fields[frame.key] = fieldsForObject([0], value);
+        fields[frame.key] = fieldsForObject(value);
       } else {
-        fields[frame.key] = [value];
+        fields[frame.key] = [IndexedObject(value)];
       }
     }
 
     return fields;
   }
 
-  List<Object?> fieldsForObject(List<int> index, RawObject object) {
-    final fields = <Object?>[];
+  List<IndexedObject> fieldsForObject(
+    RawObject object, {
+    List<int> index = const [0],
+  }) {
+    final fields = <IndexedObject>[];
 
     for (final field in object.fields) {
+      final newIndex = [...index, field.index];
       final value = field.value;
       if (value is RawObject) {
-        fields.addAll(fieldsForObject(value));
+        fields.addAll(fieldsForObject(value, index: newIndex));
       } else {
-        fields.add(value);
+        fields.add(IndexedObject(value, index: newIndex));
       }
     }
 
     return fields;
   }
+}
+
+class IndexedObject {
+  final Object? value;
+  final List<int> index;
+
+  const IndexedObject(this.value, {this.index = const [0]});
 }
