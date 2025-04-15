@@ -25,7 +25,7 @@ class _FrameIoHelperTest extends FrameIoHelper {
   _FrameIoHelperTest(this.bytes);
 
   @override
-  Future<RandomAccessFile> openFile(String path) async {
+  Future<RandomAccessFile> openFile(String path) {
     return getTempRaf(bytes);
   }
 
@@ -68,7 +68,7 @@ void main() {
         expectFrames(keystore.frames, testKeystore.frames);
       });
 
-      test('returns offset if problem occurs', () async {});
+      test('returns offset if problem occurs', () {});
     });
 
     group('.allFromFile()', () {
@@ -104,7 +104,7 @@ void main() {
         expectFrames(keystore.frames, testKeystore.frames);
       });
 
-      test('returns offset if problem occurs', () async {});
+      test('returns offset if problem occurs', () {});
     });
   });
 }
