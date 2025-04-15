@@ -1,10 +1,12 @@
 import 'package:hive_ce/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'test_model.g.dart';
 
 @JsonSerializable()
 @HiveType(typeId: 0)
+@immutable
 class TestModel {
   @HiveField(0)
   final int testModelFieldZero;

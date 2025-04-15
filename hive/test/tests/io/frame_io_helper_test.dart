@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 import '../frames.dart';
+import 'package:meta/meta.dart';
 
 Uint8List _getBytes(List<Uint8List> list) {
   final builder = BytesBuilder();
@@ -19,6 +20,7 @@ Uint8List _getBytes(List<Uint8List> list) {
   return builder.toBytes();
 }
 
+@immutable
 class _FrameIoHelperTest extends FrameIoHelper {
   final Uint8List bytes;
 

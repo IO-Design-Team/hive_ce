@@ -1,4 +1,7 @@
+import 'package:meta/meta.dart';
+
 /// An error related to Hive.
+@immutable
 class HiveError extends Error {
   /// A description of the error.
   final String message;

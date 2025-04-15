@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 ///
 /// Needed to codegen the TypeRegistry mock
 @visibleForTesting
+@immutable
 class ResolvedAdapter<T> {
   /// The [TypeAdapter] for type [T]
   final TypeAdapter adapter;
@@ -20,7 +21,7 @@ class ResolvedAdapter<T> {
   final int typeId;
 
   /// A wrapper for a [TypeAdapter] and its [typeId]
-  ResolvedAdapter(this.adapter, this.typeId);
+  const ResolvedAdapter(this.adapter, this.typeId);
 
   /// Checks if the given value's [runtimeType] is of type [T]
   bool matchesRuntimeType(dynamic value) => value.runtimeType == T;

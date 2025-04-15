@@ -1,9 +1,11 @@
 import 'package:hive_ce/hive.dart';
 import 'package:example/named_import.dart' as named;
+import 'package:meta/meta.dart';
 
 part 'types.g.dart';
 
 @HiveType(typeId: 1)
+@immutable
 class Class1 {
   const Class1(this.nested, [this.enum1]);
 
@@ -33,6 +35,7 @@ class Class1 {
 }
 
 @HiveType(typeId: 2)
+@immutable
 class Class2 {
   const Class2(this.param1, this.param2, [this.what]);
 
@@ -64,8 +67,9 @@ class EmptyClass {
 }
 
 @HiveType(typeId: 5)
+@immutable
 class IterableClass {
-  IterableClass(this.list, this.set, this.nestedList, this.nestedSet);
+  const IterableClass(this.list, this.set, this.nestedList, this.nestedSet);
 
   @HiveField(0)
   final List<String> list;
@@ -81,6 +85,7 @@ class IterableClass {
 }
 
 @HiveType(typeId: 6)
+@immutable
 class ConstructorDefaults {
   ConstructorDefaults({
     this.a = 42,
@@ -103,8 +108,9 @@ class ConstructorDefaults {
 }
 
 @HiveType(typeId: 7)
+@immutable
 class NullableTypes {
-  NullableTypes({this.a, this.b, this.c});
+  const NullableTypes({this.a, this.b, this.c});
 
   @HiveField(0)
   final int? a;
@@ -117,8 +123,9 @@ class NullableTypes {
 }
 
 @HiveType(typeId: 8)
+@immutable
 class NamedImports {
-  NamedImports(
+  const NamedImports(
     this.namedImportType,
     this.namedImportTypeList,
     this.namedImportTypeNullable,

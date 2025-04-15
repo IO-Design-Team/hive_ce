@@ -1,5 +1,6 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/frame.dart';
+import 'package:meta/meta.dart';
 
 /// Adapter for DateTime
 class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
@@ -19,6 +20,7 @@ class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
 }
 
 /// TODO: Document this!
+@immutable
 class DateTimeWithoutTZ extends DateTime {
   /// TODO: Document this!
   DateTimeWithoutTZ.fromMillisecondsSinceEpoch(super.millisecondsSinceEpoch)

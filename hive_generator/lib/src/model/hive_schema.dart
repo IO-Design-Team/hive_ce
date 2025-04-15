@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:yaml_writer/yaml_writer.dart';
+import 'package:meta/meta.dart';
 
 part 'hive_schema.g.dart';
 
@@ -39,6 +40,7 @@ $yaml''';
 
 /// Information about a Hive adapter type
 @JsonSerializable()
+@immutable
 class HiveSchemaType {
   /// The adapter's type ID
   final int typeId;
@@ -79,6 +81,7 @@ class HiveSchemaType {
 
 /// Information about a Hive adapter field
 @JsonSerializable()
+@immutable
 class HiveSchemaField {
   /// The field index
   final int index;

@@ -14,7 +14,7 @@ import 'package:hive_ce_generator/src/helper/type_helper.dart';
 /// TODO: Document this!
 class ClassAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
-  ClassAdapterBuilder(
+  const ClassAdapterBuilder(
     super.cls,
     super.getters,
     super.setters,

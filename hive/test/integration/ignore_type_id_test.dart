@@ -2,15 +2,17 @@ import 'package:hive_ce/hive.dart';
 import 'package:test/test.dart';
 
 import 'integration.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class TestObject {
-  TestObject(this.value);
+  const TestObject(this.value);
 
   final int value;
 }
 
 class TestAdapter extends TypeAdapter<TestObject> {
-  TestAdapter();
+  const TestAdapter();
 
   @override
   final typeId = 10;

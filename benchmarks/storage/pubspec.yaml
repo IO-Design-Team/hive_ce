@@ -10,6 +10,7 @@ dependencies:
   hive: ^4.0.0-dev.2
   isar: ^4.0.0-dev.14
   csv: ^6.0.0
+  meta: ^1.14.0
 
 dev_dependencies:
   rexios_lints: ^11.0.6

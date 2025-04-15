@@ -3,6 +3,7 @@ import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
 import '../../util/is_browser/is_browser.dart';
+import 'package:meta/meta.dart';
 
 Future<BoxCollection> _openCollection({bool withData = false}) async {
   final collection =
@@ -159,6 +160,7 @@ void main() {
 
 const testObject = Test(a: 1, b: 'test');
 
+@immutable
 class Test {
   final int a;
   final String b;

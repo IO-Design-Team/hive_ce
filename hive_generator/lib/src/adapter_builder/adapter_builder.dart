@@ -1,8 +1,10 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:meta/meta.dart';
 
 /// Metadata about a field in a class adapter
+@immutable
 class AdapterField {
   /// The corresponding element for this field
   final PropertyAccessorElement element;
@@ -25,7 +27,7 @@ class AdapterField {
   final String? constructorDefault;
 
   /// Constructor
-  AdapterField(
+  const AdapterField(
     this.element,
     this.index,
     this.name,
@@ -36,6 +38,7 @@ class AdapterField {
 }
 
 /// TODO: Document this!
+@immutable
 abstract class AdapterBuilder {
   /// TODO: Document this!
   final InterfaceElement cls;
@@ -47,7 +50,7 @@ abstract class AdapterBuilder {
   final List<AdapterField> setters;
 
   /// TODO: Document this!
-  AdapterBuilder(
+  const AdapterBuilder(
     this.cls,
     this.getters, [
     this.setters = const <AdapterField>[],

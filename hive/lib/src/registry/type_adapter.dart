@@ -5,6 +5,9 @@ import 'package:meta/meta.dart';
 /// Type adapters can be implemented to support non primitive values.
 @immutable
 abstract class TypeAdapter<T> {
+  /// Constructor
+  const TypeAdapter();
+
   /// Called for type registration
   int get typeId;
 

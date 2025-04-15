@@ -19,6 +19,7 @@ dependencies:
   yaml_writer: ^2.0.1
   json_annotation: ^4.9.0
   collection: ^1.18.0
+  meta: ^1.14.0
 
 dev_dependencies:
   test: ^1.17.11

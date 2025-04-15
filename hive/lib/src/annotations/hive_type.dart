@@ -1,7 +1,9 @@
 import 'package:meta/meta_meta.dart';
+import 'package:meta/meta.dart';
 
 /// Annotate classes with [HiveType] to generate a `TypeAdapter`.
 @Target({TargetKind.type})
+@immutable
 class HiveType {
   /// The typeId of the annotated class.
   final int typeId;

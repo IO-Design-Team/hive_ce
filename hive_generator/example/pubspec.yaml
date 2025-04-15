@@ -1,6 +1,7 @@
 name: example
 dependencies:
   hive_ce: any
+  meta: ^1.14.0
 dev_dependencies:
   rexios_lints: ^11.0.6
   build_runner: any

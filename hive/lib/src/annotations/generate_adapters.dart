@@ -1,4 +1,7 @@
+import 'package:meta/meta.dart';
+
 /// Annotation to generate TypeAdapters for the given [specs]
+@immutable
 class GenerateAdapters {
   /// Constructor
   // coverage:ignore-start

@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 import 'common.dart';
 
 class _TestAdapter extends TypeAdapter<int> {
-  _TestAdapter([this.typeId = 0]);
+  const _TestAdapter([this.typeId = 0]);
 
   @override
   final int typeId;
