@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
+import 'package:meta/meta.dart';
 
 /// Not part of public API
 class IndexableSkipList<K, V> {
@@ -16,9 +17,9 @@ class IndexableSkipList<K, V> {
 
   final Comparator<K> _comparator;
 
-  int _height = 1;
+  var _height = 1;
 
-  int _length = 0;
+  var _length = 0;
 
   /// Not part of public API
   IndexableSkipList(this._comparator, [Random? random])
@@ -251,10 +252,11 @@ class _KeyIterator<K, V> extends _Iterator<K, V, K> {
   K get current => node!.key!;
 }
 
+@immutable
 class _KeyIterable<K, V> extends IterableBase<K> {
   final _Node<K?, V?> head;
 
-  _KeyIterable(this.head);
+  const _KeyIterable(this.head);
 
   @override
   Iterator<K> get iterator => _KeyIterator(head);
@@ -267,10 +269,11 @@ class _ValueIterator<K, V> extends _Iterator<K, V, V> {
   V get current => node!.value!;
 }
 
+@immutable
 class _ValueIterable<K, V> extends IterableBase<V> {
   final _Node<K?, V?> head;
 
-  _ValueIterable(this.head);
+  const _ValueIterable(this.head);
 
   @override
   Iterator<V> get iterator => _ValueIterator(head);

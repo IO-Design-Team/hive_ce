@@ -10,9 +10,10 @@ dependencies:
   hive: ^4.0.0-dev.2
   isar: ^4.0.0-dev.14
   csv: ^6.0.0
+  meta: ^1.14.0
 
 dev_dependencies:
-  rexios_lints: ^9.2.0
+  rexios_lints: ^11.0.6
   # build_runner: ^2.4.13 # TODO: Fix this
   json_serializable: ^6.8.0
   hive_ce_generator: any

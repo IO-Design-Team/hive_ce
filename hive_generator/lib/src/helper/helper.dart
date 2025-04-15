@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as path;
+import 'package:meta/meta.dart';
 
 final _hiveFieldChecker = const TypeChecker.fromRuntime(HiveField);
 final _freezedDefaultChecker = const TypeChecker.fromUrl(
@@ -14,9 +15,10 @@ final _freezedDefaultChecker = const TypeChecker.fromUrl(
 );
 
 /// TODO: Document this!
+@immutable
 class HiveFieldInfo {
   /// TODO: Document this!
-  HiveFieldInfo(this.index, this.defaultValue);
+  const HiveFieldInfo(this.index, this.defaultValue);
 
   /// TODO: Document this!
   final int index;

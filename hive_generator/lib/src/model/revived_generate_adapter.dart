@@ -1,7 +1,9 @@
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:meta/meta.dart';
 
 /// A revived GenerateAdapters annotation
+@immutable
 class RevivedGenerateAdapters {
   /// The revived adapter specs
   final List<RevivedAdapterSpec> specs;
@@ -22,6 +24,7 @@ class RevivedGenerateAdapters {
 }
 
 /// A revived adapter spec
+@immutable
 class RevivedAdapterSpec {
   /// The type of the adapter
   final DartType type;

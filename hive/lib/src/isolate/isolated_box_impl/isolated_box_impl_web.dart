@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
 /// Web implementation of [IsolatedBoxBase]
 ///
@@ -111,6 +112,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 }
 
 /// Isolated implementation of [Box]
+@immutable
 class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedBox<E> {
   @override
@@ -131,6 +133,7 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
 }
 
 /// Isolated implementation of [LazyBoxBase]
+@immutable
 class IsolatedLazyBoxImpl<E> extends IsolatedBoxBaseImpl<E>
     implements IsolatedLazyBox<E> {
   @override

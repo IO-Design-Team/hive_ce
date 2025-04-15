@@ -8,9 +8,11 @@ import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:meta/meta.dart';
 
 // Mocks
 
+@immutable
 class MockBox<E> extends Mock implements Box<E> {
   @override
   final bool lazy;

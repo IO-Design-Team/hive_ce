@@ -1,4 +1,5 @@
 import 'package:meta/meta_meta.dart';
+import 'package:meta/meta.dart';
 
 /// Annotate all fields you want to persist with [HiveField].
 @Target({
@@ -8,6 +9,7 @@ import 'package:meta/meta_meta.dart';
   TargetKind.enumValue,
   TargetKind.parameter,
 })
+@immutable
 class HiveField {
   /// The index of this field.
   final int index;

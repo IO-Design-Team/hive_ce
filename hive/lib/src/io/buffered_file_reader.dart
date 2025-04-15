@@ -21,9 +21,9 @@ class BufferedFileReader {
   @visibleForTesting
   Uint8List buffer;
 
-  int _bufferSize = 0;
-  int _bufferOffset = 0;
-  int _fileOffset = 0;
+  var _bufferSize = 0;
+  var _bufferOffset = 0;
+  var _fileOffset = 0;
 
   /// Not part of public API
   int get remainingInBuffer => _bufferSize - _bufferOffset;

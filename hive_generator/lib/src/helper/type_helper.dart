@@ -4,7 +4,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
-const bool kConstConstructors = true;
+const kConstConstructors = true;
 
 /// TODO: Document this!
 String constantToString(

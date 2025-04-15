@@ -9,6 +9,7 @@ import 'package:hive_ce_generator/src/helper/type_helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
+import 'package:meta/meta.dart';
 
 /// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
@@ -59,7 +60,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final content = '''
     class $adapterName extends TypeAdapter<${cls.name}> {
       @override
-      final int typeId = $typeId;
+      final typeId = $typeId;
 
       @override
       ${cls.name} read(BinaryReader reader) {
@@ -231,6 +232,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 }
 
 /// Result of [TypeAdapterGenerator.getAccessors]
+@immutable
 class GetAccessorsResult {
   /// The getters of the class
   final List<AdapterField> getters;
@@ -246,6 +248,7 @@ class GetAccessorsResult {
 }
 
 /// Result of [TypeAdapterGenerator.generateTypeAdapter]
+@immutable
 class GenerateTypeAdapterResult {
   /// The generated content
   final String content;

@@ -14,11 +14,11 @@ class BinaryWriterImpl extends BinaryWriter {
   static const _initBufferSize = 4096;
 
   final TypeRegistryImpl _typeRegistry;
-  Uint8List _buffer = Uint8List(_initBufferSize);
+  var _buffer = Uint8List(_initBufferSize);
 
   ByteData? _byteDataInstance;
 
-  int _offset = 0;
+  var _offset = 0;
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')

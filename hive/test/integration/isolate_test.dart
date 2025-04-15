@@ -50,7 +50,7 @@ class TestIns extends IsolateNameServer {
 
 final isolateNameRegex = RegExp(r'\(current isolate: .+?\)');
 
-void main() async {
+void main() {
   Future<void> runIsolate({
     required IsolateNameServer ins,
     required String path,
@@ -143,7 +143,7 @@ void main() async {
           final hive = IsolatedHiveImpl();
           addTearDown(hive.close);
 
-          (hive as HiveIsolate).entryPoint = (send) async {
+          (hive as HiveIsolate).entryPoint = (send) {
             final connection = setupIsolate(send);
             final hiveChannel = IsolateMethodChannel('hive', connection);
             final testChannel = IsolateMethodChannel('test', connection);

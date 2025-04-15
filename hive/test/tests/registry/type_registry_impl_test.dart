@@ -7,7 +7,7 @@ import '../../util/print_utils.dart';
 import '../common.dart';
 
 class TestAdapter extends TypeAdapter<int> {
-  TestAdapter([this.typeId = 0]);
+  const TestAdapter([this.typeId = 0]);
 
   @override
   final int typeId;
@@ -39,7 +39,7 @@ class Parent {}
 class Child extends Parent {}
 
 class ParentAdapter extends TypeAdapter<Parent> {
-  ParentAdapter([this.typeId = 0]);
+  const ParentAdapter([this.typeId = 0]);
 
   @override
   final int typeId;
@@ -54,7 +54,7 @@ class ParentAdapter extends TypeAdapter<Parent> {
 }
 
 class ChildAdapter extends TypeAdapter<Child> {
-  ChildAdapter([this.typeId = 0]);
+  const ChildAdapter([this.typeId = 0]);
 
   @override
   final int typeId;

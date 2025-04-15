@@ -10,7 +10,7 @@ part of 'hive_adapters.dart';
 
 class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
   @override
-  final int typeId = 50;
+  final typeId = 50;
 
   @override
   ClassSpec1 read(BinaryReader reader) {
@@ -47,7 +47,7 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
 
 class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
   @override
-  final int typeId = 51;
+  final typeId = 51;
 
   @override
   ClassSpec2 read(BinaryReader reader) {
@@ -93,7 +93,7 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
 
 class EnumSpecAdapter extends TypeAdapter<EnumSpec> {
   @override
-  final int typeId = 52;
+  final typeId = 52;
 
   @override
   EnumSpec read(BinaryReader reader) {

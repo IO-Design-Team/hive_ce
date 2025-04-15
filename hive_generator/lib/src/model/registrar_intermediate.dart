@@ -1,9 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'registrar_intermediate.g.dart';
 
 /// Intermediate information to generate the Hive registrar
 @JsonSerializable()
+@immutable
 class RegistrarIntermediate {
   /// The URI of the file this intermediate describes
   final Uri uri;

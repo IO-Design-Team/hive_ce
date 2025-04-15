@@ -16,7 +16,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   });
 
   @override
-  final bool lazy = true;
+  final lazy = true;
 
   @override
   Future<E?> get(dynamic key, {E? defaultValue}) async {
