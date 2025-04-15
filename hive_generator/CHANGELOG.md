@@ -3,6 +3,7 @@
 - Generates `IsolatedHiveRegistrar` extension for `IsolatedHiveInterface`
 - Fixes generated read method for empty classes (by [@esuljic](https://github.com/esuljic) in [#92](https://github.com/IO-Design-Team/hive_ce/pull/92))
 - Adds support for `@Default` annotation from `freezed`
+- Fixes generation for `Iterable` fields
 
 ## 1.8.2
 
