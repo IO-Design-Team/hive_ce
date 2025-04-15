@@ -65,6 +65,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
         itemBuilder: (context, index) {
           final box = boxData.keys.elementAt(index);
           return ListTile(
+            style: ListTileStyle.drawer,
             title: Text(box),
             onTap: () {
               loadBoxData(box);
