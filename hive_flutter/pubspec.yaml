@@ -18,6 +18,6 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.1
-  rexios_lints: ^9.1.0
+  rexios_lints: ^11.0.6
   mockito: ^5.4.1
   build_runner: ^2.1.11
