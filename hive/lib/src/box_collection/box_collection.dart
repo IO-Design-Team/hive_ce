@@ -255,8 +255,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     return _getTransactionZone(testZone.parent);
   }
 
-  static const int _maxKeyLength = 255;
-  static const String _badKeyPrefix = '_bad_key_';
+  static const _maxKeyLength = 255;
+  static const _badKeyPrefix = '_bad_key_';
 
   String _calcHashKey(String encodedKey) =>
       _badKeyPrefix + sha256.convert(utf8.encode(encodedKey)).toString();

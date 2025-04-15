@@ -13,7 +13,7 @@ class TestAdapter extends TypeAdapter<TestObject> {
   TestAdapter();
 
   @override
-  final int typeId = 10;
+  final typeId = 10;
 
   @override
   TestObject read(BinaryReader reader) {

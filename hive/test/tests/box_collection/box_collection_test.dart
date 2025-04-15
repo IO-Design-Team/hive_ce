@@ -172,7 +172,7 @@ class Test {
 
 class TestAdapter extends TypeAdapter<Test> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   Test read(BinaryReader reader) => testObject;

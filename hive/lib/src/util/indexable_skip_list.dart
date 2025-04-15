@@ -16,9 +16,9 @@ class IndexableSkipList<K, V> {
 
   final Comparator<K> _comparator;
 
-  int _height = 1;
+  var _height = 1;
 
-  int _length = 0;
+  var _length = 0;
 
   /// Not part of public API
   IndexableSkipList(this._comparator, [Random? random])

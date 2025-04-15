@@ -20,7 +20,7 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   final IsolateEventChannel _eventChannel;
   Stream<BoxEvent>? _stream;
 
-  bool _open = true;
+  var _open = true;
 
   /// Constructor
   IsolatedBoxBaseImpl(
@@ -197,7 +197,7 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   );
 
   @override
-  final bool lazy = false;
+  final lazy = false;
 
   @override
   Future<Iterable<E>> get values async {
@@ -236,5 +236,5 @@ class IsolatedLazyBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   );
 
   @override
-  final bool lazy = true;
+  final lazy = true;
 }

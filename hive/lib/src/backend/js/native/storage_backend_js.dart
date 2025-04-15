@@ -54,7 +54,7 @@ class StorageBackendJs extends StorageBackend {
   String? get path => null;
 
   @override
-  bool supportsCompaction = false;
+  var supportsCompaction = false;
 
   bool _isEncoded(Uint8List bytes) {
     return bytes.length >= _bytePrefix.length &&

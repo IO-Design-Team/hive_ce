@@ -22,9 +22,9 @@ class HiveListImpl<E extends HiveObjectMixin>
 
   Box? _box;
 
-  bool _invalidated = false;
+  var _invalidated = false;
 
-  bool _disposed = false;
+  var _disposed = false;
 
   /// Not part of public API
   HiveListImpl(Box box, {List<E>? objects})

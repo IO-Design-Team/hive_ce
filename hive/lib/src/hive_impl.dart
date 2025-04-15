@@ -43,10 +43,10 @@ RECOMMENDED ACTIONS:
   final _boxes = HashMap<String, BoxBaseImpl>();
   final _openingBoxes = HashMap<String, Future>();
   BackendManagerInterface? _managerOverride;
-  final Random _secureRandom = Random.secure();
+  final _secureRandom = Random.secure();
 
   /// Whether this Hive instance is isolated
-  bool _isolated = false;
+  var _isolated = false;
 
   /// Set [_isolated] to true
   void setIsolated() => _isolated = true;

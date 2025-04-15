@@ -18,7 +18,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   });
 
   @override
-  final bool lazy = false;
+  final lazy = false;
 
   @override
   Iterable<E> get values {
