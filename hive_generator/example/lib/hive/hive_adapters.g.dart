@@ -58,17 +58,26 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
     return ClassSpec2(
       fields[0] as String,
       fields[1] as String,
+      (fields[2] as List).cast<String>(),
+      (fields[3] as Set).cast<String>(),
+      (fields[4] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ClassSpec2 obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.value)
       ..writeByte(1)
-      ..write(obj.value2);
+      ..write(obj.value2)
+      ..writeByte(2)
+      ..write(obj.iterable)
+      ..writeByte(3)
+      ..write(obj.set)
+      ..writeByte(4)
+      ..write(obj.list);
   }
 
   @override

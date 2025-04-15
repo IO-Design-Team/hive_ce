@@ -23,9 +23,6 @@ class ClassAdapterBuilder extends AdapterBuilder {
   /// [TypeChecker] for [HiveList].
   final hiveListChecker = const TypeChecker.fromRuntime(HiveList);
 
-  /// [TypeChecker] for [List].
-  final listChecker = const TypeChecker.fromRuntime(List);
-
   /// [TypeChecker] for [Map].
   final mapChecker = const TypeChecker.fromRuntime(Map);
 
@@ -116,10 +113,11 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
-    } else if (listChecker.isAssignableFromType(type) && !isUint8List(type)) {
-      return '($variable as List$suffix)${_castIterable(type)}';
     } else if (setChecker.isAssignableFromType(type)) {
       return '($variable as Set$suffix)${_castIterable(type)}';
+    } else if (iterableChecker.isAssignableFromType(type) &&
+        !isUint8List(type)) {
+      return '($variable as List$suffix)${_castIterable(type)}';
     } else if (mapChecker.isAssignableFromType(type)) {
       return '($variable as Map$suffix)${_castMap(type)}';
     } else if (type.isDartCoreInt) {
@@ -148,12 +146,12 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final suffix = _accessorSuffixFromType(type);
     if (isMapOrIterable(arg) && !isUint8List(arg)) {
       var cast = '';
-      // Using assignable because List? is not exactly List
-      if (listChecker.isAssignableFromType(type)) {
-        cast = '.toList()';
-        // Using assignable because Set? is not exactly Set
-      } else if (setChecker.isAssignableFromType(type)) {
+      // Using assignable because Set? is not exactly Set
+      if (setChecker.isAssignableFromType(type)) {
         cast = '.toSet()';
+        // Using assignable because Iterable? is not exactly Iterable
+      } else if (iterableChecker.isAssignableFromType(type)) {
+        cast = '.toList()';
       }
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
