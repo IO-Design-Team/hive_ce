@@ -20,8 +20,11 @@ class ClassSpec1 {
 class ClassSpec2 {
   final String value;
   final String value2;
+  final Iterable<String> iterable;
+  final Set<String> set;
+  final List<String> list;
 
-  ClassSpec2(this.value, this.value2);
+  ClassSpec2(this.value, this.value2, this.iterable, this.set, this.list);
 }
 
 enum EnumSpec {
