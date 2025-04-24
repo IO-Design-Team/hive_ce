@@ -50,19 +50,21 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         )
         .toList();
 
-    var nextTypeId = schema.nextTypeId;
+    var typeId = schema.nextTypeId - 1;
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.getDisplayString();
 
-      nextTypeId++;
-      while (revived.reservedTypeIds.contains(nextTypeId)) {
-        nextTypeId++;
+      int generateTypeId() {
+        do {
+          typeId++;
+        } while (revived.reservedTypeIds.contains(typeId));
+        return typeId;
       }
 
       final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(typeId: nextTypeId, nextIndex: 0, fields: {});
+          HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
         element: spec.type.element!,
         library: library,
@@ -79,7 +81,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     // Not the safest thing to do, but there doesn't seem to be a better way
     buildStep.forceWriteAsString(
       schemaAsset,
-      HiveSchema(nextTypeId: nextTypeId, types: newTypes).toString(),
+      HiveSchema(nextTypeId: typeId + 1, types: newTypes).toString(),
     );
 
     return content.toString();

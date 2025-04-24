@@ -20,7 +20,7 @@ class GenerateAdapters {
 
   /// Reserved type ids
   ///
-  /// These type ids will not be auto generated
+  /// These type ids will be skipped during generation
   final Set<int> reservedTypeIds;
 }
 
