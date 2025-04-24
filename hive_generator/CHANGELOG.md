@@ -5,6 +5,7 @@
 - Adds support for `@Default` annotation from `freezed`
 - Fixes generation for `Iterable` fields
 - Removes type annotation from generated `typeId` field
+- Adds support for `reservedTypeIds` in `GenerateAdapters` annotation
 
 ## 1.8.2
 
