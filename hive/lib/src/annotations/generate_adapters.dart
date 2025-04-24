@@ -5,7 +5,11 @@ import 'package:meta/meta.dart';
 class GenerateAdapters {
   /// Constructor
   // coverage:ignore-start
-  const GenerateAdapters(this.specs, {this.firstTypeId = 0});
+  const GenerateAdapters(
+    this.specs, {
+    this.firstTypeId = 0,
+    this.reservedTypeIds = const {},
+  });
   // coverage:ignore-end
 
   /// The classes to generate TypeAdapters for
@@ -13,6 +17,11 @@ class GenerateAdapters {
 
   /// The first typeId to use
   final int firstTypeId;
+
+  /// Reserved type ids
+  ///
+  /// These type ids will not be auto generated
+  final Set<int> reservedTypeIds;
 }
 
 /// Configuration that specifies the generation of a TypeAdapter

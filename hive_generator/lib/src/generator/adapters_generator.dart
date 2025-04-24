@@ -55,8 +55,14 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.getDisplayString();
+
+      nextTypeId++;
+      while (revived.reservedTypeIds.contains(nextTypeId)) {
+        nextTypeId++;
+      }
+
       final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(typeId: nextTypeId++, nextIndex: 0, fields: {});
+          HiveSchemaType(typeId: nextTypeId, nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
         element: spec.type.element!,
         library: library,
