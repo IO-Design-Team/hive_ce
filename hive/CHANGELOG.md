@@ -8,6 +8,7 @@
 - Supports `freezed` default values
 - Enforces that boxes of type `Map` _must_ be `Map<dynamic, dynamic>`
 - Enforces that boxes of type `Iterable` _must_ be `Iterable<dynamic>`
+- Adds `reservedTypeIds` to `GenerateAdapters` annotation
 
 ## 2.10.1
 
