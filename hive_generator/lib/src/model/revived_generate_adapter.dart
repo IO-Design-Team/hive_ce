@@ -11,6 +11,9 @@ class RevivedGenerateAdapters {
   /// The first type ID to use
   final int firstTypeId;
 
+  /// The reserved type ids
+  final Set<int> reservedTypeIds;
+
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
       : specs = annotation
@@ -20,7 +23,13 @@ class RevivedGenerateAdapters {
             .map((type) => type.typeArguments.single)
             .map((type) => RevivedAdapterSpec(type: type))
             .toList(),
-        firstTypeId = annotation.read('firstTypeId').intValue;
+        firstTypeId = annotation.read('firstTypeId').intValue,
+        reservedTypeIds = annotation
+            .read('reservedTypeIds')
+            .setValue
+            .map((e) => e.toIntValue())
+            .whereType<int>()
+            .toSet();
 }
 
 /// A revived adapter spec

@@ -310,5 +310,54 @@ types:
         );
       });
     });
+
+    test('reserved type ids', () {
+      expectGeneration(
+        input: {
+          ...pubspec(),
+          'lib/hive/hive_adapters.dart': '''
+$directives
+
+@GenerateAdapters([AdapterSpec<Person>(), AdapterSpec<Person2>()], reservedTypeIds: {1})
+class Person {
+  const Person({required this.name, required this.age});
+
+  final String name;
+  final int age;
+}
+
+class Person2 {
+  const Person2({required this.name, required this.age});
+
+  final String name;
+  final int age;
+}
+''',
+        },
+        output: {
+          'lib/hive/hive_adapters.g.yaml': '''
+$schemaComment
+nextTypeId: 3
+types:
+  Person:
+    typeId: 0
+    nextIndex: 2
+    fields:
+      name:
+        index: 0
+      age:
+        index: 1
+  Person2:
+    typeId: 2
+    nextIndex: 2
+    fields:
+      name:
+        index: 0
+      age:
+        index: 1
+''',
+        },
+      );
+    });
   });
 }
