@@ -6,7 +6,7 @@ class TimeOfDayAdapter extends TypeAdapter<TimeOfDay> {
   static const _defaultTypeId = 201;
 
   /// Constructor
-  TimeOfDayAdapter({int? typeId}) : typeId = typeId ?? _defaultTypeId;
+  const TimeOfDayAdapter({int? typeId}) : typeId = typeId ?? _defaultTypeId;
 
   @override
   final int typeId;

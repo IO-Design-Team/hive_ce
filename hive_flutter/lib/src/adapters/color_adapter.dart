@@ -78,7 +78,7 @@ class HiveColor {
 /// Adapter for the new Color fields
 class HiveColorAdapter extends TypeAdapter<HiveColor> {
   /// Constructor
-  HiveColorAdapter({required this.typeId});
+  const HiveColorAdapter({required this.typeId});
 
   @override
   final int typeId;

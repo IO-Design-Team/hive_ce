@@ -19,7 +19,7 @@ void main() {
       final BinaryReader binaryReader = MockBinaryReader();
       when(binaryReader.readInt()).thenReturn(totalMinutes);
 
-      final readTime = TimeOfDayAdapter().read(binaryReader);
+      final readTime = const TimeOfDayAdapter().read(binaryReader);
       verify(binaryReader.readInt()).called(1);
       expect(readTime, time);
     });
@@ -27,7 +27,7 @@ void main() {
     test('.write()', () {
       final BinaryWriter binaryWriter = MockBinaryWriter();
 
-      TimeOfDayAdapter().write(binaryWriter, time);
+      const TimeOfDayAdapter().write(binaryWriter, time);
       verify(binaryWriter.writeInt(totalMinutes));
     });
   });
