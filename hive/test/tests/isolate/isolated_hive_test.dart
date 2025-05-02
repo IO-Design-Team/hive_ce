@@ -385,8 +385,6 @@ void main() {
           await hive.deleteBoxFromDisk(boxName);
           expect(await hive.boxExists(boxName), false);
         },
-        // TODO: Figure out why deleteFromDisk never completes on web
-        skip: isBrowser,
       );
     });
 
