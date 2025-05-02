@@ -1,11 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:glob/glob.dart';
 import 'package:build/build.dart';
+import 'package:glob/glob.dart';
 import 'package:hive_ce/hive.dart';
-import 'dart:async';
-
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 import 'package:yaml/yaml.dart';
@@ -104,18 +103,25 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
 }
 ''');
 
-    var registrarLocation = 'lib';
     if (registrarUri != null) {
+      var registrarLocation = 'lib';
+
       final segments = registrarUri.pathSegments;
       // Skip the package segment and remove the file segment
       final registrarPath = segments.sublist(1, segments.length - 1).join('/');
       registrarLocation += '/$registrarPath';
-    }
-    registrarLocation += '/hive_registrar.g.dart';
 
-    buildStep.forceWriteAsString(
-      buildStep.asset(registrarLocation),
-      buffer.toString(),
-    );
+      registrarLocation += '/hive_registrar.g.dart';
+
+      buildStep.forceWriteAsString(
+        buildStep.asset(registrarLocation),
+        buffer.toString(),
+      );
+    } else {
+      await buildStep.writeAsString(
+        buildStep.allowedOutputs.single,
+        buffer.toString(),
+      );
+    }
   }
 }
