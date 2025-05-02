@@ -1,3 +1,7 @@
+## 2.11.1
+
+- Allows boxes of primitive iterables
+
 ## 2.11.0
 
 - Isolate support through `IsolatedHive`
