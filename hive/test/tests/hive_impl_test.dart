@@ -107,23 +107,41 @@ void main() {
           );
           expect(hive.openBox<Map>('mapbox'), completes);
 
-          expect(
-            hive.openBox<Iterable<String>>('iterablebox'),
-            throwsA(isA<AssertionError>()),
-          );
-          expect(hive.openBox<Iterable>('iterablebox'), completes);
+          Future<void> openBox<T>() async {
+            final box = await hive.openBox<T>('iterablebox');
+            await box.close();
+          }
 
           expect(
-            hive.openBox<List<String>>('listbox'),
+            hive.openBox<Iterable<DateTime>>('iterablebox'),
             throwsA(isA<AssertionError>()),
           );
-          expect(hive.openBox<List>('listbox'), completes);
+          await expectLater(openBox<Iterable>(), completes);
+          await expectLater(openBox<Iterable<int>>(), completes);
+          await expectLater(openBox<Iterable<double>>(), completes);
+          await expectLater(openBox<Iterable<bool>>(), completes);
+          await expectLater(openBox<Iterable<String>>(), completes);
 
           expect(
-            hive.openBox<Set<String>>('setbox'),
+            hive.openBox<List<DateTime>>('listbox'),
             throwsA(isA<AssertionError>()),
           );
-          expect(hive.openBox<Set>('setbox'), completes);
+
+          await expectLater(openBox<List>(), completes);
+          await expectLater(openBox<List<int>>(), completes);
+          await expectLater(openBox<List<double>>(), completes);
+          await expectLater(openBox<List<bool>>(), completes);
+          await expectLater(openBox<List<String>>(), completes);
+
+          expect(
+            hive.openBox<Set<DateTime>>('setbox'),
+            throwsA(isA<AssertionError>()),
+          );
+          await expectLater(openBox<Set>(), completes);
+          await expectLater(openBox<Set<int>>(), completes);
+          await expectLater(openBox<Set<double>>(), completes);
+          await expectLater(openBox<Set<bool>>(), completes);
+          await expectLater(openBox<Set<String>>(), completes);
         });
       });
     });
