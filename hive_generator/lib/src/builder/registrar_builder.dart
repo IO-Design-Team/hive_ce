@@ -118,11 +118,9 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
         buffer.toString(),
       );
     } else {
-      unawaited(
-        buildStep.writeAsString(
-          buildStep.allowedOutputs.single,
-          buffer.toString(),
-        ),
+      await buildStep.writeAsString(
+        buildStep.allowedOutputs.single,
+        buffer.toString(),
       );
     }
   }
