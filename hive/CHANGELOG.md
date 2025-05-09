@@ -1,3 +1,7 @@
+## NEXT
+
+- Fixes `deleteFromDisk` not completing on web
+
 ## 2.11.1
 
 - Allows boxes of primitive iterables
