@@ -87,6 +87,16 @@ extension HiveRegistrar on HiveInterface {
     }
 
     buffer.write('''
+  void registerAdaptersSafe() {
+''');
+
+    for (final adapter in adapters) {
+      buffer.writeln(
+          '    if (!Hive.isAdapterRegistered($adapter().typeId)) registerAdapter($adapter());');
+    }
+
+    buffer.write('''
+    }
   }
 }
 
@@ -99,6 +109,16 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     }
 
     buffer.write('''
+  void registerAdaptersSafe() {
+''');
+
+    for (final adapter in adapters) {
+      buffer.writeln(
+          '    if (!Hive.isAdapterRegistered($adapter().typeId)) registerAdapter($adapter());');
+    }
+
+    buffer.write('''
+    }
   }
 }
 ''');

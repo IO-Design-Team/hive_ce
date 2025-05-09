@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores
+// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores, unused_element
 
 part of 'hive_adapters.dart';
 

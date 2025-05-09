@@ -2,7 +2,7 @@
 // Do not modify
 // Check in to version control
 
-// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores
+// ignore_for_file: unnecessary_const, require_trailing_commas, document_ignores, unused_element
 
 import 'package:hive_ce/hive.dart';
 import 'package:example/hive/hive_adapters.dart';
@@ -21,6 +21,19 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(IterableClassAdapter());
     registerAdapter(NamedImportsAdapter());
     registerAdapter(NullableTypesAdapter());
+  void registerAdaptersSafe() {
+    if (!Hive.isAdapterRegistered(Class1Adapter().typeId)) registerAdapter(Class1Adapter());
+    if (!Hive.isAdapterRegistered(Class2Adapter().typeId)) registerAdapter(Class2Adapter());
+    if (!Hive.isAdapterRegistered(ClassSpec1Adapter().typeId)) registerAdapter(ClassSpec1Adapter());
+    if (!Hive.isAdapterRegistered(ClassSpec2Adapter().typeId)) registerAdapter(ClassSpec2Adapter());
+    if (!Hive.isAdapterRegistered(ConstructorDefaultsAdapter().typeId)) registerAdapter(ConstructorDefaultsAdapter());
+    if (!Hive.isAdapterRegistered(EmptyClassAdapter().typeId)) registerAdapter(EmptyClassAdapter());
+    if (!Hive.isAdapterRegistered(Enum1Adapter().typeId)) registerAdapter(Enum1Adapter());
+    if (!Hive.isAdapterRegistered(EnumSpecAdapter().typeId)) registerAdapter(EnumSpecAdapter());
+    if (!Hive.isAdapterRegistered(IterableClassAdapter().typeId)) registerAdapter(IterableClassAdapter());
+    if (!Hive.isAdapterRegistered(NamedImportsAdapter().typeId)) registerAdapter(NamedImportsAdapter());
+    if (!Hive.isAdapterRegistered(NullableTypesAdapter().typeId)) registerAdapter(NullableTypesAdapter());
+    }
   }
 }
 
@@ -37,5 +50,18 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(IterableClassAdapter());
     registerAdapter(NamedImportsAdapter());
     registerAdapter(NullableTypesAdapter());
+  void registerAdaptersSafe() {
+    if (!Hive.isAdapterRegistered(Class1Adapter().typeId)) registerAdapter(Class1Adapter());
+    if (!Hive.isAdapterRegistered(Class2Adapter().typeId)) registerAdapter(Class2Adapter());
+    if (!Hive.isAdapterRegistered(ClassSpec1Adapter().typeId)) registerAdapter(ClassSpec1Adapter());
+    if (!Hive.isAdapterRegistered(ClassSpec2Adapter().typeId)) registerAdapter(ClassSpec2Adapter());
+    if (!Hive.isAdapterRegistered(ConstructorDefaultsAdapter().typeId)) registerAdapter(ConstructorDefaultsAdapter());
+    if (!Hive.isAdapterRegistered(EmptyClassAdapter().typeId)) registerAdapter(EmptyClassAdapter());
+    if (!Hive.isAdapterRegistered(Enum1Adapter().typeId)) registerAdapter(Enum1Adapter());
+    if (!Hive.isAdapterRegistered(EnumSpecAdapter().typeId)) registerAdapter(EnumSpecAdapter());
+    if (!Hive.isAdapterRegistered(IterableClassAdapter().typeId)) registerAdapter(IterableClassAdapter());
+    if (!Hive.isAdapterRegistered(NamedImportsAdapter().typeId)) registerAdapter(NamedImportsAdapter());
+    if (!Hive.isAdapterRegistered(NullableTypesAdapter().typeId)) registerAdapter(NullableTypesAdapter());
+    }
   }
 }
