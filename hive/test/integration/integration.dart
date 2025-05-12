@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -101,7 +102,7 @@ extension HiveIsolateExtension on HiveIsolate {
   set entryPoint(IsolateEntryPoint entryPoint) {
     spawnHiveIsolate = () => spawnIsolate(
           entryPoint,
-          debugName: HiveIsolate.isolateName,
+          debugName: hiveIsolateName,
           onConnect: onConnect,
           onExit: onExit,
         );
@@ -112,7 +113,7 @@ extension HiveIsolateExtension on HiveIsolate {
           Uri.file(
             '${Directory.current.path}/test/util/isolate_entry_point.dart',
           ),
-          debugName: HiveIsolate.isolateName,
+          debugName: hiveIsolateName,
           onConnect: onConnect,
           onExit: onExit,
         );

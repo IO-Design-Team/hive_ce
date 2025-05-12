@@ -1,5 +1,6 @@
-## NEXT
+## 2.11.2
 
+- Fixes web compatibility check
 - Fixes `deleteFromDisk` not completing on web
 
 ## 2.11.1
