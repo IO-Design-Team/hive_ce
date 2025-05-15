@@ -7,9 +7,6 @@ import 'package:meta/meta.dart';
 ///
 /// Used for testing
 abstract class HiveIsolate {
-  /// The name of the hive isolate
-  static const isolateName = '_hive_isolate';
-
   /// Warning message printed when using [IsolatedHive] without an [IsolateNameServer]
   static final noIsolateNameServerWarning = '''
 ⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️

@@ -6,6 +6,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
@@ -30,18 +31,17 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   late Future<IsolateConnection> Function() _spawnHiveIsolate =
       () => spawnIsolate(
             isolateEntryPoint,
-            debugName: HiveIsolate.isolateName,
+            debugName: hiveIsolateName,
             onConnect: onConnect,
             onExit: onExit,
           );
 
   @override
   void onConnect(SendPort send) =>
-      _isolateNameServer?.registerPortWithName(send, HiveIsolate.isolateName);
+      _isolateNameServer?.registerPortWithName(send, hiveIsolateName);
 
   @override
-  void onExit() =>
-      _isolateNameServer?.removePortNameMapping(HiveIsolate.isolateName);
+  void onExit() => _isolateNameServer?.removePortNameMapping(hiveIsolateName);
 
   @override
   set spawnHiveIsolate(Future<IsolateConnection> Function() spawnHiveIsolate) =>
@@ -60,7 +60,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       }
 
       final send =
-          _isolateNameServer?.lookupPortByName(HiveIsolate.isolateName);
+          _isolateNameServer?.lookupPortByName(hiveIsolateName) as SendPort?;
 
       final IsolateConnection connection;
       if (send != null) {
