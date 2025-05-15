@@ -1,3 +1,7 @@
+## 2.3.1
+
+- Fixes web compatibility check
+
 ## 2.3.0
 
 - Adds `IsolatedHive.initFlutter`
