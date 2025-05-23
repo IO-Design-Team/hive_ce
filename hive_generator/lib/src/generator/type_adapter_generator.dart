@@ -191,8 +191,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
 
-      final setter =
-          cls.augmented.lookUpSetter(name: '$name=', library: library);
+      final setter = cls.augmented.lookUpSetter(name: name, library: library);
       final setterField = accessorToField(setter);
       if (setterField != null) setters.add(setterField);
     }

@@ -1,3 +1,7 @@
+## 1.9.2
+
+- Fixes read method generation for classes with non-constructor fields
+
 ## 1.9.1
 
 - Fixes issue with `hive_registrar.g.dart` getting deleted (by [@Komodo5197](https://github.com/Komodo5197) in [#130](https://github.com/IO-Design-Team/hive_ce/pull/130))
