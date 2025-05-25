@@ -28,6 +28,8 @@ class HiveFieldInfo {
 }
 
 /// TODO: Document this!
+/// TODO: Fix with analyzer 8
+/// ignore: deprecated_member_use
 HiveFieldInfo? getHiveFieldAnn(Element? element) {
   if (element == null) return null;
   final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
@@ -40,6 +42,8 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
 }
 
 /// Get the string representation of the freezed default value
+/// TODO: Fix with analyzer 8
+/// ignore: deprecated_member_use
 DartObject? getFreezedDefault(Element? element) {
   if (element == null) return null;
   final obj = _freezedDefaultChecker.firstAnnotationOfExact(element);
@@ -50,7 +54,11 @@ DartObject? getFreezedDefault(Element? element) {
 }
 
 /// Get a classes default constructor or throw
+/// TODO: Fix with analyzer 8
+/// ignore: deprecated_member_use
 ConstructorElement getConstructor(InterfaceElement cls) {
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   final constr = cls.constructors.firstWhereOrNull((it) => it.name.isEmpty);
   if (constr == null) {
     throw 'Provide an unnamed constructor.';
@@ -58,12 +66,18 @@ ConstructorElement getConstructor(InterfaceElement cls) {
   return constr;
 }
 
+/// TODO: Fix with analyzer 8
+/// ignore: deprecated_member_use
 /// Returns [element] as [InterfaceElement] if it is a class or enum
+/// TODO: Fix with analyzer 8
+/// ignore: deprecated_member_use
 InterfaceElement getClass(Element element) {
   if (element.kind != ElementKind.CLASS && element.kind != ElementKind.ENUM) {
     throw 'Only classes or enums are allowed to be annotated with @HiveType.';
   }
 
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   return element as InterfaceElement;
 }
 
