@@ -1,6 +1,6 @@
-## 1.9.2
+## NEXT
 
-- Fixes read method generation for classes with non-constructor fields
+- Ignores analyzer deprecations
 
 ## 1.9.1
 

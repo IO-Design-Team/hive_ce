@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
   [
     AdapterSpec<ClassSpec1>(),
     AdapterSpec<ClassSpec2>(),
-    AdapterSpec<ClassSpec3>(),
     AdapterSpec<EnumSpec>(),
   ],
   firstTypeId: 50,
@@ -29,10 +28,6 @@ class ClassSpec2 {
   final List<String> list;
 
   const ClassSpec2(this.value, this.value2, this.iterable, this.set, this.list);
-}
-
-class ClassSpec3 {
-  int? value;
 }
 
 enum EnumSpec {

@@ -125,6 +125,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
       return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
   }
@@ -156,6 +158,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
       return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
     }
   }
@@ -169,7 +173,12 @@ class ClassAdapterBuilder extends AdapterBuilder {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
       return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
+
+          /// TODO: Fix with analyzer 8
+          /// ignore: deprecated_member_use
           '${arg2.getPrefixedDisplayString(cls.library)}>()';
     }
   }
@@ -214,15 +223,26 @@ String _suffixFromType(DartType type) {
 }
 
 extension on DartType {
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   String getPrefixedDisplayString(LibraryElement currentLibrary) {
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     final element = this.element;
     if (element == null) return getDisplayString();
 
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     final definingLibrary = element.library;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     for (final import in currentLibrary.units.expand((e) => e.libraryImports)) {
       for (final MapEntry(:key, :value)
+
+          /// TODO: Fix with analyzer 8
+          /// ignore: deprecated_member_use
           in import.namespace.definedNames.entries) {
         if (value == element) {
           return '$key${_suffixFromType(this)}';

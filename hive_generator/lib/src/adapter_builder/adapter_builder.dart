@@ -7,6 +7,8 @@ import 'package:meta/meta.dart';
 @immutable
 class AdapterField {
   /// The corresponding element for this field
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   final PropertyAccessorElement element;
 
   /// The index of the field
@@ -41,6 +43,8 @@ class AdapterField {
 @immutable
 abstract class AdapterBuilder {
   /// TODO: Document this!
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   final InterfaceElement cls;
 
   /// TODO: Document this!
