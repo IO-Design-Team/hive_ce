@@ -152,13 +152,13 @@ void main() {
 
       bw = getWriter();
       final output1 =
-          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt))
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt - 1))
               .toList();
       expect(output1, isEmpty);
 
       bw = getWriter();
       final output2 =
-          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt + 1))
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt))
               .toList();
       expect(output2, contains(BinaryWriterImpl.intWarning));
 

@@ -104,7 +104,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeInt(int value) {
-    if (kDebugMode && value > maxInt) debugPrint(intWarning);
+    // Web truncates values greater than 2^53 to 2^53
+    if (kDebugMode && value >= maxInt) debugPrint(intWarning);
     writeDouble(value.toDouble());
   }
 
