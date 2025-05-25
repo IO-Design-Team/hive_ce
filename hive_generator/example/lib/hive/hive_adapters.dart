@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
     AdapterSpec<ClassSpec1>(),
     AdapterSpec<ClassSpec2>(),
     AdapterSpec<ClassSpec3>(),
+    AdapterSpec<ClassSpec4>(),
     AdapterSpec<EnumSpec>(),
   ],
   firstTypeId: 50,
@@ -34,6 +35,8 @@ class ClassSpec2 {
 class ClassSpec3 {
   int? value;
 }
+
+class ClassSpec4<T extends Object> {}
 
 enum EnumSpec {
   value1,

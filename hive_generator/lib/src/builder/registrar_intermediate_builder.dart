@@ -53,7 +53,7 @@ class RegistrarIntermediateBuilder implements Builder {
       final annotation = generateAdaptersElements.single.annotation;
       final revived = RevivedGenerateAdapters(annotation);
       for (final spec in revived.specs) {
-        adapters.add(generateAdapterName(spec.type.getDisplayString()));
+        adapters.add(generateAdapterName(spec.type.element3!.displayName));
       }
     } else {
       registrarLocation = false;

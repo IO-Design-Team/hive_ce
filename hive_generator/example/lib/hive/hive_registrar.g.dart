@@ -15,6 +15,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(ClassSpec1Adapter());
     registerAdapter(ClassSpec2Adapter());
     registerAdapter(ClassSpec3Adapter());
+    registerAdapter(ClassSpec4Adapter());
     registerAdapter(ConstructorDefaultsAdapter());
     registerAdapter(EmptyClassAdapter());
     registerAdapter(Enum1Adapter());
@@ -32,6 +33,7 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
     registerAdapter(ClassSpec1Adapter());
     registerAdapter(ClassSpec2Adapter());
     registerAdapter(ClassSpec3Adapter());
+    registerAdapter(ClassSpec4Adapter());
     registerAdapter(ConstructorDefaultsAdapter());
     registerAdapter(EmptyClassAdapter());
     registerAdapter(Enum1Adapter());
