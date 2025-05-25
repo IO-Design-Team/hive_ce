@@ -15,6 +15,8 @@ import 'package:yaml/yaml.dart';
 class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
   @override
   Future<String> generateForAnnotatedElement(
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
@@ -66,6 +68,8 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
+        /// TODO: Fix with analyzer 8
+        /// ignore: deprecated_member_use
         element: spec.type.element!,
         library: library,
         typeId: schemaType.typeId,
