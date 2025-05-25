@@ -2,6 +2,7 @@
 
 - Ignores analyzer deprecations
 - Fixes read method generation for classes with non-constructor fields
+- Fixes adapter name generation for generic types
 
 ## 1.9.1
 
