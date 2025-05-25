@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 class BinaryWriterImpl extends BinaryWriter {
   static const _initBufferSize = 4096;
 
-  /// The maximum integer that can be stored an a 64 bit float (2^53)
+  /// The maximum integer that can be stored in a 64 bit float (2^53)
   static const maxInt = 9007199254740992;
 
   /// Warning message printed when attempting to store an integer that is too large
