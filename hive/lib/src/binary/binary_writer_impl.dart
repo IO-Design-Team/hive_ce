@@ -19,8 +19,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   /// Warning message printed when attempting to store an integer that is too large
   static const intWarning =
-      'WARNING: Writing integer values greater than 2^53 will result in precision loss.'
-      'This is due to Hive storing all numbers as 64 bit floats.'
+      'WARNING: Writing integer values greater than 2^53 will result in precision loss. '
+      'This is due to Hive storing all numbers as 64 bit floats. '
       'Consider using a BigInt.';
 
   final TypeRegistryImpl _typeRegistry;

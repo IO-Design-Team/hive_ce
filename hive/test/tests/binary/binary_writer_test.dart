@@ -151,11 +151,19 @@ void main() {
       expect(bw.toBytes(), bytes(bd));
 
       bw = getWriter();
-      final output =
-          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt + 1))
-              .first;
-      expect(output, contains(BinaryWriterImpl.intWarning));
+      final output1 =
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt))
+              .toList();
+      expect(output1, isEmpty);
 
+      bw = getWriter();
+      final output2 =
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt + 1))
+              .toList();
+      expect(output2, contains(BinaryWriterImpl.intWarning));
+
+      bw = getWriter();
+      bw.writeInt(BinaryWriterImpl.maxInt + 1);
       final br = fromBytes(bw.toBytes());
       // Precision loss
       expect(br.readInt(), BinaryWriterImpl.maxInt);
