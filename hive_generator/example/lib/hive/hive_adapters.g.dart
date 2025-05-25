@@ -127,3 +127,35 @@ class EnumSpecAdapter extends TypeAdapter<EnumSpec> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class ClassSpec3Adapter extends TypeAdapter<ClassSpec3> {
+  @override
+  final typeId = 53;
+
+  @override
+  ClassSpec3 read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ClassSpec3()..value = (fields[0] as num?)?.toInt();
+  }
+
+  @override
+  void write(BinaryWriter writer, ClassSpec3 obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.value);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClassSpec3Adapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
