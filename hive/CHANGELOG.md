@@ -1,3 +1,7 @@
+## NEXT
+
+- Prints warning when writing integers greater than 2^53
+
 ## 2.11.2
 
 - Fixes web compatibility check
