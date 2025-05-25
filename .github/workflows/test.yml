@@ -53,12 +53,11 @@ jobs:
         with:
           sdk: 3.4.0
       # These dev dependencies require a newer SDK, but are not needed for testing
-      - name: Remove unnecessary dev dependencies
+      - name: Remove rexios_lints
         run: |
           sed -i '/rexios_lints:/d' pubspec.yaml
           sed -i '/build_runner:/d' pubspec.yaml
           sed -i '/json_serializable:/d' pubspec.yaml
-          sed -i '/dependency_overrides:/,/^[a-z]/{/^[a-z]/!d}' pubspec.yaml
       - name: Install dependencies
         run: dart pub get --no-example
       - name: Run tests
