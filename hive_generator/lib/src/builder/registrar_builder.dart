@@ -73,7 +73,8 @@ class RegistrarBuilder implements Builder {
     buffer.writeln("import 'package:hive_ce/hive.dart';");
 
     for (final uri in uris) {
-      buffer.writeln("import '$uri';");
+      final resultUri = getRelativePath(uri);
+      buffer.writeln("import '$resultUri';");
     }
 
     buffer.write('''
@@ -122,6 +123,15 @@ extension IsolatedHiveRegistrar on IsolatedHiveInterface {
         buildStep.allowedOutputs.single,
         buffer.toString(),
       );
+    }
+  }
+
+  String getRelativePath(String uri) {
+    Uri pathUri = Uri.parse(uri);
+    if (pathUri.scheme == 'package') {
+      return pathUri.pathSegments.skip(1).join('/');
+    } else {
+      return uri;
     }
   }
 }
