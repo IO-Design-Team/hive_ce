@@ -1,6 +1,6 @@
 name: hive_ce_generator
 description: Extension for Hive. Automatically generates TypeAdapters to store any class.
-version: 1.9.1
+version: 1.9.2
 homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive_generator
 documentation: https://docs.hivedb.dev/
 
@@ -24,5 +24,5 @@ dependencies:
 dev_dependencies:
   test: ^1.17.11
   build_runner: any
-  rexios_lints: ^11.0.6
+  rexios_lints: ^12.0.0
   json_serializable: ^6.8.0

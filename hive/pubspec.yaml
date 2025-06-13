@@ -1,6 +1,6 @@
 name: hive_ce
 description: Hive Community Edition - A spiritual continuation of Hive v2
-version: 2.11.2
+version: 2.11.3
 homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive
 documentation: https://docs.hivedb.dev/
 
@@ -17,7 +17,7 @@ dependencies:
 dev_dependencies:
   test: ^1.17.12
   mocktail: ^1.0.4
-  rexios_lints: ^11.0.6
+  rexios_lints: ^12.0.0
   path: ^1.7.0
   pointycastle: ^4.0.0
   build_runner: ^2.1.2

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
@@ -8,12 +9,18 @@ import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
+import '../../util/print_utils.dart';
 import '../frames.dart';
 import '../mocks.dart';
 
 List<int> bytes(ByteData byteData) => byteData.buffer.asUint8List();
 
 BinaryWriterImpl getWriter() => BinaryWriterImpl(TypeRegistryImpl());
+
+BinaryReaderImpl fromBytes(List<int> bytes) {
+  return BinaryReaderImpl(Uint8List.fromList(bytes), TypeRegistryImpl());
+}
+
 void main() {
   group('BinaryWriter', () {
     test('.writeByte()', () {
@@ -115,7 +122,7 @@ void main() {
       expect(bw.toBytes(), bytes(bd));
     });
 
-    test('.writeInt()', () {
+    test('.writeInt()', () async {
       final bd = ByteData(8);
 
       var bw = getWriter();
@@ -134,14 +141,32 @@ void main() {
       expect(bw.toBytes(), bytes(bd));
 
       bw = getWriter();
-      bw.writeInt(2 ^ 53);
-      bd.setFloat64(0, (2 ^ 53).toDouble(), Endian.little);
+      bw.writeInt(BinaryWriterImpl.maxInt);
+      bd.setFloat64(0, BinaryWriterImpl.maxInt.toDouble(), Endian.little);
       expect(bw.toBytes(), bytes(bd));
 
       bw = getWriter();
-      bw.writeInt(-2 ^ 53);
-      bd.setFloat64(0, (-2 ^ 53).toDouble(), Endian.little);
+      bw.writeInt(-BinaryWriterImpl.maxInt);
+      bd.setFloat64(0, -BinaryWriterImpl.maxInt.toDouble(), Endian.little);
       expect(bw.toBytes(), bytes(bd));
+
+      bw = getWriter();
+      final output1 =
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt - 1))
+              .toList();
+      expect(output1, isEmpty);
+
+      bw = getWriter();
+      final output2 =
+          await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt))
+              .toList();
+      expect(output2, contains(BinaryWriterImpl.intWarning));
+
+      bw = getWriter();
+      bw.writeInt(BinaryWriterImpl.maxInt + 1);
+      final br = fromBytes(bw.toBytes());
+      // Precision loss
+      expect(br.readInt(), BinaryWriterImpl.maxInt);
     });
 
     test('.writeDouble()', () {
