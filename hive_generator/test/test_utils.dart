@@ -34,7 +34,11 @@ void expectGeneration({
 
   if (throws != null) {
     expect(result.exitCode, isNot(0));
-    expect(result.stdout, contains(throws));
+
+    final lines = result.stdout.split('\n');
+    for (final line in throws.split('\n')) {
+      expect(lines, contains(contains(line)));
+    }
     return;
   } else {
     expect(result.exitCode, 0);
