@@ -20,4 +20,4 @@ dev_dependencies:
   test: ^1.21.1
   rexios_lints: ^12.0.0
   mockito: ^5.4.1
-  build_runner: 2.4.15 # TODO: https://github.com/dart-lang/build/issues/4064
+  build_runner: ^2.5.4
