@@ -111,9 +111,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
+      # TODO: Figure out why puby gen needs to run twice
       - run: |
           dart pub global activate puby
           puby link
+          puby gen
           puby gen
           dart format .
           git diff --exit-code
