@@ -105,7 +105,11 @@ class DataTableView extends StatelessWidget {
       columnCount: columnCount,
       pinnedRowCount: 1,
       pinnedColumnCount: 1,
-      rowBuilder: (index) => const TableSpan(extent: FixedSpanExtent(20)),
+      rowBuilder:
+          (index) => const TableSpan(
+            extent: FixedSpanExtent(20),
+            padding: SpanPadding.all(4),
+          ),
       columnBuilder:
           (index) => const TableSpan(
             extent: FixedSpanExtent(100),
