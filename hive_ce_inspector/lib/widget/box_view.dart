@@ -7,19 +7,13 @@ class BoxView extends StatefulWidget {
   final BoxData data;
 
   const BoxView({super.key, required this.data});
-
-  @override
-  State<StatefulWidget> createState() => _BoxViewState();
-}
-
-class _BoxViewState extends State<BoxView> {
   @override
   Widget build(BuildContext context) {
-    if (widget.data.frames.isEmpty) {
+    if (data.frames.isEmpty) {
       return const Center(child: Text('Box is empty'));
     }
 
-    final frames = widget.data.frames.values.toList();
+    final frames = data.frames.values.toList();
     final frameFields = fieldsForFrames(frames);
     final columnCount = 1 + (frameFields.values.firstOrNull?.length ?? 0);
 
