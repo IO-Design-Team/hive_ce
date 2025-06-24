@@ -14,7 +14,19 @@ class BoxView extends StatefulWidget {
 
 class _BoxViewState extends State<BoxView> {
   /// Stack of table views
-  final List<List<KeyedObject>> stack = [];
+  final List<List<KeyedObject>> _stack = [];
+
+  List<List<KeyedObject>> get stack => [
+    widget.data.frames.values.map((e) => KeyedObject(e.key, e.value)).toList(),
+    ..._stack,
+  ];
+
+  @override
+  void didUpdateWidget(BoxView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.name == widget.data.name) return;
+    setState(_stack.clear);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +35,8 @@ class _BoxViewState extends State<BoxView> {
     }
 
     return DataTableView(
-      data:
-          widget.data.frames.values
-              .map((e) => KeyedObject(e.key, e.value))
-              .toList(),
+      data: stack.last,
+      onStack: (data) => setState(() => _stack.add(data)),
     );
   }
 }
@@ -40,8 +50,9 @@ class KeyedObject {
 
 class DataTableView extends StatelessWidget {
   final List<KeyedObject> data;
+  final ValueSetter<List<KeyedObject>> onStack;
 
-  const DataTableView({super.key, required this.data});
+  const DataTableView({super.key, required this.data, required this.onStack});
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +98,24 @@ class DataTableView extends StatelessWidget {
           fieldValue = objectValue;
         }
 
-        return TableViewCell(child: Text(fieldValue.toString()));
+        if (fieldValue is Iterable) {
+          final list = fieldValue.toList();
+          if (list.isEmpty) {
+            return const TableViewCell(child: Text('[Empty]'));
+          }
+          return TableViewCell(
+            child: InkWell(
+              child: const Text('[Iterable]'),
+              onTap:
+                  () => onStack([
+                    for (var i = 0; i < list.length; i++)
+                      KeyedObject(i, list[i]),
+                  ]),
+            ),
+          );
+        } else {
+          return TableViewCell(child: Text(fieldValue.toString()));
+        }
       },
     );
   }
