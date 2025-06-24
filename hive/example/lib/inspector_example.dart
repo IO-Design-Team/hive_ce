@@ -16,11 +16,14 @@ void main() async {
   box2.inspect();
 
   final john = Person(name: 'John', age: 30);
-  await box2.put('person1', john);
-  await box2.put(
-    'person2',
-    Person(name: 'Jane', age: 25, bestFriend: john, friends: [john]),
+  final jane = Person(
+    name: 'Jane',
+    age: 25,
+    bestFriend: john,
+    friends: [john, john, john, Person(name: 'Joe', age: 22, bestFriend: john)],
   );
+  await box2.put('person1', john);
+  await box2.put('person2', jane);
 
   while (true) {
     await Future.delayed(const Duration(seconds: 1));

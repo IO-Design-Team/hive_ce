@@ -21,6 +21,8 @@ class _BoxViewState extends State<BoxView> {
       'root',
       widget.data.frames.values
           .map((e) => KeyedObject(e.key, e.value))
+          .toList()
+          .reversed
           .toList(),
     ),
     ..._stack,
@@ -54,7 +56,7 @@ class _BoxViewState extends State<BoxView> {
                   onPressed:
                       () => setState(
                         () => _stack.removeRange(
-                          _stack.length - _stack.indexOf(e),
+                          _stack.indexOf(e) + 1,
                           _stack.length,
                         ),
                       ),
@@ -128,7 +130,7 @@ class DataTableView extends StatelessWidget {
           return TableViewCell(child: Text(columnIndex.toString()));
         }
 
-        final object = data.reversed.elementAt(rowIndex);
+        final object = data[rowIndex];
 
         if (column == 0) {
           return TableViewCell(child: Text(object.key.toString()));
