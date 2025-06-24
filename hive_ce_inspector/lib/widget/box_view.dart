@@ -14,10 +14,15 @@ class BoxView extends StatefulWidget {
 
 class _BoxViewState extends State<BoxView> {
   /// Stack of table views
-  final List<List<KeyedObject>> _stack = [];
+  final List<KeyedObject<List<KeyedObject>>> _stack = [];
 
-  List<List<KeyedObject>> get stack => [
-    widget.data.frames.values.map((e) => KeyedObject(e.key, e.value)).toList(),
+  List<KeyedObject<List<KeyedObject>>> get stack => [
+    KeyedObject(
+      'root',
+      widget.data.frames.values
+          .map((e) => KeyedObject(e.key, e.value))
+          .toList(),
+    ),
     ..._stack,
   ];
 
@@ -34,23 +39,54 @@ class _BoxViewState extends State<BoxView> {
       return const Center(child: Text('Box is empty'));
     }
 
-    return DataTableView(
-      data: stack.last,
-      onStack: (data) => setState(() => _stack.add(data)),
+    return Column(
+      children: [
+        Row(
+          children: [
+            TextButton(
+              onPressed: () => setState(_stack.clear),
+              child: const Text('root'),
+            ),
+            ..._stack.expand(
+              (e) => [
+                const Text('/'),
+                TextButton(
+                  onPressed:
+                      () => setState(
+                        () => _stack.removeRange(
+                          _stack.length - _stack.indexOf(e),
+                          _stack.length,
+                        ),
+                      ),
+                  child: Text(e.key.toString()),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Expanded(
+          child: DataTableView(
+            data: stack.last.value,
+            onStack:
+                (key, value) =>
+                    setState(() => _stack.add(KeyedObject(key, value))),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class KeyedObject {
+class KeyedObject<T extends Object?> {
   final Object key;
-  final Object? value;
+  final T value;
 
   const KeyedObject(this.key, this.value);
 }
 
 class DataTableView extends StatelessWidget {
   final List<KeyedObject> data;
-  final ValueSetter<List<KeyedObject>> onStack;
+  final void Function(Object key, List<KeyedObject> value) onStack;
 
   const DataTableView({super.key, required this.data, required this.onStack});
 
@@ -107,7 +143,7 @@ class DataTableView extends StatelessWidget {
             child: InkWell(
               child: const Text('[Iterable]'),
               onTap:
-                  () => onStack([
+                  () => onStack('${object.key}.$columnIndex', [
                     for (var i = 0; i < list.length; i++)
                       KeyedObject(i, list[i]),
                   ]),
@@ -117,7 +153,10 @@ class DataTableView extends StatelessWidget {
           return TableViewCell(
             child: InkWell(
               child: const Text('[Object]'),
-              onTap: () => onStack([KeyedObject(0, fieldValue)]),
+              onTap:
+                  () => onStack('${object.key}.$columnIndex', [
+                    KeyedObject(0, fieldValue),
+                  ]),
             ),
           );
         } else {
