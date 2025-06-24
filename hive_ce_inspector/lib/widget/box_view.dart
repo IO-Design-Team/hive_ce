@@ -3,7 +3,7 @@ import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
-class BoxView extends StatefulWidget {
+class BoxView extends StatelessWidget {
   final BoxData data;
 
   const BoxView({super.key, required this.data});
