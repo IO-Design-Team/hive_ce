@@ -17,7 +17,7 @@ class BinaryReaderImpl extends BinaryReader {
   final TypeRegistryImpl _typeRegistry;
 
   int _bufferLimit;
-  int _offset = 0;
+  var _offset = 0;
 
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])

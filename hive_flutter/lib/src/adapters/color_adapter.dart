@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:hive_ce/hive.dart';
+import 'package:flutter/foundation.dart';
 
 /// TODO: Document this!
 class ColorAdapter extends TypeAdapter<Color> {
@@ -30,6 +31,7 @@ class ColorAdapter extends TypeAdapter<Color> {
 }
 
 /// Hive wrapper for the fields in [Color]
+@immutable
 class HiveColor {
   /// alpha
   final double a;
@@ -76,7 +78,7 @@ class HiveColor {
 /// Adapter for the new Color fields
 class HiveColorAdapter extends TypeAdapter<HiveColor> {
   /// Constructor
-  HiveColorAdapter({required this.typeId});
+  const HiveColorAdapter({required this.typeId});
 
   @override
   final int typeId;

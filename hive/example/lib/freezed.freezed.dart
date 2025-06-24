@@ -1,3 +1,4 @@
+// dart format width=80
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
@@ -9,93 +10,64 @@ part of 'freezed.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
 /// @nodoc
 mixin _$FreezedPerson {
-  String get firstName => throw _privateConstructorUsedError;
-  String get middleName => throw _privateConstructorUsedError;
-  String get lastName => throw _privateConstructorUsedError;
-  int get age => throw _privateConstructorUsedError;
+  String get firstName;
+  String get middleName;
+  String get lastName;
+  int get age;
 
   /// Create a copy of FreezedPerson
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $FreezedPersonCopyWith<FreezedPerson> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $FreezedPersonCopyWith<$Res> {
-  factory $FreezedPersonCopyWith(
-          FreezedPerson value, $Res Function(FreezedPerson) then) =
-      _$FreezedPersonCopyWithImpl<$Res, FreezedPerson>;
-  @useResult
-  $Res call({String firstName, String middleName, String lastName, int age});
-}
-
-/// @nodoc
-class _$FreezedPersonCopyWithImpl<$Res, $Val extends FreezedPerson>
-    implements $FreezedPersonCopyWith<$Res> {
-  _$FreezedPersonCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of FreezedPerson
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $FreezedPersonCopyWith<FreezedPerson> get copyWith =>
+      _$FreezedPersonCopyWithImpl<FreezedPerson>(
+          this as FreezedPerson, _$identity);
+
   @override
-  $Res call({
-    Object? firstName = null,
-    Object? middleName = null,
-    Object? lastName = null,
-    Object? age = null,
-  }) {
-    return _then(_value.copyWith(
-      firstName: null == firstName
-          ? _value.firstName
-          : firstName // ignore: cast_nullable_to_non_nullable
-              as String,
-      middleName: null == middleName
-          ? _value.middleName
-          : middleName // ignore: cast_nullable_to_non_nullable
-              as String,
-      lastName: null == lastName
-          ? _value.lastName
-          : lastName // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
-          ? _value.age
-          : age // ignore: cast_nullable_to_non_nullable
-              as int,
-    ) as $Val);
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is FreezedPerson &&
+            (identical(other.firstName, firstName) ||
+                other.firstName == firstName) &&
+            (identical(other.middleName, middleName) ||
+                other.middleName == middleName) &&
+            (identical(other.lastName, lastName) ||
+                other.lastName == lastName) &&
+            (identical(other.age, age) || other.age == age));
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, firstName, middleName, lastName, age);
+
+  @override
+  String toString() {
+    return 'FreezedPerson(firstName: $firstName, middleName: $middleName, lastName: $lastName, age: $age)';
   }
 }
 
 /// @nodoc
-abstract class _$$FreezedPersonImplCopyWith<$Res>
-    implements $FreezedPersonCopyWith<$Res> {
-  factory _$$FreezedPersonImplCopyWith(
-          _$FreezedPersonImpl value, $Res Function(_$FreezedPersonImpl) then) =
-      __$$FreezedPersonImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $FreezedPersonCopyWith<$Res> {
+  factory $FreezedPersonCopyWith(
+          FreezedPerson value, $Res Function(FreezedPerson) _then) =
+      _$FreezedPersonCopyWithImpl;
   @useResult
   $Res call({String firstName, String middleName, String lastName, int age});
 }
 
 /// @nodoc
-class __$$FreezedPersonImplCopyWithImpl<$Res>
-    extends _$FreezedPersonCopyWithImpl<$Res, _$FreezedPersonImpl>
-    implements _$$FreezedPersonImplCopyWith<$Res> {
-  __$$FreezedPersonImplCopyWithImpl(
-      _$FreezedPersonImpl _value, $Res Function(_$FreezedPersonImpl) _then)
-      : super(_value, _then);
+class _$FreezedPersonCopyWithImpl<$Res>
+    implements $FreezedPersonCopyWith<$Res> {
+  _$FreezedPersonCopyWithImpl(this._self, this._then);
+
+  final FreezedPerson _self;
+  final $Res Function(FreezedPerson) _then;
 
   /// Create a copy of FreezedPerson
   /// with the given fields replaced by the non-null parameter values.
@@ -107,21 +79,21 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
     Object? lastName = null,
     Object? age = null,
   }) {
-    return _then(_$FreezedPersonImpl(
+    return _then(_self.copyWith(
       firstName: null == firstName
-          ? _value.firstName
+          ? _self.firstName
           : firstName // ignore: cast_nullable_to_non_nullable
               as String,
       middleName: null == middleName
-          ? _value.middleName
+          ? _self.middleName
           : middleName // ignore: cast_nullable_to_non_nullable
               as String,
       lastName: null == lastName
-          ? _value.lastName
+          ? _self.lastName
           : lastName // ignore: cast_nullable_to_non_nullable
               as String,
       age: null == age
-          ? _value.age
+          ? _self.age
           : age // ignore: cast_nullable_to_non_nullable
               as int,
     ));
@@ -130,8 +102,8 @@ class __$$FreezedPersonImplCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$FreezedPersonImpl implements _FreezedPerson {
-  const _$FreezedPersonImpl(
+class _FreezedPerson implements FreezedPerson {
+  const _FreezedPerson(
       {required this.firstName,
       this.middleName = '',
       required this.lastName,
@@ -147,16 +119,19 @@ class _$FreezedPersonImpl implements _FreezedPerson {
   @override
   final int age;
 
+  /// Create a copy of FreezedPerson
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'FreezedPerson(firstName: $firstName, middleName: $middleName, lastName: $lastName, age: $age)';
-  }
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$FreezedPersonCopyWith<_FreezedPerson> get copyWith =>
+      __$FreezedPersonCopyWithImpl<_FreezedPerson>(this, _$identity);
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$FreezedPersonImpl &&
+            other is _FreezedPerson &&
             (identical(other.firstName, firstName) ||
                 other.firstName == firstName) &&
             (identical(other.middleName, middleName) ||
@@ -170,35 +145,60 @@ class _$FreezedPersonImpl implements _FreezedPerson {
   int get hashCode =>
       Object.hash(runtimeType, firstName, middleName, lastName, age);
 
+  @override
+  String toString() {
+    return 'FreezedPerson(firstName: $firstName, middleName: $middleName, lastName: $lastName, age: $age)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$FreezedPersonCopyWith<$Res>
+    implements $FreezedPersonCopyWith<$Res> {
+  factory _$FreezedPersonCopyWith(
+          _FreezedPerson value, $Res Function(_FreezedPerson) _then) =
+      __$FreezedPersonCopyWithImpl;
+  @override
+  @useResult
+  $Res call({String firstName, String middleName, String lastName, int age});
+}
+
+/// @nodoc
+class __$FreezedPersonCopyWithImpl<$Res>
+    implements _$FreezedPersonCopyWith<$Res> {
+  __$FreezedPersonCopyWithImpl(this._self, this._then);
+
+  final _FreezedPerson _self;
+  final $Res Function(_FreezedPerson) _then;
+
   /// Create a copy of FreezedPerson
   /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$FreezedPersonImplCopyWith<_$FreezedPersonImpl> get copyWith =>
-      __$$FreezedPersonImplCopyWithImpl<_$FreezedPersonImpl>(this, _$identity);
+  $Res call({
+    Object? firstName = null,
+    Object? middleName = null,
+    Object? lastName = null,
+    Object? age = null,
+  }) {
+    return _then(_FreezedPerson(
+      firstName: null == firstName
+          ? _self.firstName
+          : firstName // ignore: cast_nullable_to_non_nullable
+              as String,
+      middleName: null == middleName
+          ? _self.middleName
+          : middleName // ignore: cast_nullable_to_non_nullable
+              as String,
+      lastName: null == lastName
+          ? _self.lastName
+          : lastName // ignore: cast_nullable_to_non_nullable
+              as String,
+      age: null == age
+          ? _self.age
+          : age // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
 }
 
-abstract class _FreezedPerson implements FreezedPerson {
-  const factory _FreezedPerson(
-      {required final String firstName,
-      final String middleName,
-      required final String lastName,
-      required final int age}) = _$FreezedPersonImpl;
-
-  @override
-  String get firstName;
-  @override
-  String get middleName;
-  @override
-  String get lastName;
-  @override
-  int get age;
-
-  /// Create a copy of FreezedPerson
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$FreezedPersonImplCopyWith<_$FreezedPersonImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
+// dart format on

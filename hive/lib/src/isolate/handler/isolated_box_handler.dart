@@ -4,8 +4,10 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:meta/meta.dart';
 
 /// Class to handle method calls to the isolated box
+@immutable
 class IsolatedBoxHandler extends IsolateStreamHandler {
   /// The wrapped box
   final BoxBase box;

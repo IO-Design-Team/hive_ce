@@ -6,6 +6,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
@@ -13,12 +14,21 @@ import 'package:meta/meta.dart';
 class BinaryWriterImpl extends BinaryWriter {
   static const _initBufferSize = 4096;
 
+  /// The maximum integer that can be stored in a 64 bit float (2^53)
+  static const maxInt = 9007199254740992;
+
+  /// Warning message printed when attempting to store an integer that is too large
+  static const intWarning =
+      'WARNING: Writing integer values greater than 2^53 will result in precision loss. '
+      'This is due to Hive storing all numbers as 64 bit floats. '
+      'Consider using a BigInt.';
+
   final TypeRegistryImpl _typeRegistry;
-  Uint8List _buffer = Uint8List(_initBufferSize);
+  var _buffer = Uint8List(_initBufferSize);
 
   ByteData? _byteDataInstance;
 
-  int _offset = 0;
+  var _offset = 0;
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -94,6 +104,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeInt(int value) {
+    // Web truncates values greater than 2^53 to 2^53
+    if (kDebugMode && value >= maxInt) debugPrint(intWarning);
     writeDouble(value.toDouble());
   }
 

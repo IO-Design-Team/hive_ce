@@ -10,7 +10,7 @@ part of 'types.dart';
 
 class Class1Adapter extends TypeAdapter<Class1> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   Class1 read(BinaryReader reader) {
@@ -56,7 +56,7 @@ class Class1Adapter extends TypeAdapter<Class1> {
 
 class Class2Adapter extends TypeAdapter<Class2> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   Class2 read(BinaryReader reader) {
@@ -99,7 +99,7 @@ class Class2Adapter extends TypeAdapter<Class2> {
 
 class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
   @override
-  final int typeId = 4;
+  final typeId = 4;
 
   @override
   EmptyClass read(BinaryReader reader) {
@@ -125,7 +125,7 @@ class EmptyClassAdapter extends TypeAdapter<EmptyClass> {
 
 class IterableClassAdapter extends TypeAdapter<IterableClass> {
   @override
-  final int typeId = 5;
+  final typeId = 5;
 
   @override
   IterableClass read(BinaryReader reader) {
@@ -168,7 +168,7 @@ class IterableClassAdapter extends TypeAdapter<IterableClass> {
 
 class ConstructorDefaultsAdapter extends TypeAdapter<ConstructorDefaults> {
   @override
-  final int typeId = 6;
+  final typeId = 6;
 
   @override
   ConstructorDefaults read(BinaryReader reader) {
@@ -211,7 +211,7 @@ class ConstructorDefaultsAdapter extends TypeAdapter<ConstructorDefaults> {
 
 class NullableTypesAdapter extends TypeAdapter<NullableTypes> {
   @override
-  final int typeId = 7;
+  final typeId = 7;
 
   @override
   NullableTypes read(BinaryReader reader) {
@@ -251,7 +251,7 @@ class NullableTypesAdapter extends TypeAdapter<NullableTypes> {
 
 class NamedImportsAdapter extends TypeAdapter<NamedImports> {
   @override
-  final int typeId = 8;
+  final typeId = 8;
 
   @override
   NamedImports read(BinaryReader reader) {
@@ -294,7 +294,7 @@ class NamedImportsAdapter extends TypeAdapter<NamedImports> {
 
 class Enum1Adapter extends TypeAdapter<Enum1> {
   @override
-  final int typeId = 3;
+  final typeId = 3;
 
   @override
   Enum1 read(BinaryReader reader) {

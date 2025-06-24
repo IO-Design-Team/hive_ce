@@ -3,7 +3,7 @@ import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 /// TODO: Document this!
 class EnumAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
-  EnumAdapterBuilder(super.cls, super.getters);
+  const EnumAdapterBuilder(super.cls, super.getters);
 
   @override
   String buildRead() {

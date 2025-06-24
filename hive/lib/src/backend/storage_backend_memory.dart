@@ -23,7 +23,7 @@ class StorageBackendMemory extends StorageBackend {
   String? get path => null;
 
   @override
-  bool supportsCompaction = false;
+  var supportsCompaction = false;
 
   @override
   Future<void> initialize(

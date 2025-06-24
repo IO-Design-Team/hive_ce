@@ -36,7 +36,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   /// Whether this box is isolated
   final bool isolated;
 
-  bool _open = true;
+  var _open = true;
 
   /// Not part of public API
   BoxBaseImpl(

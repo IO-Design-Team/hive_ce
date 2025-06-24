@@ -206,8 +206,6 @@ void main() {
           await box.deleteFromDisk();
           expect(box.isOpen, false);
         },
-        // TODO: Figure out why deleteFromDisk never completes on web
-        skip: isBrowser,
       );
     });
   });

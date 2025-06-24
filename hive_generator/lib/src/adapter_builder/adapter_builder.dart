@@ -1,10 +1,14 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:meta/meta.dart';
 
 /// Metadata about a field in a class adapter
+@immutable
 class AdapterField {
   /// The corresponding element for this field
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   final PropertyAccessorElement element;
 
   /// The index of the field
@@ -25,7 +29,7 @@ class AdapterField {
   final String? constructorDefault;
 
   /// Constructor
-  AdapterField(
+  const AdapterField(
     this.element,
     this.index,
     this.name,
@@ -36,8 +40,11 @@ class AdapterField {
 }
 
 /// TODO: Document this!
+@immutable
 abstract class AdapterBuilder {
   /// TODO: Document this!
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   final InterfaceElement cls;
 
   /// TODO: Document this!
@@ -47,7 +54,7 @@ abstract class AdapterBuilder {
   final List<AdapterField> setters;
 
   /// TODO: Document this!
-  AdapterBuilder(
+  const AdapterBuilder(
     this.cls,
     this.getters, [
     this.setters = const <AdapterField>[],

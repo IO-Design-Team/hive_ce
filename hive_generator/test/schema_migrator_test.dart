@@ -241,7 +241,7 @@ part 'adapters.g.dart';
 
 @HiveType(typeId: 0)
 @freezed
-class Class with _\$Class {
+sealed class Class with _\$Class {
   factory Class({@HiveField(0) required int value}) = _Class;
 }
 ''',

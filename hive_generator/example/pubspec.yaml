@@ -1,9 +1,10 @@
 name: example
 dependencies:
   hive_ce: any
+  meta: ^1.14.0
 dev_dependencies:
-  rexios_lints: ^9.1.0
-  build_runner: any
+  rexios_lints: ^12.0.0
+  build_runner: ^2.5.4
   hive_ce_generator:
     path: ..
 environment:

@@ -9,11 +9,14 @@ import 'package:hive_ce_generator/src/helper/type_helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
+import 'package:meta/meta.dart';
 
 /// TODO: Document this!
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   @override
   Future<String> generateForAnnotatedElement(
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
@@ -31,7 +34,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   ///
   /// If this is an incremental update, pass the existing [schema]
   static GenerateTypeAdapterResult generateTypeAdapter({
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required Element element,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required LibraryElement library,
     required int typeId,
     String? adapterName,
@@ -59,7 +67,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final content = '''
     class $adapterName extends TypeAdapter<${cls.name}> {
       @override
-      final int typeId = $typeId;
+      final typeId = $typeId;
 
       @override
       ${cls.name} read(BinaryReader reader) {
@@ -87,12 +95,17 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
+  /// TODO: Fix with analyzer 8
+  /// ignore: deprecated_member_use
   static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final isEnum = cls.thisType.isEnum;
     final constructorFields =
         getConstructor(cls).parameters.map((it) => it.name).toSet();
 
     final accessorNames = <String>{};
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
@@ -127,7 +140,13 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static GetAccessorsResult getAccessors({
     required int typeId,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required InterfaceElement cls,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required LibraryElement library,
     HiveSchemaType? schema,
   }) {
@@ -147,6 +166,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     var nextIndex = schema?.nextIndex ?? 0;
     final newSchemaFields = <String, HiveSchemaField>{};
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
@@ -186,12 +208,15 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
       final getter = cls.augmented.lookUpGetter(name: name, library: library);
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
 
-      final setter =
-          cls.augmented.lookUpSetter(name: '$name=', library: library);
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
+      final setter = cls.augmented.lookUpSetter(name: name, library: library);
       final setterField = accessorToField(setter);
       if (setterField != null) setters.add(setterField);
     }
@@ -231,6 +256,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 }
 
 /// Result of [TypeAdapterGenerator.getAccessors]
+@immutable
 class GetAccessorsResult {
   /// The getters of the class
   final List<AdapterField> getters;
@@ -246,6 +272,7 @@ class GetAccessorsResult {
 }
 
 /// Result of [TypeAdapterGenerator.generateTypeAdapter]
+@immutable
 class GenerateTypeAdapterResult {
   /// The generated content
   final String content;

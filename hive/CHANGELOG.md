@@ -1,3 +1,16 @@
+## 2.11.3
+
+- Prints warning when writing integers greater than 2^53
+
+## 2.11.2
+
+- Fixes web compatibility check
+- Fixes `deleteFromDisk` not completing on web
+
+## 2.11.1
+
+- Allows boxes of primitive iterables
+
 ## 2.11.0
 
 - Isolate support through `IsolatedHive`
@@ -8,6 +21,7 @@
 - Supports `freezed` default values
 - Enforces that boxes of type `Map` _must_ be `Map<dynamic, dynamic>`
 - Enforces that boxes of type `Iterable` _must_ be `Iterable<dynamic>`
+- Adds `reservedTypeIds` to `GenerateAdapters` annotation
 
 ## 2.10.1
 

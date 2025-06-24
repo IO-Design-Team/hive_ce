@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -12,11 +13,13 @@ import 'package:test/test.dart';
 import '../tests/common.dart';
 import '../util/is_browser/is_browser.dart';
 import '../util/print_utils.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class HiveWrapper {
   final dynamic hive;
 
-  HiveWrapper(this.hive);
+  const HiveWrapper(this.hive);
 
   FutureOr<void> init(String? path) => hive.init(path);
 
@@ -61,10 +64,11 @@ class HiveWrapper {
   FutureOr<void> ignoreTypeId<T>(int typeId) => hive.ignoreTypeId(typeId);
 }
 
+@immutable
 class BoxBaseWrapper<E> {
   final dynamic box;
 
-  BoxBaseWrapper(this.box);
+  const BoxBaseWrapper(this.box);
 
   String get name => box.name;
   String? get path => box.path;
@@ -85,11 +89,11 @@ class BoxBaseWrapper<E> {
 }
 
 class LazyBoxWrapper<E> extends BoxBaseWrapper<E> {
-  LazyBoxWrapper(super.box);
+  const LazyBoxWrapper(super.box);
 }
 
 class BoxWrapper<E> extends BoxBaseWrapper<E> {
-  BoxWrapper(super.box);
+  const BoxWrapper(super.box);
 
   FutureOr<Map<dynamic, E>> toMap() => box.toMap();
 }
@@ -98,7 +102,7 @@ extension HiveIsolateExtension on HiveIsolate {
   set entryPoint(IsolateEntryPoint entryPoint) {
     spawnHiveIsolate = () => spawnIsolate(
           entryPoint,
-          debugName: HiveIsolate.isolateName,
+          debugName: hiveIsolateName,
           onConnect: onConnect,
           onExit: onExit,
         );
@@ -109,7 +113,7 @@ extension HiveIsolateExtension on HiveIsolate {
           Uri.file(
             '${Directory.current.path}/test/util/isolate_entry_point.dart',
           ),
-          debugName: HiveIsolate.isolateName,
+          debugName: hiveIsolateName,
           onConnect: onConnect,
           onExit: onExit,
         );

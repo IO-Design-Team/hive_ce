@@ -15,6 +15,8 @@ import 'package:yaml/yaml.dart';
 class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
   @override
   Future<String> generateForAnnotatedElement(
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
@@ -50,14 +52,24 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         )
         .toList();
 
-    var nextTypeId = schema.nextTypeId;
+    var typeId = schema.nextTypeId - 1;
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
-      final typeKey = spec.type.getDisplayString();
+      final typeKey = spec.type.element3!.displayName;
+
+      int generateTypeId() {
+        do {
+          typeId++;
+        } while (revived.reservedTypeIds.contains(typeId));
+        return typeId;
+      }
+
       final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(typeId: nextTypeId++, nextIndex: 0, fields: {});
+          HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
+        /// TODO: Fix with analyzer 8
+        /// ignore: deprecated_member_use
         element: spec.type.element!,
         library: library,
         typeId: schemaType.typeId,
@@ -73,7 +85,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     // Not the safest thing to do, but there doesn't seem to be a better way
     buildStep.forceWriteAsString(
       schemaAsset,
-      writeSchema(HiveSchema(nextTypeId: nextTypeId, types: newTypes)),
+      writeSchema(HiveSchema(nextTypeId: typeId + 1, types: newTypes).toString()),
     );
 
     return content.toString();

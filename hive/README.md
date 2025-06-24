@@ -74,6 +74,15 @@ The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark
 - [Migrating to `GenerateAdapters`](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#generate-adapters)
 - [Add fields to objects](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#add-fields)
 
+## Getting Started
+
+Hive CE requires Dart 3. Ensure that you have the following in your `pubspec.yaml` file:
+
+```yaml
+environment:
+  sdk: ^3.0.0
+```
+
 ## Usage
 
 You can use Hive just like a map. It is not necessary to await `Futures`.

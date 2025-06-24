@@ -11,7 +11,7 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
-import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
@@ -43,10 +43,10 @@ RECOMMENDED ACTIONS:
   final _boxes = HashMap<String, BoxBaseImpl>();
   final _openingBoxes = HashMap<String, Future>();
   BackendManagerInterface? _managerOverride;
-  final Random _secureRandom = Random.secure();
+  final _secureRandom = Random.secure();
 
   /// Whether this Hive instance is isolated
-  bool _isolated = false;
+  var _isolated = false;
 
   /// Set [_isolated] to true
   void setIsolated() => _isolated = true;
@@ -66,7 +66,7 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (!{'main', HiveIsolate.isolateName}.contains(isolateDebugName)) {
+    if (!{'main', hiveIsolateName}.contains(isolateDebugName)) {
       debugPrint(unsafeIsolateWarning);
     }
     homePath = path;

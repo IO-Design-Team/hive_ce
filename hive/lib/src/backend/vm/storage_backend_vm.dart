@@ -59,13 +59,13 @@ RECOMMENDED ACTIONS:
 
   /// Not part of public API
   @visibleForTesting
-  int writeOffset = 0;
+  var writeOffset = 0;
 
   /// Not part of public API
   @visibleForTesting
   late final TypeRegistry registry;
 
-  bool _compactionScheduled = false;
+  var _compactionScheduled = false;
 
   /// Not part of public API
   StorageBackendVm(
@@ -90,7 +90,7 @@ RECOMMENDED ACTIONS:
   String get path => _file.path;
 
   @override
-  bool supportsCompaction = true;
+  var supportsCompaction = true;
 
   /// Not part of public API
   Future open() async {

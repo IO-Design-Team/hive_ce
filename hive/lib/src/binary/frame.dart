@@ -18,7 +18,7 @@ class Frame {
   int? length;
 
   /// Not part of public API
-  int offset = -1;
+  var offset = -1;
 
   /// Not part of public API
   Frame(this.key, this.value, {this.length, this.offset = -1})

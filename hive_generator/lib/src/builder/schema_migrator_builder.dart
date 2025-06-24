@@ -10,6 +10,7 @@ import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
+import 'package:meta/meta.dart';
 
 /// Generate a Hive schema from existing HiveType annotations
 class SchemaMigratorBuilder implements Builder {
@@ -67,6 +68,9 @@ class SchemaMigratorBuilder implements Builder {
     for (final type in hiveTypes) {
       final cls = getClass(type.element);
       final className = cls.displayName;
+
+      /// TODO: Fix with analyzer 8
+      /// ignore: deprecated_member_use
       final library = type.element.library!;
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
@@ -94,6 +98,9 @@ class SchemaMigratorBuilder implements Builder {
       final constructor = getConstructor(cls);
       final accessors = [
         ...cls.accessors,
+
+        /// TODO: Fix with analyzer 8
+        /// ignore: deprecated_member_use
         ...cls.allSupertypes.expand((it) => it.accessors),
       ];
       final info = _SchemaInfo(
@@ -175,6 +182,7 @@ part 'hive_adapters.g.dart';
   }
 }
 
+@immutable
 class _SchemaInfo {
   final Uri uri;
   final String className;
@@ -184,7 +192,13 @@ class _SchemaInfo {
     required this.uri,
     required this.className,
     required bool isEnum,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required ConstructorElement constructor,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required List<PropertyAccessorElement> accessors,
     required HiveSchemaType schema,
   }) : schema = _sanitizeSchema(
@@ -199,7 +213,13 @@ class _SchemaInfo {
     required String className,
     required bool isEnum,
     required HiveSchemaType schema,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required ConstructorElement constructor,
+
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     required List<PropertyAccessorElement> accessors,
   }) {
     // Enums need no sanitization

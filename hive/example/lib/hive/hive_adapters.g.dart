@@ -8,7 +8,7 @@ part of 'hive_adapters.dart';
 
 class PersonAdapter extends TypeAdapter<Person> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   Person read(BinaryReader reader) {
@@ -49,7 +49,7 @@ class PersonAdapter extends TypeAdapter<Person> {
 
 class FreezedPersonAdapter extends TypeAdapter<FreezedPerson> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   FreezedPerson read(BinaryReader reader) {

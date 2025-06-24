@@ -1,4 +1,7 @@
+import 'package:meta/meta.dart';
+
 /// A event representing a change in a box.
+@immutable
 class BoxEvent {
   /// The key of the changed entry
   final dynamic key;
@@ -10,7 +13,7 @@ class BoxEvent {
   final bool deleted;
 
   /// Create a new BoxEvent (Hive internal)
-  BoxEvent(this.key, this.value, this.deleted);
+  const BoxEvent(this.key, this.value, this.deleted);
 
   @override
   bool operator ==(Object other) {

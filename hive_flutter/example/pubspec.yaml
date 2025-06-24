@@ -12,8 +12,8 @@ dependencies:
     path: ../../hive_flutter
 
 dev_dependencies:
-  rexios_lints: ^9.1.0
-  build_runner: ^2.4.0
+  rexios_lints: ^12.0.0
+  build_runner: ^2.5.4
   hive_ce_generator:
     path: ../../hive_generator
 

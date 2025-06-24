@@ -4,7 +4,7 @@ import 'package:source_gen/source_gen.dart';
 import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
-const bool kConstConstructors = true;
+const kConstConstructors = true;
 
 /// TODO: Document this!
 String constantToString(
@@ -56,6 +56,8 @@ String literalToString(DartObject object, List<String> typeInformation) {
   } else if (object.type is FunctionType) {
     badType = 'Function';
   } else if (!reader.isLiteral) {
+    /// TODO: Fix with analyzer 8
+    /// ignore: deprecated_member_use
     badType = object.type!.element!.name;
   }
 

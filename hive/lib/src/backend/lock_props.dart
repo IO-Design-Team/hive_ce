@@ -1,9 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'lock_props.g.dart';
 
 /// Properties stored in box lock files
 @JsonSerializable()
+@immutable
 class LockProps {
   /// Whether the box is isolated
   final bool isolated;

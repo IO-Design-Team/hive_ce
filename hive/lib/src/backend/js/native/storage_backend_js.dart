@@ -54,7 +54,7 @@ class StorageBackendJs extends StorageBackend {
   String? get path => null;
 
   @override
-  bool supportsCompaction = false;
+  var supportsCompaction = false;
 
   bool _isEncoded(Uint8List bytes) {
     return bytes.length >= _bytePrefix.length &&
@@ -243,6 +243,7 @@ class StorageBackendJs extends StorageBackend {
 
     // directly deleting the entire DB if a non-collection Box
     if (_db.objectStoreNames.length == 1) {
+      _db.close();
       await indexDB.deleteDatabase(_db.name).asFuture();
     } else {
       final request = indexDB.open(_db.name, 1);
@@ -254,6 +255,7 @@ class StorageBackendJs extends StorageBackend {
       }.toJS;
       final db = await request.asFuture<IDBDatabase>();
       if (db.objectStoreNames.length == 0) {
+        _db.close();
         await indexDB.deleteDatabase(_db.name).asFuture();
       }
     }
