@@ -19,6 +19,7 @@ class PersonAdapter extends TypeAdapter<Person> {
     return Person(
       name: fields[0] as String,
       age: (fields[1] as num).toInt(),
+      bestFriend: fields[3] as Person?,
       friends:
           fields[2] == null ? const [] : (fields[2] as List).cast<Person>(),
     );
@@ -27,13 +28,15 @@ class PersonAdapter extends TypeAdapter<Person> {
   @override
   void write(BinaryWriter writer, Person obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
       ..write(obj.age)
       ..writeByte(2)
-      ..write(obj.friends);
+      ..write(obj.friends)
+      ..writeByte(3)
+      ..write(obj.bestFriend);
   }
 
   @override

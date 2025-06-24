@@ -2,12 +2,20 @@ import 'dart:io';
 
 import 'package:example/hive/hive_registrar.g.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class Person {
-  Person({required this.name, required this.age, this.friends = const []});
+  const Person({
+    required this.name,
+    required this.age,
+    this.bestFriend,
+    this.friends = const [],
+  });
 
   final String name;
   final int age;
+  final Person? bestFriend;
   final List<Person> friends;
 
   @override

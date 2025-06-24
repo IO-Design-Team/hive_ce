@@ -113,6 +113,13 @@ class DataTableView extends StatelessWidget {
                   ]),
             ),
           );
+        } else if (fieldValue is RawObject) {
+          return TableViewCell(
+            child: InkWell(
+              child: const Text('[Object]'),
+              onTap: () => onStack([KeyedObject(0, fieldValue)]),
+            ),
+          );
         } else {
           return TableViewCell(child: Text(fieldValue.toString()));
         }
