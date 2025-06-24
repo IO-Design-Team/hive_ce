@@ -106,7 +106,11 @@ class DataTableView extends StatelessWidget {
       pinnedRowCount: 1,
       pinnedColumnCount: 1,
       rowBuilder: (index) => const TableSpan(extent: FixedSpanExtent(20)),
-      columnBuilder: (index) => const TableSpan(extent: FixedSpanExtent(100)),
+      columnBuilder:
+          (index) => const TableSpan(
+            extent: FixedSpanExtent(100),
+            padding: SpanPadding.all(8),
+          ),
       cellBuilder: (context, vicinity) {
         final TableVicinity(:row, :column) = vicinity;
         final rowIndex = row - 1;
@@ -134,34 +138,34 @@ class DataTableView extends StatelessWidget {
           fieldValue = objectValue;
         }
 
+        final Widget cellContent;
+        final stackKey = '${object.key}.$columnIndex';
         if (fieldValue is Iterable) {
           final list = fieldValue.toList();
           if (list.isEmpty) {
-            return const TableViewCell(child: Text('[Empty]'));
-          }
-          return TableViewCell(
-            child: InkWell(
+            cellContent = const Text('[Empty]');
+          } else {
+            cellContent = InkWell(
               child: const Text('[Iterable]'),
               onTap:
-                  () => onStack('${object.key}.$columnIndex', [
+                  () => onStack(stackKey, [
                     for (var i = 0; i < list.length; i++)
                       KeyedObject(i, list[i]),
                   ]),
-            ),
-          );
+            );
+          }
         } else if (fieldValue is RawObject) {
-          return TableViewCell(
+          cellContent = InkWell(
             child: InkWell(
               child: const Text('[Object]'),
-              onTap:
-                  () => onStack('${object.key}.$columnIndex', [
-                    KeyedObject(0, fieldValue),
-                  ]),
+              onTap: () => onStack(stackKey, [KeyedObject(0, fieldValue)]),
             ),
           );
         } else {
-          return TableViewCell(child: Text(fieldValue.toString()));
+          cellContent = Text(fieldValue.toString());
         }
+
+        return TableViewCell(child: cellContent);
       },
     );
   }
