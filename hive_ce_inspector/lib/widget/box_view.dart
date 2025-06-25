@@ -214,8 +214,6 @@ class _DataTableViewState extends State<DataTableView> {
                 );
               }
 
-              object.load?.call();
-
               final objectValue = object.value;
               final Object? fieldValue;
               if (objectValue is RawObject) {
@@ -262,12 +260,49 @@ class _DataTableViewState extends State<DataTableView> {
               }
 
               return TableViewCell(
-                child: ColoredBox(color: cellColor, child: cellContent),
+                child: FrameLoader(
+                  object: object,
+                  child: ColoredBox(color: cellColor, child: cellContent),
+                ),
               );
             },
           ),
         ),
       ],
     );
+  }
+}
+
+class FrameLoader extends StatefulWidget {
+  final KeyedObject object;
+  final Widget child;
+
+  const FrameLoader({super.key, required this.object, required this.child});
+
+  @override
+  State<StatefulWidget> createState() => _FrameLoaderState();
+}
+
+class _FrameLoaderState extends State<FrameLoader> {
+  @override
+  void initState() {
+    super.initState();
+
+    load();
+  }
+
+  void load() async {
+    final load = widget.object.load;
+    if (load == null) return;
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
