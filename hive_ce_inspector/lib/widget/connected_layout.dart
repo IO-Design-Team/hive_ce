@@ -43,9 +43,10 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     );
 
     boxEventSubscription = widget.client.boxEvent.listen((event) {
+      boxData[event.box]?.frames[event.frame.key] = event.frame;
+
       // Do not call set state for unfocused boxes for performance reasons
-      if (selectedBox != event.box) return;
-      setState(() => boxData[event.box]?.frames[event.frame.key] = event.frame);
+      if (selectedBox == event.box) setState(() {});
     });
   }
 
@@ -100,12 +101,16 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   }
 
   void loadBoxData(String box) async {
+    final data = boxData[box];
+    if (data == null || data.loaded) return;
+
     final frames = await widget.client.getBoxFrames(box);
     setState(
       () =>
           boxData[box] = BoxData(
             name: box,
             frames: {for (final frame in frames) frame.key: frame},
+            loaded: true,
           ),
     );
   }

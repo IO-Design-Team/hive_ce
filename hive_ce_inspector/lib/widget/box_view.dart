@@ -44,6 +44,9 @@ class _BoxViewState extends State<BoxView> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.data.loaded) {
+      return const Center(child: Text('Box is loading...'));
+    }
     if (widget.data.frames.isEmpty) {
       return const Center(child: Text('Box is empty'));
     }
