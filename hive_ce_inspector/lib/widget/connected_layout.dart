@@ -42,11 +42,10 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
       ),
     );
 
-    boxEventSubscription = widget.client.boxEvent.listen(
-      (event) => setState(
-        () => boxData[event.box]?.frames[event.frame.key] = event.frame,
-      ),
-    );
+    boxEventSubscription = widget.client.boxEvent.listen((event) {
+      if (selectedBox != event.box) return;
+      setState(() => boxData[event.box]?.frames[event.frame.key] = event.frame);
+    });
   }
 
   @override
