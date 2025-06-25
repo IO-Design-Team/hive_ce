@@ -147,8 +147,12 @@ class _DataTableViewState extends State<DataTableView> {
           widget.data
               .where(
                 (e) =>
-                    e.key.toString().contains(query) ||
-                    e.value.toString().contains(query),
+                    e.key.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ) ||
+                    e.value.toString().toLowerCase().contains(
+                      query.toLowerCase(),
+                    ),
               )
               .toList();
     }
@@ -377,7 +381,7 @@ class DataCellContent extends StatelessWidget {
     final query = this.query;
     if (query != null && query.isNotEmpty) {
       final searchable = getSearchableString?.call() ?? tooltip;
-      if (searchable.contains(query)) {
+      if (searchable.toLowerCase().contains(query.toLowerCase())) {
         widget = ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: ColoredBox(color: Colors.yellow.withAlpha(50), child: widget),
