@@ -8,6 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_dropzone: ^4.2.1
   go_router: ^14.8.1
   hive_ce:
     path: ../hive
@@ -15,6 +16,7 @@ dependencies:
   vm_service: ^15.0.0
   web: ^1.1.1
   web_socket_channel: ^3.0.2
+  yaml: ^3.1.3
 
 dev_dependencies:
   rexios_lints: ^10.1.0

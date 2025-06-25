@@ -6,9 +6,15 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class BoxView extends StatefulWidget {
   final ConnectClient client;
+  final HiveSchema? schema;
   final BoxData data;
 
-  const BoxView({super.key, required this.client, required this.data});
+  const BoxView({
+    super.key,
+    required this.client,
+    required this.schema,
+    required this.data,
+  });
 
   @override
   State<StatefulWidget> createState() => _BoxViewState();
@@ -78,6 +84,7 @@ class _BoxViewState extends State<BoxView> {
         ),
         Expanded(
           child: DataTableView(
+            schema: widget.schema,
             data: stack.last.value,
             onStack:
                 (key, value) =>
@@ -100,10 +107,16 @@ class KeyedObject<T extends Object?> {
 }
 
 class DataTableView extends StatefulWidget {
+  final HiveSchema? schema;
   final List<KeyedObject> data;
   final void Function(Object key, List<KeyedObject> value) onStack;
 
-  const DataTableView({super.key, required this.data, required this.onStack});
+  const DataTableView({
+    super.key,
+    required this.schema,
+    required this.data,
+    required this.onStack,
+  });
 
   @override
   State<StatefulWidget> createState() => _DataTableViewState();

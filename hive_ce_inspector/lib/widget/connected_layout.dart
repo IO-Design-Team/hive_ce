@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/widget/box_view.dart';
+import 'package:yaml/yaml.dart';
 
 class ConnectedLayout extends StatefulWidget {
   final ConnectClient client;
@@ -24,6 +27,8 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   late final StreamSubscription<BoxEventPayload> boxEventSubscription;
 
   String? selectedBox;
+  DropzoneViewController? dropzoneController;
+  HiveSchema? schema;
 
   @override
   void initState() {
@@ -82,22 +87,36 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Hive CE Inspector')),
-      drawer: isWide ? null : drawer,
-      body: Row(
-        children: [
-          if (isWide) drawer,
-          if (selectedBox == null)
-            const Expanded(child: Center(child: Text('Select a box')))
-          else if (selectedBoxData == null)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else
-            Expanded(
-              child: BoxView(client: widget.client, data: selectedBoxData),
-            ),
-        ],
-      ),
+    return Stack(
+      children: [
+        DropzoneView(
+          onCreated: (controller) => dropzoneController = controller,
+          onDropFile: onDropFile,
+        ),
+        Scaffold(
+          appBar: AppBar(title: const Text('Hive CE Inspector')),
+          drawer: isWide ? null : drawer,
+          body: Row(
+            children: [
+              if (isWide) drawer,
+              if (selectedBox == null)
+                const Expanded(child: Center(child: Text('Select a box')))
+              else if (selectedBoxData == null)
+                const Expanded(
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                Expanded(
+                  child: BoxView(
+                    client: widget.client,
+                    schema: schema,
+                    data: selectedBoxData,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -114,5 +133,16 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
             loaded: true,
           ),
     );
+  }
+
+  void onDropFile(DropzoneFileInterface file) async {
+    final dropzoneController = this.dropzoneController;
+    if (dropzoneController == null) return;
+    final data = await dropzoneController.getFileData(file);
+    final schemaContent = utf8.decode(data);
+    final schema = HiveSchema.fromJson(
+      jsonDecode(jsonEncode(loadYaml(schemaContent))),
+    );
+    setState(() => this.schema = schema);
   }
 }
