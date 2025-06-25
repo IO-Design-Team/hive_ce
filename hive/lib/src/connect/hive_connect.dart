@@ -86,7 +86,7 @@ class HiveConnect {
   }
 
   /// Register a box for inspection
-  static void registerBox(InspectableBox box) async {
+  static void registerBox(InspectableBox box) {
     if (_boxes.containsKey(box.name)) return;
     _initialize();
 
@@ -115,7 +115,7 @@ class HiveConnect {
     postEvent(ConnectEvent.boxUnregistered.event, {'name': box.name});
   }
 
-  static List<String> _listBoxes(_) => _boxes.keys.toList();
+  static List<String> _listBoxes(dynamic args) => _boxes.keys.toList();
 
   static Future<List<InspectorFrame>> _getBoxFrames(dynamic args) async {
     final name = args['name'] as String;
