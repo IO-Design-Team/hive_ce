@@ -84,6 +84,7 @@ class _BoxViewState extends State<BoxView> {
         ),
         Expanded(
           child: DataTableView(
+            key: ValueKey(widget.data.name),
             schema: widget.schema,
             data: stack.last.value,
             onStack:
@@ -129,12 +130,6 @@ class _DataTableViewState extends State<DataTableView> {
   void dispose() {
     searchController.dispose();
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(DataTableView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    searchController.clear();
   }
 
   @override
@@ -295,6 +290,7 @@ class _DataTableViewState extends State<DataTableView> {
 
               return TableViewCell(
                 child: FrameLoader(
+                  key: ValueKey(object.key),
                   object: object,
                   child: Tooltip(
                     message: cellText,
