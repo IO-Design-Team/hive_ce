@@ -211,10 +211,7 @@ class _DataTableViewState extends State<DataTableView> {
                   }
 
                   final fieldName =
-                      schemaType?.fields.entries
-                          .where((e) => e.value.index == columnIndex)
-                          .firstOrNull
-                          ?.key ??
+                      getFieldName(schemaType, columnIndex) ??
                       columnIndex.toString();
 
                   if (row == 0) {
@@ -280,6 +277,19 @@ class _DataTableViewState extends State<DataTableView> {
                             ]),
                       ),
                     );
+                  } else if (fieldValue is RawEnum) {
+                    final enumType = getSchemaType(fieldValue.typeId);
+                    final enumValue = getFieldName(
+                      enumType?.value,
+                      fieldValue.index,
+                    );
+                    if (enumType != null && enumValue != null) {
+                      cellText = '${enumType.key}.$enumValue';
+                      cellContent = Text(cellText);
+                    } else {
+                      cellText = fieldValue.index.toString();
+                      cellContent = Text(cellText);
+                    }
                   } else {
                     cellText = fieldValue.toString();
                     cellContent = Text(cellText);
@@ -316,6 +326,13 @@ class _DataTableViewState extends State<DataTableView> {
               typeId,
         )
         .firstOrNull;
+  }
+
+  String? getFieldName(HiveSchemaType? type, int index) {
+    return type?.fields.entries
+        .where((e) => e.value.index == index)
+        .firstOrNull
+        ?.key;
   }
 }
 

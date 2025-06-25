@@ -22,13 +22,14 @@ class PersonAdapter extends TypeAdapter<Person> {
       bestFriend: fields[3] as Person?,
       friends:
           fields[2] == null ? const [] : (fields[2] as List).cast<Person>(),
+      job: fields[4] == null ? Job.unemployed : fields[4] as Job,
     );
   }
 
   @override
   void write(BinaryWriter writer, Person obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -36,7 +37,9 @@ class PersonAdapter extends TypeAdapter<Person> {
       ..writeByte(2)
       ..write(obj.friends)
       ..writeByte(3)
-      ..write(obj.bestFriend);
+      ..write(obj.bestFriend)
+      ..writeByte(4)
+      ..write(obj.job);
   }
 
   @override
@@ -89,6 +92,67 @@ class FreezedPersonAdapter extends TypeAdapter<FreezedPerson> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is FreezedPersonAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class JobAdapter extends TypeAdapter<Job> {
+  @override
+  final typeId = 2;
+
+  @override
+  Job read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return Job.softwareEngineer;
+      case 1:
+        return Job.productManager;
+      case 2:
+        return Job.designer;
+      case 3:
+        return Job.sales;
+      case 4:
+        return Job.marketing;
+      case 5:
+        return Job.hr;
+      case 6:
+        return Job.finance;
+      case 7:
+        return Job.unemployed;
+      default:
+        return Job.softwareEngineer;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, Job obj) {
+    switch (obj) {
+      case Job.softwareEngineer:
+        writer.writeByte(0);
+      case Job.productManager:
+        writer.writeByte(1);
+      case Job.designer:
+        writer.writeByte(2);
+      case Job.sales:
+        writer.writeByte(3);
+      case Job.marketing:
+        writer.writeByte(4);
+      case Job.hr:
+        writer.writeByte(5);
+      case Job.finance:
+        writer.writeByte(6);
+      case Job.unemployed:
+        writer.writeByte(7);
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is JobAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

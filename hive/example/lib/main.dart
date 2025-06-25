@@ -11,17 +11,30 @@ class Person {
     required this.age,
     this.bestFriend,
     this.friends = const [],
+    this.job = Job.unemployed,
   });
 
   final String name;
   final int age;
   final Person? bestFriend;
   final List<Person> friends;
+  final Job job;
 
   @override
   String toString() {
     return '$name: $age';
   }
+}
+
+enum Job {
+  softwareEngineer,
+  productManager,
+  designer,
+  sales,
+  marketing,
+  hr,
+  finance,
+  unemployed,
 }
 
 void main() async {

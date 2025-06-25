@@ -4,6 +4,7 @@ import 'package:hive_ce/hive.dart';
 
 @GenerateAdapters([
   AdapterSpec<Person>(),
+  AdapterSpec<Job>(),
   AdapterSpec<FreezedPerson>(),
 ])
 part 'hive_adapters.g.dart';
