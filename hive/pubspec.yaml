@@ -9,6 +9,9 @@ topics:
   - database
   - nosql
 
+funding:
+  - https://github.com/sponsors/Rexios80
+
 environment:
   sdk: ^3.4.0
 
