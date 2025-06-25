@@ -75,12 +75,12 @@ class InspectorFrame {
 
   /// Copy with
   InspectorFrame copyWith({
-    Object? value,
+    required Object? value,
     bool? lazy,
   }) =>
       InspectorFrame(
         key: key,
-        value: value ?? this.value,
+        value: value,
         lazy: lazy ?? this.lazy,
         deleted: deleted,
       );

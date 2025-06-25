@@ -91,7 +91,6 @@ class ConnectClient {
     return (response as List).map((e) => InspectorFrame.fromJson(e)).map((
       frame,
     ) {
-      if (frame.lazy) return frame;
       return frame.copyWith(value: _readValue(frame.value));
     }).toList();
   }
