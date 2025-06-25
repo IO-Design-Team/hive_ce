@@ -91,7 +91,9 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
           else if (selectedBoxData == null)
             const Expanded(child: Center(child: CircularProgressIndicator()))
           else
-            Expanded(child: BoxView(data: selectedBoxData)),
+            Expanded(
+              child: BoxView(client: widget.client, data: selectedBoxData),
+            ),
         ],
       ),
     );

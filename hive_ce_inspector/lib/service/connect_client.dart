@@ -95,7 +95,7 @@ class ConnectClient {
     }).toList();
   }
 
-  Future<void> getValue(String name, InspectorFrame frame) async {
+  Future<void> loadValue(String name, InspectorFrame frame) async {
     final value = await _call(
       ConnectAction.getValue,
       param: {'name': name, 'key': frame.key},
@@ -105,7 +105,7 @@ class ConnectClient {
     _boxEventController.add(
       BoxEventPayload(
         box: name,
-        frame: frame.copyWith(value: value, lazy: false),
+        frame: frame.copyWith(value: _readValue(value), lazy: false),
       ),
     );
   }

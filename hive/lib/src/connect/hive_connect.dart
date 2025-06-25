@@ -134,7 +134,8 @@ class HiveConnect {
     if (box == null) return null;
 
     final key = args['key'];
-    return box.getValue(key);
+    final value = await box.getValue(key);
+    return _writeValue(box.typeRegistry, value);
   }
 
   static Uint8List _writeValue(TypeRegistry registry, Object? value) {

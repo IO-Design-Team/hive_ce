@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
+import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class BoxView extends StatefulWidget {
+  final ConnectClient client;
   final BoxData data;
 
-  const BoxView({super.key, required this.data});
+  const BoxView({super.key, required this.client, required this.data});
 
   @override
   State<StatefulWidget> createState() => _BoxViewState();
@@ -20,13 +22,18 @@ class _BoxViewState extends State<BoxView> {
     KeyedObject(
       widget.data.name,
       widget.data.frames.values
-          .map((e) => KeyedObject(e.key, e.value))
+          .map((e) => KeyedObject(e.key, e.value, load: () => _loadFrame(e)))
           .toList()
           .reversed
           .toList(),
     ),
     ..._stack,
   ];
+
+  void _loadFrame(InspectorFrame frame) {
+    if (!frame.lazy) return;
+    widget.client.loadValue(widget.data.name, frame);
+  }
 
   @override
   void didUpdateWidget(BoxView oldWidget) {
@@ -83,7 +90,10 @@ class KeyedObject<T extends Object?> {
   final Object key;
   final T value;
 
-  const KeyedObject(this.key, this.value);
+  // Load the value if it is lazy
+  final VoidCallback? load;
+
+  const KeyedObject(this.key, this.value, {this.load});
 }
 
 class DataTableView extends StatelessWidget {
@@ -135,6 +145,8 @@ class DataTableView extends StatelessWidget {
         if (column == 0) {
           return TableViewCell(child: Text(object.key.toString()));
         }
+
+        object.load?.call();
 
         final objectValue = object.value;
         final Object? fieldValue;
