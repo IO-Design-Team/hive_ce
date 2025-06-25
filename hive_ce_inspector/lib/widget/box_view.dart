@@ -144,19 +144,7 @@ class _DataTableViewState extends State<DataTableView> {
     final HiveSchemaType? schemaType;
     if (firstValue is RawObject) {
       columnCount = 1 + firstValue.fields.length;
-
-      // The RawObject type IDs are post conversion
-      schemaType =
-          widget.schema?.types.values
-              .where(
-                (e) =>
-                    TypeRegistryImpl.calculateTypeId(
-                      e.typeId,
-                      internal: false,
-                    ) ==
-                    firstValue.typeId,
-              )
-              .firstOrNull;
+      schemaType = getSchemaType(firstValue.typeId)?.value;
     } else {
       columnCount = 2;
       schemaType = null;
@@ -223,19 +211,15 @@ class _DataTableViewState extends State<DataTableView> {
                 return const TableViewCell(child: Text('Key'));
               }
 
+              final fieldName =
+                  schemaType?.fields.entries
+                      .where((e) => e.value.index == columnIndex)
+                      .firstOrNull
+                      ?.key ??
+                  columnIndex.toString();
+
               if (row == 0) {
-                String? columnLabel;
-                if (schemaType != null) {
-                  final fieldEntry =
-                      schemaType.fields.entries
-                          .where((e) => e.value.index == columnIndex)
-                          .firstOrNull;
-                  if (fieldEntry != null) {
-                    columnLabel = fieldEntry.key;
-                  }
-                }
-                columnLabel ??= columnIndex.toString();
-                return TableViewCell(child: Text(columnLabel));
+                return TableViewCell(child: Text(fieldName));
               }
 
               final object = filteredData[rowIndex];
@@ -262,7 +246,7 @@ class _DataTableViewState extends State<DataTableView> {
               }
 
               final Widget cellContent;
-              final stackKey = '${object.key}.$columnIndex';
+              final stackKey = '${object.key}.$fieldName';
               if (fieldValue is Iterable) {
                 final list = fieldValue.toList();
                 if (list.isEmpty) {
@@ -278,9 +262,10 @@ class _DataTableViewState extends State<DataTableView> {
                   );
                 }
               } else if (fieldValue is RawObject) {
+                final label = getSchemaType(fieldValue.typeId)?.key ?? 'Object';
                 cellContent = InkWell(
                   child: InkWell(
-                    child: const Text('[Object]'),
+                    child: Text('[$label]'),
                     onTap:
                         () => widget.onStack(stackKey, [
                           KeyedObject(0, fieldValue),
@@ -309,6 +294,20 @@ class _DataTableViewState extends State<DataTableView> {
         ),
       ],
     );
+  }
+
+  MapEntry<String, HiveSchemaType>? getSchemaType(int typeId) {
+    // The RawObject type IDs are post conversion
+    return widget.schema?.types.entries
+        .where(
+          (e) =>
+              TypeRegistryImpl.calculateTypeId(
+                e.value.typeId,
+                internal: false,
+              ) ==
+              typeId,
+        )
+        .firstOrNull;
   }
 }
 
