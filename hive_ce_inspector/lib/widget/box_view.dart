@@ -198,7 +198,12 @@ class _DataTableViewState extends State<DataTableView> {
                   final columnIndex = column - 1;
 
                   if (row == 0 && column == 0) {
-                    return const TableViewCell(child: Text('key'));
+                    return const TableViewCell(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Text('key'),
+                      ),
+                    );
                   }
 
                   final fieldName =
@@ -210,8 +215,8 @@ class _DataTableViewState extends State<DataTableView> {
 
                   if (row == 0) {
                     return TableViewCell(
-                      child: Tooltip(
-                        message: fieldName,
+                      child: DataCellContent(
+                        text: fieldName,
                         child: Text(fieldName),
                       ),
                     );
@@ -221,19 +226,11 @@ class _DataTableViewState extends State<DataTableView> {
 
                   if (column == 0) {
                     final keyString = object.key.toString();
-                    final Color cellColor;
-                    if (query.isNotEmpty && keyString.contains(query)) {
-                      cellColor = Colors.yellow.withAlpha(50);
-                    } else {
-                      cellColor = Colors.transparent;
-                    }
                     return TableViewCell(
-                      child: Tooltip(
-                        message: keyString,
-                        child: ColoredBox(
-                          color: cellColor,
-                          child: Text(keyString),
-                        ),
+                      child: DataCellContent(
+                        text: keyString,
+                        query: query,
+                        child: Text(keyString),
                       ),
                     );
                   }
@@ -284,21 +281,14 @@ class _DataTableViewState extends State<DataTableView> {
                     cellContent = Text(cellText);
                   }
 
-                  final Color cellColor;
-                  if (query.isNotEmpty &&
-                      fieldValue.toString().contains(query)) {
-                    cellColor = Colors.yellow.withAlpha(50);
-                  } else {
-                    cellColor = Colors.transparent;
-                  }
-
                   return TableViewCell(
                     child: FrameLoader(
                       key: ValueKey(object.key),
                       object: object,
-                      child: Tooltip(
-                        message: cellText,
-                        child: ColoredBox(color: cellColor, child: cellContent),
+                      child: DataCellContent(
+                        text: cellText,
+                        query: query,
+                        child: cellContent,
                       ),
                     ),
                   );
@@ -356,5 +346,39 @@ class _FrameLoaderState extends State<FrameLoader> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class DataCellContent extends StatelessWidget {
+  final Widget child;
+  final String text;
+  final String? query;
+
+  const DataCellContent({
+    super.key,
+    required this.child,
+    required this.text,
+    this.query,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget widget = Tooltip(
+      message: text,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: child,
+      ),
+    );
+
+    final query = this.query;
+    if (query != null && query.isNotEmpty && text.contains(query)) {
+      widget = ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: ColoredBox(color: Colors.yellow.withAlpha(50), child: widget),
+      );
+    }
+
+    return widget;
   }
 }
