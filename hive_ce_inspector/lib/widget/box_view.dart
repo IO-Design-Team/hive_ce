@@ -273,6 +273,7 @@ class _DataTableViewState extends State<DataTableView> {
   }
 }
 
+/// Defers lazy frame loading for scrolling performance
 class FrameLoader extends StatefulWidget {
   final KeyedObject object;
   final Widget child;
