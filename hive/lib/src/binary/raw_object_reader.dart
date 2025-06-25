@@ -4,12 +4,17 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/hive_error.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/schema/hive_schema.dart';
 
 /// A binary reader that reads raw objects
 class RawObjectReader extends BinaryReaderImpl {
+  final HiveSchema _schema;
+
   /// Constructor
-  RawObjectReader(Uint8List buffer) : super(buffer, TypeRegistryImpl());
+  RawObjectReader(this._schema, Uint8List buffer)
+      : super(buffer, TypeRegistryImpl());
 
   @override
   dynamic read([int? typeId]) {
@@ -19,32 +24,58 @@ class RawObjectReader extends BinaryReaderImpl {
       return super.read(typeId);
     }
 
-    // This is a custom object
-    final length = readByte();
-    final fields = List<RawField>.filled(length, RawField(-1, null));
-    for (var i = 0; i < length; i++) {
-      fields[i] = RawField(readByte(), read());
+    final type = _schema.types.entries
+        .where((e) => e.value.typeId == typeId)
+        .firstOrNull;
+    if (type == null) {
+      throw HiveError('Unknown type ID: $typeId');
     }
-    return RawObject(typeId, fields);
+
+    switch (type.value.kind) {
+      case TypeKind.objectKind:
+        final length = readByte();
+        final fields = List<RawField>.filled(length, RawField(null));
+        for (var i = 0; i < length; i++) {
+          // Consume the field index
+          readByte();
+          fields[i] = RawField(read());
+        }
+        return RawObject(type.key, fields);
+      case TypeKind.enumKind:
+        final index = read();
+        final value = type.value.fields.entries
+            .where((e) => e.value.index == index)
+            .firstOrNull;
+
+        if (value == null) {
+          throw HiveError('Unknown enum index: ${type.key}[$index]');
+        }
+        return RawEnum(type.key, value.key);
+      case TypeKind.unknownKind:
+        throw HiveError('Unknown type kind: ${type.key}');
+    }
   }
 }
 
 /// A raw type read from the buffer
 abstract class RawType {
-  /// The type ID
-  final int typeId;
+  /// The type name
+  final String name;
 
   /// Constructor
-  const RawType(this.typeId);
+  const RawType(this.name);
 }
 
 /// A raw enum value read from the buffer
 class RawEnum extends RawType {
-  /// The index of the enum
-  final int index;
+  /// The enum value
+  final String value;
 
   /// Constructor
-  const RawEnum(super.typeId, this.index);
+  const RawEnum(super.name, this.value);
+
+  @override
+  String toString() => '$name.$value';
 }
 
 /// A raw custom object read from the buffer
@@ -53,23 +84,20 @@ class RawObject extends RawType {
   final List<RawField> fields;
 
   /// Constructor
-  const RawObject(super.typeId, this.fields);
+  const RawObject(super.name, this.fields);
 
   @override
-  String toString() => 'RawObject(typeId: $typeId, fields: $fields)';
+  String toString() => '$name($fields)';
 }
 
 /// A raw field of a custom object
 class RawField {
-  /// The index of the field
-  final int index;
-
   /// The value of the field
   final Object? value;
 
   /// Constructor
-  const RawField(this.index, this.value);
+  const RawField(this.value);
 
   @override
-  String toString() => 'RawField(index: $index, value: $value)';
+  String toString() => value.toString();
 }

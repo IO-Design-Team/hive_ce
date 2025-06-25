@@ -23,6 +23,8 @@ Map<String, dynamic> _$HiveSchemaToJson(HiveSchema instance) =>
 HiveSchemaType _$HiveSchemaTypeFromJson(Map<String, dynamic> json) =>
     HiveSchemaType(
       typeId: (json['typeId'] as num).toInt(),
+      kind: $enumDecodeNullable(_$HiveSchemaTypeKindEnumMap, json['kind']) ??
+          TypeKind.unknownKind,
       nextIndex: (json['nextIndex'] as num).toInt(),
       fields: (json['fields'] as Map<String, dynamic>).map(
         (k, e) =>
@@ -33,9 +35,16 @@ HiveSchemaType _$HiveSchemaTypeFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$HiveSchemaTypeToJson(HiveSchemaType instance) =>
     <String, dynamic>{
       'typeId': instance.typeId,
+      'kind': _$HiveSchemaTypeKindEnumMap[instance.kind]!,
       'nextIndex': instance.nextIndex,
       'fields': instance.fields,
     };
+
+const _$HiveSchemaTypeKindEnumMap = {
+  TypeKind.objectKind: 'object',
+  TypeKind.enumKind: 'enum',
+  TypeKind.unknownKind: 'unknownKind',
+};
 
 HiveSchemaField _$HiveSchemaFieldFromJson(Map<String, dynamic> json) =>
     HiveSchemaField(

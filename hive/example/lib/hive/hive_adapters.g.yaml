@@ -5,32 +5,22 @@ nextTypeId: 3
 types:
   Person:
     typeId: 0
+    kind: "object"
     nextIndex: 5
     fields:
       name:
         index: 0
       age:
         index: 1
-      friends:
-        index: 2
       bestFriend:
+        index: 2
+      friends:
         index: 3
       job:
         index: 4
-  FreezedPerson:
-    typeId: 1
-    nextIndex: 4
-    fields:
-      firstName:
-        index: 0
-      lastName:
-        index: 1
-      age:
-        index: 2
-      middleName:
-        index: 3
   Job:
-    typeId: 2
+    typeId: 1
+    kind: "enum"
     nextIndex: 8
     fields:
       softwareEngineer:
@@ -49,3 +39,16 @@ types:
         index: 6
       unemployed:
         index: 7
+  FreezedPerson:
+    typeId: 2
+    kind: "object"
+    nextIndex: 4
+    fields:
+      firstName:
+        index: 0
+      middleName:
+        index: 1
+      lastName:
+        index: 2
+      age:
+        index: 3

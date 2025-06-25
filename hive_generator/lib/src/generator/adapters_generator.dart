@@ -9,6 +9,7 @@ import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
+import 'package:source_helper/source_helper.dart';
 import 'package:yaml/yaml.dart';
 
 /// Builder that generates Hive adapters from a GenerateAdapters annotation
@@ -53,20 +54,25 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         .toList();
 
     var typeId = schema.nextTypeId - 1;
+    int generateTypeId() {
+      do {
+        typeId++;
+      } while (revived.reservedTypeIds.contains(typeId));
+      return typeId;
+    }
+
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.element3!.displayName;
 
-      int generateTypeId() {
-        do {
-          typeId++;
-        } while (revived.reservedTypeIds.contains(typeId));
-        return typeId;
-      }
-
       final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
+          HiveSchemaType(
+            typeId: generateTypeId(),
+            kind: spec.type.isEnum ? TypeKind.enumKind : TypeKind.objectKind,
+            nextIndex: 0,
+            fields: {},
+          );
       final result = TypeAdapterGenerator.generateTypeAdapter(
         /// TODO: Fix with analyzer 8
         /// ignore: deprecated_member_use
