@@ -141,10 +141,25 @@ class _DataTableViewState extends State<DataTableView> {
   Widget build(BuildContext context) {
     final firstValue = widget.data.first.value;
     final int columnCount;
+    final HiveSchemaType? schemaType;
     if (firstValue is RawObject) {
       columnCount = 1 + firstValue.fields.length;
+
+      // The RawObject type IDs are post conversion
+      schemaType =
+          widget.schema?.types.values
+              .where(
+                (e) =>
+                    TypeRegistryImpl.calculateTypeId(
+                      e.typeId,
+                      internal: false,
+                    ) ==
+                    firstValue.typeId,
+              )
+              .firstOrNull;
     } else {
       columnCount = 2;
+      schemaType = null;
     }
 
     final query = searchController.text;
@@ -209,7 +224,18 @@ class _DataTableViewState extends State<DataTableView> {
               }
 
               if (row == 0) {
-                return TableViewCell(child: Text(columnIndex.toString()));
+                String? columnLabel;
+                if (schemaType != null) {
+                  final fieldEntry =
+                      schemaType.fields.entries
+                          .where((e) => e.value.index == columnIndex)
+                          .firstOrNull;
+                  if (fieldEntry != null) {
+                    columnLabel = fieldEntry.key;
+                  }
+                }
+                columnLabel ??= columnIndex.toString();
+                return TableViewCell(child: Text(columnLabel));
               }
 
               final object = filteredData[rowIndex];

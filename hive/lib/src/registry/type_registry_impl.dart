@@ -225,7 +225,6 @@ class TypeRegistryImpl implements TypeRegistry {
   }
 
   /// Resolve the real type ID for the given [typeId]
-  @visibleForTesting
   static int calculateTypeId(int typeId, {required bool internal}) {
     if (internal) {
       assert(typeId >= 0 && typeId <= maxInternalTypeId);
