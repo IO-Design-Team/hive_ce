@@ -174,126 +174,137 @@ class _DataTableViewState extends State<DataTableView> {
             ),
           ),
         ),
-        Expanded(
-          child: TableView.builder(
-            rowCount: filteredData.length + 1,
-            columnCount: columnCount,
-            pinnedRowCount: 1,
-            pinnedColumnCount: 1,
-            rowBuilder:
-                (index) => const TableSpan(
-                  extent: FixedSpanExtent(20),
-                  padding: SpanPadding.all(4),
-                ),
-            columnBuilder:
-                (index) => const TableSpan(
-                  extent: FixedSpanExtent(100),
-                  padding: SpanPadding.all(8),
-                ),
-            cellBuilder: (context, vicinity) {
-              final TableVicinity(:row, :column) = vicinity;
-              final rowIndex = row - 1;
-              final columnIndex = column - 1;
+        filteredData.isEmpty
+            ? const Expanded(child: Center(child: Text('No search results')))
+            : Expanded(
+              child: TableView.builder(
+                rowCount: filteredData.length + 1,
+                columnCount: columnCount,
+                pinnedRowCount: 1,
+                pinnedColumnCount: 1,
+                rowBuilder:
+                    (index) => const TableSpan(
+                      extent: FixedSpanExtent(20),
+                      padding: SpanPadding.all(4),
+                    ),
+                columnBuilder:
+                    (index) => const TableSpan(
+                      extent: FixedSpanExtent(100),
+                      padding: SpanPadding.all(8),
+                    ),
+                cellBuilder: (context, vicinity) {
+                  final TableVicinity(:row, :column) = vicinity;
+                  final rowIndex = row - 1;
+                  final columnIndex = column - 1;
 
-              if (row == 0 && column == 0) {
-                return const TableViewCell(child: Text('Key'));
-              }
+                  if (row == 0 && column == 0) {
+                    return const TableViewCell(child: Text('Key'));
+                  }
 
-              final fieldName =
-                  schemaType?.fields.entries
-                      .where((e) => e.value.index == columnIndex)
-                      .firstOrNull
-                      ?.key ??
-                  columnIndex.toString();
+                  final fieldName =
+                      schemaType?.fields.entries
+                          .where((e) => e.value.index == columnIndex)
+                          .firstOrNull
+                          ?.key ??
+                      columnIndex.toString();
 
-              if (row == 0) {
-                return TableViewCell(
-                  child: Tooltip(message: fieldName, child: Text(fieldName)),
-                );
-              }
+                  if (row == 0) {
+                    return TableViewCell(
+                      child: Tooltip(
+                        message: fieldName,
+                        child: Text(fieldName),
+                      ),
+                    );
+                  }
 
-              final object = filteredData[rowIndex];
+                  final object = filteredData[rowIndex];
 
-              if (column == 0) {
-                final keyString = object.key.toString();
-                final Color cellColor;
-                if (query.isNotEmpty && keyString.contains(query)) {
-                  cellColor = Colors.yellow.withAlpha(50);
-                } else {
-                  cellColor = Colors.transparent;
-                }
-                return TableViewCell(
-                  child: Tooltip(
-                    message: keyString,
-                    child: ColoredBox(color: cellColor, child: Text(keyString)),
-                  ),
-                );
-              }
+                  if (column == 0) {
+                    final keyString = object.key.toString();
+                    final Color cellColor;
+                    if (query.isNotEmpty && keyString.contains(query)) {
+                      cellColor = Colors.yellow.withAlpha(50);
+                    } else {
+                      cellColor = Colors.transparent;
+                    }
+                    return TableViewCell(
+                      child: Tooltip(
+                        message: keyString,
+                        child: ColoredBox(
+                          color: cellColor,
+                          child: Text(keyString),
+                        ),
+                      ),
+                    );
+                  }
 
-              final objectValue = object.value;
-              final Object? fieldValue;
-              if (objectValue is RawObject) {
-                fieldValue = objectValue.fields.elementAt(columnIndex).value;
-              } else {
-                fieldValue = objectValue;
-              }
+                  final objectValue = object.value;
+                  final Object? fieldValue;
+                  if (objectValue is RawObject) {
+                    fieldValue =
+                        objectValue.fields.elementAt(columnIndex).value;
+                  } else {
+                    fieldValue = objectValue;
+                  }
 
-              final String cellText;
-              final Widget cellContent;
-              final stackKey = '${object.key}.$fieldName';
-              if (fieldValue is Iterable) {
-                final list = fieldValue.toList();
-                if (list.isEmpty) {
-                  cellText = '[Empty]';
-                  cellContent = Text(cellText);
-                } else {
-                  cellText = '[Iterable]';
-                  cellContent = InkWell(
-                    child: Text(cellText),
-                    onTap:
-                        () => widget.onStack(stackKey, [
-                          for (var i = 0; i < list.length; i++)
-                            KeyedObject(i, list[i]),
-                        ]),
+                  final String cellText;
+                  final Widget cellContent;
+                  final stackKey = '${object.key}.$fieldName';
+                  if (fieldValue is Iterable) {
+                    final list = fieldValue.toList();
+                    if (list.isEmpty) {
+                      cellText = '[Empty]';
+                      cellContent = Text(cellText);
+                    } else {
+                      cellText = '[Iterable]';
+                      cellContent = InkWell(
+                        child: Text(cellText),
+                        onTap:
+                            () => widget.onStack(stackKey, [
+                              for (var i = 0; i < list.length; i++)
+                                KeyedObject(i, list[i]),
+                            ]),
+                      );
+                    }
+                  } else if (fieldValue is RawObject) {
+                    final label =
+                        getSchemaType(fieldValue.typeId)?.key ?? 'Object';
+                    cellText = '[$label]';
+                    cellContent = InkWell(
+                      child: InkWell(
+                        child: Text(cellText),
+                        onTap:
+                            () => widget.onStack(stackKey, [
+                              KeyedObject(0, fieldValue),
+                            ]),
+                      ),
+                    );
+                  } else {
+                    cellText = fieldValue.toString();
+                    cellContent = Text(cellText);
+                  }
+
+                  final Color cellColor;
+                  if (query.isNotEmpty &&
+                      fieldValue.toString().contains(query)) {
+                    cellColor = Colors.yellow.withAlpha(50);
+                  } else {
+                    cellColor = Colors.transparent;
+                  }
+
+                  return TableViewCell(
+                    child: FrameLoader(
+                      key: ValueKey(object.key),
+                      object: object,
+                      child: Tooltip(
+                        message: cellText,
+                        child: ColoredBox(color: cellColor, child: cellContent),
+                      ),
+                    ),
                   );
-                }
-              } else if (fieldValue is RawObject) {
-                final label = getSchemaType(fieldValue.typeId)?.key ?? 'Object';
-                cellText = '[$label]';
-                cellContent = InkWell(
-                  child: InkWell(
-                    child: Text(cellText),
-                    onTap:
-                        () => widget.onStack(stackKey, [
-                          KeyedObject(0, fieldValue),
-                        ]),
-                  ),
-                );
-              } else {
-                cellText = fieldValue.toString();
-                cellContent = Text(cellText);
-              }
-
-              final Color cellColor;
-              if (query.isNotEmpty && fieldValue.toString().contains(query)) {
-                cellColor = Colors.yellow.withAlpha(50);
-              } else {
-                cellColor = Colors.transparent;
-              }
-
-              return TableViewCell(
-                child: FrameLoader(
-                  key: ValueKey(object.key),
-                  object: object,
-                  child: Tooltip(
-                    message: cellText,
-                    child: ColoredBox(color: cellColor, child: cellContent),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
+                },
+              ),
+            ),
       ],
     );
   }
