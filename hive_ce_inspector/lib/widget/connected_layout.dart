@@ -60,6 +60,9 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedBox = this.selectedBox;
+    final selectedBoxData = boxData[selectedBox];
+
     final isWide = MediaQuery.of(context).size.width > 600;
     final drawer = Drawer(
       child: ListView.builder(
@@ -68,6 +71,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
           return ListTile(
             style: ListTileStyle.drawer,
             title: Text(box),
+            selected: selectedBox == box,
             onTap: () {
               loadBoxData(box);
               setState(() => this.selectedBox = box);
@@ -77,9 +81,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
         itemCount: boxData.keys.length,
       ),
     );
-
-    final selectedBox = this.selectedBox;
-    final selectedBoxData = boxData[selectedBox];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Hive CE Inspector')),
