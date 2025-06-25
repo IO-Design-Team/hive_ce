@@ -143,6 +143,8 @@ class _DataTableViewState extends State<DataTableView> {
               .toList();
     }
 
+    final largeDataset = widget.data.length > 100000;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -152,11 +154,13 @@ class _DataTableViewState extends State<DataTableView> {
             width: 300,
             child: TextField(
               controller: searchController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Search',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
+                helperText: largeDataset ? 'Submit to search' : null,
               ),
-              onChanged: (_) => setState(() {}),
+              onChanged: !largeDataset ? (_) => setState(() {}) : null,
+              onSubmitted: largeDataset ? (_) => setState(() {}) : null,
             ),
           ),
         ),
