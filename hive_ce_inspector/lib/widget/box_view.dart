@@ -99,15 +99,28 @@ class KeyedObject<T extends Object?> {
   const KeyedObject(this.key, this.value, {this.load});
 }
 
-class DataTableView extends StatelessWidget {
+class DataTableView extends StatefulWidget {
   final List<KeyedObject> data;
   final void Function(Object key, List<KeyedObject> value) onStack;
 
   const DataTableView({super.key, required this.data, required this.onStack});
 
   @override
+  State<StatefulWidget> createState() => _DataTableViewState();
+}
+
+class _DataTableViewState extends State<DataTableView> {
+  final searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final firstValue = data.first.value;
+    final firstValue = widget.data.first.value;
     final int columnCount;
     if (firstValue is RawObject) {
       columnCount = 1 + firstValue.fields.length;
@@ -115,79 +128,136 @@ class DataTableView extends StatelessWidget {
       columnCount = 2;
     }
 
-    return TableView.builder(
-      rowCount: data.length + 1,
-      columnCount: columnCount,
-      pinnedRowCount: 1,
-      pinnedColumnCount: 1,
-      rowBuilder:
-          (index) => const TableSpan(
-            extent: FixedSpanExtent(20),
-            padding: SpanPadding.all(4),
-          ),
-      columnBuilder:
-          (index) => const TableSpan(
-            extent: FixedSpanExtent(100),
-            padding: SpanPadding.all(8),
-          ),
-      cellBuilder: (context, vicinity) {
-        final TableVicinity(:row, :column) = vicinity;
-        final rowIndex = row - 1;
-        final columnIndex = column - 1;
+    final query = searchController.text;
+    final List<KeyedObject> filteredData;
+    if (query.isEmpty) {
+      filteredData = widget.data;
+    } else {
+      filteredData =
+          widget.data
+              .where(
+                (e) =>
+                    e.key.toString().contains(query) ||
+                    e.value.toString().contains(query),
+              )
+              .toList();
+    }
 
-        if (row == 0 && column == 0) {
-          return const TableViewCell(child: Text('Key'));
-        }
-
-        if (row == 0) {
-          return TableViewCell(child: Text(columnIndex.toString()));
-        }
-
-        final object = data[rowIndex];
-
-        if (column == 0) {
-          return TableViewCell(child: Text(object.key.toString()));
-        }
-
-        object.load?.call();
-
-        final objectValue = object.value;
-        final Object? fieldValue;
-        if (objectValue is RawObject) {
-          fieldValue = objectValue.fields.elementAt(columnIndex).value;
-        } else {
-          fieldValue = objectValue;
-        }
-
-        final Widget cellContent;
-        final stackKey = '${object.key}.$columnIndex';
-        if (fieldValue is Iterable) {
-          final list = fieldValue.toList();
-          if (list.isEmpty) {
-            cellContent = const Text('[Empty]');
-          } else {
-            cellContent = InkWell(
-              child: const Text('[Iterable]'),
-              onTap:
-                  () => onStack(stackKey, [
-                    for (var i = 0; i < list.length; i++)
-                      KeyedObject(i, list[i]),
-                  ]),
-            );
-          }
-        } else if (fieldValue is RawObject) {
-          cellContent = InkWell(
-            child: InkWell(
-              child: const Text('[Object]'),
-              onTap: () => onStack(stackKey, [KeyedObject(0, fieldValue)]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox(
+            width: 300,
+            child: TextField(
+              controller: searchController,
+              decoration: const InputDecoration(
+                hintText: 'Search',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (_) => setState(() {}),
             ),
-          );
-        } else {
-          cellContent = Text(fieldValue.toString());
-        }
+          ),
+        ),
+        Expanded(
+          child: TableView.builder(
+            rowCount: filteredData.length + 1,
+            columnCount: columnCount,
+            pinnedRowCount: 1,
+            pinnedColumnCount: 1,
+            rowBuilder:
+                (index) => const TableSpan(
+                  extent: FixedSpanExtent(20),
+                  padding: SpanPadding.all(4),
+                ),
+            columnBuilder:
+                (index) => const TableSpan(
+                  extent: FixedSpanExtent(100),
+                  padding: SpanPadding.all(8),
+                ),
+            cellBuilder: (context, vicinity) {
+              final TableVicinity(:row, :column) = vicinity;
+              final rowIndex = row - 1;
+              final columnIndex = column - 1;
 
-        return TableViewCell(child: cellContent);
-      },
+              if (row == 0 && column == 0) {
+                return const TableViewCell(child: Text('Key'));
+              }
+
+              if (row == 0) {
+                return TableViewCell(child: Text(columnIndex.toString()));
+              }
+
+              final object = filteredData[rowIndex];
+
+              if (column == 0) {
+                final keyString = object.key.toString();
+                final Color cellColor;
+                if (query.isNotEmpty && keyString.contains(query)) {
+                  cellColor = Colors.yellow.withAlpha(50);
+                } else {
+                  cellColor = Colors.transparent;
+                }
+                return TableViewCell(
+                  child: ColoredBox(color: cellColor, child: Text(keyString)),
+                );
+              }
+
+              object.load?.call();
+
+              final objectValue = object.value;
+              final Object? fieldValue;
+              if (objectValue is RawObject) {
+                fieldValue = objectValue.fields.elementAt(columnIndex).value;
+              } else {
+                fieldValue = objectValue;
+              }
+
+              final Widget cellContent;
+              final stackKey = '${object.key}.$columnIndex';
+              if (fieldValue is Iterable) {
+                final list = fieldValue.toList();
+                if (list.isEmpty) {
+                  cellContent = const Text('[Empty]');
+                } else {
+                  cellContent = InkWell(
+                    child: const Text('[Iterable]'),
+                    onTap:
+                        () => widget.onStack(stackKey, [
+                          for (var i = 0; i < list.length; i++)
+                            KeyedObject(i, list[i]),
+                        ]),
+                  );
+                }
+              } else if (fieldValue is RawObject) {
+                cellContent = InkWell(
+                  child: InkWell(
+                    child: const Text('[Object]'),
+                    onTap:
+                        () => widget.onStack(stackKey, [
+                          KeyedObject(0, fieldValue),
+                        ]),
+                  ),
+                );
+              } else {
+                cellContent = Text(fieldValue.toString());
+              }
+
+              final Color cellColor;
+              if (query.isNotEmpty && fieldValue.toString().contains(query)) {
+                cellColor = Colors.yellow.withAlpha(50);
+              } else {
+                cellColor = Colors.transparent;
+              }
+
+              return TableViewCell(
+                child: ColoredBox(color: cellColor, child: cellContent),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

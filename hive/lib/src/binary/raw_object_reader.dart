@@ -56,6 +56,9 @@ class RawObject extends RawType {
 
   /// Constructor
   const RawObject(super.typeId, this.fields);
+
+  @override
+  String toString() => 'RawObject(typeId: $typeId, fields: $fields)';
 }
 
 /// A raw field of a custom object
@@ -68,4 +71,7 @@ class RawField {
 
   /// Constructor
   const RawField(this.index, this.value);
+
+  @override
+  String toString() => 'RawField(index: $index, value: $value)';
 }
