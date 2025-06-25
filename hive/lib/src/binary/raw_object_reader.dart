@@ -1,12 +1,15 @@
 // This is internal usage
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
+import 'dart:typed_data';
+
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 
 /// A binary reader that reads raw objects
 class RawObjectReader extends BinaryReaderImpl {
   /// Constructor
-  RawObjectReader(super.buffer, super.typeRegistry);
+  RawObjectReader(Uint8List buffer) : super(buffer, TypeRegistryImpl());
 
   @override
   dynamic read([int? typeId]) {
@@ -14,11 +17,6 @@ class RawObjectReader extends BinaryReaderImpl {
     if (typeId < 32) {
       // This is a built in type
       return super.read(typeId);
-    }
-
-    if (availableBytes == 1) {
-      // This is a custom enum
-      return RawEnum(typeId, readByte());
     }
 
     // This is a custom object

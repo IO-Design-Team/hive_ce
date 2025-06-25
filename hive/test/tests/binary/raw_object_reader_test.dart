@@ -2,15 +2,14 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/binary/raw_object_reader.dart';
-import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
 
 RawObjectReader fromByteData(ByteData byteData) {
-  return RawObjectReader(byteData.buffer.asUint8List(), TypeRegistryImpl());
+  return RawObjectReader(byteData.buffer.asUint8List());
 }
 
 RawObjectReader fromBytes(List<int> bytes) {
-  return RawObjectReader(Uint8List.fromList(bytes), TypeRegistryImpl());
+  return RawObjectReader(Uint8List.fromList(bytes));
 }
 
 void main() {
