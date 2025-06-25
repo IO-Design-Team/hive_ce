@@ -96,14 +96,19 @@ class ConnectClient {
     }).toList();
   }
 
-  Future<Object?> getValue(String name, String key) async {
+  Future<void> getValue(String name, InspectorFrame frame) async {
     final value = await _call(
       ConnectAction.getValue,
-      param: {'name': name, 'key': key},
+      param: {'name': name, 'key': frame.key},
     );
-    if (value == null) return null;
+    if (value == null) return;
 
-    return _readValue(value);
+    _boxEventController.add(
+      BoxEventPayload(
+        box: name,
+        frame: frame.copyWith(value: value, lazy: false),
+      ),
+    );
   }
 
   Object? _readValue(Object? value) {

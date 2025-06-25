@@ -11,7 +11,6 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
 import 'package:hive_ce/src/connect/hive_connect.dart';
-import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
@@ -152,6 +151,9 @@ RECOMMENDED ACTIONS:
         _boxes[name] = newBox;
 
         completer.complete();
+
+        if (!_isolated) HiveConnect.registerBox(newBox);
+
         return newBox;
       } catch (error, stackTrace) {
         unawaited(newBox?.close());
@@ -178,7 +180,7 @@ RECOMMENDED ACTIONS:
     if (encryptionKey != null) {
       encryptionCipher = HiveAesCipher(encryptionKey);
     }
-    final box = await _openBox<E>(
+    return await _openBox<E>(
       name,
       false,
       encryptionCipher,
@@ -189,12 +191,6 @@ RECOMMENDED ACTIONS:
       bytes,
       collection,
     ) as Box<E>;
-
-    if (!_isolated) {
-      HiveConnect.registerBox(box as InspectableBox);
-    }
-
-    return box;
   }
 
   @override
