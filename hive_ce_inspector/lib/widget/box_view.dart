@@ -198,7 +198,7 @@ class _DataTableViewState extends State<DataTableView> {
                   final columnIndex = column - 1;
 
                   if (row == 0 && column == 0) {
-                    return const TableViewCell(child: Text('Key'));
+                    return const TableViewCell(child: Text('key'));
                   }
 
                   final fieldName =
