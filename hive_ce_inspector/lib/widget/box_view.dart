@@ -269,7 +269,7 @@ class _DataTableViewState extends State<DataTableView> {
                   } else if (fieldValue is RawObject) {
                     final label =
                         getSchemaType(fieldValue.typeId)?.key ?? 'Object';
-                    cellText = '[$label]';
+                    cellText = '{$label}';
                     cellContent = InkWell(
                       child: InkWell(
                         child: Text(cellText),
