@@ -216,7 +216,7 @@ class _DataTableViewState extends State<DataTableView> {
                   if (row == 0) {
                     return TableViewCell(
                       child: DataCellContent(
-                        text: fieldName,
+                        tooltip: fieldName,
                         child: Text(fieldName),
                       ),
                     );
@@ -228,7 +228,7 @@ class _DataTableViewState extends State<DataTableView> {
                     final keyString = object.key.toString();
                     return TableViewCell(
                       child: DataCellContent(
-                        text: keyString,
+                        tooltip: keyString,
                         query: query,
                         child: Text(keyString),
                       ),
@@ -286,7 +286,8 @@ class _DataTableViewState extends State<DataTableView> {
                       key: ValueKey(object.key),
                       object: object,
                       child: DataCellContent(
-                        text: cellText,
+                        tooltip: cellText,
+                        getSearchableString: fieldValue.toString,
                         query: query,
                         child: cellContent,
                       ),
@@ -351,20 +352,22 @@ class _FrameLoaderState extends State<FrameLoader> {
 
 class DataCellContent extends StatelessWidget {
   final Widget child;
-  final String text;
+  final String tooltip;
+  final ValueGetter<String>? getSearchableString;
   final String? query;
 
   const DataCellContent({
     super.key,
     required this.child,
-    required this.text,
+    required this.tooltip,
+    this.getSearchableString,
     this.query,
   });
 
   @override
   Widget build(BuildContext context) {
     Widget widget = Tooltip(
-      message: text,
+      message: tooltip,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: child,
@@ -372,11 +375,14 @@ class DataCellContent extends StatelessWidget {
     );
 
     final query = this.query;
-    if (query != null && query.isNotEmpty && text.contains(query)) {
-      widget = ClipRRect(
-        borderRadius: BorderRadius.circular(4),
-        child: ColoredBox(color: Colors.yellow.withAlpha(50), child: widget),
-      );
+    if (query != null && query.isNotEmpty) {
+      final searchable = getSearchableString?.call() ?? tooltip;
+      if (searchable.contains(query)) {
+        widget = ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: ColoredBox(color: Colors.yellow.withAlpha(50), child: widget),
+        );
+      }
     }
 
     return widget;
