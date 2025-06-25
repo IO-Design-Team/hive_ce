@@ -34,6 +34,11 @@ void main() async {
   await box4.close();
   box4 = await Hive.openLazyBox('lazyBox');
 
+  final box5 = await Hive.openBox('box5');
+  for (var i = 0; i < 1000000; i++) {
+    await box5.put(i, john);
+  }
+
   while (true) {
     await Future.delayed(const Duration(seconds: 1));
     await box1.add('bump');
