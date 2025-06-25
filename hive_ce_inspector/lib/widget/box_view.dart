@@ -18,7 +18,7 @@ class _BoxViewState extends State<BoxView> {
 
   List<KeyedObject<List<KeyedObject>>> get stack => [
     KeyedObject(
-      'root',
+      widget.data.name,
       widget.data.frames.values
           .map((e) => KeyedObject(e.key, e.value))
           .toList()
