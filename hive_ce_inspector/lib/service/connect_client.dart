@@ -26,7 +26,8 @@ class ConnectClient {
       disposeHandler: channel.sink.close,
     );
     final vm = await service.getVM();
-    final isolateId = vm.isolates!.where((e) => e.name == 'main').first.id!;
+    final isolateId =
+        vm.isolates!.where((e) => e.name?.contains('main') ?? false).first.id!;
     await service.streamListen(EventStreams.kExtension);
 
     final client = ConnectClient(service, isolateId);

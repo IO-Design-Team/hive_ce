@@ -55,7 +55,14 @@ class HiveConnect {
   }
 
   static void _printConnection() async {
-    final info = await Service.getInfo();
+    final ServiceProtocolInfo info;
+    try {
+      info = await Service.getInfo();
+    } catch (_) {
+      // TODO: This fails on web
+      return;
+    }
+
     final serviceUri = info.serverUri;
     if (serviceUri == null) return;
 
