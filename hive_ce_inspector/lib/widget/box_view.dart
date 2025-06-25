@@ -42,13 +42,6 @@ class _BoxViewState extends State<BoxView> {
   }
 
   @override
-  void didUpdateWidget(BoxView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.data.name == widget.data.name) return;
-    setState(_stack.clear);
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (!widget.data.loaded) {
       return const Center(child: Text('Box is loading...'));

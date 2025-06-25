@@ -108,6 +108,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
               else
                 Expanded(
                   child: BoxView(
+                    key: ValueKey(selectedBox),
                     client: widget.client,
                     schema: schema,
                     data: selectedBoxData,
