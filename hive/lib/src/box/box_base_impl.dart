@@ -199,9 +199,6 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   }
 
   @override
-  void inspect() => HiveConnect.registerBox(this);
-
-  @override
   TypeRegistry get typeRegistry => hive;
 
   @override
@@ -281,7 +278,4 @@ class _NullBoxBase<E> implements BoxBase<E> {
 
   @override
   Never flush() => throw UnimplementedError();
-
-  @override
-  void inspect() => throw UnimplementedError();
 }

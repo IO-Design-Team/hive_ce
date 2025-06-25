@@ -8,12 +8,11 @@ void main() async {
   final path = Directory.current.path;
   Hive.init(path);
   Hive.registerAdapters();
+  await IsolatedHive.init(path);
+  IsolatedHive.registerAdapters();
 
   final box1 = await Hive.openBox('testBox');
-  box1.inspect();
-
   final box2 = await Hive.openBox('testBox2');
-  box2.inspect();
 
   final john = Person(name: 'John', age: 30);
   final jane = Person(
@@ -24,6 +23,9 @@ void main() async {
   );
   await box2.put('person1', john);
   await box2.put('person2', jane);
+
+  final box3 = await IsolatedHive.openBox('isolatedBox');
+  await box3.add(john);
 
   while (true) {
     await Future.delayed(const Duration(seconds: 1));

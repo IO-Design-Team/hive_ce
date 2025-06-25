@@ -3,6 +3,8 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
+import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
@@ -170,18 +172,23 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     String? path,
     Uint8List? bytes,
     String? collection,
-  }) async =>
-      await _openBox<E>(
-        name,
-        false,
-        encryptionCipher,
-        keyComparator,
-        compactionStrategy,
-        crashRecovery,
-        path,
-        bytes,
-        collection,
-      ) as IsolatedBox<E>;
+  }) async {
+    final box = await _openBox<E>(
+      name,
+      false,
+      encryptionCipher,
+      keyComparator,
+      compactionStrategy,
+      crashRecovery,
+      path,
+      bytes,
+      collection,
+    ) as IsolatedBox<E>;
+
+    HiveConnect.registerBox(box as InspectableBox);
+
+    return box;
+  }
 
   @override
   Future<IsolatedLazyBox<E>> openLazyBox<E>(

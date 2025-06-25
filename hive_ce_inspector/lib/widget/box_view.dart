@@ -47,7 +47,7 @@ class _BoxViewState extends State<BoxView> {
           children: [
             TextButton(
               onPressed: () => setState(_stack.clear),
-              child: const Text('root'),
+              child: Text(widget.data.name),
             ),
             ..._stack.expand(
               (e) => [

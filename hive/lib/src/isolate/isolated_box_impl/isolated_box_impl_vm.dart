@@ -189,9 +189,6 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   @override
-  void inspect() => HiveConnect.registerBox(this);
-
-  @override
   TypeRegistry get typeRegistry => _hive;
 
   @override

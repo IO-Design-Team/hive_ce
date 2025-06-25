@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
 import 'package:meta/meta.dart';
-import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 
@@ -113,9 +112,6 @@ abstract class IsolatedBoxBaseImpl<E>
 
   @override
   int get hashCode => _box.hashCode;
-
-  @override
-  void inspect() => HiveConnect.registerBox(this);
 
   @override
   TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
