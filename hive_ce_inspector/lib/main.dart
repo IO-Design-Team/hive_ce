@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:hive_ce_inspector/widget/connection_screen.dart';
+import 'package:hive_ce_inspector/widget/root_screen.dart';
 
 void main() {
+  usePathUrlStrategy();
   runApp(DarkMode(notifier: DarkModeNotifier(), child: const App()));
 }
 
 final _router = GoRouter(
   routes: <GoRoute>[
+    GoRoute(path: '/', builder: (context, state) => const RootScreen()),
     GoRoute(
-      path: '/',
-      builder: (context, state) {
-        return const Material(
-          child: Center(
-            child: Text(
-              'Welcome to the Hive CE Inspector!\nPlease open the link '
-              'displayed when running the debug version of a Hive CE app.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-        );
-      },
-    ),
-    GoRoute(
-      path: '/:version/:port/:secret',
+      path: '/:port/:secret',
       builder: (context, state) {
         return GestureDetector(
           onTap: () {
@@ -34,7 +23,6 @@ final _router = GoRouter(
           child: Scaffold(
             body: Material(
               child: ConnectionScreen(
-                version: state.pathParameters['version']!,
                 port: state.pathParameters['port']!,
                 secret: state.pathParameters['secret']!,
               ),

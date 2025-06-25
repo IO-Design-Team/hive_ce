@@ -7,13 +7,11 @@ import 'package:hive_ce_inspector/widget/error_screen.dart';
 
 class ConnectionScreen extends StatefulWidget {
   const ConnectionScreen({
-    required this.version,
     required this.port,
     required this.secret,
     super.key,
   });
 
-  final String version;
   final String port;
   final String secret;
 

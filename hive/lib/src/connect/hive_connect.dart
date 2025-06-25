@@ -11,6 +11,7 @@ import 'package:hive_ce/src/connect/inspectable_box.dart';
 /// Handles box inspection through `hive_ce_inspector`
 class HiveConnect {
   static const _version = 1;
+  static const _baseUrl = 'https://inspect.hive.isar.community';
 
   static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
     ConnectAction.listBoxes: _listBoxes,
@@ -59,7 +60,7 @@ class HiveConnect {
     try {
       info = await Service.getInfo();
     } catch (_) {
-      // TODO: This fails on web
+      _printUrl('$_baseUrl/$_version/');
       return;
     }
 
@@ -74,9 +75,13 @@ class HiveConnect {
     if (path.endsWith('=')) {
       path = path.substring(0, path.length - 1);
     }
-    final url = ' https://inspect.hive.isar.community/#/$_version/$port$path ';
+
+    _printUrl('$_baseUrl/$_version/$port$path');
+  }
+
+  static void _printUrl(String url) {
     String line(String text, String fill) {
-      final fillCount = url.length - text.length;
+      final fillCount = url.length - text.length + 2;
       final left = List.filled(fillCount ~/ 2, fill);
       final right = List.filled(fillCount - left.length, fill);
       return left.join() + text + right.join();
@@ -88,7 +93,7 @@ class HiveConnect {
     print('║${line('Open the link to connect to the Hive', ' ')}║');
     print('║${line('Inspector while this build is running.', ' ')}║');
     print('╟${line('', '─')}╢');
-    print('║$url║');
+    print('║ $url ║');
     print('╚${line('', '═')}╝');
   }
 
