@@ -119,6 +119,12 @@ class _DataTableViewState extends State<DataTableView> {
   }
 
   @override
+  void didUpdateWidget(DataTableView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    searchController.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final firstValue = widget.data.first.value;
     final int columnCount;
