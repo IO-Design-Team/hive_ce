@@ -219,7 +219,9 @@ class _DataTableViewState extends State<DataTableView> {
                   columnIndex.toString();
 
               if (row == 0) {
-                return TableViewCell(child: Text(fieldName));
+                return TableViewCell(
+                  child: Tooltip(message: fieldName, child: Text(fieldName)),
+                );
               }
 
               final object = filteredData[rowIndex];
@@ -233,7 +235,10 @@ class _DataTableViewState extends State<DataTableView> {
                   cellColor = Colors.transparent;
                 }
                 return TableViewCell(
-                  child: ColoredBox(color: cellColor, child: Text(keyString)),
+                  child: Tooltip(
+                    message: keyString,
+                    child: ColoredBox(color: cellColor, child: Text(keyString)),
+                  ),
                 );
               }
 
@@ -245,15 +250,18 @@ class _DataTableViewState extends State<DataTableView> {
                 fieldValue = objectValue;
               }
 
+              final String cellText;
               final Widget cellContent;
               final stackKey = '${object.key}.$fieldName';
               if (fieldValue is Iterable) {
                 final list = fieldValue.toList();
                 if (list.isEmpty) {
-                  cellContent = const Text('[Empty]');
+                  cellText = '[Empty]';
+                  cellContent = Text(cellText);
                 } else {
+                  cellText = '[Iterable]';
                   cellContent = InkWell(
-                    child: const Text('[Iterable]'),
+                    child: Text(cellText),
                     onTap:
                         () => widget.onStack(stackKey, [
                           for (var i = 0; i < list.length; i++)
@@ -263,9 +271,10 @@ class _DataTableViewState extends State<DataTableView> {
                 }
               } else if (fieldValue is RawObject) {
                 final label = getSchemaType(fieldValue.typeId)?.key ?? 'Object';
+                cellText = '[$label]';
                 cellContent = InkWell(
                   child: InkWell(
-                    child: Text('[$label]'),
+                    child: Text(cellText),
                     onTap:
                         () => widget.onStack(stackKey, [
                           KeyedObject(0, fieldValue),
@@ -273,7 +282,8 @@ class _DataTableViewState extends State<DataTableView> {
                   ),
                 );
               } else {
-                cellContent = Text(fieldValue.toString());
+                cellText = fieldValue.toString();
+                cellContent = Text(cellText);
               }
 
               final Color cellColor;
@@ -286,7 +296,10 @@ class _DataTableViewState extends State<DataTableView> {
               return TableViewCell(
                 child: FrameLoader(
                   object: object,
-                  child: ColoredBox(color: cellColor, child: cellContent),
+                  child: Tooltip(
+                    message: cellText,
+                    child: ColoredBox(color: cellColor, child: cellContent),
+                  ),
                 ),
               );
             },
