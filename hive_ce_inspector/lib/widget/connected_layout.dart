@@ -110,7 +110,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                   child: BoxView(
                     key: ValueKey(selectedBox),
                     client: widget.client,
-                    schema: schema,
                     data: selectedBoxData,
                   ),
                 ),

@@ -6,15 +6,9 @@ import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 class BoxView extends StatefulWidget {
   final ConnectClient client;
-  final HiveSchema? schema;
   final BoxData data;
 
-  const BoxView({
-    super.key,
-    required this.client,
-    required this.schema,
-    required this.data,
-  });
+  const BoxView({super.key, required this.client, required this.data});
 
   @override
   State<StatefulWidget> createState() => _BoxViewState();
@@ -78,7 +72,6 @@ class _BoxViewState extends State<BoxView> {
         Expanded(
           child: DataTableView(
             key: ValueKey(widget.data.name),
-            schema: widget.schema,
             data: stack.last.value,
             onStack:
                 (key, value) =>
@@ -101,16 +94,10 @@ class KeyedObject<T extends Object?> {
 }
 
 class DataTableView extends StatefulWidget {
-  final HiveSchema? schema;
   final List<KeyedObject> data;
   final void Function(Object key, List<KeyedObject> value) onStack;
 
-  const DataTableView({
-    super.key,
-    required this.schema,
-    required this.data,
-    required this.onStack,
-  });
+  const DataTableView({super.key, required this.data, required this.onStack});
 
   @override
   State<StatefulWidget> createState() => _DataTableViewState();
@@ -129,13 +116,10 @@ class _DataTableViewState extends State<DataTableView> {
   Widget build(BuildContext context) {
     final firstValue = widget.data.first.value;
     final int columnCount;
-    final HiveSchemaType? schemaType;
     if (firstValue is RawObject) {
       columnCount = 1 + firstValue.fields.length;
-      schemaType = getSchemaType(firstValue.typeId)?.value;
     } else {
       columnCount = 2;
-      schemaType = null;
     }
 
     final query = searchController.text;
@@ -210,9 +194,12 @@ class _DataTableViewState extends State<DataTableView> {
                     );
                   }
 
-                  final fieldName =
-                      getFieldName(schemaType, columnIndex) ??
-                      columnIndex.toString();
+                  final String fieldName;
+                  if (firstValue is RawObject) {
+                    fieldName = firstValue.fields[columnIndex].name;
+                  } else {
+                    fieldName = columnIndex.toString();
+                  }
 
                   if (row == 0) {
                     return TableViewCell(
@@ -265,9 +252,7 @@ class _DataTableViewState extends State<DataTableView> {
                       );
                     }
                   } else if (fieldValue is RawObject) {
-                    final label =
-                        getSchemaType(fieldValue.typeId)?.key ?? 'Object';
-                    cellText = '{$label}';
+                    cellText = '{${fieldValue.name}}';
                     cellContent = InkWell(
                       child: InkWell(
                         child: Text(cellText),
@@ -278,18 +263,8 @@ class _DataTableViewState extends State<DataTableView> {
                       ),
                     );
                   } else if (fieldValue is RawEnum) {
-                    final enumType = getSchemaType(fieldValue.typeId);
-                    final enumValue = getFieldName(
-                      enumType?.value,
-                      fieldValue.index,
-                    );
-                    if (enumType != null && enumValue != null) {
-                      cellText = '${enumType.key}.$enumValue';
-                      cellContent = Text(cellText);
-                    } else {
-                      cellText = fieldValue.index.toString();
-                      cellContent = Text(cellText);
-                    }
+                    cellText = '${fieldValue.name}.${fieldValue.value}';
+                    cellContent = Text(cellText);
                   } else {
                     cellText = fieldValue.toString();
                     cellContent = Text(cellText);
@@ -312,27 +287,6 @@ class _DataTableViewState extends State<DataTableView> {
             ),
       ],
     );
-  }
-
-  MapEntry<String, HiveSchemaType>? getSchemaType(int typeId) {
-    // The RawObject type IDs are post conversion
-    return widget.schema?.types.entries
-        .where(
-          (e) =>
-              TypeRegistryImpl.calculateTypeId(
-                e.value.typeId,
-                internal: false,
-              ) ==
-              typeId,
-        )
-        .firstOrNull;
-  }
-
-  String? getFieldName(HiveSchemaType? type, int index) {
-    return type?.fields.entries
-        .where((e) => e.value.index == index)
-        .firstOrNull
-        ?.key;
   }
 }
 

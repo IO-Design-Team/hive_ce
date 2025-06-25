@@ -31,26 +31,35 @@ class RawObjectReader extends BinaryReaderImpl {
       throw HiveError('Unknown type ID: $typeId');
     }
 
+    MapEntry<String, HiveSchemaField>? getField(int index) {
+      return type.value.fields.entries
+          .where((e) => e.value.index == index)
+          .firstOrNull;
+    }
+
     switch (type.value.kind) {
       case TypeKind.objectKind:
         final length = readByte();
-        final fields = List<RawField>.filled(length, RawField(null));
+        final fields = List<RawField>.filled(length, RawField('', null));
         for (var i = 0; i < length; i++) {
           // Consume the field index
-          readByte();
-          fields[i] = RawField(read());
+          final index = readByte();
+          final field = getField(index);
+
+          if (field == null) {
+            throw HiveError('Unknown field index: ${type.key}[$index]');
+          }
+          fields[i] = RawField(field.key, read());
         }
         return RawObject(type.key, fields);
       case TypeKind.enumKind:
-        final index = read();
-        final value = type.value.fields.entries
-            .where((e) => e.value.index == index)
-            .firstOrNull;
+        final index = readByte();
+        final field = getField(index);
 
-        if (value == null) {
+        if (field == null) {
           throw HiveError('Unknown enum index: ${type.key}[$index]');
         }
-        return RawEnum(type.key, value.key);
+        return RawEnum(type.key, field.key);
       case TypeKind.unknownKind:
         throw HiveError('Unknown type kind: ${type.key}');
     }
@@ -92,12 +101,15 @@ class RawObject extends RawType {
 
 /// A raw field of a custom object
 class RawField {
+  /// THe name of the field
+  final String name;
+
   /// The value of the field
   final Object? value;
 
   /// Constructor
-  const RawField(this.value);
+  const RawField(this.name, this.value);
 
   @override
-  String toString() => value.toString();
+  String toString() => '$name: $value';
 }
