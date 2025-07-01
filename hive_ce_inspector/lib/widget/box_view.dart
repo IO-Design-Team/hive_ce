@@ -37,6 +37,8 @@ class _BoxViewState extends State<BoxView> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = TextTheme.of(context);
+
     if (!widget.data.loaded) {
       return const Center(child: Text('Box is loading...'));
     }
@@ -70,12 +72,17 @@ class _BoxViewState extends State<BoxView> {
           ],
         ),
         Expanded(
-          child: DataTableView(
-            key: ValueKey(widget.data.name),
-            data: stack.last.value,
-            onStack:
-                (key, value) =>
-                    setState(() => _stack.add(KeyedObject(key, value))),
+          child: DefaultTextStyle(
+            style: textTheme.bodyMedium!.copyWith(
+              overflow: TextOverflow.ellipsis,
+            ),
+            child: DataTableView(
+              key: ValueKey(widget.data.name),
+              data: stack.last.value,
+              onStack:
+                  (key, value) =>
+                      setState(() => _stack.add(KeyedObject(key, value))),
+            ),
           ),
         ),
       ],
