@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:hive_ce_inspector/widget/connection_screen.dart';
 import 'package:hive_ce_inspector/widget/root_screen.dart';
+import 'package:hive_ce_inspector/widget/schema_upload_screen.dart';
 
 void main() {
   usePathUrlStrategy();
@@ -20,13 +20,9 @@ final _router = GoRouter(
           onTap: () {
             FocusScope.of(context).requestFocus(FocusNode());
           },
-          child: Scaffold(
-            body: Material(
-              child: ConnectionScreen(
-                port: state.pathParameters['port']!,
-                secret: state.pathParameters['secret']!,
-              ),
-            ),
+          child: SchemaUploadScreen(
+            port: state.pathParameters['port']!,
+            secret: state.pathParameters['secret']!,
           ),
         );
       },

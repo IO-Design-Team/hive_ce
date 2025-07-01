@@ -195,7 +195,7 @@ class _DataTableViewState extends State<DataTableView> {
                   }
 
                   final String fieldName;
-                  if (firstValue is RawObject) {
+                  if (firstValue is RawObject && columnIndex > 0) {
                     fieldName = firstValue.fields[columnIndex].name;
                   } else {
                     fieldName = columnIndex.toString();

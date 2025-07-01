@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/widget/connected_layout.dart';
 import 'package:hive_ce_inspector/widget/error_screen.dart';
@@ -9,11 +10,13 @@ class ConnectionScreen extends StatefulWidget {
   const ConnectionScreen({
     required this.port,
     required this.secret,
+    required this.schema,
     super.key,
   });
 
   final String port;
   final String secret;
+  final HiveSchema schema;
 
   @override
   State<ConnectionScreen> createState() => _ConnectionPageState();
@@ -24,31 +27,41 @@ class _ConnectionPageState extends State<ConnectionScreen> {
 
   @override
   void initState() {
-    clientFuture = ConnectClient.connect(widget.port, widget.secret);
+    clientFuture = ConnectClient.connect(
+      widget.port,
+      widget.secret,
+      widget.schema,
+    );
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant ConnectionScreen oldWidget) {
     if (oldWidget.port != widget.port || oldWidget.secret != widget.secret) {
-      clientFuture = ConnectClient.connect(widget.port, widget.secret);
+      clientFuture = ConnectClient.connect(
+        widget.port,
+        widget.secret,
+        widget.schema,
+      );
     }
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ConnectClient>(
-      future: clientFuture,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _BoxesLoader(client: snapshot.data!);
-        } else if (snapshot.hasError) {
-          return const ErrorScreen();
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
+    return Scaffold(
+      body: FutureBuilder<ConnectClient>(
+        future: clientFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return _BoxesLoader(client: snapshot.data!);
+          } else if (snapshot.hasError) {
+            return const ErrorScreen();
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }

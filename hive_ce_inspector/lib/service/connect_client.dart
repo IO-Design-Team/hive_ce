@@ -9,10 +9,15 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class ConnectClient {
   final VmService vmService;
   final String isolateId;
+  final HiveSchema schema;
 
-  ConnectClient(this.vmService, this.isolateId);
+  ConnectClient(this.vmService, this.isolateId, this.schema);
 
-  static Future<ConnectClient> connect(String port, String secret) async {
+  static Future<ConnectClient> connect(
+    String port,
+    String secret,
+    HiveSchema schema,
+  ) async {
     final wsUrl = Uri.parse('ws://127.0.0.1:$port/$secret=/ws');
     final channel = WebSocketChannel.connect(wsUrl);
 
@@ -30,7 +35,7 @@ class ConnectClient {
         vm.isolates!.where((e) => e.name?.contains('main') ?? false).first.id!;
     await service.streamListen(EventStreams.kExtension);
 
-    final client = ConnectClient(service, isolateId);
+    final client = ConnectClient(service, isolateId, schema);
     final handlers = <String, Function(Map<String, dynamic>)>{
       ConnectEvent.boxRegistered.event: (Map<String, dynamic> json) {
         client._boxRegisteredController.add(json['name']);
@@ -115,6 +120,7 @@ class ConnectClient {
     if (value == null) return null;
 
     return RawObjectReader(
+      schema,
       Uint8List.fromList((value as List).cast<int>()),
     ).read();
   }

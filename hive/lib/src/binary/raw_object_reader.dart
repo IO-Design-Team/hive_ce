@@ -25,7 +25,9 @@ class RawObjectReader extends BinaryReaderImpl {
     }
 
     final type = _schema.types.entries
-        .where((e) => e.value.typeId == typeId)
+        .where((e) =>
+            TypeRegistryImpl.calculateTypeId(e.value.typeId, internal: false) ==
+            typeId)
         .firstOrNull;
     if (type == null) {
       throw HiveError('Unknown type ID: $typeId');
