@@ -53,17 +53,17 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         .toList();
 
     var typeId = schema.nextTypeId - 1;
+    int generateTypeId() {
+      do {
+        typeId++;
+      } while (revived.reservedTypeIds.contains(typeId));
+      return typeId;
+    }
+
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.element3!.displayName;
-
-      int generateTypeId() {
-        do {
-          typeId++;
-        } while (revived.reservedTypeIds.contains(typeId));
-        return typeId;
-      }
 
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});

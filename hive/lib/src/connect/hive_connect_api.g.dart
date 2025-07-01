@@ -8,7 +8,7 @@ part of 'hive_connect_api.dart';
 
 InspectorFrame _$InspectorFrameFromJson(Map<String, dynamic> json) =>
     InspectorFrame(
-      key: json['key'],
+      key: json['key'] as Object,
       value: json['value'],
       lazy: json['lazy'] as bool? ?? false,
       deleted: json['deleted'] as bool? ?? false,
@@ -24,12 +24,12 @@ Map<String, dynamic> _$InspectorFrameToJson(InspectorFrame instance) =>
 
 BoxEventPayload _$BoxEventPayloadFromJson(Map<String, dynamic> json) =>
     BoxEventPayload(
-      box: json['name'] as String,
+      box: json['box'] as String,
       frame: InspectorFrame.fromJson(json['frame'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$BoxEventPayloadToJson(BoxEventPayload instance) =>
     <String, dynamic>{
-      'name': instance.box,
+      'box': instance.box,
       'frame': instance.frame,
     };
