@@ -197,7 +197,8 @@ abstract class IsolatedBoxBaseImpl<E>
         await _channel.invokeListMethod<Map>('getFrames', {'name': name});
     return result
         .map((e) => e.cast<String, dynamic>())
-        .map(InspectorFrame.fromJson);
+        .map(InspectorFrame.fromJson)
+        .map((e) => e.copyWith(value: _readValue(e.value as Uint8List?)));
   }
 
   @override
