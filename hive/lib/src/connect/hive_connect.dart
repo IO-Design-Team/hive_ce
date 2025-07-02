@@ -11,7 +11,7 @@ import 'package:hive_ce/src/connect/inspectable_box.dart';
 /// Handles box inspection through `hive_ce_inspector`
 class HiveConnect {
   static const _version = 1;
-  static const _baseUrl = 'https://inspect.hive.isar.community';
+  static const _baseUrl = 'https://inspector.hive.isar.community';
 
   static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
     ConnectAction.listBoxes: _listBoxes,
