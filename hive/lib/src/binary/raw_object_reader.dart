@@ -19,8 +19,7 @@ class RawObjectReader extends BinaryReaderImpl {
   @override
   dynamic read([int? typeId]) {
     typeId ??= readTypeId();
-    if (typeId < 32) {
-      // This is a built in type
+    if (TypeRegistryImpl.isInternalTypeId(typeId)) {
       return super.read(typeId);
     }
 

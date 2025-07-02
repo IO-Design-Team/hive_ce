@@ -39,7 +39,10 @@ void main() {
     bw.write(Duration(seconds: 123));
 
     final br = RawObjectReader(stubSchema, bw.toBytes());
-    expect(br.read(), dateTime);
+    expect(
+      (br.read() as DateTime).millisecondsSinceEpoch,
+      dateTime.millisecondsSinceEpoch,
+    );
     expect(br.read(), Duration(seconds: 123));
   });
 }

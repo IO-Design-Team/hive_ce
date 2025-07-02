@@ -1,5 +1,6 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 
 /// A binary writer that writes raw objects
 class RawObjectWriter extends BinaryWriterImpl {
@@ -30,8 +31,11 @@ class RawObjectWriter extends BinaryWriterImpl {
     resolved.adapter.write(nested, value);
     final bytes = nested.toBytes();
 
-    if (withTypeId) writeTypeId(resolved.typeId);
-    writeByte(bytes.length);
+    final typeId = resolved.typeId;
+    final isInternal = TypeRegistryImpl.isInternalTypeId(typeId);
+
+    if (withTypeId) writeTypeId(typeId);
+    if (!isInternal) writeByte(bytes.length);
     writeBytes(bytes);
   }
 }
