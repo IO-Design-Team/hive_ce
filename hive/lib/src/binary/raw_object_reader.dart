@@ -24,13 +24,15 @@ class RawObjectReader extends BinaryReaderImpl {
       return super.read(typeId);
     }
 
+    final dataLength = readByte();
+
     final type = _schema.types.entries
         .where((e) =>
             TypeRegistryImpl.calculateTypeId(e.value.typeId, internal: false) ==
             typeId)
         .firstOrNull;
     if (type == null) {
-      throw HiveError('Unknown type ID: $typeId');
+      return readBytes(dataLength);
     }
 
     MapEntry<String, HiveSchemaField>? getField(int index) {

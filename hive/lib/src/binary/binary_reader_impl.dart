@@ -311,6 +311,14 @@ class BinaryReaderImpl extends BinaryReader {
     return frame;
   }
 
+  /// Read [length] bytes from the buffer
+  Uint8List readBytes(int length) {
+    _requireBytes(length);
+    final bytes = _buffer.sublist(_offset, _offset + length);
+    _offset += length;
+    return bytes;
+  }
+
   @override
   dynamic read([int? typeId]) {
     typeId ??= readTypeId();
