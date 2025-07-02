@@ -7,7 +7,7 @@ import 'package:hive_ce_inspector/widget/schema_upload_screen.dart';
 
 void main() {
   usePathUrlStrategy();
-  runApp(DarkMode(notifier: DarkModeNotifier(), child: const App()));
+  runApp(const App());
 }
 
 final _router = GoRouter(
@@ -31,6 +31,8 @@ final _router = GoRouter(
 );
 
 class App extends StatelessWidget {
+  static const _seedColor = Color(0xFF9FC9FF);
+
   const App({super.key});
 
   @override
@@ -42,33 +44,16 @@ class App extends StatelessWidget {
       routerDelegate: _router.routerDelegate,
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF9FC9FF),
-          brightness:
-              DarkMode.of(context).darkMode
-                  ? Brightness.dark
-                  : Brightness.light,
+          seedColor: _seedColor,
+          brightness: Brightness.light,
         ),
-        useMaterial3: true,
+      ),
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: _seedColor,
+          brightness: Brightness.dark,
+        ),
       ),
     );
-  }
-}
-
-class DarkMode extends InheritedNotifier<DarkModeNotifier> {
-  const DarkMode({required super.child, super.key, super.notifier});
-
-  static DarkModeNotifier of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<DarkMode>()!.notifier!;
-  }
-}
-
-class DarkModeNotifier extends ChangeNotifier {
-  var _darkMode = true;
-
-  bool get darkMode => _darkMode;
-
-  void toggle() {
-    _darkMode = !_darkMode;
-    notifyListeners();
   }
 }
