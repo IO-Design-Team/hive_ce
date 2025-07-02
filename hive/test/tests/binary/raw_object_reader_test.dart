@@ -1,74 +1,45 @@
-import 'dart:typed_data';
-
-import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/binary/raw_object_reader.dart';
+import 'package:hive_ce/src/binary/raw_object_writer.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/schema/hive_schema.dart';
 import 'package:test/test.dart';
 
-RawObjectReader fromByteData(ByteData byteData) {
-  return RawObjectReader(byteData.buffer.asUint8List());
-}
-
-RawObjectReader fromBytes(List<int> bytes) {
-  return RawObjectReader(Uint8List.fromList(bytes));
-}
+const stubSchema = HiveSchema(nextTypeId: 0, types: {});
 
 void main() {
   group('RawObjectReader', () {
     test('primitive', () {
-      final br = fromByteData(
-        ByteData(9)
-          ..setUint8(0, FrameValueType.intT)
-          ..setFloat64(1, 123, Endian.little),
-      );
+      final bw = RawObjectWriter(TypeRegistryImpl());
+      bw.write(null);
+      bw.write(123);
+      bw.write(123.456);
+      bw.write(true);
+      bw.write('hello');
+      bw.write([1, 2, 3]);
+      bw.write({1, 2, 3});
+      bw.write({1: 2, 3: 4});
 
+      final br = RawObjectReader(stubSchema, bw.toBytes());
+      expect(br.read(), null);
       expect(br.read(), 123);
+      expect(br.read(), 123.456);
+      expect(br.read(), true);
+      expect(br.read(), 'hello');
+      expect(br.read(), [1, 2, 3]);
+      expect(br.read(), {1, 2, 3});
+      expect(br.read(), {1: 2, 3: 4});
     });
+  });
 
-    test('custom object', () {
-      final br = fromByteData(
-        ByteData(27)
-          ..setUint8(0, 200) // object type id
-          ..setUint8(1, 4) // object field count
-          ..setUint8(2, 0) // field index
-          ..setUint8(3, FrameValueType.intT) // field type id
-          ..setFloat64(4, 12345, Endian.little) // field value
-          ..setUint8(12, 1) // field index
-          ..setUint8(13, FrameValueType.intT) // field type id
-          ..setFloat64(14, 123, Endian.little) // field value
-          ..setUint8(22, 2) // field index
-          ..setUint8(23, FrameValueType.nullT) // field type id
-          ..setUint8(24, 3) // field index
-          ..setUint8(25, 201) // enum type id
-          ..setUint8(26, 1), // enum index
-      );
+  test('adapter', () {
+    final dateTime = DateTime.timestamp();
 
-      expect(
-        br.read(),
-        isA<RawObject>().having((o) => o.typeId, 'typeId', 200).having(
-          (o) => o.fields,
-          'fields',
-          [
-            isA<RawField>()
-                .having((f) => f.index, 'index', 0)
-                .having((f) => f.value, 'value', 12345),
-            isA<RawField>()
-                .having((f) => f.index, 'index', 1)
-                .having((f) => f.value, 'value', 123),
-            isA<RawField>()
-                .having((f) => f.index, 'index', 2)
-                .having((f) => f.value, 'value', null),
-            isA<RawField>()
-                .having((f) => f.index, 'index', 3) //
-                .having(
-                  (f) => f.value,
-                  'value',
-                  isA<RawEnum>()
-                      .having((e) => e.typeId, 'typeId', 201)
-                      .having((e) => e.index, 'index', 1),
-                ),
-          ],
-        ),
-      );
-    });
+    final bw = RawObjectWriter(TypeRegistryImpl());
+    bw.write(dateTime);
+    bw.write(Duration(seconds: 123));
+
+    final br = RawObjectReader(stubSchema, bw.toBytes());
+    expect(br.read(), dateTime);
+    expect(br.read(), Duration(seconds: 123));
   });
 }
