@@ -47,11 +47,11 @@ class RawObjectReader extends BinaryReaderImpl {
         final fields = List<RawField>.filled(length, RawField('', null));
         for (var i = 0; i < length; i++) {
           // Consume the field index
-          final index = readByte();
-          final field = getField(index);
+          readByte();
+          final field = getField(i);
 
           if (field == null) {
-            throw HiveError('Unknown field index: ${type.key}[$index]');
+            throw HiveError('Unknown field index: ${type.key}[$i]');
           }
           fields[i] = RawField(field.key, read());
         }
