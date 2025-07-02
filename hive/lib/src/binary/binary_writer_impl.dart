@@ -296,6 +296,8 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Add the given bytes to the buffer verbatim
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   int writeBytes(Uint8List bytes) {
     final length = bytes.length;
     _reserveBytes(length);
