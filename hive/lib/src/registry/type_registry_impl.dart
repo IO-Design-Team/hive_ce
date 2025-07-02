@@ -247,4 +247,15 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
   }
+
+  /// If the given raw [typeId] is internal
+  static bool isInternalTypeId(int typeId) {
+    final isInternal = typeId >= 0 && typeId < reservedTypeIds;
+
+    final firstExtendedInternalTypeId = maxTypeId + 1;
+    final isExtendedInternal = typeId >= firstExtendedInternalTypeId &&
+        typeId < firstExtendedInternalTypeId + reservedExtendedTypeIds;
+
+    return isInternal || isExtendedInternal;
+  }
 }
