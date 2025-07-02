@@ -252,9 +252,9 @@ class _DataTableViewState extends State<DataTableView> {
                       cellText = '[Empty]';
                       cellContent = Text(cellText);
                     } else {
-                      cellText = '[Iterable]';
+                      cellText = list.toString();
                       cellContent = InkWell(
-                        child: Text(cellText),
+                        child: const Text('[Iterable]'),
                         onTap:
                             () => widget.onStack(stackKey, [
                               for (var i = 0; i < list.length; i++)
