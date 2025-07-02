@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
@@ -233,8 +235,7 @@ class _DataTableViewState extends State<DataTableView> {
                   final objectValue = object.value;
                   final Object? fieldValue;
                   if (objectValue is RawObject) {
-                    fieldValue =
-                        objectValue.fields[columnIndex].value;
+                    fieldValue = objectValue.fields[columnIndex].value;
                   } else {
                     fieldValue = objectValue;
                   }
@@ -242,7 +243,10 @@ class _DataTableViewState extends State<DataTableView> {
                   final String cellText;
                   final Widget cellContent;
                   final stackKey = '${object.key}.$fieldName';
-                  if (fieldValue is Iterable) {
+                  if (fieldValue is Uint8List) {
+                    cellText = fieldValue.toString();
+                    cellContent = const Text('[Bytes]');
+                  } else if (fieldValue is Iterable) {
                     final list = fieldValue.toList();
                     if (list.isEmpty) {
                       cellText = '[Empty]';
