@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
