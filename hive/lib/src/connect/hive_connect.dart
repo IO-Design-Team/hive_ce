@@ -151,8 +151,6 @@ class HiveConnect {
   }
 
   static Uint8List _writeValue(TypeRegistry registry, Object? value) {
-    if (value is Uint8List) return value;
-
     final writer = RawObjectWriter(registry);
     writer.write(value);
     return writer.toBytes();

@@ -27,7 +27,7 @@ class RawObjectWriter extends BinaryWriterImpl {
           'Did you forget to register an adapter?');
     }
 
-    final nested = BinaryWriterImpl(typeRegistry);
+    final nested = RawObjectWriter(typeRegistry);
     resolved.adapter.write(nested, value);
     final bytes = nested.toBytes();
 
