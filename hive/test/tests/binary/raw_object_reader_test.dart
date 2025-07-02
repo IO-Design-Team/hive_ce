@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/raw_object_reader.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
@@ -73,6 +75,19 @@ void main() {
       expect(raw.fields[0].value, testObject.field1);
       expect(raw.fields[1].name, 'field2');
       expect(raw.fields[1].value, testObject.field2);
+    });
+
+    test('without schema', () {
+      final typeRegistry = TypeRegistryImpl()..registerAdapter(TestAdapter());
+      final testObject = TestObject('test', 123);
+
+      final bw = RawObjectWriter(typeRegistry);
+      bw.write(testObject);
+
+      final bytes = bw.toBytes();
+      final br = RawObjectReader(stubSchema, bytes);
+      final raw = br.read() as Uint8List;
+      expect(raw, bytes.skip(2));
     });
   });
 }
