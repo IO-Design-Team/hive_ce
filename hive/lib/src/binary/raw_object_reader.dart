@@ -23,7 +23,7 @@ class RawObjectReader extends BinaryReaderImpl {
       return super.read(typeId);
     }
 
-    final dataLength = readByte();
+    final dataLength = readInt();
 
     final type = _schema.types.entries
         .where((e) =>
