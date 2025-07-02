@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/widget/connection_screen.dart';
 import 'package:yaml/yaml.dart';
 
-class SchemaUploadScreen extends StatefulWidget {
+class SchemaUploadScreen extends StatelessWidget {
   final String port;
   final String secret;
 
@@ -18,53 +18,35 @@ class SchemaUploadScreen extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => _SchemaUploadScreenState();
-}
-
-class _SchemaUploadScreenState extends State<SchemaUploadScreen> {
-  DropzoneViewController? dropzoneController;
-
-  @override
   Widget build(BuildContext context) {
+    final navigator = Navigator.of(context);
+
     return Scaffold(
-      body: Stack(
-        children: [
-          DropzoneView(
-            onCreated: (controller) => dropzoneController = controller,
-            onDropFile: onDropFile,
+      body: DropTarget(
+        onDragDone: (details) => onDragDone(navigator, details),
+        child: const Center(
+          child: Text(
+            'Drop a Hive schema here to continue',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18),
           ),
-          const Center(
-            child: Text(
-              'Drop a Hive schema here to continue',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  void onDropFile(DropzoneFileInterface file) async {
-    final navigator = Navigator.of(context);
-
-    final dropzoneController = this.dropzoneController;
-    if (dropzoneController == null) return;
-    final data = await dropzoneController.getFileData(file);
-    final schemaContent = utf8.decode(data);
+  void onDragDone(NavigatorState navigator, DropDoneDetails details) async {
+    final content = await details.files.first.readAsString();
     final schema = HiveSchema.fromJson(
-      jsonDecode(jsonEncode(loadYaml(schemaContent))),
+      jsonDecode(jsonEncode(loadYaml(content))),
     );
 
     unawaited(
       navigator.push(
         MaterialPageRoute(
           builder:
-              (context) => ConnectionScreen(
-                port: widget.port,
-                secret: widget.secret,
-                schema: schema,
-              ),
+              (context) =>
+                  ConnectionScreen(port: port, secret: secret, schema: schema),
         ),
       ),
     );

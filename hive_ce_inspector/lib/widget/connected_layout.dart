@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
@@ -25,7 +24,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   late final StreamSubscription<BoxEventPayload> boxEventSubscription;
 
   String? selectedBox;
-  DropzoneViewController? dropzoneController;
   HiveSchema? schema;
 
   @override
