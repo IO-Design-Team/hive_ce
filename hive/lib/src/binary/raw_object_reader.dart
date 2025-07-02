@@ -64,7 +64,7 @@ class RawObjectReader extends BinaryReaderImpl {
         }
         return RawEnum(type.key, field.key);
       case TypeKind.unknownKind:
-        throw HiveError('Unknown type kind: ${type.key}');
+        throw HiveError('Unknown type kind for type: ${type.key}');
     }
   }
 }
