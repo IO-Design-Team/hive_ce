@@ -53,16 +53,20 @@ void main() {
   group('external adapter', () {
     test('with schema', () {
       final typeRegistry = TypeRegistryImpl()..registerAdapter(TestAdapter());
-      final schema = HiveSchema(nextTypeId: 0, types: {
-        'TestObject': HiveSchemaType(
+      final schema = HiveSchema(
+        nextTypeId: 0,
+        types: {
+          'TestObject': HiveSchemaType(
             typeId: 100,
             kind: TypeKind.objectKind,
             nextIndex: 0,
             fields: {
               'field1': HiveSchemaField(index: 0),
               'field2': HiveSchemaField(index: 1),
-            })
-      });
+            },
+          )
+        },
+      );
 
       final testObject = TestObject('test', 123);
 
@@ -88,6 +92,33 @@ void main() {
       final br = RawObjectReader(stubSchema, bytes);
       final raw = br.read() as Uint8List;
       expect(raw, bytes.skip(2));
+    });
+
+    test('enum', () {
+      final typeRegistry = TypeRegistryImpl()
+        ..registerAdapter(TestEnumAdapter());
+      final schema = HiveSchema(
+        nextTypeId: 0,
+        types: {
+          'TestEnum': HiveSchemaType(
+            typeId: 100,
+            kind: TypeKind.enumKind,
+            nextIndex: 0,
+            fields: {
+              'value1': HiveSchemaField(index: 0),
+              'value2': HiveSchemaField(index: 1),
+            },
+          )
+        },
+      );
+
+      final bw = RawObjectWriter(typeRegistry);
+      bw.write(TestEnum.value1);
+
+      final br = RawObjectReader(schema, bw.toBytes());
+      final raw = br.read() as RawEnum;
+      expect(raw.name, 'TestEnum');
+      expect(raw.value, 'value1');
     });
   });
 }
@@ -124,5 +155,25 @@ class TestAdapter extends TypeAdapter<TestObject> {
       ..write(obj.field1)
       ..writeByte(1)
       ..write(obj.field2);
+  }
+}
+
+enum TestEnum {
+  value1,
+  value2,
+}
+
+class TestEnumAdapter extends TypeAdapter<TestEnum> {
+  @override
+  final typeId = 100;
+
+  @override
+  TestEnum read(BinaryReader reader) {
+    return TestEnum.values[reader.readByte()];
+  }
+
+  @override
+  void write(BinaryWriter writer, TestEnum obj) {
+    writer.writeByte(obj.index);
   }
 }
