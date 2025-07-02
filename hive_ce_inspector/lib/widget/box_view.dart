@@ -175,6 +175,7 @@ class _DataTableViewState extends State<DataTableView> {
             ? const Expanded(child: Center(child: Text('No search results')))
             : Expanded(
               child: TableView.builder(
+                key: ValueKey(widget.data),
                 rowCount: filteredData.length + 1,
                 columnCount: columnCount,
                 pinnedRowCount: 1,
