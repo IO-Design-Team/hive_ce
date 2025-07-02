@@ -6,6 +6,9 @@ abstract interface class InspectableBox {
   /// The name of the box
   String get name;
 
+  /// The box's type registry
+  TypeRegistry get typeRegistry;
+
   /// Returns all of the frames currently loaded in the box
   Future<Iterable<InspectorFrame>> getFrames();
 

@@ -1,11 +1,10 @@
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
-import 'package:hive_ce/src/registry/type_registry_impl.dart';
 
 /// A binary writer that writes raw objects
 class RawObjectWriter extends BinaryWriterImpl {
   /// Constructor
-  RawObjectWriter() : super(TypeRegistryImpl());
+  RawObjectWriter(super.typeRegistry);
 
   @override
   void write<T>(T value, {bool withTypeId = true}) {

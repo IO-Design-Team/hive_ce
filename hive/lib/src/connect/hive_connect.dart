@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
@@ -111,7 +113,7 @@ class HiveConnect {
           box: box.name,
           frame: InspectorFrame(
             key: event.key,
-            value: _writeValue(event.value),
+            value: _writeValue(box.typeRegistry, event.value),
             deleted: event.deleted,
           ),
         ).toJson(),
@@ -134,7 +136,9 @@ class HiveConnect {
     if (box == null) return [];
 
     final frames = await box.getFrames();
-    return frames.map((e) => e.copyWith(value: _writeValue(e.value))).toList();
+    return frames
+        .map((e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)))
+        .toList();
   }
 
   static Future<Object?> _loadValue(dynamic args) async {
@@ -144,13 +148,13 @@ class HiveConnect {
 
     final key = args['key'];
     final value = await box.loadValue(key);
-    return _writeValue(value);
+    return _writeValue(box.typeRegistry, value);
   }
 
-  static Uint8List _writeValue(Object? value) {
+  static Uint8List _writeValue(TypeRegistry registry, Object? value) {
     if (value is Uint8List) return value;
 
-    final writer = RawObjectWriter();
+    final writer = RawObjectWriter(registry);
     writer.write(value);
     return writer.toBytes();
   }

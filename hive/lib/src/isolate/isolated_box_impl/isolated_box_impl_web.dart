@@ -114,6 +114,9 @@ abstract class IsolatedBoxBaseImpl<E>
   int get hashCode => _box.hashCode;
 
   @override
+  TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
+
+  @override
   Future<Iterable<InspectorFrame>> getFrames() =>
       (_box as InspectableBox).getFrames();
 

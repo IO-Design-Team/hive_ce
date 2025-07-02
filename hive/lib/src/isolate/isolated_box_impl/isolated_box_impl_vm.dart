@@ -189,6 +189,9 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   @override
+  TypeRegistry get typeRegistry => _hive;
+
+  @override
   Future<Iterable<InspectorFrame>> getFrames() async {
     final result =
         await _channel.invokeListMethod<Map>('getFrames', {'name': name});
