@@ -103,7 +103,7 @@ class ConnectClient {
 
   Future<void> loadValue(String name, InspectorFrame frame) async {
     final value = await _call(
-      ConnectAction.getValue,
+      ConnectAction.loadValue,
       param: {'name': name, 'key': frame.key},
     );
     if (value == null) return;

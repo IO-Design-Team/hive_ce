@@ -95,5 +95,5 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   }
 
   @override
-  Future<Object?> getValue(Object key) => get(key);
+  Future<Object?> loadValue(Object key) => get(key);
 }

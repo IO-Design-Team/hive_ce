@@ -109,5 +109,5 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   }
 
   @override
-  Future<Object?> getValue(Object key) async => get(key);
+  Future<Object?> loadValue(Object key) async => get(key);
 }

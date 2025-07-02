@@ -199,9 +199,6 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   }
 
   @override
-  TypeRegistry get typeRegistry => hive;
-
-  @override
   Future<Iterable<InspectorFrame>> getFrames() async =>
       keystore.frames.map(InspectorFrame.fromFrame);
 }

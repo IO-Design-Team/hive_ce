@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 
@@ -16,7 +15,7 @@ class HiveConnect {
   static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
     ConnectAction.listBoxes: _listBoxes,
     ConnectAction.getBoxFrames: _getBoxFrames,
-    ConnectAction.getValue: _getValue,
+    ConnectAction.loadValue: _loadValue,
   };
 
   const HiveConnect._();
@@ -112,7 +111,7 @@ class HiveConnect {
           box: box.name,
           frame: InspectorFrame(
             key: event.key,
-            value: _writeValue(box.typeRegistry, event.value),
+            value: _writeValue(event.value),
             deleted: event.deleted,
           ),
         ).toJson(),
@@ -135,25 +134,23 @@ class HiveConnect {
     if (box == null) return [];
 
     final frames = await box.getFrames();
-    return frames
-        .map((e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)))
-        .toList();
+    return frames.map((e) => e.copyWith(value: _writeValue(e.value))).toList();
   }
 
-  static Future<Object?> _getValue(dynamic args) async {
+  static Future<Object?> _loadValue(dynamic args) async {
     final name = args['name'] as String;
     final box = _boxes[name];
     if (box == null) return null;
 
     final key = args['key'];
-    final value = await box.getValue(key);
-    return _writeValue(box.typeRegistry, value);
+    final value = await box.loadValue(key);
+    return _writeValue(value);
   }
 
-  static Uint8List _writeValue(TypeRegistry registry, Object? value) {
+  static Uint8List _writeValue(Object? value) {
     if (value is Uint8List) return value;
 
-    final writer = BinaryWriterImpl(registry);
+    final writer = RawObjectWriter();
     writer.write(value);
     return writer.toBytes();
   }

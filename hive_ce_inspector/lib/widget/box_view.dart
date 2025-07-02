@@ -234,7 +234,7 @@ class _DataTableViewState extends State<DataTableView> {
                   final Object? fieldValue;
                   if (objectValue is RawObject) {
                     fieldValue =
-                        objectValue.fields.elementAt(columnIndex).value;
+                        objectValue.fields[columnIndex].value;
                   } else {
                     fieldValue = objectValue;
                   }

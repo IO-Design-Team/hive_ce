@@ -114,15 +114,12 @@ abstract class IsolatedBoxBaseImpl<E>
   int get hashCode => _box.hashCode;
 
   @override
-  TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
-
-  @override
   Future<Iterable<InspectorFrame>> getFrames() =>
       (_box as InspectableBox).getFrames();
 
   @override
-  Future<Object?> getValue(Object key) =>
-      (_box as InspectableBox).getValue(key);
+  Future<Object?> loadValue(Object key) =>
+      (_box as InspectableBox).loadValue(key);
 }
 
 /// Isolated implementation of [Box]

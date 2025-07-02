@@ -11,8 +11,8 @@ enum ConnectAction {
   /// Get all frames for a given box
   getBoxFrames,
 
-  /// Read the value of a given key
-  getValue;
+  /// Load the value of a given key
+  loadValue;
 
   /// The method name
   String get method => 'ext.hive_ce.$name';
