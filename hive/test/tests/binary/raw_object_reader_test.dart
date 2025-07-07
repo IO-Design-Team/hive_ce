@@ -8,8 +8,6 @@ import 'package:hive_ce/src/schema/hive_schema.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
-const stubSchema = HiveSchema(nextTypeId: 0, types: {});
-
 void main() {
   group('RawObjectReader', () {
     test('primitive', () {
@@ -23,7 +21,7 @@ void main() {
       bw.write({1, 2, 3});
       bw.write({1: 2, 3: 4});
 
-      final br = RawObjectReader(stubSchema, bw.toBytes());
+      final br = RawObjectReader({}, bw.toBytes());
       expect(br.read(), null);
       expect(br.read(), 123);
       expect(br.read(), 123.456);
@@ -42,7 +40,7 @@ void main() {
     bw.write(dateTime);
     bw.write(Duration(seconds: 123));
 
-    final br = RawObjectReader(stubSchema, bw.toBytes());
+    final br = RawObjectReader({}, bw.toBytes());
     expect(
       (br.read() as DateTime).millisecondsSinceEpoch,
       dateTime.millisecondsSinceEpoch,
@@ -53,27 +51,24 @@ void main() {
   group('external adapter', () {
     test('with schema', () {
       final typeRegistry = TypeRegistryImpl()..registerAdapter(TestAdapter());
-      final schema = HiveSchema(
-        nextTypeId: 0,
-        types: {
-          'TestObject': HiveSchemaType(
-            typeId: 100,
-            kind: TypeKind.objectKind,
-            nextIndex: 0,
-            fields: {
-              'field1': HiveSchemaField(index: 0),
-              'field2': HiveSchemaField(index: 1),
-            },
-          )
-        },
-      );
+      final types = {
+        'TestObject': HiveSchemaType(
+          typeId: 100,
+          kind: TypeKind.objectKind,
+          nextIndex: 0,
+          fields: {
+            'field1': HiveSchemaField(index: 0),
+            'field2': HiveSchemaField(index: 1),
+          },
+        )
+      };
 
       final testObject = TestObject('test', 123);
 
       final bw = RawObjectWriter(typeRegistry);
       bw.write(testObject);
 
-      final br = RawObjectReader(schema, bw.toBytes());
+      final br = RawObjectReader(types, bw.toBytes());
       final raw = br.read() as RawObject;
       expect(raw.fields[0].name, 'field1');
       expect(raw.fields[0].value, testObject.field1);
@@ -89,33 +84,30 @@ void main() {
       bw.write(testObject);
 
       final bytes = bw.toBytes();
-      final br = RawObjectReader(stubSchema, bytes);
+      final br = RawObjectReader({}, bytes);
       final raw = br.read() as Uint8List;
-      expect(raw, bytes.skip(2));
+      expect(raw, bytes.sublist(5));
     });
 
     test('enum', () {
       final typeRegistry = TypeRegistryImpl()
         ..registerAdapter(TestEnumAdapter());
-      final schema = HiveSchema(
-        nextTypeId: 0,
-        types: {
-          'TestEnum': HiveSchemaType(
-            typeId: 100,
-            kind: TypeKind.enumKind,
-            nextIndex: 0,
-            fields: {
-              'value1': HiveSchemaField(index: 0),
-              'value2': HiveSchemaField(index: 1),
-            },
-          )
-        },
-      );
+      final types = {
+        'TestEnum': HiveSchemaType(
+          typeId: 100,
+          kind: TypeKind.enumKind,
+          nextIndex: 0,
+          fields: {
+            'value1': HiveSchemaField(index: 0),
+            'value2': HiveSchemaField(index: 1),
+          },
+        )
+      };
 
       final bw = RawObjectWriter(typeRegistry);
       bw.write(TestEnum.value1);
 
-      final br = RawObjectReader(schema, bw.toBytes());
+      final br = RawObjectReader(types, bw.toBytes());
       final raw = br.read() as RawEnum;
       expect(raw.name, 'TestEnum');
       expect(raw.value, 'value1');

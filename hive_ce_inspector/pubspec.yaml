@@ -8,15 +8,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_web_plugins:
-    sdk: flutter
   desktop_drop: ^0.6.0
-  go_router: ^14.8.1
   hive_ce:
     path: ../hive
   two_dimensional_scrollables: ^0.3.3
   vm_service: ^15.0.0
-  web_socket_channel: ^3.0.2
   yaml: ^3.1.3
   devtools_extensions: ^0.4.0
   devtools_app_shared: ^0.4.0

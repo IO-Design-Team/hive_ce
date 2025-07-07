@@ -10,10 +10,10 @@ import 'package:hive_ce/src/schema/hive_schema.dart';
 
 /// A binary reader that reads raw objects
 class RawObjectReader extends BinaryReaderImpl {
-  final HiveSchema _schema;
+  final Map<String, HiveSchemaType> _types;
 
   /// Constructor
-  RawObjectReader(this._schema, Uint8List buffer)
+  RawObjectReader(this._types, Uint8List buffer)
       : super(buffer, TypeRegistryImpl());
 
   @override
@@ -23,9 +23,9 @@ class RawObjectReader extends BinaryReaderImpl {
       return super.read(typeId);
     }
 
-    final dataLength = readInt();
+    final dataLength = readInt32();
 
-    final type = _schema.types.entries
+    final type = _types.entries
         .where((e) =>
             TypeRegistryImpl.calculateTypeId(e.value.typeId, internal: false) ==
             typeId)

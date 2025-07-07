@@ -2,40 +2,30 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:vm_service/vm_service.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 class ConnectClient {
   final VmService vmService;
   final String isolateId;
-  final HiveSchema schema;
+  final Map<String, HiveSchemaType> types;
 
-  ConnectClient(this.vmService, this.isolateId, this.schema);
+  ConnectClient(this.vmService, this.isolateId, this.types);
 
   static Future<ConnectClient> connect(
-    String port,
-    String secret,
-    HiveSchema schema,
+    Map<String, HiveSchemaType> types,
   ) async {
-    final wsUrl = Uri.parse('ws://127.0.0.1:$port/$secret=/ws');
-    final channel = WebSocketChannel.connect(wsUrl);
+    await serviceManager.onServiceAvailable;
+    final service = serviceManager.service;
+    if (service == null) throw 'VM service not found';
 
-    // Ignore
-    // ignore: avoid_print
-    final stream = channel.stream.handleError(print);
-
-    final service = VmService(
-      stream,
-      channel.sink.add,
-      disposeHandler: channel.sink.close,
-    );
     final vm = await service.getVM();
     final isolateId =
         vm.isolates!.where((e) => e.name?.contains('main') ?? false).first.id!;
     await service.streamListen(EventStreams.kExtension);
 
-    final client = ConnectClient(service, isolateId, schema);
+    final client = ConnectClient(service, isolateId, types);
     final handlers = <String, Function(Map<String, dynamic>)>{
       ConnectEvent.boxRegistered.event: (Map<String, dynamic> json) {
         client._boxRegisteredController.add(json['name']);
@@ -120,7 +110,7 @@ class ConnectClient {
     if (value == null) return null;
 
     return RawObjectReader(
-      schema,
+      types,
       Uint8List.fromList((value as List).cast<int>()),
     ).read();
   }
