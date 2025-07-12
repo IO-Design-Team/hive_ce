@@ -19,7 +19,11 @@ extension IsolatedHiveX on IsolatedHiveInterface {
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
   }) async {
-    WidgetsFlutterBinding.ensureInitialized();
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+    } catch (_) {
+      // This will throw in non UI isolates
+    }
 
     String? path;
     if (!kIsWeb) {
