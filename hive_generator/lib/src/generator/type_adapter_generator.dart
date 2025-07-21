@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
@@ -15,9 +15,7 @@ import 'package:meta/meta.dart';
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   @override
   Future<String> generateForAnnotatedElement(
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    Element element,
+    Element2 element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
@@ -34,13 +32,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   ///
   /// If this is an incremental update, pass the existing [schema]
   static GenerateTypeAdapterResult generateTypeAdapter({
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required Element element,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required LibraryElement library,
+    required Element2 element,
+    required LibraryElement2 library,
     required int typeId,
     String? adapterName,
     HiveSchemaType? schema,
@@ -59,23 +52,23 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final setters = getAccessorsResult.setters;
     _verifyFieldIndices(setters);
 
-    adapterName ??= generateAdapterName(cls.name);
+    adapterName ??= generateAdapterName(cls.displayName);
     final builder = cls.thisType.isEnum
         ? EnumAdapterBuilder(cls, getters)
         : ClassAdapterBuilder(cls, getters, setters);
 
     final content = '''
-    class $adapterName extends TypeAdapter<${cls.name}> {
+    class $adapterName extends TypeAdapter<${cls.displayName}> {
       @override
       final typeId = $typeId;
 
       @override
-      ${cls.name} read(BinaryReader reader) {
+      ${cls.displayName} read(BinaryReader reader) {
         ${builder.buildRead()}
       }
 
       @override
-      void write(BinaryWriter writer, ${cls.name} obj) {
+      void write(BinaryWriter writer, ${cls.displayName} obj) {
         ${builder.buildWrite()}
       }
 
@@ -95,23 +88,21 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  /// TODO: Fix with analyzer 8
-  /// ignore: deprecated_member_use
-  static Set<String> _getAllAccessorNames(InterfaceElement cls) {
+  static Set<String> _getAllAccessorNames(InterfaceElement2 cls) {
     final isEnum = cls.thisType.isEnum;
-    final constructorFields =
-        getConstructor(cls).parameters.map((it) => it.name).toSet();
+    final constructorFields = getConstructor(cls)
+        .formalParameters
+        .map((it) => it.displayName)
+        .toSet();
 
     final accessorNames = <String>{};
 
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    final supertypes = cls.allSupertypes.map((it) => it.element);
+    final supertypes = cls.allSupertypes.map((it) => it.element3);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
       if (const TypeChecker.fromRuntime(Object).isExactly(type)) continue;
 
-      for (final accessor in type.accessors) {
+      for (final accessor in [...type.getters2, ...type.setters2]) {
         // Ignore any non-enum accessors on enums
         if (isEnum && !accessor.returnType.isEnum) continue;
 
@@ -123,9 +114,9 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
         // Ignore getters without setters on classes
         if (!isEnum &&
-            accessor.isGetter &&
-            accessor.correspondingSetter == null &&
-            !constructorFields.contains(accessor.name)) {
+            accessor is GetterElement &&
+            accessor.correspondingSetter2 == null &&
+            !constructorFields.contains(accessor.displayName)) {
           continue;
         }
 
@@ -140,14 +131,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static GetAccessorsResult getAccessors({
     required int typeId,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required InterfaceElement cls,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required LibraryElement library,
+    required InterfaceElement2 cls,
+    required LibraryElement2 library,
     HiveSchemaType? schema,
   }) {
     final accessorNames = _getAllAccessorNames(cls);
@@ -155,29 +140,27 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final constr = getConstructor(cls);
 
     final parameterDefaults = <String, String?>{};
-    for (final param in constr.parameters) {
+    for (final param in constr.formalParameters) {
       final freezedDefault = getFreezedDefault(param);
       if (freezedDefault != null) {
-        parameterDefaults[param.name] = constantToString(freezedDefault);
+        parameterDefaults[param.displayName] = constantToString(freezedDefault);
       } else {
-        parameterDefaults[param.name] = param.defaultValueCode;
+        parameterDefaults[param.displayName] = param.defaultValueCode;
       }
     }
 
     var nextIndex = schema?.nextIndex ?? 0;
     final newSchemaFields = <String, HiveSchemaField>{};
 
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    AdapterField? accessorToField(PropertyAccessorElement? element) {
+    AdapterField? accessorToField(PropertyAccessorElement2? element) {
       if (element == null) return null;
 
       final annotation =
-          getHiveFieldAnn(element.variable2) ?? getHiveFieldAnn(element);
+          getHiveFieldAnn(element.variable3) ?? getHiveFieldAnn(element);
       if (schema == null && annotation == null) return null;
 
-      final field = element.variable2!;
-      final name = field.name;
+      final field = element.variable3!;
+      final name = field.displayName;
       final int index;
       if (schema != null) {
         // Only generate one id per field name
@@ -208,15 +191,11 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      final getter = cls.augmented.lookUpGetter(name: name, library: library);
+      final getter = cls.getGetter2(name);
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
 
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      final setter = cls.augmented.lookUpSetter(name: name, library: library);
+      final setter = cls.getSetter2(name);
       final setterField = accessorToField(setter);
       if (setterField != null) setters.add(setterField);
     }

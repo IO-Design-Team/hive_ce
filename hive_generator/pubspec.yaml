@@ -7,8 +7,8 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  build: ^2.0.0
-  source_gen: ^2.0.0
+  build: ^3.0.0
+  source_gen: ^3.0.0
   hive_ce: ^2.11.0
   analyzer: ^7.1.0
   source_helper: ^1.1.0

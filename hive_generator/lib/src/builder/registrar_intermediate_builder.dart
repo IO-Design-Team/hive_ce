@@ -29,7 +29,7 @@ class RegistrarIntermediateBuilder implements Builder {
       final element = annotatedElement.element;
       final cls = getClass(element);
       final adapterName =
-          readAdapterName(annotation) ?? generateAdapterName(cls.name);
+          readAdapterName(annotation) ?? generateAdapterName(cls.displayName);
       adapters.add(adapterName);
     }
 
@@ -45,7 +45,7 @@ class RegistrarIntermediateBuilder implements Builder {
 
     if (generateAdaptersAnnotations.length > 1) {
       throw HiveError(
-        'Multiple GenerateAdapters annotations found in file: ${library.source.uri}',
+        'Multiple GenerateAdapters annotations found in file: ${library.uri}',
       );
     } else if (generateAdaptersElements.isNotEmpty) {
       registrarLocation = true;
@@ -65,7 +65,7 @@ class RegistrarIntermediateBuilder implements Builder {
       buildStep.allowedOutputs.first,
       jsonEncode(
         RegistrarIntermediate(
-          uri: library.source.uri,
+          uri: library.uri,
           adapters: adapters,
           registrarLocation: registrarLocation,
         ),

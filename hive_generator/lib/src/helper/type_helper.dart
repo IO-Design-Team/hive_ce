@@ -56,9 +56,7 @@ String literalToString(DartObject object, List<String> typeInformation) {
   } else if (object.type is FunctionType) {
     badType = 'Function';
   } else if (!reader.isLiteral) {
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    badType = object.type!.element!.name;
+    badType = object.type!.element3!.displayName;
   }
 
   if (badType != null) {
