@@ -221,14 +221,16 @@ extension on DartType {
     final definingLibrary = element.library2;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
-    for (final import
-        in currentLibrary.fragments.expand((e) => e.libraryImports2)) {
-      for (final MapEntry(:key, :value)
-          in import.namespace.definedNames2.entries) {
-        if (value == element) {
-          return '$key${_suffixFromType(this)}';
-        }
-      }
+    final prefix = currentLibrary.fragments
+        .expand((e) => e.libraryImports2)
+        .firstWhereOrNull(
+            (e) => e.namespace.definedNames2.values.contains(element))
+        ?.prefix2
+        ?.element
+        .displayName;
+
+    if (prefix != null) {
+      return '$prefix.${getDisplayString()}';
     }
 
     return getDisplayString();
