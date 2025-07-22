@@ -43,7 +43,6 @@ class RegistrarIntermediateBuilder implements Builder {
         libraryReader.annotatedWith(generateAdaptersChecker);
     final generateAdaptersDirectives =
         libraryReader.libraryDirectivesAnnotatedWith(generateAdaptersChecker);
-    
 
     final generateAdaptersAnnotationReaders = [
       ...generateAdaptersElements.map((e) => e.annotation),
