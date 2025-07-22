@@ -37,20 +37,35 @@ class RegistrarIntermediateBuilder implements Builder {
     final bool registrarLocation;
 
     final generateAdaptersChecker = TypeChecker.fromRuntime(GenerateAdapters);
-    final generateAdaptersElements =
-        LibraryReader(library).annotatedWith(generateAdaptersChecker);
-    // Read multiple annotations if they exist
-    final generateAdaptersAnnotations = generateAdaptersElements
-        .expand((e) => generateAdaptersChecker.annotationsOf(e.element));
+    final libraryReader = LibraryReader(library);
 
-    if (generateAdaptersAnnotations.length > 1) {
+    final generateAdaptersElements =
+        libraryReader.annotatedWith(generateAdaptersChecker);
+    final generateAdaptersDirectives =
+        libraryReader.libraryDirectivesAnnotatedWith(generateAdaptersChecker);
+    
+
+    final generateAdaptersAnnotationReaders = [
+      ...generateAdaptersElements.map((e) => e.annotation),
+      ...generateAdaptersDirectives.map((e) => e.annotation),
+    ];
+
+    // Read multiple annotations if they exist
+    final generateAdaptersAnnotationObjects = [
+      ...generateAdaptersElements
+          .expand((e) => generateAdaptersChecker.annotationsOf(e.element)),
+      ...generateAdaptersDirectives
+          .expand((e) => generateAdaptersChecker.annotationsOf(e.directive)),
+    ];
+
+    if (generateAdaptersAnnotationObjects.length > 1) {
       throw HiveError(
         'Multiple GenerateAdapters annotations found in file: ${library.uri}',
       );
-    } else if (generateAdaptersElements.isNotEmpty) {
+    } else if (generateAdaptersAnnotationReaders.isNotEmpty) {
       registrarLocation = true;
 
-      final annotation = generateAdaptersElements.single.annotation;
+      final annotation = generateAdaptersAnnotationReaders.single;
       final revived = RevivedGenerateAdapters(annotation);
       for (final spec in revived.specs) {
         adapters.add(generateAdapterName(spec.type.element3!.displayName));
