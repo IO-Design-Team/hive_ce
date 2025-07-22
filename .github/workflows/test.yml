@@ -16,7 +16,10 @@ jobs:
     strategy:
       matrix:
         package: [hive, hive_flutter, hive_generator]
-        flutter-channel: [stable, beta]
+        flutter-channel:
+          - stable
+          # TODO: Re-enable with https://github.com/dart-lang/sdk/issues/61168
+          # - beta
     defaults:
       run:
         working-directory: ${{ matrix.package }}
