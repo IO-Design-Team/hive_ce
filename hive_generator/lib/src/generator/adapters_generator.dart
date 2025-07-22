@@ -14,8 +14,22 @@ import 'package:yaml/yaml.dart';
 /// Builder that generates Hive adapters from a GenerateAdapters annotation
 class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
   @override
+  Future<String> generateForAnnotatedDirective(
+    ElementDirective directive,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  @override
   Future<String> generateForAnnotatedElement(
     Element2 element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  Future<String> _generate(
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
