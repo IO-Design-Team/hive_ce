@@ -1,3 +1,7 @@
+## 1.9.3
+
+- Supports `build: 3.0.0` and `source_gen: 3.0.0`
+
 ## 1.9.2
 
 - Ignores analyzer deprecations
