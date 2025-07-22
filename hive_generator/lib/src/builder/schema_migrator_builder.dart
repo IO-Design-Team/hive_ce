@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
@@ -69,9 +69,7 @@ class SchemaMigratorBuilder implements Builder {
       final cls = getClass(type.element);
       final className = cls.displayName;
 
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      final library = type.element.library!;
+      final library = type.element.library2!;
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
         typeId: typeId,
@@ -93,15 +91,14 @@ class SchemaMigratorBuilder implements Builder {
         }
       }
 
-      final uri = library.source.uri;
+      final uri = library.uri;
       final isEnum = cls.thisType.isEnum;
       final constructor = getConstructor(cls);
       final accessors = [
-        ...cls.accessors,
-
-        /// TODO: Fix with analyzer 8
-        /// ignore: deprecated_member_use
-        ...cls.allSupertypes.expand((it) => it.accessors),
+        ...cls.getters2,
+        ...cls.setters2,
+        ...cls.allSupertypes
+            .expand((it) => [...it.element3.getters2, ...it.element3.setters2]),
       ];
       final info = _SchemaInfo(
         uri: uri,
@@ -192,14 +189,8 @@ class _SchemaInfo {
     required this.uri,
     required this.className,
     required bool isEnum,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required ConstructorElement constructor,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required List<PropertyAccessorElement> accessors,
+    required ConstructorElement2 constructor,
+    required List<PropertyAccessorElement2> accessors,
     required HiveSchemaType schema,
   }) : schema = _sanitizeSchema(
           className: className,
@@ -213,14 +204,8 @@ class _SchemaInfo {
     required String className,
     required bool isEnum,
     required HiveSchemaType schema,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required ConstructorElement constructor,
-
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    required List<PropertyAccessorElement> accessors,
+    required ConstructorElement2 constructor,
+    required List<PropertyAccessorElement2> accessors,
   }) {
     // Enums need no sanitization
     if (isEnum) return schema;
@@ -231,12 +216,12 @@ class _SchemaInfo {
       final publicFieldName =
           fieldName.startsWith('_') ? fieldName.substring(1) : fieldName;
 
-      final isInConstructor =
-          constructor.parameters.any((e) => e.displayName == publicFieldName);
+      final isInConstructor = constructor.formalParameters
+          .any((e) => e.displayName == publicFieldName);
       final publicAccessors =
           accessors.where((e) => e.displayName == publicFieldName).toList();
-      final hasPublicSetter = publicAccessors.any((e) => e.isSetter);
-      final hasPublicGetter = publicAccessors.any((e) => e.isGetter);
+      final hasPublicSetter = publicAccessors.any((e) => e is SetterElement);
+      final hasPublicGetter = publicAccessors.any((e) => e is GetterElement);
 
       if (!isInConstructor && !hasPublicSetter) {
         throw InvalidGenerationSourceError(

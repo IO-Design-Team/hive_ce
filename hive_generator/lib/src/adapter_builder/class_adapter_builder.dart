@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
@@ -43,10 +43,10 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final fields = setters.toList();
 
     // Empty classes
-    if (constr.parameters.isEmpty && fields.isEmpty) {
+    if (constr.formalParameters.isEmpty && fields.isEmpty) {
       return '''
     reader.readByte();
-    return ${cls.name}();
+    return ${cls.displayName}();
     ''';
     }
 
@@ -57,16 +57,16 @@ class ClassAdapterBuilder extends AdapterBuilder {
       for (int i = 0; i < numOfFields; i++)
         reader.readByte(): reader.read(),
     };
-    return ${cls.name}(
+    return ${cls.displayName}(
     ''');
 
-    for (final param in constr.parameters) {
-      var field = fields.firstWhereOrNull((it) => it.name == param.name);
+    for (final param in constr.formalParameters) {
+      var field = fields.firstWhereOrNull((it) => it.name == param.displayName);
       // Final fields
-      field ??= getters.firstWhereOrNull((it) => it.name == param.name);
+      field ??= getters.firstWhereOrNull((it) => it.name == param.displayName);
       if (field != null) {
         if (param.isNamed) {
-          code.write('${param.name}: ');
+          code.write('${param.displayName}: ');
         }
         code.write(_value(param.type, field));
         code.writeln(',');
@@ -125,9 +125,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
+      return '$variable as ${type.getPrefixedDisplayString(cls.library2)}';
     }
   }
 
@@ -158,9 +156,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
+      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library2)}>()';
     }
   }
 
@@ -173,13 +169,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
-      /// TODO: Fix with analyzer 8
-      /// ignore: deprecated_member_use
-      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
-
-          /// TODO: Fix with analyzer 8
-          /// ignore: deprecated_member_use
-          '${arg2.getPrefixedDisplayString(cls.library)}>()';
+      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library2)}, '
+          '${arg2.getPrefixedDisplayString(cls.library2)}>()';
     }
   }
 
@@ -223,31 +214,23 @@ String _suffixFromType(DartType type) {
 }
 
 extension on DartType {
-  /// TODO: Fix with analyzer 8
-  /// ignore: deprecated_member_use
-  String getPrefixedDisplayString(LibraryElement currentLibrary) {
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    final element = this.element;
+  String getPrefixedDisplayString(LibraryElement2 currentLibrary) {
+    final element = element3;
     if (element == null) return getDisplayString();
 
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    final definingLibrary = element.library;
+    final definingLibrary = element.library2;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    for (final import in currentLibrary.units.expand((e) => e.libraryImports)) {
-      for (final MapEntry(:key, :value)
+    final prefix = currentLibrary.fragments
+        .expand((e) => e.libraryImports2)
+        .firstWhereOrNull(
+            (e) => e.namespace.definedNames2.values.contains(element))
+        ?.prefix2
+        ?.element
+        .displayName;
 
-          /// TODO: Fix with analyzer 8
-          /// ignore: deprecated_member_use
-          in import.namespace.definedNames.entries) {
-        if (value == element) {
-          return '$key${_suffixFromType(this)}';
-        }
-      }
+    if (prefix != null) {
+      return '$prefix.${getDisplayString()}';
     }
 
     return getDisplayString();

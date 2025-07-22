@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:meta/meta.dart';
 
@@ -7,9 +7,7 @@ import 'package:meta/meta.dart';
 @immutable
 class AdapterField {
   /// The corresponding element for this field
-  /// TODO: Fix with analyzer 8
-  /// ignore: deprecated_member_use
-  final PropertyAccessorElement element;
+  final PropertyAccessorElement2 element;
 
   /// The index of the field
   ///
@@ -43,9 +41,7 @@ class AdapterField {
 @immutable
 abstract class AdapterBuilder {
   /// TODO: Document this!
-  /// TODO: Fix with analyzer 8
-  /// ignore: deprecated_member_use
-  final InterfaceElement cls;
+  final InterfaceElement2 cls;
 
   /// TODO: Document this!
   final List<AdapterField> getters;

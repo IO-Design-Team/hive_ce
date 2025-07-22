@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
@@ -14,10 +14,22 @@ import 'package:yaml/yaml.dart';
 /// Builder that generates Hive adapters from a GenerateAdapters annotation
 class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
   @override
+  Future<String> generateForAnnotatedDirective(
+    ElementDirective directive,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  @override
   Future<String> generateForAnnotatedElement(
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
-    Element element,
+    Element2 element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  Future<String> _generate(
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
@@ -68,9 +80,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
-        /// TODO: Fix with analyzer 8
-        /// ignore: deprecated_member_use
-        element: spec.type.element!,
+        element: spec.type.element3!,
         library: library,
         typeId: schemaType.typeId,
         schema: schemaType,
