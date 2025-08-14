@@ -23,5 +23,5 @@ dependencies:
 dev_dependencies:
   test: ^1.17.11
   build_runner: ^2.5.4
-  rexios_lints: ^12.0.0
+  rexios_lints: ^14.0.1
   json_serializable: ^6.8.0
