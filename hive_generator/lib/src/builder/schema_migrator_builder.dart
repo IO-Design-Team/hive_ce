@@ -60,7 +60,7 @@ class SchemaMigratorBuilder implements Builder {
       if (!await buildStep.resolver.isLibrary(input)) continue;
       final library = await buildStep.resolver.libraryFor(input);
       final hiveTypeElements = LibraryReader(library)
-          .annotatedWith(TypeChecker.fromRuntime(HiveType));
+          .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
       hiveTypes.addAll(hiveTypeElements);
     }
 

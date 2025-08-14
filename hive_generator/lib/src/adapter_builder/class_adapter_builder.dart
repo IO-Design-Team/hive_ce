@@ -21,19 +21,24 @@ class ClassAdapterBuilder extends AdapterBuilder {
   );
 
   /// [TypeChecker] for [HiveList].
-  final hiveListChecker = const TypeChecker.fromRuntime(HiveList);
+  final hiveListChecker =
+      const TypeChecker.typeNamed(HiveList, inPackage: 'hive_ce');
 
   /// [TypeChecker] for [Map].
-  final mapChecker = const TypeChecker.fromRuntime(Map);
+  final mapChecker =
+      const TypeChecker.typeNamed(Map, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Set].
-  final setChecker = const TypeChecker.fromRuntime(Set);
+  final setChecker =
+      const TypeChecker.typeNamed(Set, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Iterable].
-  final iterableChecker = const TypeChecker.fromRuntime(Iterable);
+  final iterableChecker =
+      const TypeChecker.typeNamed(Iterable, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Uint8List].
-  final uint8ListChecker = const TypeChecker.fromRuntime(Uint8List);
+  final uint8ListChecker = const TypeChecker.typeNamed(Uint8List,
+      inPackage: 'typed_data', inSdk: true);
 
   @override
   String buildRead() {

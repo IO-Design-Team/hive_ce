@@ -18,7 +18,7 @@ class HiveCounterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final textTheme = TextTheme.of(context);
     final box = Hive.box(counterBox);
 
     return Scaffold(

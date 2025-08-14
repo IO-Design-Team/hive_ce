@@ -100,7 +100,10 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final supertypes = cls.allSupertypes.map((it) => it.element3);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
-      if (const TypeChecker.fromRuntime(Object).isExactly(type)) continue;
+      if (const TypeChecker.typeNamed(Object, inPackage: 'core', inSdk: true)
+          .isExactly(type)) {
+        continue;
+      }
 
       for (final accessor in [...type.getters2, ...type.setters2]) {
         // Ignore any non-enum accessors on enums
