@@ -1,3 +1,7 @@
+## 1.9.4
+
+- Fixes `TypeChecker.fromRuntime` deprecations
+
 ## 1.9.3
 
 - Supports `build: 3.0.0` and `source_gen: 3.0.0`
