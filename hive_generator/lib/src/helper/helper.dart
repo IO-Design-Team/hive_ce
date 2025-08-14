@@ -9,7 +9,8 @@ import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
-final _hiveFieldChecker = const TypeChecker.fromRuntime(HiveField);
+final _hiveFieldChecker =
+    const TypeChecker.typeNamed(HiveField, inPackage: 'hive_ce');
 final _freezedDefaultChecker = const TypeChecker.fromUrl(
   'package:freezed_annotation/freezed_annotation.dart#Default',
 );
