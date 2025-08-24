@@ -165,7 +165,7 @@ class BinaryReaderImpl extends BinaryReader {
     length ??= readUint32();
     _requireBytes(length * 8);
     final byteData = _byteData;
-    final list = List<double>.filled(length, 0.0, growable: true);
+    final list = List<double>.filled(length, 0, growable: true);
     for (var i = 0; i < length; i++) {
       list[i] = byteData.getFloat64(_offset, Endian.little);
       _offset += 8;
