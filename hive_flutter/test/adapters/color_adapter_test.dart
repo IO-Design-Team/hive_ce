@@ -21,6 +21,9 @@ void main() {
         // ignore: deprecated_member_use
         writer.writeInt(color.value);
 
+        // Write some garbage to the end of the buffer
+        writer.writeInt(0);
+
         final reader = BinaryReaderImpl(writer.toBytes(), registry);
         final readColor = ColorAdapter().read(reader);
         expect(readColor, color);
