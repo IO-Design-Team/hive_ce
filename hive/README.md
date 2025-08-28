@@ -260,6 +260,8 @@ void example() async {
 
 The Hive schema is a generated yaml file that contains the information necessary to incrementally update the generated TypeAdapters as your model classes evolve.
 
+**IMPORTANT**: There will be a lot of churn in this file during initial development. Make sure to delete `hive_adapters.g.yaml` and regenerate before the first real deployment of your application to reclaim unused field indices.
+
 Some migrations may require manual modifications to the Hive schema file. One example is class/field renaming. Without manual intervention, the generator will see both an added and removed class/field. To resolve this, manually rename the class/field in the schema.
 
 ### Explicitly defining HiveTypes
