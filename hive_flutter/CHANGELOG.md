@@ -1,3 +1,7 @@
+## 2.3.2
+
+- Fixes an issue with the `ColorAdapter` reading legacy color data
+
 ## 2.3.1
 
 - Fixes web compatibility check

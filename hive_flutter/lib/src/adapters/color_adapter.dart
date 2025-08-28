@@ -17,7 +17,14 @@ class ColorAdapter extends TypeAdapter<Color> {
 
   @override
   Color read(BinaryReader reader) {
-    if (reader.availableBytes == 8) {
+    final firstByte = reader.peekBytes(1)[0];
+
+    // `color.value` is 4 bytes long
+    // ints are written as 8 bytes
+    // Therefore the first byte of old color data is 0
+    // The first byte of new color data is the field count which is not 0
+    // Therefore if the first byte is 0, this is old color data
+    if (firstByte == 0) {
       // Support for reading data created by the old ColorAdapter
       return Color(reader.readInt());
     } else {
