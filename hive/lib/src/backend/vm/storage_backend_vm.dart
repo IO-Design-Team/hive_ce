@@ -240,6 +240,7 @@ RECOMMENDED ACTIONS:
       await writeRaf.close();
 
       try {
+        // This can fail on some systems
         await compactFile.rename(path);
       } catch (e) {
         await compactFile.delete();
