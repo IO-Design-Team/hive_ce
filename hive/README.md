@@ -141,6 +141,8 @@ void main() async {
 
 ```
 
+IMPORTANT: If you are using `IsolatedHive`, you MUST use it everywhere in place of the normal `Hive` interface
+
 NOTE: It is possible to use `IsolatedHive` without an `IsolateNameServer`, BUT THIS IS UNSAFE. The `IsolateNameServer` is what allows `IsolatedHive` to locate and communicate with a single backend isolate.
 
 Additional notes:
