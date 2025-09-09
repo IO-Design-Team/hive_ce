@@ -238,8 +238,17 @@ RECOMMENDED ACTIONS:
 
       await readRaf.close();
       await writeRaf.close();
-      await compactFile.rename(path);
-      await open();
+
+      try {
+        // This can fail on some systems
+        await compactFile.rename(path);
+      } catch (e) {
+        await compactFile.delete();
+        rethrow;
+      } finally {
+        await open();
+        _compactionScheduled = false;
+      }
 
       var offset = 0;
       for (final frame in sortedFrames) {
@@ -247,7 +256,6 @@ RECOMMENDED ACTIONS:
         frame.offset = offset;
         offset += frame.length!;
       }
-      _compactionScheduled = false;
     });
   }
 

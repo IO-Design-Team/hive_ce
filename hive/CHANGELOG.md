@@ -1,3 +1,12 @@
+## NEXT
+
+- Improves adapter of same type warning
+
+## 2.11.4
+
+- Handles exception thrown during compaction on some platforms
+- Updates documentation for `IsolatedHive`
+
 ## 2.11.3
 
 - Prints warning when writing integers greater than 2^53
