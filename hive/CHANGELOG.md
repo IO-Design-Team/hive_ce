@@ -1,6 +1,7 @@
-## 2.12.0
+## NEXT
 
 - Notify with the value of a deleted frame instead of `null`
+- Improves adapter of same type warning
 
 ## 2.11.4
 

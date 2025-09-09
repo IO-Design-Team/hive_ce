@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
@@ -15,7 +15,7 @@ import 'package:meta/meta.dart';
 class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   @override
   Future<String> generateForAnnotatedElement(
-    Element2 element,
+    Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
@@ -32,8 +32,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   ///
   /// If this is an incremental update, pass the existing [schema]
   static GenerateTypeAdapterResult generateTypeAdapter({
-    required Element2 element,
-    required LibraryElement2 library,
+    required Element element,
+    required LibraryElement library,
     required int typeId,
     String? adapterName,
     HiveSchemaType? schema,
@@ -88,7 +88,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-  static Set<String> _getAllAccessorNames(InterfaceElement2 cls) {
+  static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final isEnum = cls.thisType.isEnum;
     final constructorFields = getConstructor(cls)
         .formalParameters
@@ -97,7 +97,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     final accessorNames = <String>{};
 
-    final supertypes = cls.allSupertypes.map((it) => it.element3);
+    final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
       if (const TypeChecker.typeNamed(Object, inPackage: 'core', inSdk: true)
@@ -105,7 +105,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         continue;
       }
 
-      for (final accessor in [...type.getters2, ...type.setters2]) {
+      for (final accessor in [...type.getters, ...type.setters]) {
         // Ignore any non-enum accessors on enums
         if (isEnum && !accessor.returnType.isEnum) continue;
 
@@ -118,7 +118,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         // Ignore getters without setters on classes
         if (!isEnum &&
             accessor is GetterElement &&
-            accessor.correspondingSetter2 == null &&
+            accessor.correspondingSetter == null &&
             !constructorFields.contains(accessor.displayName)) {
           continue;
         }
@@ -134,8 +134,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static GetAccessorsResult getAccessors({
     required int typeId,
-    required InterfaceElement2 cls,
-    required LibraryElement2 library,
+    required InterfaceElement cls,
+    required LibraryElement library,
     HiveSchemaType? schema,
   }) {
     final accessorNames = _getAllAccessorNames(cls);
@@ -155,14 +155,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     var nextIndex = schema?.nextIndex ?? 0;
     final newSchemaFields = <String, HiveSchemaField>{};
 
-    AdapterField? accessorToField(PropertyAccessorElement2? element) {
+    AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
       final annotation =
-          getHiveFieldAnn(element.variable3) ?? getHiveFieldAnn(element);
+          getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
       if (schema == null && annotation == null) return null;
 
-      final field = element.variable3!;
+      final field = element.variable;
       final name = field.displayName;
       final int index;
       if (schema != null) {
@@ -194,11 +194,11 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
     for (final name in accessorNames) {
-      final getter = cls.lookUpGetter2(name: name, library: library);
+      final getter = cls.lookUpGetter(name: name, library: library);
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
 
-      final setter = cls.lookUpSetter2(name: name, library: library);
+      final setter = cls.lookUpSetter(name: name, library: library);
       final setterField = accessorToField(setter);
       if (setterField != null) setters.add(setterField);
     }
