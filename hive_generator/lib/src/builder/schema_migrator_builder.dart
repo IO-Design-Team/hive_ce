@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
@@ -69,7 +69,7 @@ class SchemaMigratorBuilder implements Builder {
       final cls = getClass(type.element);
       final className = cls.displayName;
 
-      final library = type.element.library2!;
+      final library = type.element.library!;
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
         typeId: typeId,
@@ -95,10 +95,10 @@ class SchemaMigratorBuilder implements Builder {
       final isEnum = cls.thisType.isEnum;
       final constructor = getConstructor(cls);
       final accessors = [
-        ...cls.getters2,
-        ...cls.setters2,
+        ...cls.getters,
+        ...cls.setters,
         ...cls.allSupertypes
-            .expand((it) => [...it.element3.getters2, ...it.element3.setters2]),
+            .expand((it) => [...it.element.getters, ...it.element.setters]),
       ];
       final info = _SchemaInfo(
         uri: uri,
@@ -189,8 +189,8 @@ class _SchemaInfo {
     required this.uri,
     required this.className,
     required bool isEnum,
-    required ConstructorElement2 constructor,
-    required List<PropertyAccessorElement2> accessors,
+    required ConstructorElement constructor,
+    required List<PropertyAccessorElement> accessors,
     required HiveSchemaType schema,
   }) : schema = _sanitizeSchema(
           className: className,
@@ -204,8 +204,8 @@ class _SchemaInfo {
     required String className,
     required bool isEnum,
     required HiveSchemaType schema,
-    required ConstructorElement2 constructor,
-    required List<PropertyAccessorElement2> accessors,
+    required ConstructorElement constructor,
+    required List<PropertyAccessorElement> accessors,
   }) {
     // Enums need no sanitization
     if (isEnum) return schema;

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
@@ -130,7 +130,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      return '$variable as ${type.getPrefixedDisplayString(cls.library2)}';
+      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
   }
 
@@ -161,7 +161,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
       return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
     } else {
-      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library2)}>()';
+      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
     }
   }
 
@@ -174,8 +174,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
-      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library2)}, '
-          '${arg2.getPrefixedDisplayString(cls.library2)}>()';
+      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
+          '${arg2.getPrefixedDisplayString(cls.library)}>()';
     }
   }
 
@@ -219,18 +219,18 @@ String _suffixFromType(DartType type) {
 }
 
 extension on DartType {
-  String getPrefixedDisplayString(LibraryElement2 currentLibrary) {
-    final element = element3;
+  String getPrefixedDisplayString(LibraryElement currentLibrary) {
+    final element = this.element;
     if (element == null) return getDisplayString();
 
-    final definingLibrary = element.library2;
+    final definingLibrary = element.library;
     if (definingLibrary == currentLibrary) return getDisplayString();
 
     final prefix = currentLibrary.fragments
-        .expand((e) => e.libraryImports2)
+        .expand((e) => e.libraryImports)
         .firstWhereOrNull(
             (e) => e.namespace.definedNames2.values.contains(element))
-        ?.prefix2
+        ?.prefix
         ?.element
         .displayName;
 

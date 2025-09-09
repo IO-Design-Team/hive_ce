@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
@@ -23,7 +23,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
 
   @override
   Future<String> generateForAnnotatedElement(
-    Element2 element,
+    Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) =>
@@ -68,7 +68,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
-      final typeKey = spec.type.element3!.displayName;
+      final typeKey = spec.type.element!.displayName;
 
       int generateTypeId() {
         do {
@@ -80,7 +80,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
-        element: spec.type.element3!,
+        element: spec.type.element!,
         library: library,
         typeId: schemaType.typeId,
         schema: schemaType,
