@@ -1,3 +1,7 @@
+## 2.12.0
+
+- Notify with the value of a deleted frame instead of `null`
+
 ## 2.11.4
 
 - Handles exception thrown during compaction on some platforms
