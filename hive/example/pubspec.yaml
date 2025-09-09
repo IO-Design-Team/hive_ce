@@ -5,7 +5,7 @@ dependencies:
   freezed_annotation: ^3.0.0
 
 dev_dependencies:
-  rexios_lints: ^15.0.0
+  rexios_lints: ^15.0.1
   hive_ce_generator: any
   build_runner: ^2.5.4
   freezed: ^3.0.6
