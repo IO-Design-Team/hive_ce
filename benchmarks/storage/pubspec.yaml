@@ -23,6 +23,6 @@ dependency_overrides:
     path: ../../hive
   hive_ce_generator:
     path: ../../hive_generator
-  build: ^3.0.0
-  source_gen: ^3.0.0
+  build: ^4.0.0
+  source_gen: ^4.0.0
   analyzer: ^7.0.0
