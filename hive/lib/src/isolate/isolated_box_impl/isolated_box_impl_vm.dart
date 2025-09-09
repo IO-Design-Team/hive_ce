@@ -5,6 +5,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/impl/isolated_hive_impl_vm.dart';
+import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Isolated implementation of [BoxBase]
@@ -155,11 +156,41 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
   }
 
   @override
+  Future<List<T>?> getList<T>(dynamic key, {List<T>? defaultValue}) async =>
+      castList(await get(key), defaultValue: defaultValue);
+
+  @override
+  Future<Set<T>?> getSet<T>(dynamic key, {Set<T>? defaultValue}) async =>
+      castSet(await get(key), defaultValue: defaultValue);
+
+  @override
+  Future<Map<K, V>?> getMap<K, V>(
+    dynamic key, {
+    Map<K, V>? defaultValue,
+  }) async =>
+      castMap(await get(key), defaultValue: defaultValue);
+
+  @override
   Future<E?> getAt(int index) async {
     final bytes =
         await _channel.invokeMethod('getAt', {'name': name, 'index': index});
     return _readValue(bytes);
   }
+
+  @override
+  Future<List<T>?> getListAt<T>(int index, {List<T>? defaultValue}) async =>
+      castList(await getAt(index), defaultValue: defaultValue);
+
+  @override
+  Future<Set<T>?> getSetAt<T>(int index, {Set<T>? defaultValue}) async =>
+      castSet(await getAt(index), defaultValue: defaultValue);
+
+  @override
+  Future<Map<K, V>?> getMapAt<K, V>(
+    int index, {
+    Map<K, V>? defaultValue,
+  }) async =>
+      castMap(await getAt(index), defaultValue: defaultValue);
 
   Uint8List _writeValue(E value) {
     final writer = BinaryWriterImpl(_hive);
