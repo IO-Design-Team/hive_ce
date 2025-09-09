@@ -174,7 +174,7 @@ class Keystore<E> {
     }
 
     if (notify && (!frame.deleted || deletedFrame != null)) {
-      _notifier.notify(frame);
+      _notifier.notify(frame, deletedFrame: deletedFrame);
     }
 
     return deletedFrame;
