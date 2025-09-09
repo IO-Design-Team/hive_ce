@@ -1,3 +1,9 @@
+## 1.9.5
+
+- Supports `analyzer: 8.0.0`
+- Supports `build: 4.0.0`
+- Supports `source_gen: 4.0.0`
+
 ## 1.9.4
 
 - Fixes `TypeChecker.fromRuntime` deprecations

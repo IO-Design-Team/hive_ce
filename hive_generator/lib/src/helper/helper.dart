@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_ce/hive.dart';
@@ -29,7 +29,7 @@ class HiveFieldInfo {
 }
 
 /// TODO: Document this!
-HiveFieldInfo? getHiveFieldAnn(Element2? element) {
+HiveFieldInfo? getHiveFieldAnn(Element? element) {
   if (element == null) return null;
   final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
   if (obj == null) return null;
@@ -41,7 +41,7 @@ HiveFieldInfo? getHiveFieldAnn(Element2? element) {
 }
 
 /// Get the string representation of the freezed default value
-DartObject? getFreezedDefault(Element2? element) {
+DartObject? getFreezedDefault(Element? element) {
   if (element == null) return null;
   final obj = _freezedDefaultChecker.firstAnnotationOfExact(element);
   if (obj == null) return null;
@@ -51,8 +51,8 @@ DartObject? getFreezedDefault(Element2? element) {
 }
 
 /// Get a classes default constructor or throw
-ConstructorElement2 getConstructor(InterfaceElement2 cls) {
-  final constr = cls.constructors2.firstWhereOrNull((it) => it.name3 == 'new');
+ConstructorElement getConstructor(InterfaceElement cls) {
+  final constr = cls.constructors.firstWhereOrNull((it) => it.name == 'new');
   if (constr == null) {
     throw 'Provide an unnamed constructor.';
   }
@@ -60,12 +60,12 @@ ConstructorElement2 getConstructor(InterfaceElement2 cls) {
 }
 
 /// Returns [element] as [InterfaceElement] if it is a class or enum
-InterfaceElement2 getClass(Element2 element) {
+InterfaceElement getClass(Element element) {
   if (element.kind != ElementKind.CLASS && element.kind != ElementKind.ENUM) {
     throw 'Only classes or enums are allowed to be annotated with @HiveType.';
   }
 
-  return element as InterfaceElement2;
+  return element as InterfaceElement;
 }
 
 /// Generate a default adapter name from the type name
