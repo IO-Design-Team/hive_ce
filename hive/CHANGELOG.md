@@ -1,3 +1,7 @@
+## NEXT
+
+- Improves adapter of same type warning
+
 ## 2.11.4
 
 - Handles exception thrown during compaction on some platforms
