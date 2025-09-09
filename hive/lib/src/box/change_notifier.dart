@@ -17,11 +17,11 @@ class ChangeNotifier {
   const ChangeNotifier.debug(this._streamController);
 
   /// Not part of public API
-  void notify(Frame frame, {Frame? deletedFrame}) {
+  void notify(Frame frame, {Object? deletedValue}) {
     _streamController.add(
       BoxEvent(
         frame.key,
-        frame.deleted ? deletedFrame?.value : frame.value,
+        frame.deleted ? deletedValue : frame.value,
         frame.deleted,
       ),
     );
