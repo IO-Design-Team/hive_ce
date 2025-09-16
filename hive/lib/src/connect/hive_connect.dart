@@ -69,20 +69,6 @@ class HiveConnect {
 
     _boxes[box.name] = box;
     postEvent(ConnectEvent.boxRegistered.event, {'name': box.name});
-
-    _subscriptions[box.name] = box.watch().listen((event) {
-      postEvent(
-        ConnectEvent.boxEvent.event,
-        BoxEventPayload(
-          box: box.name,
-          frame: InspectorFrame(
-            key: event.key,
-            value: _writeValue(box.typeRegistry, event.value),
-            deleted: event.deleted,
-          ),
-        ).toJson(),
-      );
-    });
   }
 
   /// Remove a box from inspection
@@ -92,7 +78,24 @@ class HiveConnect {
     postEvent(ConnectEvent.boxUnregistered.event, {'name': box.name});
   }
 
-  static List<String> _listBoxes(dynamic args) => _boxes.keys.toList();
+  static List<String> _listBoxes(dynamic args) {
+    for (final box in _boxes.values) {
+      _subscriptions[box.name] ??= box.watch().listen((event) {
+        postEvent(
+          ConnectEvent.boxEvent.event,
+          BoxEventPayload(
+            box: box.name,
+            frame: InspectorFrame(
+              key: event.key,
+              value: _writeValue(box.typeRegistry, event.value),
+              deleted: event.deleted,
+            ),
+          ).toJson(),
+        );
+      });
+    }
+    return _boxes.keys.toList();
+  }
 
   static Future<List<InspectorFrame>> _getBoxFrames(dynamic args) async {
     final name = args['name'] as String;
