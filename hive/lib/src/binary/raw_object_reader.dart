@@ -7,6 +7,7 @@ import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/hive_error.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/schema/hive_schema.dart';
+import 'package:meta/meta.dart';
 
 /// A binary reader that reads raw objects
 class RawObjectReader extends BinaryReaderImpl {
@@ -69,6 +70,7 @@ class RawObjectReader extends BinaryReaderImpl {
 }
 
 /// A raw type read from the buffer
+@immutable
 abstract class RawType {
   /// The type name
   final String name;
@@ -102,6 +104,7 @@ class RawObject extends RawType {
 }
 
 /// A raw field of a custom object
+@immutable
 class RawField {
   /// THe name of the field
   final String name;

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:vm_service/vm_service.dart';
+import 'package:flutter/foundation.dart';
 
+@immutable
 class ConnectClient {
   final VmService vmService;
   final String isolateId;
@@ -21,8 +22,10 @@ class ConnectClient {
     if (service == null) throw 'VM service not found';
 
     final vm = await service.getVM();
-    final isolateId =
-        vm.isolates!.where((e) => e.name?.contains('main') ?? false).first.id!;
+    final isolateId = vm.isolates!
+        .where((e) => e.name?.contains('main') ?? false)
+        .first
+        .id!;
     await service.streamListen(EventStreams.kExtension);
 
     final client = ConnectClient(service, isolateId, types);

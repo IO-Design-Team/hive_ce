@@ -1,5 +1,6 @@
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'hive_connect_api.g.dart';
 
@@ -35,6 +36,7 @@ enum ConnectEvent {
 
 /// An inspector frame
 @JsonSerializable()
+@immutable
 class InspectorFrame {
   /// The frame key
   final Object key;
@@ -88,6 +90,7 @@ class InspectorFrame {
 
 /// Payload for a box event
 @JsonSerializable()
+@immutable
 class BoxEventPayload {
   /// The box name
   final String box;

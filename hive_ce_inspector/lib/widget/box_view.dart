@@ -1,10 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
+import 'package:flutter/foundation.dart';
 
 class BoxView extends StatefulWidget {
   final ConnectClient client;
@@ -60,13 +59,12 @@ class _BoxViewState extends State<BoxView> {
               (e) => [
                 const Text('/'),
                 TextButton(
-                  onPressed:
-                      () => setState(
-                        () => _stack.removeRange(
-                          _stack.indexOf(e) + 1,
-                          _stack.length,
-                        ),
-                      ),
+                  onPressed: () => setState(
+                    () => _stack.removeRange(
+                      _stack.indexOf(e) + 1,
+                      _stack.length,
+                    ),
+                  ),
                   child: Text(e.key.toString()),
                 ),
               ],
@@ -81,9 +79,8 @@ class _BoxViewState extends State<BoxView> {
             child: DataTableView(
               key: ValueKey(widget.data.name),
               data: stack.last.value,
-              onStack:
-                  (key, value) =>
-                      setState(() => _stack.add(KeyedObject(key, value))),
+              onStack: (key, value) =>
+                  setState(() => _stack.add(KeyedObject(key, value))),
             ),
           ),
         ),
@@ -92,6 +89,7 @@ class _BoxViewState extends State<BoxView> {
   }
 }
 
+@immutable
 class KeyedObject<T extends Object?> {
   final Object key;
   final T value;
@@ -136,18 +134,13 @@ class _DataTableViewState extends State<DataTableView> {
     if (query.isEmpty) {
       filteredData = widget.data;
     } else {
-      filteredData =
-          widget.data
-              .where(
-                (e) =>
-                    e.key.toString().toLowerCase().contains(
-                      query.toLowerCase(),
-                    ) ||
-                    e.value.toString().toLowerCase().contains(
-                      query.toLowerCase(),
-                    ),
-              )
-              .toList();
+      filteredData = widget.data
+          .where(
+            (e) =>
+                e.key.toString().toLowerCase().contains(query.toLowerCase()) ||
+                e.value.toString().toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
     }
 
     final largeDataset = widget.data.length > 100000;
@@ -174,128 +167,124 @@ class _DataTableViewState extends State<DataTableView> {
         filteredData.isEmpty
             ? const Expanded(child: Center(child: Text('No search results')))
             : Expanded(
-              child: TableView.builder(
-                rowCount: filteredData.length + 1,
-                columnCount: columnCount,
-                pinnedRowCount: 1,
-                pinnedColumnCount: 1,
-                rowBuilder:
-                    (index) => const TableSpan(
-                      extent: FixedSpanExtent(20),
-                      padding: SpanPadding.all(4),
-                    ),
-                columnBuilder:
-                    (index) => const TableSpan(
-                      extent: FixedSpanExtent(100),
-                      padding: SpanPadding.all(8),
-                    ),
-                cellBuilder: (context, vicinity) {
-                  final TableVicinity(:row, :column) = vicinity;
-                  final rowIndex = row - 1;
-                  final columnIndex = column - 1;
+                child: TableView.builder(
+                  rowCount: filteredData.length + 1,
+                  columnCount: columnCount,
+                  pinnedRowCount: 1,
+                  pinnedColumnCount: 1,
+                  rowBuilder: (index) => const TableSpan(
+                    extent: FixedSpanExtent(20),
+                    padding: SpanPadding.all(4),
+                  ),
+                  columnBuilder: (index) => const TableSpan(
+                    extent: FixedSpanExtent(100),
+                    padding: SpanPadding.all(8),
+                  ),
+                  cellBuilder: (context, vicinity) {
+                    final TableVicinity(:row, :column) = vicinity;
+                    final rowIndex = row - 1;
+                    final columnIndex = column - 1;
 
-                  if (row == 0 && column == 0) {
-                    return const TableViewCell(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
-                        child: Text('key'),
-                      ),
-                    );
-                  }
-
-                  final String fieldName;
-                  if (firstValue is RawObject && columnIndex > 0) {
-                    fieldName = firstValue.fields[columnIndex].name;
-                  } else {
-                    fieldName = columnIndex.toString();
-                  }
-
-                  if (row == 0) {
-                    return TableViewCell(
-                      child: DataCellContent(
-                        tooltip: fieldName,
-                        child: Text(fieldName),
-                      ),
-                    );
-                  }
-
-                  final object = filteredData[rowIndex];
-
-                  if (column == 0) {
-                    final keyString = object.key.toString();
-                    return TableViewCell(
-                      child: DataCellContent(
-                        tooltip: keyString,
-                        query: query,
-                        child: Text(keyString),
-                      ),
-                    );
-                  }
-
-                  final objectValue = object.value;
-                  final Object? fieldValue;
-                  if (objectValue is RawObject) {
-                    fieldValue = objectValue.fields[columnIndex].value;
-                  } else {
-                    fieldValue = objectValue;
-                  }
-
-                  final String cellText;
-                  final Widget cellContent;
-                  final stackKey = '${object.key}.$fieldName';
-                  if (fieldValue is Uint8List) {
-                    cellText = fieldValue.toString();
-                    cellContent = const Text('[Bytes]');
-                  } else if (fieldValue is Iterable) {
-                    final list = fieldValue.toList();
-                    if (list.isEmpty) {
-                      cellText = '[Empty]';
-                      cellContent = Text(cellText);
-                    } else {
-                      cellText = list.toString();
-                      cellContent = InkWell(
-                        child: const Text('[Iterable]'),
-                        onTap:
-                            () => widget.onStack(stackKey, [
-                              for (var i = 0; i < list.length; i++)
-                                KeyedObject(i, list[i]),
-                            ]),
+                    if (row == 0 && column == 0) {
+                      return const TableViewCell(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 4),
+                          child: Text('key'),
+                        ),
                       );
                     }
-                  } else if (fieldValue is RawObject) {
-                    cellText = '{${fieldValue.name}}';
-                    cellContent = InkWell(
-                      child: InkWell(
-                        child: Text(cellText),
-                        onTap:
-                            () => widget.onStack(stackKey, [
-                              KeyedObject(0, fieldValue),
-                            ]),
+
+                    final String fieldName;
+                    if (firstValue is RawObject && columnIndex > 0) {
+                      fieldName = firstValue.fields[columnIndex].name;
+                    } else {
+                      fieldName = columnIndex.toString();
+                    }
+
+                    if (row == 0) {
+                      return TableViewCell(
+                        child: DataCellContent(
+                          tooltip: fieldName,
+                          child: Text(fieldName),
+                        ),
+                      );
+                    }
+
+                    final object = filteredData[rowIndex];
+
+                    if (column == 0) {
+                      final keyString = object.key.toString();
+                      return TableViewCell(
+                        child: DataCellContent(
+                          tooltip: keyString,
+                          query: query,
+                          child: Text(keyString),
+                        ),
+                      );
+                    }
+
+                    final objectValue = object.value;
+                    final Object? fieldValue;
+                    if (objectValue is RawObject) {
+                      fieldValue = objectValue.fields[columnIndex].value;
+                    } else {
+                      fieldValue = objectValue;
+                    }
+
+                    final String cellText;
+                    final Widget cellContent;
+                    final stackKey = '${object.key}.$fieldName';
+                    if (fieldValue is Uint8List) {
+                      cellText = fieldValue.toString();
+                      cellContent = const Text('[Bytes]');
+                    } else if (fieldValue is Iterable) {
+                      final list = fieldValue.toList();
+                      if (list.isEmpty) {
+                        cellText = '[Empty]';
+                        cellContent = Text(cellText);
+                      } else {
+                        cellText = list.toString();
+                        cellContent = InkWell(
+                          child: const Text('[Iterable]'),
+                          onTap: () => widget.onStack(stackKey, [
+                            for (var i = 0; i < list.length; i++)
+                              KeyedObject(i, list[i]),
+                          ]),
+                        );
+                      }
+                    } else if (fieldValue is RawObject) {
+                      cellText = '{${fieldValue.name}}';
+                      cellContent = InkWell(
+                        child: InkWell(
+                          child: Text(cellText),
+                          onTap: () => widget.onStack(stackKey, [
+                            KeyedObject(0, fieldValue),
+                          ]),
+                        ),
+                      );
+                    } else if (fieldValue is RawEnum) {
+                      cellText = '${fieldValue.name}.${fieldValue.value}';
+                      cellContent = Text(cellText);
+                    } else {
+                      cellText = fieldValue.toString();
+                      cellContent = Text(cellText);
+                    }
+
+                    return TableViewCell(
+                      child: FrameLoader(
+                        key: ValueKey(object.key),
+                        object: object,
+                        child: DataCellContent(
+                          tooltip: cellText,
+                          getSearchableString: fieldValue.toString,
+                          query: query,
+                          child: cellContent,
+                        ),
                       ),
                     );
-                  } else if (fieldValue is RawEnum) {
-                    cellText = '${fieldValue.name}.${fieldValue.value}';
-                    cellContent = Text(cellText);
-                  } else {
-                    cellText = fieldValue.toString();
-                    cellContent = Text(cellText);
-                  }
-
-                  return TableViewCell(
-                    child: FrameLoader(
-                      key: ValueKey(object.key),
-                      object: object,
-                      child: DataCellContent(
-                        tooltip: cellText,
-                        getSearchableString: fieldValue.toString,
-                        query: query,
-                        child: cellContent,
-                      ),
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
       ],
     );
   }

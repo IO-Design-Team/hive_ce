@@ -61,10 +61,12 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+
     final selectedBox = this.selectedBox;
     final selectedBoxData = boxData[selectedBox];
 
-    final isWide = MediaQuery.of(context).size.width > 600;
+    final isWide = mediaQuery.size.width > 600;
     final drawer = Drawer(
       child: ListView.builder(
         itemBuilder: (context, index) {
@@ -112,12 +114,11 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
     final frames = await widget.client.getBoxFrames(box);
     setState(
-      () =>
-          boxData[box] = BoxData(
-            name: box,
-            frames: {for (final frame in frames) frame.key: frame},
-            loaded: true,
-          ),
+      () => boxData[box] = BoxData(
+        name: box,
+        frames: {for (final frame in frames) frame.key: frame},
+        loaded: true,
+      ),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:hive_ce_inspector/model/hive_internal.dart';
+import 'package:flutter/foundation.dart';
 
+@immutable
 class BoxData {
   final String name;
   final Map<Object, InspectorFrame> frames;
