@@ -1,3 +1,4 @@
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
@@ -349,7 +350,7 @@ class DataCellContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget widget = Tooltip(
+    Widget widget = DevToolsTooltip(
       message: tooltip,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
