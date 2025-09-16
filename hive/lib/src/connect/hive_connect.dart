@@ -10,9 +10,6 @@ import 'package:hive_ce/src/connect/inspectable_box.dart';
 
 /// Handles box inspection through `hive_ce_inspector`
 class HiveConnect {
-  static const _version = 1;
-  static const _baseUrl = 'https://inspector.hive.isar.community';
-
   static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
     ConnectAction.listBoxes: _listBoxes,
     ConnectAction.getBoxFrames: _getBoxFrames,
@@ -102,10 +99,7 @@ class HiveConnect {
     final box = _boxes[name];
     if (box == null) return [];
 
-    final frames = await box.getFrames();
-    return frames
-        .map((e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)))
-        .toList();
+    return [for (final key in await box.keys) InspectorFrame.lazy(key)];
   }
 
   static Future<Object?> _loadValue(dynamic args) async {

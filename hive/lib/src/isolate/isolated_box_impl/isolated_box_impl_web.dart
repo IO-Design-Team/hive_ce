@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
 import 'package:meta/meta.dart';
-import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 
 /// Web implementation of [IsolatedBoxBase]
@@ -115,10 +114,6 @@ abstract class IsolatedBoxBaseImpl<E>
 
   @override
   TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
-
-  @override
-  Future<Iterable<InspectorFrame>> getFrames() =>
-      (_box as InspectableBox).getFrames();
 
   @override
   Future<Object?> loadValue(Object key) =>

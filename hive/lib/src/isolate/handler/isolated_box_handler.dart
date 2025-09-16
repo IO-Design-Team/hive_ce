@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
-import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
@@ -130,9 +129,6 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
         }
       case 'toMap':
         return (box as Box).toMap();
-      case 'getFrames':
-        final frames = await (box as InspectableBox).getFrames();
-        return frames.map((e) => e.toJson()).toList();
       default:
         return call.notImplemented();
     }
