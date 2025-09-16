@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/connect/hive_connect_api.dart';
 
 /// An inspectable box
 abstract interface class InspectableBox {
@@ -10,8 +11,8 @@ abstract interface class InspectableBox {
   /// The box's type registry
   TypeRegistry get typeRegistry;
 
-  /// All the keys in the box
-  FutureOr<Iterable<dynamic>> get keys;
+  /// Returns all of the frames currently loaded in the box
+  Future<Iterable<InspectorFrame>> getFrames();
 
   /// Returns the value for the given [key].
   FutureOr<Object?> get(Object key);

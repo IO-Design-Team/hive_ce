@@ -60,12 +60,6 @@ class InspectorFrame {
     this.deleted = false,
   });
 
-  /// Lazy
-  const InspectorFrame.lazy(this.key)
-      : value = null,
-        lazy = true,
-        deleted = false;
-
   /// From frame
   factory InspectorFrame.fromFrame(Frame frame) => InspectorFrame(
         key: frame.key,

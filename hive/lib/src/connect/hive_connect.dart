@@ -99,7 +99,10 @@ class HiveConnect {
     final box = _boxes[name];
     if (box == null) return [];
 
-    return [for (final key in await box.keys) InspectorFrame.lazy(key)];
+    final frames = await box.getFrames();
+    return frames
+        .map((e) => e.copyWith(value: _writeValue(box.typeRegistry, e.value)))
+        .toList();
   }
 
   static Future<Object?> _loadValue(dynamic args) async {

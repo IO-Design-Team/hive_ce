@@ -3,6 +3,7 @@ import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/connect/hive_connect.dart';
+import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:meta/meta.dart';
@@ -199,6 +200,10 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
 
   @override
   TypeRegistry get typeRegistry => hive;
+
+  @override
+  Future<Iterable<InspectorFrame>> getFrames() async =>
+      keystore.frames.map(InspectorFrame.fromFrame);
 }
 
 class _NullBoxBase<E> implements BoxBase<E> {
