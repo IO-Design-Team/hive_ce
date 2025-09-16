@@ -1,3 +1,7 @@
+## 2.13.0-pre.2
+
+- Auto-retry loading boxes
+
 ## 2.13.0-pre.1
 
 - Adds the Hive CE Inspector dev tools extension
