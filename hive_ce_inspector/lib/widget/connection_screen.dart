@@ -6,7 +6,7 @@ import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/widget/connected_layout.dart';
 
 class ConnectionScreen extends StatefulWidget {
-  const ConnectionScreen({this.types = const {}, super.key});
+  const ConnectionScreen({super.key, this.types = const {}});
 
   final Map<String, HiveSchemaType> types;
 
@@ -15,7 +15,7 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class _ConnectionPageState extends State<ConnectionScreen> {
-  late Future<ConnectClient> clientFuture;
+  late final Future<ConnectClient> clientFuture;
 
   @override
   void initState() {
@@ -29,6 +29,7 @@ class _ConnectionPageState extends State<ConnectionScreen> {
       body: FutureBuilder<ConnectClient>(
         future: clientFuture,
         builder: (context, snapshot) {
+          print(snapshot.error);
           if (snapshot.hasData) {
             return _BoxesLoader(client: snapshot.data!);
           } else {

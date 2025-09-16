@@ -26,7 +26,11 @@ class ConnectClient {
         .where((e) => e.name?.contains('main') ?? false)
         .first
         .id!;
-    await service.streamListen(EventStreams.kExtension);
+    try {
+      await service.streamListen(EventStreams.kExtension);
+    } catch (_) {
+      // Throws if the stream is already listened to
+    }
 
     final client = ConnectClient(service, isolateId, types);
     final handlers = <String, Function(Map<String, dynamic>)>{
