@@ -15,10 +15,22 @@ import 'package:yaml/yaml.dart';
 /// Builder that generates Hive adapters from a GenerateAdapters annotation
 class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
   @override
+  Future<String> generateForAnnotatedDirective(
+    ElementDirective directive,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  @override
   Future<String> generateForAnnotatedElement(
-    /// TODO: Fix with analyzer 8
-    /// ignore: deprecated_member_use
     Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) =>
+      _generate(annotation, buildStep);
+
+  Future<String> _generate(
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
@@ -64,7 +76,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
-      final typeKey = spec.type.element3!.displayName;
+      final typeKey = spec.type.element!.displayName;
 
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(
@@ -74,8 +86,6 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
             fields: {},
           );
       final result = TypeAdapterGenerator.generateTypeAdapter(
-        /// TODO: Fix with analyzer 8
-        /// ignore: deprecated_member_use
         element: spec.type.element!,
         library: library,
         typeId: schemaType.typeId,

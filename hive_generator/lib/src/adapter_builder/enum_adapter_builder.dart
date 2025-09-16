@@ -8,7 +8,7 @@ class EnumAdapterBuilder extends AdapterBuilder {
   @override
   String buildRead() {
     if (getters.isEmpty) {
-      throw '${cls.name} does not have any enum value.';
+      throw '${cls.displayName} does not have any enum value.';
     }
 
     final code = StringBuffer();
@@ -17,7 +17,7 @@ class EnumAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
         case ${field.index}:
-          return ${cls.name}.${field.name};''');
+          return ${cls.displayName}.${field.name};''');
     }
 
     final defaultField = getters.firstWhere(
@@ -26,7 +26,7 @@ class EnumAdapterBuilder extends AdapterBuilder {
     );
     code.writeln('''
       default:
-        return ${cls.name}.${defaultField.name};
+        return ${cls.displayName}.${defaultField.name};
       }''');
 
     return code.toString();
@@ -39,7 +39,7 @@ class EnumAdapterBuilder extends AdapterBuilder {
 
     for (final field in getters) {
       code.writeln('''
-        case ${cls.name}.${field.name}:
+        case ${cls.displayName}.${field.name}:
           writer.writeByte(${field.index});''');
     }
 

@@ -16,7 +16,9 @@ jobs:
     strategy:
       matrix:
         package: [hive, hive_flutter, hive_generator]
-        flutter-channel: [stable, beta]
+        flutter-channel:
+          - stable
+          - beta
     defaults:
       run:
         working-directory: ${{ matrix.package }}

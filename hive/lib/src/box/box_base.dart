@@ -6,7 +6,7 @@ class BoxEvent {
   /// The key of the changed entry
   final dynamic key;
 
-  /// The value of a new entry of `null` if the entry has been deleted
+  /// The value of the entry
   final dynamic value;
 
   /// Whether the entry has been deleted

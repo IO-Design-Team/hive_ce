@@ -82,6 +82,7 @@ void main() {
             await box.delete('key');
           },
           key: 'key',
+          value: 'value',
           deleted: true,
         );
       });

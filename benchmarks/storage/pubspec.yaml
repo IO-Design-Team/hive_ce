@@ -13,7 +13,7 @@ dependencies:
   meta: ^1.14.0
 
 dev_dependencies:
-  rexios_lints: ^13.0.0
+  rexios_lints: ^15.0.1
   # build_runner: ^2.5.4 # TODO: Fix this
   json_serializable: ^6.8.0
   hive_ce_generator: any
@@ -23,5 +23,6 @@ dependency_overrides:
     path: ../../hive
   hive_ce_generator:
     path: ../../hive_generator
-  source_gen: ^2.0.0
-  analyzer: ^7.0.0
+  build: ^4.0.0
+  source_gen: ^4.0.0
+  analyzer: ^8.0.0

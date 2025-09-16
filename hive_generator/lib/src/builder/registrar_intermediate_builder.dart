@@ -22,38 +22,53 @@ class RegistrarIntermediateBuilder implements Builder {
     final library = await buildStep.inputLibrary;
     final adapters = <String>[];
 
-    final hiveTypeElements =
-        LibraryReader(library).annotatedWith(TypeChecker.fromRuntime(HiveType));
+    final hiveTypeElements = LibraryReader(library)
+        .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
     for (final annotatedElement in hiveTypeElements) {
       final annotation = annotatedElement.annotation;
       final element = annotatedElement.element;
       final cls = getClass(element);
       final adapterName =
-          readAdapterName(annotation) ?? generateAdapterName(cls.name);
+          readAdapterName(annotation) ?? generateAdapterName(cls.displayName);
       adapters.add(adapterName);
     }
 
     // If the registrar should be placed next to this file
     final bool registrarLocation;
 
-    final generateAdaptersChecker = TypeChecker.fromRuntime(GenerateAdapters);
-    final generateAdaptersElements =
-        LibraryReader(library).annotatedWith(generateAdaptersChecker);
-    // Read multiple annotations if they exist
-    final generateAdaptersAnnotations = generateAdaptersElements
-        .expand((e) => generateAdaptersChecker.annotationsOf(e.element));
+    final generateAdaptersChecker =
+        TypeChecker.typeNamed(GenerateAdapters, inPackage: 'hive_ce');
+    final libraryReader = LibraryReader(library);
 
-    if (generateAdaptersAnnotations.length > 1) {
+    final generateAdaptersElements =
+        libraryReader.annotatedWith(generateAdaptersChecker);
+    final generateAdaptersDirectives =
+        libraryReader.libraryDirectivesAnnotatedWith(generateAdaptersChecker);
+
+    final generateAdaptersAnnotationReaders = [
+      ...generateAdaptersElements.map((e) => e.annotation),
+      ...generateAdaptersDirectives.map((e) => e.annotation),
+    ];
+
+    // Read multiple annotations if they exist
+    final generateAdaptersAnnotationObjects = [
+      ...generateAdaptersElements
+          .expand((e) => generateAdaptersChecker.annotationsOf(e.element)),
+      ...generateAdaptersDirectives
+          .expand((e) => generateAdaptersChecker.annotationsOf(e.directive)),
+    ];
+
+    if (generateAdaptersAnnotationObjects.length > 1) {
       throw HiveError(
-        'Multiple GenerateAdapters annotations found in file: ${library.source.uri}',
+        'Multiple GenerateAdapters annotations found in file: ${library.uri}',
       );
-    } else if (generateAdaptersElements.isNotEmpty) {
+    } else if (generateAdaptersAnnotationReaders.isNotEmpty) {
       registrarLocation = true;
 
-      final annotation = generateAdaptersElements.single.annotation;
+      final annotation = generateAdaptersAnnotationReaders.single;
       final revived = RevivedGenerateAdapters(annotation);
       for (final spec in revived.specs) {
-        adapters.add(generateAdapterName(spec.type.element3!.displayName));
+        adapters.add(generateAdapterName(spec.type.element!.displayName));
       }
     } else {
       registrarLocation = false;
@@ -65,7 +80,7 @@ class RegistrarIntermediateBuilder implements Builder {
       buildStep.allowedOutputs.first,
       jsonEncode(
         RegistrarIntermediate(
-          uri: library.source.uri,
+          uri: library.uri,
           adapters: adapters,
           registrarLocation: registrarLocation,
         ),

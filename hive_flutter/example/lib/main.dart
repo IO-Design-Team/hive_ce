@@ -18,6 +18,7 @@ class HiveCounterApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = TextTheme.of(context);
     final box = Hive.box(counterBox);
 
     return Scaffold(
@@ -32,7 +33,7 @@ class HiveCounterApp extends StatelessWidget {
               builder: (context, box, widget) {
                 return Text(
                   box.getAt(0).toString(),
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: textTheme.headlineMedium,
                 );
               },
             ),

@@ -23,6 +23,7 @@ void expectGeneration({
   required Map<String, String> input,
   Map<String, Object> output = const {},
   String? throws,
+  bool debug = false,
 }) {
   final projectRoot = createTestProject(input);
   Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
@@ -31,6 +32,8 @@ void expectGeneration({
     ['pub', 'run', 'build_runner', 'build'],
     workingDirectory: projectRoot,
   );
+
+  if (debug) print(result.stdout);
 
   if (throws != null) {
     expect(result.exitCode, isNot(0));
