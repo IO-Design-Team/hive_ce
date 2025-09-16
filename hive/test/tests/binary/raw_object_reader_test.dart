@@ -85,7 +85,7 @@ void main() {
       final bytes = bw.toBytes();
       final br = RawObjectReader({}, bytes);
       final raw = br.read() as Uint8List;
-      expect(raw, bytes.sublist(5));
+      expect(raw, bytes.sublist(6));
     });
 
     test('enum', () {

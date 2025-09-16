@@ -36,8 +36,12 @@ class RawObjectWriter extends BinaryWriterImpl {
     final isInternal = TypeRegistryImpl.isInternalTypeId(typeId);
 
     if (withTypeId) writeTypeId(typeId);
-    writeByte(isEnum ? 1 : 0);
-    if (!isInternal) writeInt32(bytes.length);
+
+    if (!isInternal) {
+      writeByte(isEnum ? 1 : 0);
+      writeInt32(bytes.length);
+    }
+
     writeBytes(bytes);
   }
 }
