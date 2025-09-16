@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "cf502794818664e1e6e3bce3c76ff32b",
+const RESOURCES = {"flutter_bootstrap.js": "424c6ac9dc6a88d749b45831e69bf578",
 "version.json": "408c5eb073cd7b430ebb8fdc5b6dda82",
 "index.html": "94e1ba9ee733191c782633faae49688f",
 "/": "94e1ba9ee733191c782633faae49688f",
@@ -34,7 +34,7 @@ const RESOURCES = {"flutter_bootstrap.js": "cf502794818664e1e6e3bce3c76ff32b",
 "assets/packages/devtools_app_shared/fonts/Roboto/Roboto-Black.ttf": "ec4c9962ba54eb91787aa93d361c10a8",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "assets/AssetManifest.bin": "2c828b91620f80bce3f679a14fa02942",
-"assets/fonts/MaterialIcons-Regular.otf": "fe42fd640d9a451335e2082def7c6083",
+"assets/fonts/MaterialIcons-Regular.otf": "e7069dfd19b331be16bed984668fe080",
 "canvaskit/skwasm.js": "1ef3ea3a0fec4569e5d531da25f34095",
 "canvaskit/skwasm_heavy.js": "413f5b2b2d9345f37de148e2544f584f",
 "canvaskit/skwasm.js.symbols": "0088242d10d7e7d6d2649d1fe1bda7c1",
@@ -50,8 +50,6 @@ const RESOURCES = {"flutter_bootstrap.js": "cf502794818664e1e6e3bce3c76ff32b",
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
-"main.dart.wasm",
-"main.dart.mjs",
 "index.html",
 "flutter_bootstrap.js",
 "assets/AssetManifest.bin.json",
