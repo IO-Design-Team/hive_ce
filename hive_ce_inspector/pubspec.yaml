@@ -18,7 +18,7 @@ dependencies:
   devtools_app_shared: ^0.4.0
 
 dev_dependencies:
-  rexios_lints: ^10.1.0
+  rexios_lints: ^15.0.1
 
 flutter:
   uses-material-design: true
