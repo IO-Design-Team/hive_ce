@@ -1,3 +1,5 @@
+set -e
+
 cd ../hive_ce_inspector
 dart pub get
 flutter build web --wasm
