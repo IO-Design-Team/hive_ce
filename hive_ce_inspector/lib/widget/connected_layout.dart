@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
@@ -61,47 +62,38 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-
     final selectedBox = this.selectedBox;
     final selectedBoxData = boxData[selectedBox];
 
-    final isWide = mediaQuery.size.width > 600;
-    final drawer = Drawer(
-      child: ListView.builder(
-        itemBuilder: (context, index) {
-          final box = boxData.keys.elementAt(index);
-          return ListTile(
-            style: ListTileStyle.drawer,
-            title: Text(box),
-            selected: selectedBox == box,
-            onTap: () {
-              loadBoxData(box);
-              setState(() => this.selectedBox = box);
-            },
-          );
-        },
-        itemCount: boxData.keys.length,
-      ),
-    );
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('Hive CE Inspector')),
-      drawer: isWide ? null : drawer,
-      body: Row(
+    return DevToolsAreaPane(
+      header: const AreaPaneHeader(title: Text('Hive CE Inspector')),
+      child: SplitPane(
+        axis: Axis.horizontal,
+        initialFractions: const [0.2, 0.8],
         children: [
-          if (isWide) drawer,
+          ListView.builder(
+            itemBuilder: (context, index) {
+              final box = boxData.keys.elementAt(index);
+              return ListTile(
+                title: Text(box),
+                selected: selectedBox == box,
+                onTap: () {
+                  loadBoxData(box);
+                  setState(() => this.selectedBox = box);
+                },
+              );
+            },
+            itemCount: boxData.keys.length,
+          ),
           if (selectedBox == null)
-            const Expanded(child: Center(child: Text('Select a box')))
+            const Center(child: Text('Select a box'))
           else if (selectedBoxData == null)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
+            const Center(child: CircularProgressIndicator())
           else
-            Expanded(
-              child: BoxView(
-                key: ValueKey(selectedBox),
-                client: widget.client,
-                data: selectedBoxData,
-              ),
+            BoxView(
+              key: ValueKey(selectedBox),
+              client: widget.client,
+              data: selectedBoxData,
             ),
         ],
       ),
