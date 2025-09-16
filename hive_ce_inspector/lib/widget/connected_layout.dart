@@ -65,13 +65,13 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     final selectedBox = this.selectedBox;
     final selectedBoxData = boxData[selectedBox];
 
-    return DevToolsAreaPane(
-      header: const AreaPaneHeader(title: Text('Hive CE Inspector')),
-      child: SplitPane(
-        axis: Axis.horizontal,
-        initialFractions: const [0.2, 0.8],
-        children: [
-          ListView.builder(
+    return SplitPane(
+      axis: Axis.horizontal,
+      initialFractions: const [0.2, 0.8],
+      children: [
+        DevToolsAreaPane(
+          header: const AreaPaneHeader(title: Text('Boxes')),
+          child: ListView.builder(
             itemBuilder: (context, index) {
               final box = boxData.keys.elementAt(index);
               return ListTile(
@@ -85,18 +85,18 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
             },
             itemCount: boxData.keys.length,
           ),
-          if (selectedBox == null)
-            const Center(child: Text('Select a box'))
-          else if (selectedBoxData == null)
-            const Center(child: CircularProgressIndicator())
-          else
-            BoxView(
-              key: ValueKey(selectedBox),
-              client: widget.client,
-              data: selectedBoxData,
-            ),
-        ],
-      ),
+        ),
+        if (selectedBox == null)
+          const Center(child: Text('Select a box'))
+        else if (selectedBoxData == null)
+          const Center(child: CircularProgressIndicator())
+        else
+          BoxView(
+            key: ValueKey(selectedBox),
+            client: widget.client,
+            data: selectedBoxData,
+          ),
+      ],
     );
   }
 

@@ -51,9 +51,9 @@ class _BoxViewState extends State<BoxView> {
       return const Center(child: Text('Box is empty'));
     }
 
-    return Column(
-      children: [
-        Row(
+    return DevToolsAreaPane(
+      header: AreaPaneHeader(
+        title: Row(
           children: [
             DevToolsButton(
               outlined: false,
@@ -77,20 +77,16 @@ class _BoxViewState extends State<BoxView> {
             ),
           ],
         ),
-        Expanded(
-          child: DefaultTextStyle(
-            style: textTheme.bodyMedium!.copyWith(
-              overflow: TextOverflow.ellipsis,
-            ),
-            child: DataTableView(
-              key: ValueKey(widget.data.name),
-              data: stack.last.value,
-              onStack: (key, value) =>
-                  setState(() => _stack.add(KeyedObject(key, value))),
-            ),
-          ),
+      ),
+      child: DefaultTextStyle(
+        style: textTheme.bodyMedium!.copyWith(overflow: TextOverflow.ellipsis),
+        child: DataTableView(
+          key: ValueKey(widget.data.name),
+          data: stack.last.value,
+          onStack: (key, value) =>
+              setState(() => _stack.add(KeyedObject(key, value))),
         ),
-      ],
+      ),
     );
   }
 }
