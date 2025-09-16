@@ -5,7 +5,6 @@ nextTypeId: 3
 types:
   Person:
     typeId: 0
-    kind: "object"
     nextIndex: 5
     fields:
       name:
@@ -20,7 +19,6 @@ types:
         index: 4
   Job:
     typeId: 1
-    kind: "enum"
     nextIndex: 8
     fields:
       softwareEngineer:
@@ -41,7 +39,6 @@ types:
         index: 7
   FreezedPerson:
     typeId: 2
-    kind: "object"
     nextIndex: 4
     fields:
       firstName:

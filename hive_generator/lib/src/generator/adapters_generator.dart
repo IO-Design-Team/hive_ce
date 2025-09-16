@@ -9,7 +9,6 @@ import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
 import 'package:yaml/yaml.dart';
 
 /// Builder that generates Hive adapters from a GenerateAdapters annotation
@@ -81,7 +80,6 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(
             typeId: generateTypeId(),
-            kind: spec.type.isEnum ? TypeKind.enumKind : TypeKind.objectKind,
             nextIndex: 0,
             fields: {},
           );

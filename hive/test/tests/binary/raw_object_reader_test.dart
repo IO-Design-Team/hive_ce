@@ -54,7 +54,6 @@ void main() {
       final types = {
         'TestObject': HiveSchemaType(
           typeId: 100,
-          kind: TypeKind.objectKind,
           nextIndex: 0,
           fields: {
             'field1': HiveSchemaField(index: 0),
@@ -95,7 +94,6 @@ void main() {
       final types = {
         'TestEnum': HiveSchemaType(
           typeId: 100,
-          kind: TypeKind.enumKind,
           nextIndex: 0,
           fields: {
             'value1': HiveSchemaField(index: 0),

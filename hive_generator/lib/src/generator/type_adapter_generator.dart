@@ -208,7 +208,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     setters.sort((a, b) => a.index.compareTo(b.index));
     final newSchema = HiveSchemaType(
       typeId: typeId,
-      kind: cls.thisType.isEnum ? TypeKind.enumKind : TypeKind.objectKind,
       nextIndex: nextIndex,
       fields: Map.fromEntries(
         newSchemaFields.entries.toList()

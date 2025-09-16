@@ -24,6 +24,7 @@ class RawObjectReader extends BinaryReaderImpl {
       return super.read(typeId);
     }
 
+    final isEnum = readByte() == 1;
     final dataLength = readInt32();
 
     final type = _types.entries
@@ -41,30 +42,27 @@ class RawObjectReader extends BinaryReaderImpl {
           .firstOrNull;
     }
 
-    switch (type.value.kind) {
-      case TypeKind.objectKind:
-        final length = readByte();
-        final fields = List<RawField>.filled(length, RawField('', null));
-        for (var i = 0; i < length; i++) {
-          final index = readByte();
-          final field = getField(index);
+    if (isEnum) {
+      final index = readByte();
+      final field = getField(index);
 
-          if (field == null) {
-            throw HiveError('Unknown field index: ${type.key}[$index]');
-          }
-          fields[i] = RawField(field.key, read());
-        }
-        return RawObject(type.key, fields);
-      case TypeKind.enumKind:
+      if (field == null) {
+        throw HiveError('Unknown enum index: ${type.key}[$index]');
+      }
+      return RawEnum(type.key, field.key);
+    } else {
+      final length = readByte();
+      final fields = List<RawField>.filled(length, RawField('', null));
+      for (var i = 0; i < length; i++) {
         final index = readByte();
         final field = getField(index);
 
         if (field == null) {
-          throw HiveError('Unknown enum index: ${type.key}[$index]');
+          throw HiveError('Unknown field index: ${type.key}[$index]');
         }
-        return RawEnum(type.key, field.key);
-      case TypeKind.unknownKind:
-        throw HiveError('Unknown type kind for type: ${type.key}');
+        fields[i] = RawField(field.key, read());
+      }
+      return RawObject(type.key, fields);
     }
   }
 }

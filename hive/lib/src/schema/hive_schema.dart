@@ -29,29 +29,12 @@ class HiveSchema {
   Map<String, dynamic> toJson() => _$HiveSchemaToJson(this);
 }
 
-/// The kind of type this is a schema for
-enum TypeKind {
-  /// This is an object type
-  @JsonValue('object')
-  objectKind,
-
-  /// This is an enum type
-  @JsonValue('enum')
-  enumKind,
-
-  /// The kind is unknown
-  unknownKind,
-}
-
 /// Information about a Hive adapter type
 @JsonSerializable()
 @immutable
 class HiveSchemaType {
   /// The adapter's type ID
   final int typeId;
-
-  /// The kind of type this is a schema for
-  final TypeKind kind;
 
   /// The next field index to use for future updates
   final int nextIndex;
@@ -62,7 +45,6 @@ class HiveSchemaType {
   /// Constructor
   const HiveSchemaType({
     required this.typeId,
-    this.kind = TypeKind.unknownKind,
     required this.nextIndex,
     required this.fields,
   });
@@ -80,7 +62,6 @@ class HiveSchemaType {
   }) {
     return HiveSchemaType(
       typeId: typeId,
-      kind: kind,
       nextIndex: nextIndex,
       fields: fields ?? this.fields,
     );
