@@ -35,12 +35,14 @@ class ConnectClient {
     final dtd = dtdManager.connection.value;
     if (dtd == null) throw 'DTD not found';
 
-    final rootsResponse = await dtdManager.workspaceRoots();
+    final rootsResponse = await dtdManager.projectRoots();
     if (rootsResponse == null) throw 'Workspace roots not found';
 
     final uris = <Uri>[];
-    for (final root in rootsResponse.ideWorkspaceRoots) {
-      final contents = await dtd.listDirectoryContentsRecursive(root).toList();
+    for (final root in rootsResponse.uris ?? <Uri>[]) {
+      final contents = await dtd
+          .listDirectoryContentsRecursive(root.resolve('lib'))
+          .toList();
       uris.addAll(contents);
     }
 
