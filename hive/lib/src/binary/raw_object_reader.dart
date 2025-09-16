@@ -33,7 +33,15 @@ class RawObjectReader extends BinaryReaderImpl {
             typeId)
         .firstOrNull;
     if (type == null) {
-      return readBytes(dataLength);
+      if (typeId == 201 && dataLength == 8) {
+        // Assume TimeOfDay
+        final totalMinutes = readInt();
+        final hour = totalMinutes ~/ 60;
+        final minute = totalMinutes % 60;
+        return '$hour:$minute';
+      } else {
+        return readBytes(dataLength);
+      }
     }
 
     MapEntry<String, HiveSchemaField>? getField(int index) {
@@ -104,7 +112,7 @@ class RawObject extends RawType {
 /// A raw field of a custom object
 @immutable
 class RawField {
-  /// THe name of the field
+  /// The name of the field
   final String name;
 
   /// The value of the field

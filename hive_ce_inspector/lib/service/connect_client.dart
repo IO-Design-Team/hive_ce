@@ -5,6 +5,7 @@ import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:dtd/dtd.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/service/dtd_extension.dart';
+import 'package:hive_ce_inspector/util/base_schema.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:yaml/yaml.dart';
@@ -73,6 +74,7 @@ class ConnectClient {
     }
 
     final types = {
+      ...baseSchema,
       for (final schema in otherSchemas) ...schema.types,
       // Schemas for the currently running app take precedence
       for (final schema in appSchemas) ...schema.types,
