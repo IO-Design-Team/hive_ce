@@ -122,6 +122,7 @@ There are some requirements for using the inspector:
   - This means types annotated with `HiveType` and types using custom type adapters will not be deserialized
 - Hive schemas (`hive_adapters.g.yaml`) are used to deserialize data
   - All necessary Hive schemas must be in the `lib` folder of a project open in the IDE workspace
+  - This should work by default for most projects. Otherwise, you may need to copy the necessary Hive schemas into an open project's `lib` folder.
 
 </details>
 
