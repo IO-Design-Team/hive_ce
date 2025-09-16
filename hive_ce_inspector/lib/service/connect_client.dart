@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:dtd/dtd.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
+import 'package:hive_ce_inspector/service/dtd_extension.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:yaml/yaml.dart';
 
 @immutable
 class ConnectClient {
@@ -14,10 +17,7 @@ class ConnectClient {
 
   ConnectClient(this.vmService, this.isolateId, this.types);
 
-  static Future<ConnectClient> connect(
-    Map<String, HiveSchemaType> types,
-  ) async {
-    await serviceManager.onServiceAvailable;
+  static Future<ConnectClient> connect() async {
     final service = serviceManager.service;
     if (service == null) throw 'VM service not found';
 
@@ -31,6 +31,50 @@ class ConnectClient {
     } catch (_) {
       // Throws if the stream is already listened to
     }
+
+    final dtd = dtdManager.connection.value;
+    if (dtd == null) throw 'DTD not found';
+
+    final rootsResponse = await dtdManager.workspaceRoots();
+    if (rootsResponse == null) throw 'Workspace roots not found';
+
+    final uris = <Uri>[];
+    for (final root in rootsResponse.ideWorkspaceRoots) {
+      final contents = await dtd.listDirectoryContentsRecursive(root).toList();
+      uris.addAll(contents);
+    }
+
+    final appPackageRoot = await serviceManager.connectedAppPackageRoot(
+      dtdManager,
+    );
+    if (appPackageRoot == null) throw 'App package root not found';
+
+    final hiveSchemasUris = uris
+        .where((e) => e.path.endsWith('hive_adapters.g.yaml'))
+        .toList();
+
+    final appSchemas = <HiveSchema>[];
+    final otherSchemas = <HiveSchema>[];
+    for (final uri in hiveSchemasUris) {
+      final contentResponse = await dtd.readFileAsString(uri);
+      final content = contentResponse.content;
+      if (content == null) continue;
+
+      final schema = HiveSchema.fromJson(
+        jsonDecode(jsonEncode(loadYaml(content))),
+      );
+      if (uri.path.startsWith(appPackageRoot.path)) {
+        appSchemas.add(schema);
+      } else {
+        otherSchemas.add(schema);
+      }
+    }
+
+    final types = {
+      for (final schema in otherSchemas) ...schema.types,
+      // Schemas for the currently running app take precedence
+      for (final schema in appSchemas) ...schema.types,
+    };
 
     final client = ConnectClient(service, isolateId, types);
     final handlers = <String, Function(Map<String, dynamic>)>{

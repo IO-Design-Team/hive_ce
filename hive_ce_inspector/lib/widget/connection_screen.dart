@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
@@ -15,25 +14,28 @@ class ConnectionScreen extends StatefulWidget {
 }
 
 class _ConnectionPageState extends State<ConnectionScreen> {
-  late final Future<ConnectClient> clientFuture;
-
-  @override
-  void initState() {
-    clientFuture = ConnectClient.connect(widget.types);
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<ConnectClient>(
-        future: clientFuture,
-        builder: (context, snapshot) {
-          print(snapshot.error);
-          if (snapshot.hasData) {
-            return _BoxesLoader(client: snapshot.data!);
+    const loading = Center(child: CircularProgressIndicator());
+
+    return ValueListenableBuilder(
+      valueListenable: serviceManager.connectedState,
+      builder: (context, serviceConnection, child) => ValueListenableBuilder(
+        valueListenable: dtdManager.connection,
+        builder: (context, dtdConnection, child) {
+          if (serviceConnection.connected && dtdConnection != null) {
+            return FutureBuilder(
+              future: ConnectClient.connect(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return _BoxesLoader(client: snapshot.data!);
+                } else {
+                  return loading;
+                }
+              },
+            );
           } else {
-            return const Center(child: CircularProgressIndicator());
+            return loading;
           }
         },
       ),

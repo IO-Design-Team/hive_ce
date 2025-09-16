@@ -1,6 +1,6 @@
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_ce_inspector/widget/schema_upload_screen.dart';
+import 'package:hive_ce_inspector/widget/connection_screen.dart';
 
 void main() {
   runApp(
@@ -8,7 +8,7 @@ void main() {
       child: Navigator(
         onGenerateRoute: (settings) => MaterialPageRoute(
           settings: settings,
-          builder: (context) => const SchemaUploadScreen(),
+          builder: (context) => const ConnectionScreen(),
         ),
       ),
     ),
