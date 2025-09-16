@@ -200,9 +200,6 @@ abstract class IsolatedBoxBaseImpl<E>
         .map(InspectorFrame.fromJson)
         .map((e) => e.copyWith(value: _readValue(e.value as Uint8List?)));
   }
-
-  @override
-  Future<Object?> loadValue(Object key) => get(key);
 }
 
 /// Isolated implementation of [Box]

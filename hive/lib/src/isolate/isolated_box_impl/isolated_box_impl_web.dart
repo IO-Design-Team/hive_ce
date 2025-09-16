@@ -119,10 +119,6 @@ abstract class IsolatedBoxBaseImpl<E>
   @override
   Future<Iterable<InspectorFrame>> getFrames() =>
       (_box as InspectableBox).getFrames();
-
-  @override
-  Future<Object?> loadValue(Object key) =>
-      (_box as InspectableBox).loadValue(key);
 }
 
 /// Isolated implementation of [Box]
