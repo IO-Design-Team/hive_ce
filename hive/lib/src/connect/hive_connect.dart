@@ -56,45 +56,13 @@ class HiveConnect {
   }
 
   static void _printConnection() async {
-    final ServiceProtocolInfo info;
-    try {
-      info = await Service.getInfo();
-    } catch (_) {
-      _printUrl('$_baseUrl/$_version/');
-      return;
-    }
-
-    final serviceUri = info.serverUri;
-    if (serviceUri == null) return;
-
-    final port = serviceUri.port;
-    var path = serviceUri.path;
-    if (path.endsWith('/')) {
-      path = path.substring(0, path.length - 1);
-    }
-    if (path.endsWith('=')) {
-      path = path.substring(0, path.length - 1);
-    }
-
-    _printUrl('$_baseUrl/$_version/$port$path');
-  }
-
-  static void _printUrl(String url) {
-    String line(String text, String fill) {
-      final fillCount = url.length - text.length + 2;
-      final left = List.filled(fillCount ~/ 2, fill);
-      final right = List.filled(fillCount - left.length, fill);
-      return left.join() + text + right.join();
-    }
-
-    print('╔${line('', '═')}╗');
-    print('║${line('HIVE CE CONNECT STARTED', ' ')}║');
-    print('╟${line('', '─')}╢');
-    print('║${line('Open the link to connect to the Hive', ' ')}║');
-    print('║${line('Inspector while this build is running.', ' ')}║');
-    print('╟${line('', '─')}╢');
-    print('║ $url ║');
-    print('╚${line('', '═')}╝');
+    print('''
+╔═══════════════════════════════════════════════════════════════╗
+║                    HIVE CE CONNECT STARTED                    ║
+╟───────────────────────────────────────────────────────────────╢
+║        Open the dev tools to use the Hive CE Inspector        ║
+╚═══════════════════════════════════════════════════════════════╝
+''');
   }
 
   /// Register a box for inspection
