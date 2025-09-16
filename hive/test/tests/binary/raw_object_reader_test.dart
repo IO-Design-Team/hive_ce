@@ -110,6 +110,27 @@ void main() {
       expect(raw.name, 'TestEnum');
       expect(raw.value, 'value1');
     });
+
+    /// This test exists to make test coverage happy
+    ///
+    /// The real test is in hive_ce_inspector/test/binary/raw_object_reader_test.dart
+    test('TimeOfDay', () {
+      final typeRegistry = TypeRegistryImpl();
+
+      final hour = 12;
+      final minute = 30;
+      final totalMinutes = hour * 60 + minute;
+
+      final bw = RawObjectWriter(typeRegistry);
+      bw.writeTypeId(233);
+      bw.writeByte(0);
+      bw.writeInt32(8);
+      bw.writeInt(totalMinutes);
+
+      final br = RawObjectReader({}, bw.toBytes());
+      final raw = br.read() as String;
+      expect(raw, '$hour:$minute');
+    });
   });
 }
 

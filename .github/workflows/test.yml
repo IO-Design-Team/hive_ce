@@ -15,7 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [hive, hive_flutter, hive_generator]
+        package:
+          - hive
+          - hive_ce_inspector
+          - hive_flutter
+          - hive_generator
         flutter-channel:
           - stable
           - beta
@@ -64,6 +68,19 @@ jobs:
         run: dart pub get --no-example
       - name: Run tests
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
+  
+  test-hive_ce_inspector:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hive_ce_inspector
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
 
   test-hive_flutter:
     runs-on: ubuntu-latest

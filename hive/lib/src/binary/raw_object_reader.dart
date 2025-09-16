@@ -33,7 +33,7 @@ class RawObjectReader extends BinaryReaderImpl {
             typeId)
         .firstOrNull;
     if (type == null) {
-      if (typeId == 201 && dataLength == 8) {
+      if (typeId == 233 && dataLength == 8) {
         // Assume TimeOfDay
         final totalMinutes = readInt();
         final hour = totalMinutes ~/ 60;
