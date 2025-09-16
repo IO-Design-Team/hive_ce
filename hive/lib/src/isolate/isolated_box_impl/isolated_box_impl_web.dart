@@ -114,10 +114,6 @@ abstract class IsolatedBoxBaseImpl<E>
 
   @override
   TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
-
-  @override
-  Future<Object?> loadValue(Object key) =>
-      (_box as InspectableBox).loadValue(key);
 }
 
 /// Isolated implementation of [Box]

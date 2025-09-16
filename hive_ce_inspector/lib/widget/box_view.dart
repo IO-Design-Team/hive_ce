@@ -23,18 +23,21 @@ class _BoxViewState extends State<BoxView> {
     KeyedObject(
       widget.data.name,
       widget.data.frames.values
-          .map((e) => KeyedObject(e.key, e.value, load: () => _loadFrame(e)))
+          .map(
+            (e) => KeyedObject(
+              e.key,
+              e.value,
+              load: e.lazy
+                  ? () => widget.client.loadValue(widget.data.name, e)
+                  : null,
+            ),
+          )
           .toList()
           .reversed
           .toList(),
     ),
     ..._stack,
   ];
-
-  void _loadFrame(InspectorFrame frame) {
-    if (!frame.lazy) return;
-    widget.client.loadValue(widget.data.name, frame);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +99,8 @@ class KeyedObject<T extends Object?> {
 
   // Load the value if it is lazy
   final VoidCallback? load;
+
+  bool get lazy => load != null;
 
   const KeyedObject(this.key, this.value, {this.load});
 }
@@ -234,7 +239,10 @@ class _DataTableViewState extends State<DataTableView> {
                     final String cellText;
                     final Widget cellContent;
                     final stackKey = '${object.key}.$fieldName';
-                    if (fieldValue is Uint8List) {
+                    if (object.lazy) {
+                      cellText = '[Loading...]';
+                      cellContent = const Text('[Loading...]');
+                    } else if (fieldValue is Uint8List) {
                       cellText = fieldValue.toString();
                       cellContent = const Text('[Bytes]');
                     } else if (fieldValue is Iterable) {

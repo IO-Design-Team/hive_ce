@@ -14,7 +14,7 @@ abstract interface class InspectableBox {
   FutureOr<Iterable<dynamic>> get keys;
 
   /// Returns the value for the given [key].
-  Future<Object?> loadValue(Object key);
+  FutureOr<Object?> get(Object key);
 
   /// Watch the box for changes
   Stream<BoxEvent> watch();

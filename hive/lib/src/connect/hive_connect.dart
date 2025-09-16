@@ -52,7 +52,7 @@ class HiveConnect {
     }
   }
 
-  static void _printConnection() async {
+  static void _printConnection() {
     print('''
 ╔═══════════════════════════════════════════════════════════════╗
 ║                    HIVE CE CONNECT STARTED                    ║
@@ -108,7 +108,7 @@ class HiveConnect {
     if (box == null) return null;
 
     final key = args['key'];
-    final value = await box.loadValue(key);
+    final value = await box.get(key);
     return _writeValue(box.typeRegistry, value);
   }
 

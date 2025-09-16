@@ -189,9 +189,6 @@ abstract class IsolatedBoxBaseImpl<E>
 
   @override
   TypeRegistry get typeRegistry => _hive;
-
-  @override
-  Future<Object?> loadValue(Object key) => get(key);
 }
 
 /// Isolated implementation of [Box]

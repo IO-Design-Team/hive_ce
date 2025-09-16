@@ -93,7 +93,4 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<void> flush() async {
     await backend.flush();
   }
-
-  @override
-  Future<Object?> loadValue(Object key) => get(key);
 }

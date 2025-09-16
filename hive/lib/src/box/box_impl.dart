@@ -107,7 +107,4 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   Future<void> flush() async {
     await backend.flush();
   }
-
-  @override
-  Future<Object?> loadValue(Object key) async => get(key);
 }
