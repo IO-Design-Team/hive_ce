@@ -55,21 +55,23 @@ class _BoxViewState extends State<BoxView> {
       children: [
         Row(
           children: [
-            TextButton(
+            DevToolsButton(
+              outlined: false,
+              label: widget.data.name,
               onPressed: () => setState(_stack.clear),
-              child: Text(widget.data.name),
             ),
             ..._stack.expand(
               (e) => [
                 const Text('/'),
-                TextButton(
+                DevToolsButton(
+                  outlined: false,
+                  label: e.key.toString(),
                   onPressed: () => setState(
                     () => _stack.removeRange(
                       _stack.indexOf(e) + 1,
                       _stack.length,
                     ),
                   ),
-                  child: Text(e.key.toString()),
                 ),
               ],
             ),
@@ -156,18 +158,22 @@ class _DataTableViewState extends State<DataTableView> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: SizedBox(
-            width: 300,
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: 'Search',
-                prefixIcon: const Icon(Icons.search),
-                helperText: largeDataset ? 'Submit to search' : null,
+          child: Column(
+            spacing: 8,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 300,
+                child: DevToolsClearableTextField(
+                  controller: searchController,
+                  hintText: 'Search',
+                  prefixIcon: const Icon(Icons.search),
+                  onChanged: !largeDataset ? (_) => setState(() {}) : null,
+                  onSubmitted: largeDataset ? (_) => setState(() {}) : null,
+                ),
               ),
-              onChanged: !largeDataset ? (_) => setState(() {}) : null,
-              onSubmitted: largeDataset ? (_) => setState(() {}) : null,
-            ),
+              if (largeDataset) const Text('Submit to search'),
+            ],
           ),
         ),
         filteredData.isEmpty
