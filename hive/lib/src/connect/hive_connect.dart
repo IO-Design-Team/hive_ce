@@ -57,7 +57,7 @@ class HiveConnect {
 ╔═══════════════════════════════════════════════════════════════╗
 ║                    HIVE CE CONNECT STARTED                    ║
 ╟───────────────────────────────────────────────────────────────╢
-║        Open the dev tools to use the Hive CE Inspector        ║
+║        Open the DevTools to use the Hive CE Inspector         ║
 ╚═══════════════════════════════════════════════════════════════╝
 ''');
   }
