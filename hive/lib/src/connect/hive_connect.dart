@@ -7,13 +7,14 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
+import 'package:meta/meta.dart';
 
 /// Handles box inspection through `hive_ce_inspector`
 class HiveConnect {
   static const _handlers = <ConnectAction, FutureOr Function(dynamic)>{
-    ConnectAction.listBoxes: _listBoxes,
-    ConnectAction.getBoxFrames: _getBoxFrames,
-    ConnectAction.loadValue: _loadValue,
+    ConnectAction.listBoxes: listBoxes,
+    ConnectAction.getBoxFrames: getBoxFrames,
+    ConnectAction.loadValue: loadValue,
   };
 
   const HiveConnect._();
@@ -78,7 +79,9 @@ class HiveConnect {
     postEvent(ConnectEvent.boxUnregistered.event, {'name': box.name});
   }
 
-  static List<String> _listBoxes(dynamic args) {
+  /// List all registered boxes
+  @visibleForTesting
+  static List<String> listBoxes(dynamic args) {
     for (final box in _boxes.values) {
       _subscriptions[box.name] ??= box.watch().listen((event) {
         postEvent(
@@ -97,7 +100,9 @@ class HiveConnect {
     return _boxes.keys.toList();
   }
 
-  static Future<List<InspectorFrame>> _getBoxFrames(dynamic args) async {
+  /// Get all frames for a given box
+  @visibleForTesting
+  static Future<List<InspectorFrame>> getBoxFrames(dynamic args) async {
     final name = args['name'] as String;
     final box = _boxes[name];
     if (box == null) return [];
@@ -108,7 +113,9 @@ class HiveConnect {
         .toList();
   }
 
-  static Future<Object?> _loadValue(dynamic args) async {
+  /// Load the value for a given key
+  @visibleForTesting
+  static Future<Object?> loadValue(dynamic args) async {
     final name = args['name'] as String;
     final box = _boxes[name];
     if (box == null) return null;
