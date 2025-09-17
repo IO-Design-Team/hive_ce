@@ -1,3 +1,7 @@
+## 2.13.1
+
+- Fixes the first column header not showing in the inspector
+
 ## 2.13.0
 
 - Adds the Hive CE Inspector DevTools extension
