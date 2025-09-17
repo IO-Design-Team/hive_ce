@@ -3,7 +3,7 @@ import 'package:hive_ce/hive.dart';
 /// Not part of public API
 class Frame {
   /// Not part of public API
-  final Object? key;
+  final Object key;
 
   /// Not part of public API
   final Object? value;

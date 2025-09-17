@@ -2,18 +2,39 @@ import 'dart:io';
 
 import 'package:example/hive/hive_registrar.g.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
+@immutable
 class Person {
-  Person({required this.name, required this.age, required this.friends});
+  const Person({
+    required this.name,
+    required this.age,
+    this.bestFriend,
+    this.friends = const [],
+    this.job = Job.unemployed,
+  });
 
-  String name;
-  int age;
-  List<String> friends;
+  final String name;
+  final int age;
+  final Person? bestFriend;
+  final List<Person> friends;
+  final Job job;
 
   @override
   String toString() {
     return '$name: $age';
   }
+}
+
+enum Job {
+  softwareEngineer,
+  productManager,
+  designer,
+  sales,
+  marketing,
+  hr,
+  finance,
+  unemployed,
 }
 
 void main() async {
@@ -27,7 +48,11 @@ void main() async {
   final person = Person(
     name: 'Dave',
     age: 22,
-    friends: ['Linda', 'Marc', 'Anne'],
+    friends: [
+      Person(name: 'Linda', age: 20),
+      Person(name: 'Marc', age: 21),
+      Person(name: 'Anne', age: 22),
+    ],
   );
 
   await box.put('dave', person);

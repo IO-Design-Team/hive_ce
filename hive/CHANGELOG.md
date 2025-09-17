@@ -1,3 +1,7 @@
+## 2.13.0
+
+- Adds the Hive CE Inspector DevTools extension
+
 ## 2.12.0
 
 - Notify with the value of a deleted frame instead of `null`

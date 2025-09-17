@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
@@ -150,6 +151,9 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         _boxes[name] = newBox;
 
         completer.complete();
+
+        HiveConnect.registerBox(newBox);
+
         return newBox;
       } catch (error, stackTrace) {
         completer.completeError(error, stackTrace);

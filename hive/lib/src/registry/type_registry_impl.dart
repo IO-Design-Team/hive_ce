@@ -226,7 +226,6 @@ class TypeRegistryImpl implements TypeRegistry {
   }
 
   /// Resolve the real type ID for the given [typeId]
-  @visibleForTesting
   static int calculateTypeId(int typeId, {required bool internal}) {
     if (internal) {
       assert(typeId >= 0 && typeId <= maxInternalTypeId);
@@ -248,5 +247,16 @@ class TypeRegistryImpl implements TypeRegistry {
         return typeId + reservedTypeIds;
       }
     }
+  }
+
+  /// If the given raw [typeId] is internal
+  static bool isInternalTypeId(int typeId) {
+    final isInternal = typeId >= 0 && typeId < reservedTypeIds;
+
+    final firstExtendedInternalTypeId = maxTypeId + 1;
+    final isExtendedInternal = typeId >= firstExtendedInternalTypeId &&
+        typeId < firstExtendedInternalTypeId + reservedExtendedTypeIds;
+
+    return isInternal || isExtendedInternal;
   }
 }

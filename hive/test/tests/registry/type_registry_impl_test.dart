@@ -305,6 +305,16 @@ void main() {
           throwsHiveError(),
         );
       });
+
+      test('isInternalTypeId', () {
+        expect(TypeRegistryImpl.isInternalTypeId(0), true);
+        expect(TypeRegistryImpl.isInternalTypeId(31), true);
+        expect(TypeRegistryImpl.isInternalTypeId(32), false);
+        expect(TypeRegistryImpl.isInternalTypeId(255), false);
+        expect(TypeRegistryImpl.isInternalTypeId(256), true);
+        expect(TypeRegistryImpl.isInternalTypeId(319), true);
+        expect(TypeRegistryImpl.isInternalTypeId(320), false);
+      });
     });
   });
 }
