@@ -57,6 +57,14 @@ void main() {
 
       final frames = await HiveConnect.getBoxFrames({'name': 'box'});
       expect(frames, hasLength(2));
+
+      final isolatedHive = await initIsolatedHive();
+      final isolatedBox = await isolatedHive.openBox('isolatedbox');
+      await isolatedBox.put('key1', 'value1');
+      await isolatedBox.put('key2', 'value2');
+
+      final isolatedFrames = await HiveConnect.getBoxFrames({'name': 'isolatedbox'});
+      expect(isolatedFrames, hasLength(2));
     });
 
     test('loadValue', () async {
@@ -66,6 +74,16 @@ void main() {
 
       final value = await HiveConnect.loadValue({'name': 'box', 'key': 'key1'});
       expect(value, isNotEmpty);
+    });
+
+    test('boxEvent', () async {
+      final hive = await initHive();
+      final box = await hive.openBox('box');
+
+      HiveConnect.listBoxes(null);
+
+      // Trigger a box event
+      await box.put('key1', 'value1');
     });
   });
 }
