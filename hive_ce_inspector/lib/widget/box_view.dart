@@ -266,12 +266,10 @@ class _DataTableViewState extends State<DataTableView> {
                     } else if (fieldValue is RawObject) {
                       cellText = '{${fieldValue.name}}';
                       cellContent = InkWell(
-                        child: InkWell(
-                          child: Text(cellText),
-                          onTap: () => widget.onStack(stackKey, [
-                            KeyedObject(0, fieldValue),
-                          ]),
-                        ),
+                        child: Text(cellText),
+                        onTap: () => widget.onStack(stackKey, [
+                          KeyedObject(0, fieldValue),
+                        ]),
                       );
                     } else if (fieldValue is RawEnum) {
                       cellText = '${fieldValue.name}.${fieldValue.value}';
