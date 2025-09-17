@@ -63,7 +63,8 @@ void main() {
       await isolatedBox.put('key1', 'value1');
       await isolatedBox.put('key2', 'value2');
 
-      final isolatedFrames = await HiveConnect.getBoxFrames({'name': 'isolatedbox'});
+      final isolatedFrames =
+          await HiveConnect.getBoxFrames({'name': 'isolatedbox'});
       expect(isolatedFrames, hasLength(2));
     });
 
