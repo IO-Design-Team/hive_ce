@@ -1,3 +1,7 @@
+## 2.13.2
+
+- Removes the print statement from the inspector
+
 ## 2.13.1
 
 - Fixes the first column header not showing in the inspector
