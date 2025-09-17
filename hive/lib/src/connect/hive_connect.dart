@@ -28,7 +28,6 @@ class HiveConnect {
     if (_initialized) return;
 
     _registerHandlers();
-    _printConnection();
 
     _initialized = true;
   }
@@ -51,16 +50,6 @@ class HiveConnect {
         }
       });
     }
-  }
-
-  static void _printConnection() {
-    print('''
-╔═══════════════════════════════════════════════════════════════╗
-║                    HIVE CE CONNECT STARTED                    ║
-╟───────────────────────────────────────────────────────────────╢
-║        Open the DevTools to use the Hive CE Inspector         ║
-╚═══════════════════════════════════════════════════════════════╝
-''');
   }
 
   /// Register a box for inspection
