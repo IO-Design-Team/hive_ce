@@ -82667,7 +82667,7 @@ A.amw.prototype={
 $2(a,b){var s,r,q,p,o,n,m,l,k,j=this,i=null,h={},g=b.b,f=b.a,e=f-1,d=g===0
 if(d&&f===0)return B.PW
 s=j.c
-r=s instanceof A.ob&&e>0?s.b[e].a:B.h.i(e)
+r=s instanceof A.ob&&f>0?s.b[e].a:B.h.i(e)
 if(d)return A.awS(new A.uD(A.fK(r,i,i,i,i,i,i),r,i,i,i))
 q=J.fp(j.a.a,g-1)
 if(f===0){p=J.co(q.a)
