@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: problem
+labels: ''
 assignees: ''
 
 ---
@@ -11,9 +11,14 @@ assignees: ''
 Please tell me exactly how to reproduce the problem you are running into.
 
 **Code sample**
+
+Provide a working code sample that reproduces the issue without extra setup or dependencies. Provide a repository link if necessary.
+
+```dart
+{code sample}
 ```
-Provide a few simple lines of code to show your problem.
-```
+
+[link to project](https://github.com/user/repo)
 
 **Version**
  - Platform: iOS, Android, Mac, Windows, Linux, Web
