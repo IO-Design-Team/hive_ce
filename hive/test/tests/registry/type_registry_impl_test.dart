@@ -68,6 +68,21 @@ class ChildAdapter extends TypeAdapter<Child> {
   void write(BinaryWriter writer, Child obj) {}
 }
 
+class TestDurationAdapter extends TypeAdapter<Duration> {
+  const TestDurationAdapter(this.typeId);
+
+  @override
+  final int typeId;
+
+  @override
+  Duration read(BinaryReader reader) {
+    return Duration(seconds: 5);
+  }
+
+  @override
+  void write(BinaryWriter writer, obj) {}
+}
+
 void main() {
   group('TypeRegistryImpl', () {
     group('.registerAdapter()', () {
@@ -128,6 +143,44 @@ void main() {
             ),
           ),
         );
+      });
+
+      
+      test('override adapter same type different typeId', () async {
+        final registry = TypeRegistryImpl();
+        registry.registerAdapter(TestAdapter(100));
+
+        final resolvedDefaultAdapter = registry.findAdapterForType<int>();
+        expect(resolvedDefaultAdapter!.adapter.typeId, 100);
+
+        final output = await captureOutput(
+          () => registry.registerAdapter(TestAdapter(200), override: true),
+        ).toList();
+        expect(
+          output,
+          contains(contains('Removed existing adapter TestAdapter')),
+        );
+
+        final resolvedOverridenAdapterByType = registry.findAdapterForType<int>();
+        expect(resolvedOverridenAdapterByType!.adapter.typeId, 200);
+      });
+
+      test('override internal adapter', () async {
+        final registry = TypeRegistryImpl();
+
+        final resolvedDefaultAdapter = registry.findAdapterForType<Duration>();
+        expect(resolvedDefaultAdapter!.typeId, 20);
+
+        final output = await captureOutput(
+          () => registry.registerAdapter(TestDurationAdapter(60), override: true),
+        ).toList();
+        expect(
+          output,
+          contains(contains('WARNING: Removed existing adapter DurationAdapter (typeId 20) for type Duration and replaced with TestDurationAdapter (typeId 60).')),
+        );
+
+        final resolvedOverridenAdapterByType = registry.findAdapterForType<Duration>();
+        expect(resolvedOverridenAdapterByType!.adapter.typeId, 60);
       });
 
       test('adapter with same type warning', () async {
