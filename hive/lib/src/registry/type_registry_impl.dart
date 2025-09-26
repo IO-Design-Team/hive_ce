@@ -193,12 +193,12 @@ class TypeRegistryImpl implements TypeRegistry {
 
         if (adapterTypeId != existingAdapterTypeId) {
           if (override) {
-              _typeAdapters.remove(existingResolvedAdapter!.typeId);
-              debugPrint(
-                'WARNING: Removed existing adapter ${existingTypeAdapter.runtimeType} '
-                '(typeId $existingAdapterTypeId) for type $T and replaced with '
-                '${adapter.runtimeType} (typeId $adapterTypeId).',
-              );
+            _typeAdapters.remove(existingResolvedAdapter!.typeId);
+            debugPrint(
+              'WARNING: Removed existing adapter ${existingTypeAdapter.runtimeType} '
+              '(typeId $existingAdapterTypeId) for type $T and replaced with '
+              '${adapter.runtimeType} (typeId $adapterTypeId).',
+            );
           } else {
             final adapterTypeString =
                 '${adapter.runtimeType} (typeId $adapterTypeId)';
