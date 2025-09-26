@@ -145,7 +145,6 @@ void main() {
         );
       });
 
-      
       test('override adapter same type different typeId', () async {
         final registry = TypeRegistryImpl();
         registry.registerAdapter(TestAdapter(100));
@@ -161,7 +160,8 @@ void main() {
           contains(contains('Removed existing adapter TestAdapter')),
         );
 
-        final resolvedOverridenAdapterByType = registry.findAdapterForType<int>();
+        final resolvedOverridenAdapterByType =
+            registry.findAdapterForType<int>();
         expect(resolvedOverridenAdapterByType!.adapter.typeId, 200);
       });
 
@@ -172,14 +172,17 @@ void main() {
         expect(resolvedDefaultAdapter!.typeId, 20);
 
         final output = await captureOutput(
-          () => registry.registerAdapter(TestDurationAdapter(60), override: true),
+          () =>
+              registry.registerAdapter(TestDurationAdapter(60), override: true),
         ).toList();
         expect(
           output,
-          contains(contains('WARNING: Removed existing adapter DurationAdapter (typeId 20) for type Duration and replaced with TestDurationAdapter (typeId 60).')),
+          contains(contains(
+              'WARNING: Removed existing adapter DurationAdapter (typeId 20) for type Duration and replaced with TestDurationAdapter (typeId 60).')),
         );
 
-        final resolvedOverridenAdapterByType = registry.findAdapterForType<Duration>();
+        final resolvedOverridenAdapterByType =
+            registry.findAdapterForType<Duration>();
         expect(resolvedOverridenAdapterByType!.adapter.typeId, 60);
       });
 
