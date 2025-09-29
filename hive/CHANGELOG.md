@@ -1,3 +1,7 @@
+## 2.13.3
+
+- Adds copy to clipboard functionality to the inspector
+
 ## 2.13.2
 
 - Removes the print statement from the inspector

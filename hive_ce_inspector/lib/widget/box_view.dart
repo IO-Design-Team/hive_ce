@@ -1,5 +1,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_ce_inspector/model/box_data.dart';
 import 'package:hive_ce_inspector/model/hive_internal.dart';
 import 'package:hive_ce_inspector/service/connect_client.dart';
@@ -247,7 +248,10 @@ class _DataTableViewState extends State<DataTableView> {
                       cellContent = const Text('[Loading...]');
                     } else if (fieldValue is Uint8List) {
                       cellText = fieldValue.toString();
-                      cellContent = const Text('[Bytes]');
+                      cellContent = CopyableItem(
+                        item: fieldValue,
+                        child: const Text('[Bytes]'),
+                      );
                     } else if (fieldValue is Iterable) {
                       final list = fieldValue.toList();
                       if (list.isEmpty) {
@@ -273,10 +277,16 @@ class _DataTableViewState extends State<DataTableView> {
                       );
                     } else if (fieldValue is RawEnum) {
                       cellText = '${fieldValue.name}.${fieldValue.value}';
-                      cellContent = Text(cellText);
+                      cellContent = CopyableItem(
+                        item: fieldValue,
+                        child: Text(cellText),
+                      );
                     } else {
                       cellText = fieldValue.toString();
-                      cellContent = Text(cellText);
+                      cellContent = CopyableItem(
+                        item: fieldValue,
+                        child: Text(cellText),
+                      );
                     }
 
                     return TableViewCell(
@@ -331,6 +341,28 @@ class _FrameLoaderState extends State<FrameLoader> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class CopyableItem extends StatelessWidget {
+  final Object? item;
+  final Widget child;
+
+  const CopyableItem({super.key, required this.item, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final messenger = ScaffoldMessenger.of(context);
+
+    return InkWell(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: item.toString()));
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Copied to clipboard')),
+        );
+      },
+      child: child,
+    );
   }
 }
 
