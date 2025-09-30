@@ -156,11 +156,11 @@ RECOMMENDED ACTIONS:
 
         return newBox;
       } catch (error, stackTrace) {
-        unawaited(newBox?.close());
+        newBox?.close().ignore();
         completer.completeError(error, stackTrace);
         rethrow;
       } finally {
-        unawaited(_openingBoxes.remove(name));
+        _openingBoxes.remove(name)?.ignore();
       }
     }
   }
