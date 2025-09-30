@@ -1,5 +1,6 @@
 ## NEXT
 
+- Adds the ability to override type adapters by type (by [@sportismygame](https://github.com/sportismygame) in [#217](https://github.com/IO-Design-Team/hive_ce/pull/217))
 - Fixes some `Future` handling issues
 
 ## 2.13.3

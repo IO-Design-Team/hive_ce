@@ -185,7 +185,8 @@ class TypeRegistryImpl implements TypeRegistry {
         }
       }
 
-      final existingTypeAdapter = findAdapterForType<T>()?.adapter;
+      final existingResolvedAdapter = findAdapterForType<T>();
+      final existingTypeAdapter = existingResolvedAdapter?.adapter;
       if (existingTypeAdapter != null) {
         final adapterTypeId = adapter.typeId;
         final existingAdapterTypeId = existingTypeAdapter.typeId;
@@ -195,13 +196,22 @@ class TypeRegistryImpl implements TypeRegistry {
               '${adapter.runtimeType} (typeId $adapterTypeId)';
           final existingAdapterTypeString =
               '${existingTypeAdapter.runtimeType} (typeId $existingAdapterTypeId)';
-          debugPrint(
-            'WARNING: You are trying to register $adapterTypeString for type '
-            '$T but there is already a TypeAdapter for this type: '
-            '$existingAdapterTypeString. Note that $adapterTypeString will '
-            'have no effect as $existingAdapterTypeString takes precedence. If '
-            'you want to override the existing adapter, the typeIds must match.',
-          );
+
+          if (override) {
+            _typeAdapters.remove(existingResolvedAdapter!.typeId);
+            debugPrint(
+              'Removed existing adapter $existingAdapterTypeString for type $T '
+              'and replaced with $adapterTypeString.',
+            );
+          } else {
+            debugPrint(
+              'WARNING: You are trying to register $adapterTypeString for type '
+              '$T but there is already a TypeAdapter for this type: '
+              '$existingAdapterTypeString. Note that $adapterTypeString will '
+              'have no effect as $existingAdapterTypeString takes precedence. If '
+              'you want to override the existing adapter, set override: true.',
+            );
+          }
         }
       }
     }
