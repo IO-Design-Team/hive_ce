@@ -24,12 +24,12 @@ class Class1Adapter extends TypeAdapter<Class1> {
               5: {
                 'magic': [
                   const Class1(const Class2(5, 'sad')),
-                  const Class1(const Class2(5, 'sad'), Enum1.emumValue1)
-                ]
+                  const Class1(const Class2(5, 'sad'), Enum1.emumValue1),
+                ],
               },
               67: {
-                'hold': [const Class1(const Class2(42, 'meaning of life'))]
-              }
+                'hold': [const Class1(const Class2(42, 'meaning of life'))],
+              },
             })
           : fields[0] as Class2,
     );
@@ -67,10 +67,15 @@ class Class2Adapter extends TypeAdapter<Class2> {
     return Class2(
       fields[0] == null ? 0 : (fields[0] as num).toInt(),
       fields[1] as String,
-      (fields[6] as Map?)?.map((dynamic k, dynamic v) => MapEntry(
+      (fields[6] as Map?)?.map(
+        (dynamic k, dynamic v) => MapEntry(
           (k as num).toInt(),
-          (v as Map).map((dynamic k, dynamic v) =>
-              MapEntry(k as String, (v as List).cast<Class1>())))),
+          (v as Map).map(
+            (dynamic k, dynamic v) =>
+                MapEntry(k as String, (v as List).cast<Class1>()),
+          ),
+        ),
+      ),
     );
   }
 

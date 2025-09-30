@@ -19,7 +19,12 @@ void main() async {
     name: 'Jane',
     age: 25,
     bestFriend: john,
-    friends: [john, john, john, Person(name: 'Joe', age: 22, bestFriend: john)],
+    friends: [
+      john,
+      john,
+      john,
+      Person(name: 'Joe', age: 22, bestFriend: john),
+    ],
   );
   await box2.put('person1', john);
   await box2.put('person2', jane);
