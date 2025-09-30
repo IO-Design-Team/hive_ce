@@ -192,18 +192,18 @@ class TypeRegistryImpl implements TypeRegistry {
         final existingAdapterTypeId = existingTypeAdapter.typeId;
 
         if (adapterTypeId != existingAdapterTypeId) {
+          final adapterTypeString =
+              '${adapter.runtimeType} (typeId $adapterTypeId)';
+          final existingAdapterTypeString =
+              '${existingTypeAdapter.runtimeType} (typeId $existingAdapterTypeId)';
+
           if (override) {
             _typeAdapters.remove(existingResolvedAdapter!.typeId);
             debugPrint(
-              'WARNING: Removed existing adapter ${existingTypeAdapter.runtimeType} '
-              '(typeId $existingAdapterTypeId) for type $T and replaced with '
-              '${adapter.runtimeType} (typeId $adapterTypeId).',
+              'Removed existing adapter $existingAdapterTypeString for type $T '
+              'and replaced with $adapterTypeString.',
             );
           } else {
-            final adapterTypeString =
-                '${adapter.runtimeType} (typeId $adapterTypeId)';
-            final existingAdapterTypeString =
-                '${existingTypeAdapter.runtimeType} (typeId $existingAdapterTypeId)';
             debugPrint(
               'WARNING: You are trying to register $adapterTypeString for type '
               '$T but there is already a TypeAdapter for this type: '
