@@ -12,7 +12,7 @@ dev_dependencies:
   freezed: ^3.0.6
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.9.0
 
 dependency_overrides:
   hive_ce:

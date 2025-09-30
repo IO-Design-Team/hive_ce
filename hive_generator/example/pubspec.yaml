@@ -8,7 +8,7 @@ dev_dependencies:
   hive_ce_generator:
     path: ..
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.9.0
 dependency_overrides:
   hive_ce:
     path: ../../hive

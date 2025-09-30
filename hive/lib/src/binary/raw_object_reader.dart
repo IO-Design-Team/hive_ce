@@ -28,9 +28,14 @@ class RawObjectReader extends BinaryReaderImpl {
     final dataLength = readInt32();
 
     final type = _types.entries
-        .where((e) =>
-            TypeRegistryImpl.calculateTypeId(e.value.typeId, internal: false) ==
-            typeId)
+        .where(
+          (e) =>
+              TypeRegistryImpl.calculateTypeId(
+                e.value.typeId,
+                internal: false,
+              ) ==
+              typeId,
+        )
         .firstOrNull;
     if (type == null) {
       if (typeId == 233 && dataLength == 8) {

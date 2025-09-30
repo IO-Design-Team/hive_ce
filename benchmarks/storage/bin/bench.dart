@@ -9,14 +9,7 @@ import 'package:hive_storage_benchmark/db_type.dart';
 import 'package:hive_storage_benchmark/test_model.dart';
 import 'package:isar/isar.dart';
 
-const benchmarks = [
-  10,
-  100,
-  1000,
-  10000,
-  100000,
-  1000000,
-];
+const benchmarks = [10, 100, 1000, 10000, 100000, 1000000];
 
 void main() async {
   ce.Hive

@@ -4,7 +4,7 @@ version: 2.3.2
 homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive_flutter
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.4.0
   flutter: ">=3.27.0"
 
 dependencies:
