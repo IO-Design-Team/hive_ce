@@ -159,7 +159,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         completer.completeError(error, stackTrace);
         rethrow;
       } finally {
-        unawaited(_openingBoxes.remove(name));
+        _openingBoxes.remove(name)?.ignore();
       }
     }
   }
@@ -252,7 +252,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   /// Not part of public API
   Future<void> unregisterBox(String name) async {
     name = name.toLowerCase();
-    unawaited(_openingBoxes.remove(name));
+    _openingBoxes.remove(name)?.ignore();
     _boxes.remove(name);
     await _hiveChannel.invokeMethod('unregisterBox', {'name': name});
   }
