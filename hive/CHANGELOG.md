@@ -1,3 +1,7 @@
+## 2.13.4
+
+- Fixes some `Future` handling issues
+
 ## 2.13.3
 
 - Adds copy to clipboard functionality to the inspector
