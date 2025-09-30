@@ -59,7 +59,7 @@ void main() {
             'field1': HiveSchemaField(index: 0),
             'field2': HiveSchemaField(index: 1),
           },
-        )
+        ),
       };
 
       final testObject = TestObject('test', 123);
@@ -99,7 +99,7 @@ void main() {
             'value1': HiveSchemaField(index: 0),
             'value2': HiveSchemaField(index: 1),
           },
-        )
+        ),
       };
 
       final bw = RawObjectWriter(typeRegistry);

@@ -18,10 +18,7 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return ClassSpec1(
-      (fields[0] as num).toInt(),
-      (fields[1] as num).toInt(),
-    );
+    return ClassSpec1((fields[0] as num).toInt(), (fields[1] as num).toInt());
   }
 
   @override

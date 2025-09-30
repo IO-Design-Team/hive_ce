@@ -1,16 +1,13 @@
 import 'package:hive_ce/hive.dart';
 import 'package:meta/meta.dart';
 
-@GenerateAdapters(
-  [
-    AdapterSpec<ClassSpec1>(),
-    AdapterSpec<ClassSpec2>(),
-    AdapterSpec<ClassSpec3>(),
-    AdapterSpec<ClassSpec4>(),
-    AdapterSpec<EnumSpec>(),
-  ],
-  firstTypeId: 50,
-)
+@GenerateAdapters([
+  AdapterSpec<ClassSpec1>(),
+  AdapterSpec<ClassSpec2>(),
+  AdapterSpec<ClassSpec3>(),
+  AdapterSpec<ClassSpec4>(),
+  AdapterSpec<EnumSpec>(),
+], firstTypeId: 50)
 part 'hive_adapters.g.dart';
 
 @immutable

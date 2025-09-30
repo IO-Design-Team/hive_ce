@@ -20,8 +20,9 @@ class PersonAdapter extends TypeAdapter<Person> {
       name: fields[0] as String,
       age: (fields[1] as num).toInt(),
       bestFriend: fields[2] as Person?,
-      friends:
-          fields[3] == null ? const [] : (fields[3] as List).cast<Person>(),
+      friends: fields[3] == null
+          ? const []
+          : (fields[3] as List).cast<Person>(),
       job: fields[4] == null ? Job.unemployed : fields[4] as Job,
     );
   }

@@ -13,7 +13,7 @@ void main() {
             typeId: 0,
             nextIndex: 0,
             fields: {'test': HiveSchemaField(index: 0)},
-          )
+          ),
         },
       );
 
