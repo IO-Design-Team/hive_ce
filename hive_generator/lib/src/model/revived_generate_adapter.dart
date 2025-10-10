@@ -16,20 +16,15 @@ class RevivedGenerateAdapters {
 
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
-      : specs = annotation
-            .read('specs')
-            .listValue
-            .map((spec) => spec.type as InterfaceType)
-            .map((type) => type.typeArguments.single)
-            .map((type) => RevivedAdapterSpec(type: type))
-            .toList(),
+      : specs = annotation.read('specs').listValue.map((specObj) {
+          final specType = specObj.type as InterfaceType;
+          final typeArg = specType.typeArguments.single;
+          final reader = ConstantReader(specObj);
+          final ignoredFields = reader.peek('ignoredFields')?.listValue.map((v) => v.toStringValue()!).toList() ?? const [];
+          return RevivedAdapterSpec(type: typeArg, ignoredFields: ignoredFields);
+        }).toList(),
         firstTypeId = annotation.read('firstTypeId').intValue,
-        reservedTypeIds = annotation
-            .read('reservedTypeIds')
-            .setValue
-            .map((e) => e.toIntValue())
-            .whereType<int>()
-            .toSet();
+        reservedTypeIds = annotation.read('reservedTypeIds').setValue.map((e) => e.toIntValue()).whereType<int>().toSet();
 }
 
 /// A revived adapter spec
@@ -38,6 +33,9 @@ class RevivedAdapterSpec {
   /// The type of the adapter
   final DartType type;
 
+  /// Fields that should be ignored
+  final List<String> ignoredFields;
+
   /// Constructor
-  const RevivedAdapterSpec({required this.type});
+  const RevivedAdapterSpec({required this.type, this.ignoredFields = const []});
 }
