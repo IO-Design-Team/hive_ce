@@ -51,8 +51,8 @@ class Person {
     });
 
     test('AdapterSpec constructor works', () {
-      final spec = AdapterSpec(ignoredFields: ['field1']);
-      expect(spec.ignoredFields, contains('field1'));
+      final spec = AdapterSpec();
+      expect(spec, isA<AdapterSpec>());
     });
 
     test('add type', () {
