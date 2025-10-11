@@ -59,7 +59,8 @@ class SchemaMigratorBuilder implements Builder {
     await for (final input in buildStep.findAssets(Glob('**/*.dart'))) {
       if (!await buildStep.resolver.isLibrary(input)) continue;
       final library = await buildStep.resolver.libraryFor(input);
-      final hiveTypeElements = LibraryReader(library).annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
+      final hiveTypeElements = LibraryReader(library)
+          .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
       hiveTypes.addAll(hiveTypeElements);
     }
 
@@ -96,7 +97,8 @@ class SchemaMigratorBuilder implements Builder {
       final accessors = [
         ...cls.getters,
         ...cls.setters,
-        ...cls.allSupertypes.expand((it) => [...it.element.getters, ...it.element.setters]),
+        ...cls.allSupertypes
+            .expand((it) => [...it.element.getters, ...it.element.setters]),
       ];
       final info = _SchemaInfo(
         uri: uri,
@@ -126,7 +128,8 @@ class SchemaMigratorBuilder implements Builder {
 
       final firstPassFields = info.schema.fields.keys.toSet();
       final secondPassFields = secondPassInfo.schema.fields.keys.toSet();
-      final accessorsWithoutAnnotations = secondPassFields.difference(firstPassFields);
+      final accessorsWithoutAnnotations =
+          secondPassFields.difference(firstPassFields);
 
       if (accessorsWithoutAnnotations.isNotEmpty) {
         throw InvalidGenerationSourceError(
@@ -141,7 +144,8 @@ class SchemaMigratorBuilder implements Builder {
       schemaInfos.add(info);
     }
     schemaInfos.sort((a, b) => a.schema.typeId.compareTo(b.schema.typeId));
-    final nextTypeId = schemaInfos.isEmpty ? 0 : schemaInfos.last.schema.typeId + 1;
+    final nextTypeId =
+        schemaInfos.isEmpty ? 0 : schemaInfos.last.schema.typeId + 1;
 
     final types = {
       for (final type in schemaInfos) type.className: type.schema,
@@ -153,7 +157,8 @@ class SchemaMigratorBuilder implements Builder {
         .map((e) => "import '$e';")
         .sorted() // Sort alphabetically
         .join('\n');
-    final specs = schemaInfos.map((e) => 'AdapterSpec<${e.className}>()').join(',\n  ');
+    final specs =
+        schemaInfos.map((e) => 'AdapterSpec<${e.className}>()').join(',\n  ');
     buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.dart'),
       '''
@@ -206,11 +211,15 @@ class _SchemaInfo {
     if (isEnum) return schema;
 
     final sanitizedFields = <String, HiveSchemaField>{};
-    for (final MapEntry(key: fieldName, value: schema) in schema.fields.entries) {
-      final publicFieldName = fieldName.startsWith('_') ? fieldName.substring(1) : fieldName;
+    for (final MapEntry(key: fieldName, value: schema)
+        in schema.fields.entries) {
+      final publicFieldName =
+          fieldName.startsWith('_') ? fieldName.substring(1) : fieldName;
 
-      final isInConstructor = constructor.formalParameters.any((e) => e.displayName == publicFieldName);
-      final publicAccessors = accessors.where((e) => e.displayName == publicFieldName).toList();
+      final isInConstructor = constructor.formalParameters
+          .any((e) => e.displayName == publicFieldName);
+      final publicAccessors =
+          accessors.where((e) => e.displayName == publicFieldName).toList();
       final hasPublicSetter = publicAccessors.any((e) => e is SetterElement);
       final hasPublicGetter = publicAccessors.any((e) => e is GetterElement);
 

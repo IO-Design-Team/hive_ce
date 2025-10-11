@@ -21,16 +21,20 @@ class ClassAdapterBuilder extends AdapterBuilder {
   );
 
   /// [TypeChecker] for [HiveList].
-  final hiveListChecker = const TypeChecker.typeNamed(HiveList, inPackage: 'hive_ce');
+  final hiveListChecker =
+      const TypeChecker.typeNamed(HiveList, inPackage: 'hive_ce');
 
   /// [TypeChecker] for [Map].
-  final mapChecker = const TypeChecker.typeNamed(Map, inPackage: 'core', inSdk: true);
+  final mapChecker =
+      const TypeChecker.typeNamed(Map, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Set].
-  final setChecker = const TypeChecker.typeNamed(Set, inPackage: 'core', inSdk: true);
+  final setChecker =
+      const TypeChecker.typeNamed(Set, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Iterable].
-  final iterableChecker = const TypeChecker.typeNamed(Iterable, inPackage: 'core', inSdk: true);
+  final iterableChecker =
+      const TypeChecker.typeNamed(Iterable, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Uint8List].
   final uint8ListChecker = const TypeChecker.typeNamed(
@@ -119,7 +123,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
     } else if (setChecker.isAssignableFromType(type)) {
       return '($variable as Set$suffix)${_castIterable(type)}';
-    } else if (iterableChecker.isAssignableFromType(type) && !isUint8List(type)) {
+    } else if (iterableChecker.isAssignableFromType(type) &&
+        !isUint8List(type)) {
       return '($variable as List$suffix)${_castIterable(type)}';
     } else if (mapChecker.isAssignableFromType(type)) {
       return '($variable as Map$suffix)${_castMap(type)}';
@@ -134,7 +139,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
   /// TODO: Document this!
   bool isMapOrIterable(DartType type) {
-    return iterableChecker.isAssignableFromType(type) || mapChecker.isAssignableFromType(type);
+    return iterableChecker.isAssignableFromType(type) ||
+        mapChecker.isAssignableFromType(type);
   }
 
   /// TODO: Document this!

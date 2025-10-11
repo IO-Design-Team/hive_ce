@@ -11,13 +11,16 @@ Builder getTypeAdapterBuilder(BuilderOptions options) =>
     SharedPartBuilder([TypeAdapterGenerator()], 'hive_type_adapter_generator');
 
 /// Builds intermediate data required for the registrar builder
-Builder getRegistrarIntermediateBuilder(BuilderOptions options) => RegistrarIntermediateBuilder();
+Builder getRegistrarIntermediateBuilder(BuilderOptions options) =>
+    RegistrarIntermediateBuilder();
 
 /// Builds the HiveRegistrar extension
 Builder getRegistrarBuilder(BuilderOptions options) => RegistrarBuilder();
 
 /// Builds Hive TypeAdapters from the GenerateAdapters annotation
-Builder getAdaptersBuilder(BuilderOptions options) => SharedPartBuilder([AdaptersGenerator()], 'hive_adapters_generator');
+Builder getAdaptersBuilder(BuilderOptions options) =>
+    SharedPartBuilder([AdaptersGenerator()], 'hive_adapters_generator');
 
 /// Builds a Hive schema from existing HiveType annotations
-Builder getSchemaMigratorBuilder(BuilderOptions options) => SchemaMigratorBuilder();
+Builder getSchemaMigratorBuilder(BuilderOptions options) =>
+    SchemaMigratorBuilder();

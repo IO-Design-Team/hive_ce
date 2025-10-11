@@ -20,11 +20,22 @@ class RevivedGenerateAdapters {
           final specType = specObj.type as InterfaceType;
           final typeArg = specType.typeArguments.single;
           final reader = ConstantReader(specObj);
-          final ignoredFields = reader.peek('ignoredFields')?.listValue.map((v) => v.toStringValue()!).toList() ?? const [];
-          return RevivedAdapterSpec(type: typeArg, ignoredFields: ignoredFields);
+          final ignoredFields = reader
+                  .peek('ignoredFields')
+                  ?.listValue
+                  .map((v) => v.toStringValue()!)
+                  .toList() ??
+              const [];
+          return RevivedAdapterSpec(
+              type: typeArg, ignoredFields: ignoredFields);
         }).toList(),
         firstTypeId = annotation.read('firstTypeId').intValue,
-        reservedTypeIds = annotation.read('reservedTypeIds').setValue.map((e) => e.toIntValue()).whereType<int>().toSet();
+        reservedTypeIds = annotation
+            .read('reservedTypeIds')
+            .setValue
+            .map((e) => e.toIntValue())
+            .whereType<int>()
+            .toSet();
 }
 
 /// A revived adapter spec

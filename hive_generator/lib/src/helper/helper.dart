@@ -11,7 +11,8 @@ import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
-final _hiveFieldChecker = const TypeChecker.typeNamed(HiveField, inPackage: 'hive_ce');
+final _hiveFieldChecker =
+    const TypeChecker.typeNamed(HiveField, inPackage: 'hive_ce');
 final _freezedDefaultChecker = const TypeChecker.fromUrl(
   'package:freezed_annotation/freezed_annotation.dart#Default',
 );
@@ -71,7 +72,8 @@ InterfaceElement getClass(Element element) {
 
 /// Generate a default adapter name from the type name
 String generateAdapterName(String typeName) {
-  var adapterName = '${typeName}Adapter'.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '');
+  var adapterName =
+      '${typeName}Adapter'.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '');
   if (adapterName.startsWith('_')) {
     adapterName = adapterName.substring(1);
   }
