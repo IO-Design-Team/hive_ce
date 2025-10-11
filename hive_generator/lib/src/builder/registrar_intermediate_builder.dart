@@ -22,28 +22,23 @@ class RegistrarIntermediateBuilder implements Builder {
     final library = await buildStep.inputLibrary;
     final adapters = <String>[];
 
-    final hiveTypeElements = LibraryReader(library)
-        .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
+    final hiveTypeElements = LibraryReader(library).annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
     for (final annotatedElement in hiveTypeElements) {
       final annotation = annotatedElement.annotation;
       final element = annotatedElement.element;
       final cls = getClass(element);
-      final adapterName =
-          readAdapterName(annotation) ?? generateAdapterName(cls.displayName);
+      final adapterName = readAdapterName(annotation) ?? generateAdapterName(cls.displayName);
       adapters.add(adapterName);
     }
 
     // If the registrar should be placed next to this file
     final bool registrarLocation;
 
-    final generateAdaptersChecker =
-        TypeChecker.typeNamed(GenerateAdapters, inPackage: 'hive_ce');
+    final generateAdaptersChecker = TypeChecker.typeNamed(GenerateAdapters, inPackage: 'hive_ce');
     final libraryReader = LibraryReader(library);
 
-    final generateAdaptersElements =
-        libraryReader.annotatedWith(generateAdaptersChecker);
-    final generateAdaptersDirectives =
-        libraryReader.libraryDirectivesAnnotatedWith(generateAdaptersChecker);
+    final generateAdaptersElements = libraryReader.annotatedWith(generateAdaptersChecker);
+    final generateAdaptersDirectives = libraryReader.libraryDirectivesAnnotatedWith(generateAdaptersChecker);
 
     final generateAdaptersAnnotationReaders = [
       ...generateAdaptersElements.map((e) => e.annotation),
@@ -52,10 +47,8 @@ class RegistrarIntermediateBuilder implements Builder {
 
     // Read multiple annotations if they exist
     final generateAdaptersAnnotationObjects = [
-      ...generateAdaptersElements
-          .expand((e) => generateAdaptersChecker.annotationsOf(e.element)),
-      ...generateAdaptersDirectives
-          .expand((e) => generateAdaptersChecker.annotationsOf(e.directive)),
+      ...generateAdaptersElements.expand((e) => generateAdaptersChecker.annotationsOf(e.element)),
+      ...generateAdaptersDirectives.expand((e) => generateAdaptersChecker.annotationsOf(e.directive)),
     ];
 
     if (generateAdaptersAnnotationObjects.length > 1) {

@@ -28,6 +28,9 @@ class GenerateAdapters {
 class AdapterSpec<T> {
   /// Constructor
   // coverage:ignore-start
-  const AdapterSpec();
+  const AdapterSpec({this.ignoredFields = const []});
   // coverage:ignore-end
+
+  /// Fields that should be ignored
+  final List<String> ignoredFields;
 }
