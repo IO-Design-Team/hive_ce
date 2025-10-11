@@ -1,3 +1,4 @@
+import 'package:hive_ce/hive.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
@@ -42,6 +43,16 @@ class Person {
           'lib/hive/hive_adapters.g.yaml': personSchema,
         },
       );
+    });
+
+    test('GenerateAdapters constructor works', () {
+      final adapter = GenerateAdapters([]);
+      expect(adapter.specs, isEmpty);
+    });
+
+    test('AdapterSpec constructor works', () {
+      final spec = AdapterSpec(ignoredFields: ['field1']);
+      expect(spec.ignoredFields, contains('field1'));
     });
 
     test('add type', () {

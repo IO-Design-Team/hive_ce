@@ -20,6 +20,12 @@ dependencies:
   collection: ^1.18.0
   meta: ^1.14.0
 
+dependency_overrides:
+  hive_ce:
+    git:
+      url: https://github.com/rezam92/hive_ce.git
+      path: hive
+
 dev_dependencies:
   test: ^1.17.11
   build_runner: ^2.5.4

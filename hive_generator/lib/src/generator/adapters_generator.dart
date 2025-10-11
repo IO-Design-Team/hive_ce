@@ -40,17 +40,14 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final HiveSchema schema;
     if (await buildStep.canRead(schemaAsset)) {
       final schemaContent = await buildStep.readAsString(schemaAsset);
-      schema =
-          HiveSchema.fromJson(jsonDecode(jsonEncode(loadYaml(schemaContent))));
+      schema = HiveSchema.fromJson(jsonDecode(jsonEncode(loadYaml(schemaContent))));
     } else {
       schema = HiveSchema(nextTypeId: revived.firstTypeId, types: {});
     }
     _validateSchema(schema);
 
     // Sort existing types by type ID
-    final existingSpecs = revived.specs
-        .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
-        .toList()
+    final existingSpecs = revived.specs.where((spec) => schema.types.containsKey(spec.type.getDisplayString())).toList()
       ..sort((a, b) {
         final aTypeId = schema.types[a.type.getDisplayString()]!.typeId;
         final bTypeId = schema.types[b.type.getDisplayString()]!.typeId;

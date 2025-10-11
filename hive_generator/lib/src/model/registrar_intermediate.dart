@@ -26,8 +26,7 @@ class RegistrarIntermediate {
   });
 
   /// From json
-  factory RegistrarIntermediate.fromJson(Map<String, dynamic> json) =>
-      _$RegistrarIntermediateFromJson(json);
+  factory RegistrarIntermediate.fromJson(Map<String, dynamic> json) => _$RegistrarIntermediateFromJson(json);
 
   /// To json
   Map<String, dynamic> toJson() => _$RegistrarIntermediateToJson(this);

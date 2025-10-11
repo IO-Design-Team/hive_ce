@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/type.dart';
-import 'package:source_gen/source_gen.dart';
 import 'package:meta/meta.dart';
+import 'package:source_gen/source_gen.dart';
 
 /// A revived GenerateAdapters annotation
 @immutable

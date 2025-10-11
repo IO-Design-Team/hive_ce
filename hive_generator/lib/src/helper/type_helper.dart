@@ -13,9 +13,7 @@ String constantToString(
 ]) {
   if (object == null || object.isNull) return 'null';
   final reader = ConstantReader(object);
-  return reader.isLiteral
-      ? literalToString(object, typeInformation)
-      : revivableToString(object, typeInformation);
+  return reader.isLiteral ? literalToString(object, typeInformation) : revivableToString(object, typeInformation);
 }
 
 /// TODO: Document this!
@@ -32,10 +30,8 @@ String revivableToString(DartObject? object, List<String> typeInformation) {
     final prefix = kConstConstructors ? 'const ' : '';
     final ctor = revivable.accessor.isEmpty ? '' : '.${revivable.accessor}';
     final arguments = <String>[
-      for (final arg in revivable.positionalArguments)
-        constantToString(arg, nextTypeInformation),
-      for (final kv in revivable.namedArguments.entries)
-        '${kv.key}: ${constantToString(kv.value, nextTypeInformation)}',
+      for (final arg in revivable.positionalArguments) constantToString(arg, nextTypeInformation),
+      for (final kv in revivable.namedArguments.entries) '${kv.key}: ${constantToString(kv.value, nextTypeInformation)}',
     ];
 
     return '$prefix${revivable.source.fragment}$ctor(${arguments.join(', ')})';
@@ -87,17 +83,13 @@ String literalToString(DartObject object, List<String> typeInformation) {
 
   if (reader.isList) {
     final listTypeInformation = [...typeInformation, 'List'];
-    final listItems = reader.listValue
-        .map((it) => constantToString(it, listTypeInformation))
-        .join(', ');
+    final listItems = reader.listValue.map((it) => constantToString(it, listTypeInformation)).join(', ');
     return '[$listItems]';
   }
 
   if (reader.isSet) {
     final setTypeInformation = [...typeInformation, 'Set'];
-    final setItems = reader.setValue
-        .map((it) => constantToString(it, setTypeInformation))
-        .join(', ');
+    final setItems = reader.setValue.map((it) => constantToString(it, setTypeInformation)).join(', ');
     return '{$setItems}';
   }
 
@@ -134,5 +126,4 @@ String literalToString(DartObject object, List<String> typeInformation) {
 }
 
 /// TODO: Document this!
-Never throwUnsupported(String message) =>
-    throw InvalidGenerationSourceError('Error with `@HiveField`. $message');
+Never throwUnsupported(String message) => throw InvalidGenerationSourceError('Error with `@HiveField`. $message');

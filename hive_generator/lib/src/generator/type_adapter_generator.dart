@@ -55,9 +55,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     _verifyFieldIndices(setters);
 
     adapterName ??= generateAdapterName(cls.displayName);
-    final builder = cls.thisType.isEnum
-        ? EnumAdapterBuilder(cls, getters)
-        : ClassAdapterBuilder(cls, getters, setters);
+    final builder = cls.thisType.isEnum ? EnumAdapterBuilder(cls, getters) : ClassAdapterBuilder(cls, getters, setters);
 
     final content = '''
     class $adapterName extends TypeAdapter<${cls.displayName}> {
@@ -92,18 +90,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final isEnum = cls.thisType.isEnum;
-    final constructorFields = getConstructor(cls)
-        .formalParameters
-        .map((it) => it.displayName)
-        .toSet();
+    final constructorFields = getConstructor(cls).formalParameters.map((it) => it.displayName).toSet();
 
     final accessorNames = <String>{};
 
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
-      if (const TypeChecker.typeNamed(Object, inPackage: 'core', inSdk: true)
-          .isExactly(type)) {
+      if (const TypeChecker.typeNamed(Object, inPackage: 'core', inSdk: true).isExactly(type)) {
         continue;
       }
 
@@ -161,8 +155,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
-      final annotation =
-          getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
+      final annotation = getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
       if (schema == null && annotation == null) return null;
 
       final field = element.variable;
@@ -170,9 +163,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       final int index;
       if (schema != null) {
         // Only generate one id per field name
-        index = schema.fields[name]?.index ??
-            newSchemaFields[name]?.index ??
-            nextIndex++;
+        index = schema.fields[name]?.index ?? newSchemaFields[name]?.index ?? nextIndex++;
       } else if (annotation != null) {
         index = annotation.index;
 
@@ -216,8 +207,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       typeId: typeId,
       nextIndex: nextIndex,
       fields: Map.fromEntries(
-        newSchemaFields.entries.toList()
-          ..sort((a, b) => a.value.index.compareTo(b.value.index)),
+        newSchemaFields.entries.toList()..sort((a, b) => a.value.index.compareTo(b.value.index)),
       ),
     );
     return GetAccessorsResult(getters, setters, newSchema);
