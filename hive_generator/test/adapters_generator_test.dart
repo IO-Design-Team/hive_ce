@@ -180,7 +180,7 @@ types:
           'lib/hive/hive_adapters.dart': '''
   $directives
   
-  @GenerateAdapters([AdapterSpec<Person>(ignoredFields: ['balance', 'age'])])
+  @GenerateAdapters([AdapterSpec<Person>(ignoredFields: {'balance', 'age'})])
   class Person {
     const Person({required this.balance, required this.name, required this.age, required this.credit});
   
@@ -204,6 +204,60 @@ types:
         index: 0
       credit:
         index: 1
+''',
+        },
+      );
+    });
+
+    test('ignore fields for previous scheme', () {
+      // A ignore fields 'balance' and 'age' from person
+      expectGeneration(
+        input: {
+          ...pubspec(),
+          'lib/hive/hive_adapters.dart': '''
+  $directives
+  
+  @GenerateAdapters([AdapterSpec<Person>(ignoredFields: {'balance', 'age'})])
+  class Person {
+    const Person({required this.balance, required this.name, required this.age, required this.credit});
+  
+    final double balance;
+    final String name;
+    final int age;
+    final int credit;
+  }
+  ''',
+          'lib/hive/hive_adapters.g.yaml': '''
+$schemaComment
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 4
+    fields:
+      balance:
+        index: 0
+      name:
+        index: 1
+      age:
+        index: 2
+      credit:
+        index: 3
+''',
+        },
+        output: {
+          'lib/hive/hive_adapters.g.yaml': '''
+$schemaComment
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 4
+    fields:
+      name:
+        index: 1
+      credit:
+        index: 3
 ''',
         },
       );

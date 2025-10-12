@@ -37,7 +37,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     required int typeId,
     String? adapterName,
     HiveSchemaType? schema,
-    List<String>? ignoredFields,
+    Set<String> ignoredFields = const {},
   }) {
     final cls = getClass(element);
     final getAccessorsResult = getAccessors(
@@ -140,7 +140,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     required InterfaceElement cls,
     required LibraryElement library,
     HiveSchemaType? schema,
-    List<String>? ignoredFields,
+    Set<String> ignoredFields = const {},
   }) {
     final accessorNames = _getAllAccessorNames(cls);
 
@@ -158,9 +158,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     final newSchemaFields = <String, HiveSchemaField>{};
 
-    // این مجموعه همه‌ی indexهای رزروشده‌ی قبلی رو نگه می‌داره
     final reservedIndexes = <int>{
-      if (schema != null) ...schema.fields.values.map((f) => f.index)
+      if (schema != null) ...schema.fields.values.map((f) => f.index),
     };
 
     int nextAvailableIndex() {
@@ -182,10 +181,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       final field = element.variable;
       final name = field.displayName;
 
-      final isIgnored = ignoredFields?.contains(name) == true;
+      final isIgnored = ignoredFields.contains(name) == true;
 
-      // اگر در schema قبلی بوده ولی الان ignore شده،
-      // index قبلیش رزرو می‌مونه ولی فیلد حذف میشه.
       if (isIgnored) {
         if (schema?.fields[name] != null) {
           reservedIndexes.add(schema!.fields[name]!.index);
@@ -195,7 +192,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final int index;
       if (schema != null) {
-        // اگر قبلاً فیلد بوده، همون index قبلی رو نگه دار
         index = schema.fields[name]?.index ?? nextAvailableIndex();
       } else if (annotation != null) {
         index = annotation.index;
@@ -220,7 +216,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     final setters = <AdapterField>[];
 
     for (final name in accessorNames) {
-      if (ignoredFields?.contains(name) == true) continue;
+      if (ignoredFields.contains(name) == true) continue;
 
       final getter = cls.lookUpGetter(name: name, library: library);
       final getterField = accessorToField(getter);
@@ -243,101 +239,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       ),
     );
 
-    return GetAccessorsResult(getters, setters, newSchema);
-  }
-
-  static GetAccessorsResult getAccessors2({
-    required int typeId,
-    required InterfaceElement cls,
-    required LibraryElement library,
-    HiveSchemaType? schema,
-    List<String>? ignoredFields,
-  }) {
-    final accessorNames = _getAllAccessorNames(cls);
-
-    final constr = getConstructor(cls);
-
-    final parameterDefaults = <String, String?>{};
-    for (final param in constr.formalParameters) {
-      final freezedDefault = getFreezedDefault(param);
-      if (freezedDefault != null) {
-        parameterDefaults[param.displayName] = constantToString(freezedDefault);
-      } else {
-        parameterDefaults[param.displayName] = param.defaultValueCode;
-      }
-    }
-
-    var nextIndex = schema?.nextIndex ?? 0;
-    final newSchemaFields = <String, HiveSchemaField>{};
-
-    AdapterField? accessorToField(PropertyAccessorElement? element) {
-      if (element == null) return null;
-
-      final annotation =
-          getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
-      if (schema == null && annotation == null) return null;
-
-      final field = element.variable;
-      final name = field.displayName;
-
-      // Ignore if the field is in ignoredFields
-      if (ignoredFields?.contains(name) == true) return null;
-
-      final int index;
-      if (schema != null) {
-        // Only generate one id per field name
-        // index = schema.fields[name]?.index ?? newSchemaFields[name]?.index ?? nextIndex++;
-        index = schema.fields[name]?.index ??
-            newSchemaFields[name]?.index ??
-            newSchemaFields.length;
-      } else if (annotation != null) {
-        index = annotation.index;
-
-        // Keep track of the next index for the migration tool
-        if (index >= nextIndex) nextIndex = index + 1;
-      } else {
-        // This should be impossible
-        throw HiveError('No index found');
-      }
-
-      newSchemaFields[name] = HiveSchemaField(index: index);
-      return AdapterField(
-        element,
-        index,
-        name,
-        field.type,
-        annotation?.defaultValue,
-        parameterDefaults[name],
-      );
-    }
-
-    final getters = <AdapterField>[];
-    final setters = <AdapterField>[];
-    for (final name in accessorNames) {
-      if (ignoredFields?.contains(name) == true) {
-        continue;
-      }
-      final getter = cls.lookUpGetter(name: name, library: library);
-      final getterField = accessorToField(getter);
-      if (getterField != null) getters.add(getterField);
-
-      final setter = cls.lookUpSetter(name: name, library: library);
-      final setterField = accessorToField(setter);
-      if (setterField != null) setters.add(setterField);
-    }
-
-    // Sort by index for deterministic output
-    getters.sort((a, b) => a.index.compareTo(b.index));
-    setters.sort((a, b) => a.index.compareTo(b.index));
-    final newSchema = HiveSchemaType(
-      typeId: typeId,
-      // nextIndex: nextIndex,
-      nextIndex: newSchemaFields.length,
-      fields: Map.fromEntries(
-        newSchemaFields.entries.toList()
-          ..sort((a, b) => a.value.index.compareTo(b.value.index)),
-      ),
-    );
     return GetAccessorsResult(getters, setters, newSchema);
   }
 

@@ -22,10 +22,10 @@ class RevivedGenerateAdapters {
           final reader = ConstantReader(specObj);
           final ignoredFields = reader
                   .peek('ignoredFields')
-                  ?.listValue
+                  ?.setValue
                   .map((v) => v.toStringValue()!)
-                  .toList() ??
-              const [];
+                  .toSet() ??
+              const <String>{};
           return RevivedAdapterSpec(
               type: typeArg, ignoredFields: ignoredFields);
         }).toList(),
@@ -45,8 +45,8 @@ class RevivedAdapterSpec {
   final DartType type;
 
   /// Fields that should be ignored
-  final List<String> ignoredFields;
+  final Set<String> ignoredFields;
 
   /// Constructor
-  const RevivedAdapterSpec({required this.type, this.ignoredFields = const []});
+  const RevivedAdapterSpec({required this.type, required this.ignoredFields});
 }
