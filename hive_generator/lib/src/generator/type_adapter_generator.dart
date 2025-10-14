@@ -161,12 +161,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
+      final field = element.variable;
+      final name = field.displayName;
+      if (ignoredFields.contains(name)) return null;
+
       final annotation =
           getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
       if (schema == null && annotation == null) return null;
 
-      final field = element.variable;
-      final name = field.displayName;
       final int index;
       if (schema != null) {
         // Only generate one id per field name
