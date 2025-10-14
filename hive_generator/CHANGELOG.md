@@ -1,3 +1,7 @@
+## 1.10.0
+
+- Adds support for `ignoredFields` parameter in `AdapterSpec` (by [@rezam92](https://github.com/rezam92) in [#229](https://github.com/IO-Design-Team/hive_ce/pull/229))
+
 ## 1.9.5
 
 - Supports `analyzer: 8.0.0`

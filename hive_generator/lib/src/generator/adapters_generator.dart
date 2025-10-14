@@ -88,6 +88,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         library: library,
         typeId: schemaType.typeId,
         schema: schemaType,
+        ignoredFields: spec.ignoredFields,
       );
 
       content.write(result.content);

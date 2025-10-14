@@ -172,6 +172,42 @@ types:
       );
     });
 
+    test('ignored fields', () {
+      expectGeneration(
+        input: {
+          ...pubspec(),
+          'lib/hive/hive_adapters.dart': '''
+  $directives
+  
+  @GenerateAdapters([AdapterSpec<Person>(ignoredFields: {'balance', 'age'})])
+  class Person {
+    const Person({required this.balance, required this.name, required this.age, required this.credit});
+  
+    final double balance;
+    final String name;
+    final int age;
+    final int credit;
+  }
+  ''',
+        },
+        output: {
+          'lib/hive/hive_adapters.g.yaml': '''
+$schemaComment
+nextTypeId: 1
+types:
+  Person:
+    typeId: 0
+    nextIndex: 2
+    fields:
+      name:
+        index: 0
+      credit:
+        index: 1
+''',
+        },
+      );
+    });
+
     test('add and remove field', () {
       expectGeneration(
         input: {

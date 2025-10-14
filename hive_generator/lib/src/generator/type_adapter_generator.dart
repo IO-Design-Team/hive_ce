@@ -37,6 +37,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     required int typeId,
     String? adapterName,
     HiveSchemaType? schema,
+    Set<String> ignoredFields = const {},
   }) {
     final cls = getClass(element);
     final getAccessorsResult = getAccessors(
@@ -44,6 +45,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       cls: cls,
       library: library,
       schema: schema,
+      ignoredFields: ignoredFields,
     );
 
     final getters = getAccessorsResult.getters;
@@ -137,6 +139,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     required InterfaceElement cls,
     required LibraryElement library,
     HiveSchemaType? schema,
+    Set<String> ignoredFields = const {},
   }) {
     final accessorNames = _getAllAccessorNames(cls);
 
@@ -158,12 +161,14 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
 
+      final field = element.variable;
+      final name = field.displayName;
+      if (ignoredFields.contains(name)) return null;
+
       final annotation =
           getHiveFieldAnn(element.variable) ?? getHiveFieldAnn(element);
       if (schema == null && annotation == null) return null;
 
-      final field = element.variable;
-      final name = field.displayName;
       final int index;
       if (schema != null) {
         // Only generate one id per field name
