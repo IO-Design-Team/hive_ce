@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
@@ -16,19 +17,11 @@ class RevivedGenerateAdapters {
 
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
-      : specs = annotation.read('specs').listValue.map((specObj) {
-          final specType = specObj.type as InterfaceType;
-          final typeArg = specType.typeArguments.single;
-          final reader = ConstantReader(specObj);
-          final ignoredFields = reader
-                  .peek('ignoredFields')
-                  ?.setValue
-                  .map((v) => v.toStringValue()!)
-                  .toSet() ??
-              const <String>{};
-          return RevivedAdapterSpec(
-              type: typeArg, ignoredFields: ignoredFields);
-        }).toList(),
+      : specs = annotation
+            .read('specs')
+            .listValue
+            .map(RevivedAdapterSpec.fromObject)
+            .toList(),
         firstTypeId = annotation.read('firstTypeId').intValue,
         reservedTypeIds = annotation
             .read('reservedTypeIds')
@@ -49,4 +42,19 @@ class RevivedAdapterSpec {
 
   /// Constructor
   const RevivedAdapterSpec({required this.type, required this.ignoredFields});
+
+  /// Create a [RevivedAdapterSpec] from a [DartObject]
+  factory RevivedAdapterSpec.fromObject(DartObject object) {
+    final type = (object.type as InterfaceType).typeArguments.single;
+
+    final reader = ConstantReader(object);
+    final ignoredFields = reader
+        .read('ignoredFields')
+        .setValue
+        .map((v) => v.toStringValue())
+        .whereType<String>()
+        .toSet();
+
+    return RevivedAdapterSpec(type: type, ignoredFields: ignoredFields);
+  }
 }
