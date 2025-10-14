@@ -25,6 +25,7 @@ class GenerateAdapters {
 }
 
 /// Configuration that specifies the generation of a TypeAdapter
+@immutable
 class AdapterSpec<T> {
   /// Constructor
   // coverage:ignore-start
@@ -32,5 +33,8 @@ class AdapterSpec<T> {
   // coverage:ignore-end
 
   /// Fields that should be ignored
+  ///
+  /// This should only be used to simplify migrations from `HiveType`
+  /// annotations. Model classes should only contain fields to be persisted.
   final Set<String> ignoredFields;
 }
