@@ -1,3 +1,7 @@
+## 2.15.0
+
+- Adds `ignoredFields` parameter to `AdapterSpec` for excluding specific fields from type adapter generation (by [@rezam92](https://github.com/rezam92) in [#229](https://github.com/IO-Design-Team/hive_ce/pull/229))
+
 ## 2.14.0
 
 - Adds the ability to override type adapters by type (by [@sportismygame](https://github.com/sportismygame) in [#217](https://github.com/IO-Design-Team/hive_ce/pull/217))
