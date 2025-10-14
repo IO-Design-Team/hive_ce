@@ -134,7 +134,6 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   }
 
   /// TODO: Document this!
-
   static GetAccessorsResult getAccessors({
     required int typeId,
     required InterfaceElement cls,
@@ -156,20 +155,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       }
     }
 
+    var nextIndex = schema?.nextIndex ?? 0;
     final newSchemaFields = <String, HiveSchemaField>{};
-
-    final reservedIndexes = <int>{
-      if (schema != null) ...schema.fields.values.map((f) => f.index),
-    };
-
-    int nextAvailableIndex() {
-      int i = 0;
-      while (reservedIndexes.contains(i)) {
-        i++;
-      }
-      reservedIndexes.add(i);
-      return i;
-    }
 
     AdapterField? accessorToField(PropertyAccessorElement? element) {
       if (element == null) return null;
@@ -180,28 +167,23 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
       final field = element.variable;
       final name = field.displayName;
-
-      final isIgnored = ignoredFields.contains(name) == true;
-
-      if (isIgnored) {
-        if (schema?.fields[name] != null) {
-          reservedIndexes.add(schema!.fields[name]!.index);
-        }
-        return null;
-      }
-
       final int index;
       if (schema != null) {
-        index = schema.fields[name]?.index ?? nextAvailableIndex();
+        // Only generate one id per field name
+        index = schema.fields[name]?.index ??
+            newSchemaFields[name]?.index ??
+            nextIndex++;
       } else if (annotation != null) {
         index = annotation.index;
-        reservedIndexes.add(index);
+
+        // Keep track of the next index for the migration tool
+        if (index >= nextIndex) nextIndex = index + 1;
       } else {
+        // This should be impossible
         throw HiveError('No index found');
       }
 
       newSchemaFields[name] = HiveSchemaField(index: index);
-
       return AdapterField(
         element,
         index,
@@ -214,10 +196,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
 
     final getters = <AdapterField>[];
     final setters = <AdapterField>[];
-
     for (final name in accessorNames) {
-      if (ignoredFields.contains(name) == true) continue;
-
       final getter = cls.lookUpGetter(name: name, library: library);
       final getterField = accessorToField(getter);
       if (getterField != null) getters.add(getterField);
@@ -227,18 +206,17 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       if (setterField != null) setters.add(setterField);
     }
 
+    // Sort by index for deterministic output
     getters.sort((a, b) => a.index.compareTo(b.index));
     setters.sort((a, b) => a.index.compareTo(b.index));
-
     final newSchema = HiveSchemaType(
       typeId: typeId,
-      nextIndex: reservedIndexes.length,
+      nextIndex: nextIndex,
       fields: Map.fromEntries(
         newSchemaFields.entries.toList()
           ..sort((a, b) => a.value.index.compareTo(b.value.index)),
       ),
     );
-
     return GetAccessorsResult(getters, setters, newSchema);
   }
 
