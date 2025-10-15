@@ -67,7 +67,7 @@ Database size in Hive v4 is directly affected by the length of field names in mo
 
 IsolatedHive is slower than Hive, but it is much faster than Hive v4 and you still get the benefit of multiple isolate support.
 
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](../benchmarks/storage/bin/bench.dart).
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/blob/main/benchmarks/storage/bin/bench.dart).
 
 ## Migration guides
 
