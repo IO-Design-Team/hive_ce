@@ -94,6 +94,62 @@ void main() {
       expect(box.getAt(1), 'A');
     });
 
+    group('Iterable and Map casting', () {
+      test('.getList()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, [1, 2, 3]),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getList<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSet()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {1, 2, 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getSet<num>(0), {1, 2, 3});
+      });
+
+      test('.getMap()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getMap<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
+
+      test('.getListAt()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, [1, 2, 3]),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getListAt<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSetAt()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {1, 2, 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getSetAt<num>(0), {1, 2, 3});
+      });
+
+      test('.getMapAt()', () {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(box.getMapAt<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
+    });
+
     group('.putAll()', () {
       test('values', () async {
         final frames = <Frame>[
