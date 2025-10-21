@@ -19,7 +19,11 @@ extension IsolatedHiveX on IsolatedHiveInterface {
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
   }) async {
-    WidgetsFlutterBinding.ensureInitialized();
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+    } catch (_) {
+      // This will fail if the Flutter engine is not available
+    }
 
     String? path;
     if (!kIsWeb) {
