@@ -1,8 +1,9 @@
-import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
-class Person extends HiveObject {
-  Person({required this.name, required this.age});
+@immutable
+class Person {
+  const Person({required this.name, required this.age});
 
-  String name;
-  int age;
+  final String name;
+  final int age;
 }

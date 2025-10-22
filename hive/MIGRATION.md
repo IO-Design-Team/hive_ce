@@ -88,13 +88,14 @@ For example, consider an existing database with a `Person` object:
 <!-- embedme readme/add_fields/person_1.dart -->
 
 ```dart
-import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
-class Person extends HiveObject {
-  Person({required this.name, required this.age});
+@immutable
+class Person {
+  const Person({required this.name, required this.age});
 
-  String name;
-  int age;
+  final String name;
+  final int age;
 }
 
 ```
@@ -104,14 +105,15 @@ If you want to add a `balance` field, you must specify a default value or else r
 <!-- embedme readme/add_fields/person_2.dart -->
 
 ```dart
-import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
-class Person extends HiveObject {
-  Person({required this.name, required this.age, this.balance = 0});
+@immutable
+class Person {
+  const Person({required this.name, required this.age, this.balance = 0});
 
-  String name;
-  int age;
-  double balance;
+  final String name;
+  final int age;
+  final double balance;
 }
 
 ```
