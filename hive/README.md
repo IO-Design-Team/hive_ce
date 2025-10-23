@@ -67,13 +67,6 @@ IsolatedHive is slower than Hive, but it is much faster than Hive v4 and you sti
 
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/blob/main/benchmarks/storage/bin/bench.dart).
 
-## Migration guides
-
-- [Hive v2 to Hive CE](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#v2-to-ce)
-- [Transitive Hive dependencies](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#transitive-hive-dependencies)
-- [Migrating to `GenerateAdapters`](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#generate-adapters)
-- [Add fields to objects](https://github.com/IO-Design-Team/hive_ce/blob/main/hive/MIGRATION.md#add-fields)
-
 ## Getting Started
 
 Hive CE requires Dart 3. Ensure that you have the following in your `pubspec.yaml` file:
