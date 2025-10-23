@@ -104,59 +104,6 @@ void example() {
 ## Guides
 
 <details>
-<summary>IsolatedHive (isolate support)</summary>
-
-`IsolatedHive` allows you to safely use `Hive` in a multi-isolate environment by maintaining its own separate isolate for `Hive` operations
-
-Here are some common examples of multi-isolate scenarios:
-
-- A Flutter desktop app with multiple windows
-- Running background tasks with [flutter_workmanager](https://pub.dev/packages/workmanager), [background_fetch](https://pub.dev/packages/background_fetch), etc
-- Push notification processing
-
-`IsolatedHive` has a very similar API to `Hive`, but there are some key differences:
-
-- The `init` call takes an `isolateNameServer` parameter
-- Most methods are asynchronous due to isolate communication
-- `IsolatedHive` does not support `HiveObject` or `HiveList`
-- Isolate communication does add some overhead. See the benchmarks above.
-
-NOTE: On web, `IsolatedHive` directly calls `Hive` since web does not support isolates
-
-### Usage
-
-<!-- embedme readme/isolated_hive.dart -->
-
-```dart
-import 'package:hive_ce/hive.dart';
-
-import 'stub_ins.dart';
-
-void main() async {
-  await IsolatedHive.init('.', isolateNameServer: StubIns());
-  final box = await IsolatedHive.openBox('box');
-  await box.put('key', 'value');
-  print(await box.get('key')); // reading is async
-}
-
-```
-
-IMPORTANT: If you are using `IsolatedHive`, you MUST use it everywhere in place of the normal `Hive` interface
-
-NOTE: It is possible to use `IsolatedHive` without an `IsolateNameServer`, BUT THIS IS UNSAFE. The `IsolateNameServer` is what allows `IsolatedHive` to locate and communicate with a single backend isolate.
-
-Additional notes:
-
-- With Flutter, use `IsolatedHive.initFlutter` from `hive_ce_flutter` to initialize `IsolatedHive` with Flutter's `IsolateNameServer`
-- There is also an `IsolatedHive.registerAdapters` method if you use `hive_ce_generator` to generate adapters
-
-### Example
-
-See an example of a multi-window Flutter app using `IsolatedHive` [here](https://github.com/Rexios80/hive_ce_multiwindow)
-
-</details>
-
-<details>
 <summary>BoxCollection</summary>
 
 `BoxCollections` are a set of boxes which can be similarly used as normal boxes, except of that
