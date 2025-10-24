@@ -18,12 +18,21 @@ LazyBoxImpl _getBox({
   CompactionStrategy? cStrategy,
   StorageBackend? backend,
 }) {
+  if (backend == null) {
+    backend = MockStorageBackend();
+
+    for (final frame in keystore?.frames ?? <Frame>[]) {
+      when(() => backend!.readValue(frame))
+          .thenAnswer((i) async => frame.value);
+    }
+  }
+
   final box = LazyBoxImpl(
     hive ?? HiveImpl(),
     name ?? 'testBox',
     null,
     cStrategy ?? (total, deleted) => false,
-    backend ?? MockStorageBackend(),
+    backend,
   );
   box.keystore = keystore ?? Keystore(box, ChangeNotifier(), null);
   return box;
@@ -60,18 +69,67 @@ void main() {
 
     test('.getAt()', () async {
       final keystore = Keystore.debug(
-        frames: [
-          Frame.lazy(0),
-          Frame.lazy('a'),
-        ],
+        frames: [Frame(0, 'A'), Frame('a', 'A')],
       );
-      final backend = MockStorageBackend();
-      when(() => backend.readValue(any())).thenAnswer((i) {
-        return Future.value('A');
-      });
-      final box = _getBox(keystore: keystore, backend: backend);
+      final box = _getBox(keystore: keystore);
 
       expect(await box.getAt(1), 'A');
+    });
+
+    group('Iterable and Map casting', () {
+      test('.getList()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, [1, 2, 3]),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getList<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSet()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {1, 2, 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getSet<num>(0), {1, 2, 3});
+      });
+
+      test('.getMap()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getMap<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
+
+      test('.getListAt()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, [1, 2, 3]),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getListAt<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSetAt()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {1, 2, 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getSetAt<num>(0), {1, 2, 3});
+      });
+
+      test('.getMapAt()', () async {
+        final keystore = Keystore.debug(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3}),
+        ]);
+        final box = _getBox(keystore: keystore);
+
+        expect(await box.getMapAt<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
     });
 
     group('.putAll()', () {

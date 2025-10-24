@@ -77,8 +77,26 @@ abstract class IsolatedBoxBase<E> {
   /// Get a value from the box
   Future<E?> get(dynamic key, {E? defaultValue});
 
+  /// Get a value from the box and cast the value to [List<T>]
+  Future<List<T>?> getList<T>(dynamic key, {List<T>? defaultValue});
+
+  /// Get a value from the box and cast the value to [Set<T>]
+  Future<Set<T>?> getSet<T>(dynamic key, {Set<T>? defaultValue});
+
+  /// Get a value from the box and cast the value to [Map<K, V>]
+  Future<Map<K, V>?> getMap<K, V>(dynamic key, {Map<K, V>? defaultValue});
+
   /// Get a value at the given index
   Future<E?> getAt(int index);
+
+  /// Get a value at the given index and cast the value to [List<T>]
+  Future<List<T>?> getListAt<T>(int index, {List<T>? defaultValue});
+
+  /// Get a value at the given index and cast the value to [Set<T>]
+  Future<Set<T>?> getSetAt<T>(int index, {Set<T>? defaultValue});
+
+  /// Get a value at the given index and cast the value to [Map<K, V>]
+  Future<Map<K, V>?> getMapAt<K, V>(int index, {Map<K, V>? defaultValue});
 }
 
 /// Isolated version of [Box]

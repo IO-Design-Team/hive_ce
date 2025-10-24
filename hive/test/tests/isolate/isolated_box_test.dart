@@ -84,6 +84,50 @@ void main() {
       expect(await box.getAt(1), 'A');
     });
 
+    group('Iterable and Map casting', () {
+      test('.getList()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, [1, 2, 3])
+        ]);
+        expect(await box.getList<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSet()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, {1, 2, 3})
+        ]);
+        expect(await box.getSet<num>(0), {1, 2, 3});
+      });
+
+      test('.getMap()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3})
+        ]);
+        expect(await box.getMap<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
+
+      test('.getListAt()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, [1, 2, 3])
+        ]);
+        expect(await box.getListAt<num>(0), [1, 2, 3]);
+      });
+
+      test('.getSetAt()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, {1, 2, 3})
+        ]);
+        expect(await box.getSetAt<num>(0), {1, 2, 3});
+      });
+
+      test('.getMapAt()', () async {
+        final box = await _openBox(frames: [
+          Frame(0, {'a': 1, 'b': 2, 'c': 3})
+        ]);
+        expect(await box.getMapAt<String, num>(0), {'a': 1, 'b': 2, 'c': 3});
+      });
+    });
+
     group('.putAll()', () {
       test('values', () async {
         final box = await _openBox();
