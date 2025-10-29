@@ -4,6 +4,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
+import 'package:hive_ce/src/util/type_utils.dart';
 
 /// Not part of public API
 class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
@@ -50,11 +51,35 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   }
 
   @override
+  List<T>? getList<T>(dynamic key, {List<T>? defaultValue}) =>
+      castList(get(key), defaultValue: defaultValue);
+
+  @override
+  Set<T>? getSet<T>(dynamic key, {Set<T>? defaultValue}) =>
+      castSet(get(key), defaultValue: defaultValue);
+
+  @override
+  Map<K, V>? getMap<K, V>(dynamic key, {Map<K, V>? defaultValue}) =>
+      castMap(get(key), defaultValue: defaultValue);
+
+  @override
   E? getAt(int index) {
     checkOpen();
 
     return keystore.getAt(index)?.value as E?;
   }
+
+  @override
+  List<T>? getListAt<T>(int index, {List<T>? defaultValue}) =>
+      castList(getAt(index), defaultValue: defaultValue);
+
+  @override
+  Set<T>? getSetAt<T>(int index, {Set<T>? defaultValue}) =>
+      castSet(getAt(index), defaultValue: defaultValue);
+
+  @override
+  Map<K, V>? getMapAt<K, V>(int index, {Map<K, V>? defaultValue}) =>
+      castMap(getAt(index), defaultValue: defaultValue);
 
   @override
   Future<void> putAll(Map<dynamic, E> kvPairs) {

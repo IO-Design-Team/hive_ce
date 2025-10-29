@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
@@ -97,6 +98,21 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   @override
+  Future<List<T>?> getList<T>(dynamic key, {List<T>? defaultValue}) async =>
+      castList(await get(key), defaultValue: defaultValue);
+
+  @override
+  Future<Set<T>?> getSet<T>(dynamic key, {Set<T>? defaultValue}) async =>
+      castSet(await get(key), defaultValue: defaultValue);
+
+  @override
+  Future<Map<K, V>?> getMap<K, V>(
+    dynamic key, {
+    Map<K, V>? defaultValue,
+  }) async =>
+      castMap(await get(key), defaultValue: defaultValue);
+
+  @override
   Future<E?> getAt(int index) async {
     if (lazy) {
       return (_box as LazyBox<E>).getAt(index);
@@ -104,6 +120,21 @@ abstract class IsolatedBoxBaseImpl<E>
       return (_box as Box<E>).getAt(index);
     }
   }
+
+  @override
+  Future<List<T>?> getListAt<T>(int index, {List<T>? defaultValue}) async =>
+      castList(await getAt(index), defaultValue: defaultValue);
+
+  @override
+  Future<Set<T>?> getSetAt<T>(int index, {Set<T>? defaultValue}) async =>
+      castSet(await getAt(index), defaultValue: defaultValue);
+
+  @override
+  Future<Map<K, V>?> getMapAt<K, V>(
+    int index, {
+    Map<K, V>? defaultValue,
+  }) async =>
+      castMap(await getAt(index), defaultValue: defaultValue);
 
   @override
   bool operator ==(Object other) {
