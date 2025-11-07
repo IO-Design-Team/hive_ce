@@ -10,10 +10,14 @@ abstract class HiveInterface implements TypeRegistry {
   /// Initialize Hive by giving it a home directory.
   ///
   /// (Not necessary in the browser)
+  ///
+  /// [obfuscateBoxNames] when set to `true`, will obfuscate all box names and
+  /// their file extensions (`.hive`, `.lock`, `.hivec`) on disk.
   void init(
     String? path, {
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
+    bool obfuscateBoxNames = false,
   });
 
   /// Opens a box.

@@ -5,6 +5,7 @@ import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/obfuscation_utils.dart';
 import 'package:web/web.dart';
 
 /// Opens IndexedDB databases
@@ -19,10 +20,12 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     String? collection,
+    bool obfuscateBoxNames,
   ) async {
     // compatibility for old store format
-    final databaseName = collection ?? name;
-    final objectStoreName = collection == null ? 'box' : name;
+    final actualName = obfuscateBoxNames ? obfuscateBoxName(name) : name;
+    final databaseName = collection ?? actualName;
+    final objectStoreName = collection == null ? 'box' : actualName;
 
     final request = indexedDB!.open(databaseName, 1);
     request.onupgradeneeded = (IDBVersionChangeEvent e) {
@@ -55,12 +58,18 @@ class BackendManager implements BackendManagerInterface {
   }
 
   @override
-  Future<void> deleteBox(String name, String? path, String? collection) async {
-    debugPrint('Delete $name // $collection from disk');
+  Future<void> deleteBox(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) async {
+    final actualName = obfuscateBoxNames ? obfuscateBoxName(name) : name;
+    debugPrint('Delete $actualName // $collection from disk');
 
     // compatibility for old store format
-    final databaseName = collection ?? name;
-    final objectStoreName = collection == null ? 'box' : name;
+    final databaseName = collection ?? actualName;
+    final objectStoreName = collection == null ? 'box' : actualName;
 
     // directly deleting the entire DB if a non-collection Box
     if (collection == null) {
@@ -81,10 +90,16 @@ class BackendManager implements BackendManagerInterface {
   }
 
   @override
-  Future<bool> boxExists(String name, String? path, String? collection) async {
+  Future<bool> boxExists(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) async {
     // compatibility for old store format
-    final databaseName = collection ?? name;
-    final objectStoreName = collection == null ? 'box' : name;
+    final actualName = obfuscateBoxNames ? obfuscateBoxName(name) : name;
+    final databaseName = collection ?? actualName;
+    final objectStoreName = collection == null ? 'box' : actualName;
     // https://stackoverflow.com/a/17473952
     try {
       var exists = true;

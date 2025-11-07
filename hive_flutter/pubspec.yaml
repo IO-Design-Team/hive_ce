@@ -20,3 +20,7 @@ dev_dependencies:
   rexios_lints: ^15.0.1
   mockito: ^5.4.1
   build_runner: ^2.5.4
+
+dependency_overrides:
+  hive_ce:
+    path: ../hive

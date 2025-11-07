@@ -8,6 +8,7 @@ class BackendManager implements BackendManagerInterface {
   /// TODO: Document this!
   static BackendManager select([
     HiveStorageBackendPreference? backendPreference,
+    bool obfuscateBoxNames = false,
   ]) =>
       BackendManager();
 
@@ -18,17 +19,28 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     String? collection,
+    bool obfuscateBoxNames,
   ) {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> deleteBox(String name, String? path, String? collection) {
+  Future<void> deleteBox(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) {
     throw UnimplementedError();
   }
 
   @override
-  Future<bool> boxExists(String name, String? path, String? collection) {
+  Future<bool> boxExists(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) {
     throw UnimplementedError();
   }
 }

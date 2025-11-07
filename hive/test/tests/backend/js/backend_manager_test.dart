@@ -26,14 +26,20 @@ void main() {
         final backendManager = BackendManager.select();
         final db = await _openDb();
         db.close();
-        expect(await backendManager.boxExists('testBox', null, null), isTrue);
+        expect(
+          await backendManager.boxExists('testBox', null, null, false),
+          isTrue,
+        );
       });
 
       test('returns false', () async {
         final backendManager = BackendManager.select();
         final boxName =
             'notexists-${DateTime.timestamp().millisecondsSinceEpoch}';
-        expect(await backendManager.boxExists(boxName, null, null), isFalse);
+        expect(
+          await backendManager.boxExists(boxName, null, null, false),
+          isFalse,
+        );
       });
     });
   });

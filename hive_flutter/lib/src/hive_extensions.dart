@@ -17,6 +17,7 @@ extension HiveX on HiveInterface {
         HiveStorageBackendPreference.native,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
+    bool obfuscateBoxNames = false,
   ]) async {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -29,6 +30,7 @@ extension HiveX on HiveInterface {
     init(
       path,
       backendPreference: backendPreference,
+      obfuscateBoxNames: obfuscateBoxNames,
     );
 
     final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);

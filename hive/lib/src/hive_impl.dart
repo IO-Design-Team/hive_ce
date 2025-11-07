@@ -49,6 +49,9 @@ RECOMMENDED ACTIONS:
   /// Whether this Hive instance is isolated
   var _isolated = false;
 
+  /// Whether box names should be obfuscated when stored on disk
+  var _obfuscateBoxNames = false;
+
   /// Set [_isolated] to true
   void setIsolated() => _isolated = true;
 
@@ -66,12 +69,15 @@ RECOMMENDED ACTIONS:
     String? path, {
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
+    bool obfuscateBoxNames = false,
   }) {
     if (!{'main', hiveIsolateName}.contains(isolateDebugName)) {
       debugPrint(unsafeIsolateWarning);
     }
     homePath = path;
-    _managerOverride = BackendManager.select(backendPreference);
+    _obfuscateBoxNames = obfuscateBoxNames;
+    _managerOverride =
+        BackendManager.select(backendPreference, obfuscateBoxNames);
   }
 
   Future<BoxBase<E>> _openBox<E>(
@@ -124,6 +130,7 @@ RECOMMENDED ACTIONS:
             recovery,
             cipher,
             collection,
+            _obfuscateBoxNames,
           );
         }
 
@@ -283,7 +290,12 @@ RECOMMENDED ACTIONS:
     if (box != null) {
       await box.deleteFromDisk();
     } else {
-      await _manager.deleteBox(lowerCaseName, path ?? homePath, collection);
+      await _manager.deleteBox(
+        lowerCaseName,
+        path ?? homePath,
+        collection,
+        _obfuscateBoxNames,
+      );
     }
   }
 
@@ -312,6 +324,7 @@ RECOMMENDED ACTIONS:
       lowerCaseName,
       path ?? homePath,
       collection,
+      _obfuscateBoxNames,
     );
   }
 }

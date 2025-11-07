@@ -11,6 +11,7 @@ abstract class BackendManager {
   /// TODO: Document this!
   static BackendManagerInterface select([
     HiveStorageBackendPreference? backendPreference,
+    bool obfuscateBoxNames = false,
   ]) {
     switch (backendPreference) {
       default:
