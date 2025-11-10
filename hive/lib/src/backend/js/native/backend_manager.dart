@@ -19,6 +19,7 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     String? collection,
+    bool obfuscateBoxNames,
   ) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
@@ -81,7 +82,12 @@ class BackendManager implements BackendManagerInterface {
   }
 
   @override
-  Future<bool> boxExists(String name, String? path, String? collection) async {
+  Future<bool> boxExists(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;

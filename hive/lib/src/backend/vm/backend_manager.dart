@@ -4,14 +4,17 @@ import 'dart:io';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/obfuscation_utils.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
 class BackendManager implements BackendManagerInterface {
   final _delimiter = Platform.isWindows ? '\\' : '/';
 
-  /// TODO: Document this!
+  /// Creates and configures a [BackendManager] instance.
+  ///
+  /// [backendPreference] specifies the preferred storage backend (currently unused).
+  /// [obfuscateBoxNames] enables obfuscation of box names and file extensions on disk.
   static BackendManager select([
     HiveStorageBackendPreference? backendPreference,
   ]) =>
@@ -24,6 +27,7 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     String? collection,
+    bool obfuscateBoxNames,
   ) async {
     if (path == null) {
       throw HiveError('You need to initialize Hive or '
@@ -42,36 +46,84 @@ class BackendManager implements BackendManagerInterface {
       await dir.create(recursive: true);
     }
 
-    final file = await findHiveFileAndCleanUp(name, path);
-    final lockFile = File('$path$_delimiter$name.lock');
+    final (file, lockFile) =
+        await findHiveFileAndCleanUp(name, path, obfuscateBoxNames);
 
     final backend = StorageBackendVm(file, lockFile, crashRecovery, cipher);
     await backend.open();
     return backend;
   }
 
+  Future<void> _migrateFileIfNeeded(File oldFile, File newFile) async {
+    final results = await Future.wait([
+      oldFile.exists(),
+      newFile.exists(),
+    ]);
+    if (results[0]) {
+      if (results[1]) {
+        await oldFile.delete();
+      } else {
+        await oldFile.rename(newFile.path);
+      }
+    }
+  }
+
   /// Not part of public API
   @visibleForTesting
-  Future<File> findHiveFileAndCleanUp(String name, String path) async {
-    final hiveFile = File('$path$_delimiter$name.hive');
-    final compactedFile = File('$path$_delimiter$name.hivec');
+  Future<(File, File)> findHiveFileAndCleanUp(
+    String name,
+    String path,
+    bool obfuscateBoxNames,
+  ) async {
+    var hiveFile = File('$path$_delimiter$name.hive');
+    var compactedFile = File('$path$_delimiter$name.hivec');
+    var lockFile = File('$path$_delimiter$name.lock');
 
-    if (await hiveFile.exists()) {
-      if (await compactedFile.exists()) {
+    if (obfuscateBoxNames) {
+      await Future.wait([
+        _migrateFileIfNeeded(hiveFile, hiveFile.obfuscate(obfuscateBoxNames)),
+        _migrateFileIfNeeded(
+          compactedFile,
+          compactedFile.obfuscate(obfuscateBoxNames),
+        ),
+        _migrateFileIfNeeded(
+          lockFile,
+          lockFile.obfuscate(obfuscateBoxNames),
+        ),
+      ]);
+
+      hiveFile = hiveFile.obfuscate(obfuscateBoxNames);
+      compactedFile = compactedFile.obfuscate(obfuscateBoxNames);
+      lockFile = lockFile.obfuscate(obfuscateBoxNames);
+    }
+
+    final fileChecks = await Future.wait([
+      hiveFile.exists(),
+      compactedFile.exists(),
+    ]);
+
+    final hiveExists = fileChecks[0];
+    final compactedExists = fileChecks[1];
+
+    if (hiveExists) {
+      if (compactedExists) {
         await compactedFile.delete();
       }
-      return hiveFile;
-    } else if (await compactedFile.exists()) {
-      debugPrint('Restoring compacted file.');
-      return await compactedFile.rename(hiveFile.path);
+      return (hiveFile, lockFile);
+    } else if (compactedExists) {
+      return (await compactedFile.rename(hiveFile.path), lockFile);
     } else {
       await hiveFile.create();
-      return hiveFile;
+      return (hiveFile, lockFile);
     }
   }
 
   @override
-  Future<void> deleteBox(String name, String? path, String? collection) async {
+  Future<void> deleteBox(
+    String name,
+    String? path,
+    String? collection,
+  ) async {
     ArgumentError.checkNotNull(path, 'path');
 
     if (path!.endsWith(_delimiter)) path = path.substring(0, path.length - 1);
@@ -80,9 +132,16 @@ class BackendManager implements BackendManagerInterface {
       path = path + collection;
     }
 
-    await _deleteFileIfExists(File('$path$_delimiter$name.hive'));
-    await _deleteFileIfExists(File('$path$_delimiter$name.hivec'));
-    await _deleteFileIfExists(File('$path$_delimiter$name.lock'));
+    await Future.wait(
+      [
+        File('$path$_delimiter$name.hive'),
+        File('$path$_delimiter$name.hivec'),
+        File('$path$_delimiter$name.lock'),
+        File('$path$_delimiter$name.hive').obfuscate(true),
+        File('$path$_delimiter$name.hivec').obfuscate(true),
+        File('$path$_delimiter$name.lock').obfuscate(true),
+      ].map(_deleteFileIfExists),
+    );
   }
 
   Future<void> _deleteFileIfExists(File file) async {
@@ -92,7 +151,12 @@ class BackendManager implements BackendManagerInterface {
   }
 
   @override
-  Future<bool> boxExists(String name, String? path, String? collection) async {
+  Future<bool> boxExists(
+    String name,
+    String? path,
+    String? collection,
+    bool obfuscateBoxNames,
+  ) async {
     ArgumentError.checkNotNull(path, 'path');
 
     if (path!.endsWith(_delimiter)) path = path.substring(0, path.length - 1);
@@ -101,8 +165,17 @@ class BackendManager implements BackendManagerInterface {
       path = path + collection;
     }
 
-    return await File('$path$_delimiter$name.hive').exists() ||
-        await File('$path$_delimiter$name.hivec').exists() ||
-        await File('$path$_delimiter$name.lock').exists();
+    return await Future.wait(
+      [
+        File('$path$_delimiter$name.hive'),
+        File('$path$_delimiter$name.hivec'),
+        File('$path$_delimiter$name.lock'),
+      ].map(
+        (file) async =>
+            await file.exists() ||
+            obfuscateBoxNames &&
+                await file.obfuscate(obfuscateBoxNames).exists(),
+      ),
+    ).then((exists) => exists.any((exists) => exists));
   }
 }
