@@ -8,7 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  desktop_drop: ^0.6.0
+  desktop_drop: ^0.7.0
   hive_ce: ^2.13.0
   two_dimensional_scrollables: ^0.3.3
   vm_service: ^15.0.0
@@ -18,7 +18,7 @@ dependencies:
   dtd: ^4.0.0
 
 dev_dependencies:
-  rexios_lints: ^15.0.1
+  rexios_lints: ^17.0.2
   hive_ce_flutter: ^2.3.2
   test: ^1.26.3
 

@@ -3,3 +3,8 @@ include: package:rexios_lints/dart/package_extra.yaml
 linter:
   rules:
     - require_trailing_commas
+
+plugins:
+  rexios_lints:
+    diagnostics:
+      not_null_assertion: false

@@ -24,7 +24,7 @@ dependencies:
 dev_dependencies:
   test: ^1.17.12
   mocktail: ^1.0.4
-  rexios_lints: ^15.0.1
+  rexios_lints: ^17.0.2
   path: ^1.7.0
   pointycastle: ^4.0.0
   build_runner: ^2.5.4
