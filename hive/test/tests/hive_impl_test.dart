@@ -1,5 +1,5 @@
 // This is a test
-// ignore_for_file: prefer_async_await
+// ignore_for_file: rexios_lints/prefer_async_await
 @TestOn('vm')
 library;
 
