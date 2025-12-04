@@ -224,17 +224,15 @@ class Class {
       );
     });
 
-    test(
-      'works with freezed classes',
-      () {
-        expectGeneration(
-          input: {
-            ...pubspec(
-              dependencies: {'freezed_annotation: any'},
-              devDependencies: {'freezed: any'},
-            ),
-            ...buildYaml,
-            'lib/adapters.dart': '''
+    test('works with freezed classes', () {
+      expectGeneration(
+        input: {
+          ...pubspec(
+            dependencies: {'freezed_annotation: any'},
+            devDependencies: {'freezed: any'},
+          ),
+          ...buildYaml,
+          'lib/adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -247,9 +245,9 @@ sealed class Class with _\$Class {
   factory Class({@HiveField(0) required int value}) = _Class;
 }
 ''',
-          },
-          output: {
-            'lib/hive/hive_adapters.dart': '''
+        },
+        output: {
+          'lib/hive/hive_adapters.dart': '''
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
@@ -258,7 +256,7 @@ import 'package:hive_ce_generator_test/adapters.dart';
 ])
 part 'hive_adapters.g.dart';
 ''',
-            'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -269,10 +267,8 @@ types:
       value:
         index: 0
 ''',
-          },
-        );
-      },
-      skip: 'Waiting on freezed analyzer 9 suport',
-    );
+        },
+      );
+    });
   });
 }
