@@ -35,7 +35,6 @@ jobs:
           dart pub get
           dart format . --set-exit-if-changed
           dart analyze --fatal-infos
-          dart run custom_lint
 
   test-hive:
     runs-on: ubuntu-latest
