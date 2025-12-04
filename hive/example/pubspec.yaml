@@ -2,8 +2,7 @@ name: example
 
 dependencies:
   hive_ce: any
-  # TODO: Waiting on analyzer 9 support
-  # freezed_annotation: ^3.0.0
+  freezed_annotation: ^3.0.0
   meta: ^1.17.0
 
 dev_dependencies:
