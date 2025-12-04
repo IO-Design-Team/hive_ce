@@ -1,3 +1,6 @@
+// TODO: Remove with Dart 3.11
+// ignore_for_file: unnecessary_ignore, experimental_member_use
+
 import 'dart:typed_data';
 
 import 'package:analyzer/dart/element/element.dart';
