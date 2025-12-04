@@ -7,7 +7,6 @@ import 'package:example/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
-    registerAdapter(FreezedPersonAdapter());
     registerAdapter(JobAdapter());
     registerAdapter(PersonAdapter());
   }
@@ -15,7 +14,6 @@ extension HiveRegistrar on HiveInterface {
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
-    registerAdapter(FreezedPersonAdapter());
     registerAdapter(JobAdapter());
     registerAdapter(PersonAdapter());
   }
