@@ -61,7 +61,8 @@ class _WatchBoxBuilderState extends State<WatchBoxBuilder> {
 
   void _subscribe() {
     subscription = widget.box.watch().listen((event) {
-      if (widget.watchKeys != null && !widget.watchKeys!.contains(event.key)) {
+      final watchKeys = widget.watchKeys;
+      if (watchKeys != null && !watchKeys.contains(event.key)) {
         return;
       }
 

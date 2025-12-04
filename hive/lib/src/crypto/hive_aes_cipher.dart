@@ -9,6 +9,7 @@ import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 /// Default encryption algorithm. Uses AES256 CBC with PKCS7 padding.
+@immutable
 class HiveAesCipher implements HiveCipher {
   static final _ivRandom = Random.secure();
 

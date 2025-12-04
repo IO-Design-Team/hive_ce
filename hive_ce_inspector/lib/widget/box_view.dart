@@ -80,7 +80,9 @@ class _BoxViewState extends State<BoxView> {
         ),
       ),
       child: DefaultTextStyle(
-        style: textTheme.bodyMedium!.copyWith(overflow: TextOverflow.ellipsis),
+        style:
+            textTheme.bodyMedium?.copyWith(overflow: TextOverflow.ellipsis) ??
+            const TextStyle(),
         child: DataTableView(
           key: ValueKey(widget.data.name),
           data: stack.last.value,

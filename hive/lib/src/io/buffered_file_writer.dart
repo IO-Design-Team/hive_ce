@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
+
 /// Not part of public API
+@immutable
 class BufferedFileWriter {
   static const _defaultMaxBufferSize = 64000;
 

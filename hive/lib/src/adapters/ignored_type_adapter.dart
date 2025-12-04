@@ -1,8 +1,10 @@
 import 'package:hive_ce/hive.dart';
+import 'package:meta/meta.dart';
 
 /// Not part of public API
+@immutable
 class IgnoredTypeAdapter<T> implements TypeAdapter<T?> {
-  /// TODO: Document this!
+  /// Constructor
   const IgnoredTypeAdapter([this.typeId = 0]);
 
   @override
