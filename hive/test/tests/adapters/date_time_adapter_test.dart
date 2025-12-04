@@ -1,5 +1,5 @@
 // This is a test
-// ignore_for_file: prefer_timestamps
+// ignore_for_file: rexios_lints/prefer_timestamps
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

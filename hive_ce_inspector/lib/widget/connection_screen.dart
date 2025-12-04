@@ -27,8 +27,9 @@ class _ConnectionPageState extends State<ConnectionScreen> {
             return FutureBuilder(
               future: ConnectClient.connect(),
               builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return _BoxesLoader(client: snapshot.data!);
+                final data = snapshot.data;
+                if (data != null) {
+                  return _BoxesLoader(client: data);
                 } else {
                   return loading;
                 }

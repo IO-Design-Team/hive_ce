@@ -5,6 +5,7 @@ part 'hive_schema.g.dart';
 
 /// Information about Hive adapters used to support incremental changes
 @JsonSerializable()
+@immutable
 class HiveSchema {
   /// The comment placed at the top of the schema file
   static const comment = '''

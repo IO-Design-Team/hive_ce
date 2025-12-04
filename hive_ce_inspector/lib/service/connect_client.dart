@@ -23,10 +23,13 @@ class ConnectClient {
     if (service == null) throw 'VM service not found';
 
     final vm = await service.getVM();
-    final isolateId = vm.isolates!
-        .where((e) => e.name?.contains('main') ?? false)
+    final isolateId = vm.isolates
+        ?.where((e) => e.name?.contains('main') ?? false)
         .first
-        .id!;
+        .id;
+
+    if (isolateId == null) throw 'Main isolate not found';
+
     try {
       await service.streamListen(EventStreams.kExtension);
     } catch (_) {

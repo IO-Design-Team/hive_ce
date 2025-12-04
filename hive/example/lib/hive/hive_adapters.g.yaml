@@ -37,15 +37,3 @@ types:
         index: 6
       unemployed:
         index: 7
-  FreezedPerson:
-    typeId: 2
-    nextIndex: 4
-    fields:
-      firstName:
-        index: 0
-      middleName:
-        index: 1
-      lastName:
-        index: 2
-      age:
-        index: 3
