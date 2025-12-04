@@ -9,8 +9,7 @@ dev_dependencies:
   rexios_lints: ^17.0.2
   hive_ce_generator: any
   build_runner: ^2.5.4
-  # TODO: Waiting on analyzer 9 support
-  # freezed: ^3.0.6
+  freezed: ^3.0.6
 
 environment:
   sdk: ^3.9.0
