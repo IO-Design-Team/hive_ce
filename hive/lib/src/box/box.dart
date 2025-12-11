@@ -33,8 +33,26 @@ abstract class Box<E> implements BoxBase<E> {
   /// exist.
   E? get(dynamic key, {E? defaultValue});
 
+  /// Read the given [key] and cast the value to [List<T>]
+  List<T>? getList<T>(dynamic key, {List<T>? defaultValue});
+
+  /// Read the given [key] and cast the value to [Set<T>]
+  Set<T>? getSet<T>(dynamic key, {Set<T>? defaultValue});
+
+  /// Read the given [key] and cast the value to [Map<K, V>]
+  Map<K, V>? getMap<K, V>(dynamic key, {Map<K, V>? defaultValue});
+
   /// Returns the value associated with the n-th key.
   E? getAt(int index);
+
+  /// Read the value at the given [index] and cast the value to [List<T>]
+  List<T>? getListAt<T>(int index, {List<T>? defaultValue});
+
+  /// Read the value at the given [index] and cast the value to [Set<T>]
+  Set<T>? getSetAt<T>(int index, {Set<T>? defaultValue});
+
+  /// Read the value at the given [index] and cast the value to [Map<K, V>]
+  Map<K, V>? getMapAt<K, V>(int index, {Map<K, V>? defaultValue});
 
   /// Returns a map which contains all key - value pairs of the box.
   Map<dynamic, E> toMap();
