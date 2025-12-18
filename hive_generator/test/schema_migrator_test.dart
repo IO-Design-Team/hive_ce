@@ -15,7 +15,7 @@ targets:
 
 const adapters = {
   'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 1)
 class Class1 {}
@@ -32,7 +32,7 @@ class Class2 {
 }
 ''',
   'lib/adapters_2.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 3)
 class Class3 {
@@ -81,7 +81,7 @@ void main() {
         },
         output: {
           'lib/hive/hive_adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 import 'package:hive_ce_generator_test/adapters_2.dart';
 
@@ -136,7 +136,7 @@ types:
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -158,7 +158,7 @@ class Class {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -182,7 +182,7 @@ class Class {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -206,7 +206,7 @@ class Class {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -219,7 +219,7 @@ class Class {
         },
         output: {
           'lib/hive/hive_adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
 @GenerateAdapters([
@@ -242,7 +242,7 @@ part 'hive_adapters.g.dart';
             ),
             ...buildYaml,
             'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adapters.freezed.dart';
@@ -257,7 +257,7 @@ sealed class Class with _\$Class {
           },
           output: {
             'lib/hive/hive_adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
 @GenerateAdapters([
