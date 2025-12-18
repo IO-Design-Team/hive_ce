@@ -5,7 +5,7 @@ library;
 
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';

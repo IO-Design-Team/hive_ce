@@ -1,3 +1,8 @@
+## 2.16.0
+
+- Implements a proper logging system
+- Adds `hive_ce.dart` to make the publish action happy
+
 ## 2.15.1
 
 - Moves most of the documentation to the new [documentation site](https://docs.hive.isar.community)

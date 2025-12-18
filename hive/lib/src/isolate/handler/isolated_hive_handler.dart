@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/hive_impl.dart';

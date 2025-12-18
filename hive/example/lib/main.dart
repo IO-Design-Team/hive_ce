@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:example/hive/hive_registrar.g.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:meta/meta.dart';
 
 @immutable

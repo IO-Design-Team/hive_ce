@@ -1,5 +1,5 @@
 import 'package:example/main.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @GenerateAdapters([
   AdapterSpec<Person>(),

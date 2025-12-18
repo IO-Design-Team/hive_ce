@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:example/hive/hive_registrar.g.dart';
 import 'package:example/main.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 void main() async {
   final path = Directory.current.path;

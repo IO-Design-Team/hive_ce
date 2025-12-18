@@ -1,3 +1,7 @@
+## NEXT
+
+- Adds `hive_ce_flutter.dart` to make the publish action happys
+
 ## 2.3.3
 
 - Catch exception when Flutter engine is not available in `IsolatedHive.initFlutter`

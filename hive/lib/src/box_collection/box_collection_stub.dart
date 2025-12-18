@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// TODO: Document this!
 abstract class BoxCollection {

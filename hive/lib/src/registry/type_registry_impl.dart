@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
