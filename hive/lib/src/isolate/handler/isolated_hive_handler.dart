@@ -16,7 +16,8 @@ Future<dynamic> handleHiveMethodCall(
     case 'init':
       Hive.init(call.arguments['path']);
       (Hive as HiveImpl).setIsolated();
-      Logger.level = call.arguments['logger_level'];
+      final loggerLevel = call.arguments['logger_level'];
+      Logger.level = LoggerLevel.values.byName(loggerLevel);
     case 'openBox':
       final name = call.arguments['name'];
       if (boxHandlers.containsKey(name)) {
