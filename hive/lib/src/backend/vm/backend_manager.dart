@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -62,7 +62,7 @@ class BackendManager implements BackendManagerInterface {
       }
       return hiveFile;
     } else if (await compactedFile.exists()) {
-      debugPrint('Restoring compacted file.');
+      Logger.i('Restoring compacted file.');
       return await compactedFile.rename(hiveFile.path);
     } else {
       await hiveFile.create();

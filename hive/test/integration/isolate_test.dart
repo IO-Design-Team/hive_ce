@@ -137,6 +137,14 @@ void main() {
             unsafeOutput.first.replaceFirst(isolateNameRegex, ''),
             patchedWarning,
           );
+
+          final ignoredOutput = await Isolate.run(
+            () => captureOutput(() {
+              HiveLogger.unsafeIsolateWarning = false;
+              Hive.init(null);
+            }).toList(),
+          );
+          expect(ignoredOutput, isEmpty);
         });
 
         test('safe hive isolate', () async {

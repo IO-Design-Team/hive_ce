@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// The main API interface of Hive. Available through the `Hive` constant.
@@ -93,3 +94,9 @@ typedef KeyComparator = int Function(dynamic key1, dynamic key2);
 
 /// A function which decides when to compact a box.
 typedef CompactionStrategy = bool Function(int entries, int deletedEntries);
+
+/// Hive's logger
+typedef HiveLogger = Logger;
+
+/// Hive's logger level
+typedef HiveLoggerLevel = LoggerLevel;
