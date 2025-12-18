@@ -14,8 +14,8 @@ import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:meta/meta.dart';
 
@@ -67,8 +67,9 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (!{'main', hiveIsolateName}.contains(isolateDebugName)) {
-      debugPrint(unsafeIsolateWarning);
+    if (Logger.unsafeIsolateWarning &&
+        !{'main', hiveIsolateName}.contains(isolateDebugName)) {
+      Logger.w(unsafeIsolateWarning);
     }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);

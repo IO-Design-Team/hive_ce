@@ -3,6 +3,7 @@ import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// Method call handler for Hive methods
@@ -15,6 +16,7 @@ Future<dynamic> handleHiveMethodCall(
     case 'init':
       Hive.init(call.arguments['path']);
       (Hive as HiveImpl).setIsolated();
+      Logger.level = call.arguments['logger_level'];
     case 'openBox':
       final name = call.arguments['name'];
       if (boxHandlers.containsKey(name)) {

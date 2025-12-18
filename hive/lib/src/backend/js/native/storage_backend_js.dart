@@ -12,6 +12,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart';
 
@@ -82,7 +83,7 @@ class StorageBackendJs extends StorageBackend {
         if (kDebugMode) {
           final isIntType = value is int || value is List<int>;
           if (isIntType && isWasm) {
-            debugPrint(wasmIntWarning);
+            Logger.w(wasmIntWarning);
           }
         }
 
@@ -239,7 +240,7 @@ class StorageBackendJs extends StorageBackend {
   Future<void> deleteFromDisk() async {
     final indexDB = window.self.indexedDB;
 
-    debugPrint('Delete ${_db.name} // $objectStoreName from disk');
+    Logger.d('Delete ${_db.name} // $objectStoreName from disk');
 
     // directly deleting the entire DB if a non-collection Box
     if (_db.objectStoreNames.length == 1) {
