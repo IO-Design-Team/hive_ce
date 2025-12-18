@@ -249,7 +249,8 @@ class _SchemaInfo {
   String get adapterSpec {
     var spec = 'AdapterSpec<$className>(';
     if (ignoredFields.isNotEmpty) {
-      spec += 'ignoredFields: ${ignoredFields.join(', ')},';
+      final ignoredFieldsString = ignoredFields.map((e) => "'$e'").join(', ');
+      spec += 'ignoredFields: {$ignoredFieldsString}';
     }
     spec += ')';
     return spec;
