@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';

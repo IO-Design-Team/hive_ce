@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 

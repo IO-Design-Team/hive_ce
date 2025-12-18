@@ -4,7 +4,7 @@ library;
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
