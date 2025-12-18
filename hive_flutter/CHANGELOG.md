@@ -1,6 +1,6 @@
 ## NEXT
 
-- Adds `hive_ce_flutter.dart` to make the publish action happys
+- Adds `hive_ce_flutter.dart` to make the publish action happy
 
 ## 2.3.3
 
