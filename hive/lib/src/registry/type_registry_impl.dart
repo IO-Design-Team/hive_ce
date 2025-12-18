@@ -156,7 +156,7 @@ class TypeRegistryImpl implements TypeRegistry {
   }) {
     if (T == dynamic || T == Object) {
       Logger.w(
-        'Registering type adapters for dynamic type is must be avoided, '
+        'Registering type adapters for dynamic type must be avoided, '
         'otherwise all the write requests to Hive will be handled by given '
         'adapter. Please explicitly provide adapter type on registerAdapter '
         'method to avoid this kind of issues. For example if you want to '
