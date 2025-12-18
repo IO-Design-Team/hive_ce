@@ -3,6 +3,7 @@ import 'package:hive_ce/src/hive_impl.dart';
 
 import 'package:hive_ce/src/isolate/isolated_hive.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
+import 'package:hive_ce/src/util/logger.dart';
 
 export 'src/box_collection/box_collection_stub.dart'
     if (dart.library.js_interop) 'package:hive_ce/src/box_collection/box_collection_indexed_db.dart'
@@ -47,3 +48,9 @@ final HiveInterface Hive = HiveImpl();
 /// - Most methods are async due to isolate communication
 // ignore: non_constant_identifier_names
 final IsolatedHiveInterface IsolatedHive = IsolatedHiveImpl();
+
+/// Hive's logger
+typedef HiveLogger = Logger;
+
+/// Hive's logger level
+typedef HiveLoggerLevel = LoggerLevel;
