@@ -200,7 +200,7 @@ class Class {
       );
     });
 
-    test('throws with schema mismatch', () {
+    test('adds unannotated fields to ignored fields', () {
       expectGeneration(
         input: {
           ...pubspec(),
@@ -217,10 +217,17 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasSchemaMismatch(
-          className: 'Class',
-          accessors: {'value2'},
-        ),
+        output: {
+          'lib/hive/hive_adapters.dart': '''
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_generator_test/adapters.dart';
+
+@GenerateAdapters([
+  AdapterSpec<Class>(ignoredFields: {'value2'}),
+])
+part 'hive_adapters.g.dart';
+''',
+        },
       );
     });
 
