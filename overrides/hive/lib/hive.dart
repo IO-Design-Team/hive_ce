@@ -1,1 +1,1 @@
-export 'package:hive_ce/hive.dart';
+export 'package:hive_ce/hive_ce.dart';

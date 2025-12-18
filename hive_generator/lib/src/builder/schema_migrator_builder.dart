@@ -2,7 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'dart:async';
 
@@ -140,7 +140,7 @@ class SchemaMigratorBuilder implements Builder {
     buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.dart'),
       '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 $imports
 
 @GenerateAdapters([

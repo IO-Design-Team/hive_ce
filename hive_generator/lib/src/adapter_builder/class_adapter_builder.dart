@@ -7,7 +7,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';

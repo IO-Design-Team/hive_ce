@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// TODO: Document this!
 class TimeOfDayAdapter extends TypeAdapter<TimeOfDay> {

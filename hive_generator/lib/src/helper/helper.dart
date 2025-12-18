@@ -4,7 +4,7 @@ import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:path/path.dart' as path;
