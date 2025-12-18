@@ -1,7 +1,7 @@
 import 'package:hive_ce/src/util/debug_utils.dart';
 
 /// Configures the logging behavior of Hive
-final class Logger {
+abstract class Logger {
   /// The overall logging level
   static var level = kDebugMode ? LoggerLevel.debug : LoggerLevel.info;
 
