@@ -265,7 +265,7 @@ import 'package:hive_ce_generator_test/adapters.dart';
 ])
 part 'hive_adapters.g.dart';
 ''',
-            'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml': '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -276,10 +276,8 @@ types:
       value:
         index: 0
 ''',
-          },
-        );
-      },
-      skip: 'Waiting on freezed analyzer 9 suport',
-    );
+        },
+      );
+    });
   });
 }
