@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/lock_props.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
@@ -13,7 +13,7 @@ import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
@@ -116,7 +116,7 @@ RECOMMENDED ACTIONS:
         props = LockProps();
       }
       if (props.isolated && !isolated) {
-        debugPrint(unmatchedIsolationWarning);
+        Logger.w(unmatchedIsolationWarning);
       }
     }
 
@@ -140,7 +140,7 @@ RECOMMENDED ACTIONS:
 
     if (recoveryOffset != -1) {
       if (_crashRecovery) {
-        debugPrint('Recovering corrupted box.');
+        Logger.i('Recovering corrupted box.');
         await writeRaf.truncate(recoveryOffset);
         await writeRaf.setPosition(recoveryOffset);
         writeOffset = recoveryOffset;

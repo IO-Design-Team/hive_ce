@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import 'test_utils.dart';
 
 const directives = '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 part 'hive_adapters.g.dart';''';
 
 const personSchema = '''

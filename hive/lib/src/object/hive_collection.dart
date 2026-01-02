@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// List containing [HiveObjectMixin]s.
 abstract class HiveCollection<E extends HiveObjectMixin> implements List<E> {

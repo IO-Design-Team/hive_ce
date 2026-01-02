@@ -4,6 +4,3 @@ final kDebugMode = () {
   assert(assertionsEnabled = true);
   return assertionsEnabled ?? false;
 }();
-
-/// Only print the given message if assertions are enabled
-void debugPrint(String message) => kDebugMode ? print(message) : null;

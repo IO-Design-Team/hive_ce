@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Isolated version of [BoxBase]
 abstract class IsolatedBoxBase<E> {

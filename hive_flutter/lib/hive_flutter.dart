@@ -1,4 +1,4 @@
-export 'package:hive_ce/hive.dart';
+export 'package:hive_ce/hive_ce.dart';
 
 export 'src/box_extensions.dart';
 export 'src/hive_extensions.dart';

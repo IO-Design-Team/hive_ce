@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/raw_object_reader.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';

@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/big_int_adapter.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/adapters/duration_adapter.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -155,8 +155,8 @@ class TypeRegistryImpl implements TypeRegistry {
     bool override = false,
   }) {
     if (T == dynamic || T == Object) {
-      debugPrint(
-        'Registering type adapters for dynamic type is must be avoided, '
+      Logger.w(
+        'Registering type adapters for dynamic type must be avoided, '
         'otherwise all the write requests to Hive will be handled by given '
         'adapter. Please explicitly provide adapter type on registerAdapter '
         'method to avoid this kind of issues. For example if you want to '
@@ -172,7 +172,7 @@ class TypeRegistryImpl implements TypeRegistry {
           final oldAdapterType = oldAdapter.runtimeType;
           final newAdapterType = adapter.runtimeType;
           final typeId = adapter.typeId;
-          debugPrint(
+          Logger.d(
             'You are trying to override $oldAdapterType '
             'with $newAdapterType for typeId: $typeId. '
             'Please note that overriding adapters might '
@@ -199,12 +199,12 @@ class TypeRegistryImpl implements TypeRegistry {
 
           if (override) {
             _typeAdapters.remove(existingResolvedAdapter!.typeId);
-            debugPrint(
+            Logger.d(
               'Removed existing adapter $existingAdapterTypeString for type $T '
               'and replaced with $adapterTypeString.',
             );
           } else {
-            debugPrint(
+            Logger.w(
               'WARNING: You are trying to register $adapterTypeString for type '
               '$T but there is already a TypeAdapter for this type: '
               '$existingAdapterTypeString. Note that $adapterTypeString will '

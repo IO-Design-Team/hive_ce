@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Implemetation of [HiveCollection].
 mixin HiveCollectionMixin<E extends HiveObjectMixin>

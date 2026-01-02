@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:example/named_import.dart' as named;
 import 'package:meta/meta.dart';
 

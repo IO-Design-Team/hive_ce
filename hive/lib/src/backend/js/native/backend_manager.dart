@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:js_interop';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:web/web.dart';
 
 /// Opens IndexedDB databases
@@ -36,7 +36,7 @@ class BackendManager implements BackendManagerInterface {
     // in case the objectStore is not contained, re-open the db and
     // update version
     if (!db.objectStoreNames.contains(objectStoreName)) {
-      debugPrint(
+      Logger.i(
         'Creating objectStore $objectStoreName in database $databaseName...',
       );
       final request = indexedDB!.open(databaseName, db.version + 1);
@@ -49,14 +49,14 @@ class BackendManager implements BackendManagerInterface {
       db = await request.asFuture<IDBDatabase>();
     }
 
-    debugPrint('Got object store $objectStoreName in database $databaseName.');
+    Logger.i('Got object store $objectStoreName in database $databaseName.');
 
     return StorageBackendJs(db, cipher, objectStoreName);
   }
 
   @override
   Future<void> deleteBox(String name, String? path, String? collection) async {
-    debugPrint('Delete $name // $collection from disk');
+    Logger.d('Delete $name // $collection from disk');
 
     // compatibility for old store format
     final databaseName = collection ?? name;

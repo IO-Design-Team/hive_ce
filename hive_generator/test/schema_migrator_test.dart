@@ -15,7 +15,7 @@ targets:
 
 const adapters = {
   'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 1)
 class Class1 {}
@@ -32,7 +32,7 @@ class Class2 {
 }
 ''',
   'lib/adapters_2.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 3)
 class Class3 {
@@ -81,7 +81,7 @@ void main() {
         },
         output: {
           'lib/hive/hive_adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 import 'package:hive_ce_generator_test/adapters_2.dart';
 
@@ -136,7 +136,7 @@ types:
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -158,7 +158,7 @@ class Class {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -182,7 +182,7 @@ class Class {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -200,13 +200,13 @@ class Class {
       );
     });
 
-    test('throws with schema mismatch', () {
+    test('adds unannotated fields to ignored fields', () {
       expectGeneration(
         input: {
           ...pubspec(),
           ...buildYaml,
           'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 @HiveType(typeId: 0)
 class Class {
@@ -217,23 +217,32 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasSchemaMismatch(
-          className: 'Class',
-          accessors: {'value2'},
-        ),
+        output: {
+          'lib/hive/hive_adapters.dart': '''
+import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce_generator_test/adapters.dart';
+
+@GenerateAdapters([
+  AdapterSpec<Class>(ignoredFields: {'value2'}),
+])
+part 'hive_adapters.g.dart';
+''',
+        },
       );
     });
 
-    test('works with freezed classes', () {
-      expectGeneration(
-        input: {
-          ...pubspec(
-            dependencies: {'freezed_annotation: any'},
-            devDependencies: {'freezed: any'},
-          ),
-          ...buildYaml,
-          'lib/adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+    test(
+      'works with freezed classes',
+      () {
+        expectGeneration(
+          input: {
+            ...pubspec(
+              dependencies: {'freezed_annotation: any'},
+              devDependencies: {'freezed: any'},
+            ),
+            ...buildYaml,
+            'lib/adapters.dart': '''
+import 'package:hive_ce/hive_ce.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adapters.freezed.dart';
@@ -245,10 +254,10 @@ sealed class Class with _\$Class {
   factory Class({@HiveField(0) required int value}) = _Class;
 }
 ''',
-        },
-        output: {
-          'lib/hive/hive_adapters.dart': '''
-import 'package:hive_ce/hive.dart';
+          },
+          output: {
+            'lib/hive/hive_adapters.dart': '''
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
 @GenerateAdapters([
