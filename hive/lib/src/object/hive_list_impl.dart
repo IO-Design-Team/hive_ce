@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_collection_mixin.dart';
 import 'package:hive_ce/src/object/hive_object.dart';

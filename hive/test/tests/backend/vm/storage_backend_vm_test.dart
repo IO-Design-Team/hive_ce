@@ -4,7 +4,7 @@ library;
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
@@ -71,7 +71,7 @@ void main() {
   group('StorageBackendVm', () {
     test('.path returns path for of open box file', () {
       // This is a test
-      // ignore: do_not_use_raw_paths
+      // ignore: rexios_lints/do_not_use_raw_paths
       final file = File('some/path');
       final backend = _getBackend(file: file);
       expect(backend.path, 'some/path');

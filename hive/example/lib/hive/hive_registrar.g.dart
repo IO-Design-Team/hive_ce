@@ -2,19 +2,19 @@
 // Do not modify
 // Check in to version control
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:example/hive/hive_adapters.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
-    registerAdapter(FreezedPersonAdapter());
+    registerAdapter(JobAdapter());
     registerAdapter(PersonAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
-    registerAdapter(FreezedPersonAdapter());
+    registerAdapter(JobAdapter());
     registerAdapter(PersonAdapter());
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
@@ -174,7 +174,7 @@ class Keystore<E> {
     }
 
     if (notify && (!frame.deleted || deletedFrame != null)) {
-      _notifier.notify(frame);
+      _notifier.notify(frame, deletedValue: deletedFrame?.value);
     }
 
     return deletedFrame;
@@ -244,8 +244,8 @@ class Keystore<E> {
         }
       }
       if (!isOverride) {
-        _store.delete(key);
-        _notifier.notify(Frame.deleted(key));
+        final deletedFrame = _store.delete(key);
+        _notifier.notify(Frame.deleted(key), deletedValue: deletedFrame?.value);
       }
     }
   }
@@ -260,7 +260,7 @@ class Keystore<E> {
       if (frame.value is HiveObjectMixin) {
         (frame.value as HiveObjectMixin).dispose();
       }
-      _notifier.notify(Frame.deleted(frame.key));
+      _notifier.notify(Frame.deleted(frame.key), deletedValue: frame.value);
     }
 
     _deletedEntries = 0;

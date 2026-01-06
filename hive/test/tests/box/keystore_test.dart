@@ -269,7 +269,9 @@ void main() {
           verify(() => notifier.notify(Frame('key1', 'val1')));
 
           keystore.insert(Frame('key1', 'val2'));
-          verify(() => notifier.notify(Frame('key1', 'val2')));
+          verify(
+            () => notifier.notify(Frame('key1', 'val2'), deletedValue: 'val1'),
+          );
         });
       });
 
@@ -323,7 +325,9 @@ void main() {
           reset(notifier);
 
           keystore.insert(Frame.deleted('key1'));
-          verify(() => notifier.notify(Frame.deleted('key1')));
+          verify(
+            () => notifier.notify(Frame.deleted('key1'), deletedValue: 'val1'),
+          );
 
           keystore.insert(Frame.deleted('key1'));
           verifyNoMoreInteractions(notifier);
@@ -366,7 +370,9 @@ void main() {
           'key1': Frame('key1', 'val1'),
         });
         expect(keystore.frames, [Frame('key1', 'val2'), Frame('key2', 'val3')]);
-        verify(() => notifier.notify(Frame('key1', 'val2')));
+        verify(
+          () => notifier.notify(Frame('key1', 'val2'), deletedValue: 'val1'),
+        );
         verify(() => notifier.notify(Frame('key2', 'val3')));
       });
 
@@ -406,7 +412,9 @@ void main() {
           'key1': Frame('key1', 'val1'),
         });
         expect(keystore.frames, [Frame('key2', 'val2')]);
-        verify(() => notifier.notify(Frame.deleted('key1')));
+        verify(
+          () => notifier.notify(Frame.deleted('key1'), deletedValue: 'val1'),
+        );
       });
     });
 
@@ -445,7 +453,9 @@ void main() {
           keystore.transactions,
           [KeyTransaction()..added.add('otherKey')],
         );
-        verify(() => notifier.notify(Frame.deleted('key')));
+        verify(
+          () => notifier.notify(Frame.deleted('key'), deletedValue: 'val1'),
+        );
       });
 
       test('add then override', () {
@@ -635,8 +645,12 @@ void main() {
         reset(notifier);
 
         keystore.clear();
-        verify(() => notifier.notify(Frame.deleted('key1')));
-        verify(() => notifier.notify(Frame.deleted('key2')));
+        verify(
+          () => notifier.notify(Frame.deleted('key1'), deletedValue: 'val1'),
+        );
+        verify(
+          () => notifier.notify(Frame.deleted('key2'), deletedValue: 'val2'),
+        );
       });
     });
   });

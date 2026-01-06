@@ -1,0 +1,5 @@
+name: hive_ce
+version: 0.1.0
+issueTracker: https://github.com/IO-Design-Team/hive_ce/issues
+materialIconCodePoint: "0xf0518"
+requiresConnection: true

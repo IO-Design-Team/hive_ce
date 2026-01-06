@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
@@ -65,25 +65,30 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         .toList();
 
     var typeId = schema.nextTypeId - 1;
+    int generateTypeId() {
+      do {
+        typeId++;
+      } while (revived.reservedTypeIds.contains(typeId));
+      return typeId;
+    }
+
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.element!.displayName;
 
-      int generateTypeId() {
-        do {
-          typeId++;
-        } while (revived.reservedTypeIds.contains(typeId));
-        return typeId;
-      }
-
       final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
+          HiveSchemaType(
+            typeId: generateTypeId(),
+            nextIndex: 0,
+            fields: {},
+          );
       final result = TypeAdapterGenerator.generateTypeAdapter(
         element: spec.type.element!,
         library: library,
         typeId: schemaType.typeId,
         schema: schemaType,
+        ignoredFields: spec.ignoredFields,
       );
 
       content.write(result.content);
@@ -95,7 +100,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     // Not the safest thing to do, but there doesn't seem to be a better way
     buildStep.forceWriteAsString(
       schemaAsset,
-      HiveSchema(nextTypeId: typeId + 1, types: newTypes).toString(),
+      writeSchema(HiveSchema(nextTypeId: typeId + 1, types: newTypes)),
     );
 
     return content.toString();

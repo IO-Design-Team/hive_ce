@@ -1,10 +1,13 @@
+// TODO: Remove with Dart 3.11
+// ignore_for_file: unnecessary_ignore, experimental_member_use
+
 import 'dart:typed_data';
 
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
@@ -37,8 +40,11 @@ class ClassAdapterBuilder extends AdapterBuilder {
       const TypeChecker.typeNamed(Iterable, inPackage: 'core', inSdk: true);
 
   /// [TypeChecker] for [Uint8List].
-  final uint8ListChecker = const TypeChecker.typeNamed(Uint8List,
-      inPackage: 'typed_data', inSdk: true);
+  final uint8ListChecker = const TypeChecker.typeNamed(
+    Uint8List,
+    inPackage: 'typed_data',
+    inSdk: true,
+  );
 
   @override
   String buildRead() {
@@ -229,7 +235,8 @@ extension on DartType {
     final prefix = currentLibrary.fragments
         .expand((e) => e.libraryImports)
         .firstWhereOrNull(
-            (e) => e.namespace.definedNames2.values.contains(element))
+          (e) => e.namespace.definedNames2.values.contains(element),
+        )
         ?.prefix
         ?.element
         .displayName;

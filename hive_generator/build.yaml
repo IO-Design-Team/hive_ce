@@ -1,6 +1,6 @@
 builders:
   hive_type_adapter_generator:
-    import: "package:hive_ce_generator/hive_generator.dart"
+    import: "package:hive_ce_generator/hive_ce_generator.dart"
     builder_factories: ["getTypeAdapterBuilder"]
     build_extensions: { ".dart": ["hive_type_adapter_generator.g.part"] }
     auto_apply: dependents
@@ -9,20 +9,20 @@ builders:
     required_inputs:
       - .freezed.dart
   hive_registrar_intermediate_generator:
-    import: "package:hive_ce_generator/hive_generator.dart"
+    import: "package:hive_ce_generator/hive_ce_generator.dart"
     builder_factories: ["getRegistrarIntermediateBuilder"]
     build_extensions: { ".dart": [".hive_registrar.info"] }
     auto_apply: dependents
     build_to: cache
     runs_before: ["hive_registrar_generator"]
   hive_registrar_generator:
-    import: "package:hive_ce_generator/hive_generator.dart"
+    import: "package:hive_ce_generator/hive_ce_generator.dart"
     builder_factories: ["getRegistrarBuilder"]
     build_extensions: { "$lib$": ["hive_registrar.g.dart"] }
     auto_apply: dependents
     build_to: source
   hive_adapters_generator:
-    import: "package:hive_ce_generator/hive_generator.dart"
+    import: "package:hive_ce_generator/hive_ce_generator.dart"
     builder_factories: ["getAdaptersBuilder"]
     build_extensions: { ".dart": ["hive_adapters_generator.g.part"] }
     auto_apply: dependents
@@ -31,7 +31,7 @@ builders:
     required_inputs:
       - .freezed.dart
   hive_schema_migrator:
-    import: "package:hive_ce_generator/hive_generator.dart"
+    import: "package:hive_ce_generator/hive_ce_generator.dart"
     builder_factories: ["getSchemaMigratorBuilder"]
     build_extensions:
       { "$lib$": ["hive/hive_adapters.yaml", "hive/hive_adapters.g.yaml"] }

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 
 /// Not part of public API

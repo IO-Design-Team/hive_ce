@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Signature for a function that builds a widget given a [Box].
 @Deprecated('Use [ValueListenableBuilder] and `box.listenable()` instead')
@@ -61,7 +61,8 @@ class _WatchBoxBuilderState extends State<WatchBoxBuilder> {
 
   void _subscribe() {
     subscription = widget.box.watch().listen((event) {
-      if (widget.watchKeys != null && !widget.watchKeys!.contains(event.key)) {
+      final watchKeys = widget.watchKeys;
+      if (watchKeys != null && !watchKeys.contains(event.key)) {
         return;
       }
 

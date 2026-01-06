@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:test/test.dart';
 
 import 'integration.dart';
@@ -82,6 +82,7 @@ void main() {
             await box.delete('key');
           },
           key: 'key',
+          value: 'value',
           deleted: true,
         );
       });

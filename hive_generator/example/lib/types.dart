@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:example/named_import.dart' as named;
 import 'package:meta/meta.dart';
 
@@ -11,23 +11,17 @@ class Class1 {
 
   @HiveField(
     0,
-    defaultValue: Class2(
-      4,
-      'param',
-      <int, Map<String, List<Class1>>>{
-        5: <String, List<Class1>>{
-          'magic': <Class1>[
-            Class1(Class2(5, 'sad')),
-            Class1(Class2(5, 'sad'), Enum1.emumValue1),
-          ],
-        },
-        67: <String, List<Class1>>{
-          'hold': <Class1>[
-            Class1(Class2(42, 'meaning of life')),
-          ],
-        },
+    defaultValue: Class2(4, 'param', <int, Map<String, List<Class1>>>{
+      5: <String, List<Class1>>{
+        'magic': <Class1>[
+          Class1(Class2(5, 'sad')),
+          Class1(Class2(5, 'sad'), Enum1.emumValue1),
+        ],
       },
-    ),
+      67: <String, List<Class1>>{
+        'hold': <Class1>[Class1(Class2(42, 'meaning of life'))],
+      },
+    }),
   )
   final Class2 nested;
 
@@ -87,12 +81,8 @@ class IterableClass {
 @HiveType(typeId: 6)
 @immutable
 class ConstructorDefaults {
-  ConstructorDefaults({
-    this.a = 42,
-    this.b = '42',
-    this.c = true,
-    DateTime? d,
-  }) : d = d ?? DateTime.timestamp();
+  ConstructorDefaults({this.a = 42, this.b = '42', this.c = true, DateTime? d})
+    : d = d ?? DateTime.timestamp();
 
   @HiveField(0)
   final int a;

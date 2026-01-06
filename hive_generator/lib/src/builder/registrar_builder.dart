@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:build/build.dart';
 import 'package:glob/glob.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
 import 'package:yaml/yaml.dart';
@@ -70,7 +70,7 @@ class RegistrarBuilder implements Builder {
       buffer.writeln('// ignore_for_file: ${ignores.join(', ')}\n');
     }
 
-    buffer.writeln("import 'package:hive_ce/hive.dart';");
+    buffer.writeln("import 'package:hive_ce/hive_ce.dart';");
 
     for (final uri in uris) {
       buffer.writeln("import '$uri';");

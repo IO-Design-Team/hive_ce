@@ -1,12 +1,15 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/keystore.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
+import 'package:hive_ce/src/connect/hive_connect_api.dart';
+import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
-abstract class BoxBaseImpl<E> implements BoxBase<E> {
+abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   /// TODO: Document this!
   static BoxBase<E> nullImpl<E>() => _NullBoxBase<E>();
 
@@ -179,6 +182,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
     _open = false;
     await keystore.close();
     hive.unregisterBox(name);
+    HiveConnect.unregisterBox(this);
 
     await backend.close();
   }
@@ -193,6 +197,13 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
 
     await backend.deleteFromDisk();
   }
+
+  @override
+  TypeRegistry get typeRegistry => hive;
+
+  @override
+  Future<Iterable<InspectorFrame>> getFrames() async =>
+      keystore.frames.map(InspectorFrame.fromFrame);
 }
 
 class _NullBoxBase<E> implements BoxBase<E> {

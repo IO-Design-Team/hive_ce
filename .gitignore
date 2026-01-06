@@ -144,3 +144,6 @@ coverage_badge.svg
 
 # isar
 *.isar
+
+# devtools extension
+devtools_options.yaml

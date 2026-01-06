@@ -2,7 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:collection/collection.dart';
 import 'package:glob/glob.dart';
 import 'package:build/build.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
 import 'dart:async';
 
@@ -35,18 +35,6 @@ class SchemaMigratorBuilder implements Builder {
     required String fieldName,
   }) =>
       '$className.$fieldName does not have a public getter';
-
-  /// Exception if a field will cause a schema mismatch
-  static String hasSchemaMismatch({
-    required String className,
-    required Set<String> accessors,
-  }) {
-    final accessorsString = accessors.join('\n- ');
-    return 'Accessors in $className do not have HiveField annotations'
-        ' but are valid accessors for the GenerateAdapters annotation.'
-        ' This will result in a schema mismatch.'
-        ' Consider moving these accessors to an extension:\n- $accessorsString';
-  }
 
   @override
   final buildExtensions = const {
@@ -131,17 +119,8 @@ class SchemaMigratorBuilder implements Builder {
       final accessorsWithoutAnnotations =
           secondPassFields.difference(firstPassFields);
 
-      if (accessorsWithoutAnnotations.isNotEmpty) {
-        throw InvalidGenerationSourceError(
-          hasSchemaMismatch(
-            className: className,
-            accessors: accessorsWithoutAnnotations,
-          ),
-          element: cls,
-        );
-      }
-
-      schemaInfos.add(info);
+      schemaInfos
+          .add(info.copyWith(ignoredFields: accessorsWithoutAnnotations));
     }
     schemaInfos.sort((a, b) => a.schema.typeId.compareTo(b.schema.typeId));
     final nextTypeId =
@@ -157,12 +136,11 @@ class SchemaMigratorBuilder implements Builder {
         .map((e) => "import '$e';")
         .sorted() // Sort alphabetically
         .join('\n');
-    final specs =
-        schemaInfos.map((e) => 'AdapterSpec<${e.className}>()').join(',\n  ');
+    final specs = schemaInfos.map((e) => e.adapterSpec).join(',\n  ');
     buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.dart'),
       '''
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 $imports
 
 @GenerateAdapters([
@@ -174,7 +152,7 @@ part 'hive_adapters.g.dart';
 
     buildStep.forceWriteAsString(
       buildStep.asset('lib/hive/hive_adapters.g.yaml'),
-      HiveSchema(nextTypeId: nextTypeId, types: types).toString(),
+      writeSchema(HiveSchema(nextTypeId: nextTypeId, types: types)),
     );
   }
 }
@@ -183,6 +161,7 @@ part 'hive_adapters.g.dart';
 class _SchemaInfo {
   final Uri uri;
   final String className;
+  final Set<String> ignoredFields;
   final HiveSchemaType schema;
 
   _SchemaInfo({
@@ -192,13 +171,31 @@ class _SchemaInfo {
     required ConstructorElement constructor,
     required List<PropertyAccessorElement> accessors,
     required HiveSchemaType schema,
-  }) : schema = _sanitizeSchema(
+  })  : ignoredFields = {},
+        schema = _sanitizeSchema(
           className: className,
           isEnum: isEnum,
           schema: schema,
           constructor: constructor,
           accessors: accessors,
         );
+
+  const _SchemaInfo._({
+    required this.uri,
+    required this.className,
+    required this.ignoredFields,
+    required this.schema,
+  });
+
+  _SchemaInfo copyWith({
+    Set<String>? ignoredFields,
+  }) =>
+      _SchemaInfo._(
+        uri: uri,
+        className: className,
+        ignoredFields: ignoredFields ?? this.ignoredFields,
+        schema: schema,
+      );
 
   static HiveSchemaType _sanitizeSchema({
     required String className,
@@ -247,5 +244,15 @@ class _SchemaInfo {
     }
 
     return schema.copyWith(fields: sanitizedFields);
+  }
+
+  String get adapterSpec {
+    var spec = 'AdapterSpec<$className>(';
+    if (ignoredFields.isNotEmpty) {
+      final ignoredFieldsString = ignoredFields.map((e) => "'$e'").join(', ');
+      spec += 'ignoredFields: {$ignoredFieldsString}';
+    }
+    spec += ')';
+    return spec;
   }
 }

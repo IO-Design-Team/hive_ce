@@ -1,13 +1,16 @@
 import 'dart:async';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:meta/meta.dart';
+import 'package:hive_ce/src/connect/hive_connect_api.dart';
+import 'package:hive_ce/src/connect/inspectable_box.dart';
 
 /// Web implementation of [IsolatedBoxBase]
 ///
 /// All operations are delegated to the wrapped [box]
-abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
+abstract class IsolatedBoxBaseImpl<E>
+    implements IsolatedBoxBase<E>, InspectableBox {
   BoxBase<E> get _box;
 
   @override
@@ -140,6 +143,13 @@ abstract class IsolatedBoxBaseImpl<E> implements IsolatedBoxBase<E> {
 
   @override
   int get hashCode => _box.hashCode;
+
+  @override
+  TypeRegistry get typeRegistry => (_box as InspectableBox).typeRegistry;
+
+  @override
+  Future<Iterable<InspectorFrame>> getFrames() =>
+      (_box as InspectableBox).getFrames();
 }
 
 /// Isolated implementation of [Box]

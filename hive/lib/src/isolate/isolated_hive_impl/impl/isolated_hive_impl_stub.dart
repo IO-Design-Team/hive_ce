@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Stub implementation of [IsolatedHiveInterface]
 class IsolatedHiveImpl implements IsolatedHiveInterface {

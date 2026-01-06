@@ -1,5 +1,40 @@
-## NEXT
+## 2.16.0
 
+- Implements a proper logging system
+- Adds `hive_ce.dart` to make the publish action happy
+
+## 2.15.1
+
+- Moves most of the documentation to the new [documentation site](https://docs.hive.isar.community)
+
+## 2.15.0
+
+- Adds `ignoredFields` parameter to `AdapterSpec` for excluding specific fields from type adapter generation (by [@rezam92](https://github.com/rezam92) in [#229](https://github.com/IO-Design-Team/hive_ce/pull/229))
+
+## 2.14.0
+
+- Adds the ability to override type adapters by type (by [@sportismygame](https://github.com/sportismygame) in [#217](https://github.com/IO-Design-Team/hive_ce/pull/217))
+- Fixes some `Future` handling issues
+
+## 2.13.3
+
+- Adds copy to clipboard functionality to the inspector
+
+## 2.13.2
+
+- Removes the print statement from the inspector
+
+## 2.13.1
+
+- Fixes the first column header not showing in the inspector
+
+## 2.13.0
+
+- Adds the Hive CE Inspector DevTools extension
+
+## 2.12.0
+
+- Notify with the value of a deleted frame instead of `null`
 - Improves adapter of same type warning
 
 ## 2.11.4

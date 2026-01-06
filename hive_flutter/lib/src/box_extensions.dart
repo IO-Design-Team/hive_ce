@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Flutter extensions for boxes.
 extension BoxX<T> on Box<T> {
@@ -39,9 +39,10 @@ class _BoxListenable<T, B extends BoxBase<T>> extends ValueListenable<B> {
   @override
   void addListener(VoidCallback listener) {
     if (_listeners.isEmpty) {
+      final keys = this.keys;
       if (keys != null) {
         _subscription = box.watch().listen((event) {
-          if (keys!.contains(event.key)) {
+          if (keys.contains(event.key)) {
             for (final listener in _listeners) {
               listener();
             }

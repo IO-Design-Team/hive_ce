@@ -1,9 +1,9 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Not part of public API
 class Frame {
   /// Not part of public API
-  final Object? key;
+  final Object key;
 
   /// Not part of public API
   final Object? value;

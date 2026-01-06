@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:flutter/foundation.dart';
 
 /// TODO: Document this!

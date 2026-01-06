@@ -2,3 +2,8 @@
 * text=auto
 * text eol=lf
 *.png binary
+*.dylib binary
+hive/extension/devtools/** binary
+
+# Exclude from language statistics
+hive/extension/** linguist-vendored

@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/ignored_type_adapter.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
@@ -68,6 +68,19 @@ class ChildAdapter extends TypeAdapter<Child> {
   void write(BinaryWriter writer, Child obj) {}
 }
 
+class TestDurationAdapter extends TypeAdapter<Duration> {
+  const TestDurationAdapter(this.typeId);
+
+  @override
+  final int typeId;
+
+  @override
+  Duration read(BinaryReader reader) => throw UnimplementedError();
+
+  @override
+  void write(BinaryWriter writer, obj) => throw UnimplementedError();
+}
+
 void main() {
   group('TypeRegistryImpl', () {
     group('.registerAdapter()', () {
@@ -109,25 +122,74 @@ void main() {
         registry.registerAdapter<dynamic>(TestAdapter());
       });
 
-      test('override', () async {
-        final registry = TypeRegistryImpl();
-        registry.registerAdapter(TestAdapter());
+      group('override', () {
+        test('by typeId', () async {
+          final registry = TypeRegistryImpl();
+          registry.registerAdapter(TestAdapter());
 
-        final output = await captureOutput(
-          () => registry.registerAdapter(TestAdapter(), override: true),
-        ).toList();
-        expect(
-          output,
-          contains(contains('You are trying to override TestAdapter')),
-        );
-        expect(
-          output,
-          isNot(
-            contains(
-              contains('WARNING: You are trying to register TestAdapter'),
+          final output = await captureOutput(
+            () => registry.registerAdapter(TestAdapter(), override: true),
+          ).toList();
+          expect(
+            output,
+            contains(contains('You are trying to override TestAdapter')),
+          );
+          expect(
+            output,
+            isNot(
+              contains(
+                contains('WARNING: You are trying to register TestAdapter'),
+              ),
             ),
-          ),
-        );
+          );
+        });
+
+        group('by type', () {
+          test('external', () async {
+            final registry = TypeRegistryImpl();
+            registry.registerAdapter(TestAdapter(100));
+
+            final foundAdapter1 = registry.findAdapterForType<int>();
+            expect(foundAdapter1!.adapter.typeId, 100);
+
+            final output = await captureOutput(
+              () => registry.registerAdapter(TestAdapter(200), override: true),
+            ).toList();
+            expect(
+              output,
+              contains(contains('Removed existing adapter TestAdapter')),
+            );
+
+            final foundAdapter2 = registry.findAdapterForType<int>();
+            expect(foundAdapter2!.adapter.typeId, 200);
+          });
+
+          test('internal', () async {
+            final registry = TypeRegistryImpl();
+
+            final foundAdapter1 = registry.findAdapterForType<Duration>();
+            expect(foundAdapter1!.adapter.typeId, 20);
+
+            final output = await captureOutput(
+              () => registry.registerAdapter(
+                TestDurationAdapter(60),
+                override: true,
+              ),
+            ).toList();
+            expect(
+              output,
+              contains(
+                contains(
+                  'Removed existing adapter DurationAdapter (typeId 20) for '
+                  'type Duration and replaced with TestDurationAdapter (typeId 60).',
+                ),
+              ),
+            );
+
+            final foundAdapter2 = registry.findAdapterForType<Duration>();
+            expect(foundAdapter2!.adapter.typeId, 60);
+          });
+        });
       });
 
       test('adapter with same type warning', () async {
@@ -304,6 +366,16 @@ void main() {
           () => TypeRegistryImpl.calculateTypeId(65440, internal: false),
           throwsHiveError(),
         );
+      });
+
+      test('isInternalTypeId', () {
+        expect(TypeRegistryImpl.isInternalTypeId(0), true);
+        expect(TypeRegistryImpl.isInternalTypeId(31), true);
+        expect(TypeRegistryImpl.isInternalTypeId(32), false);
+        expect(TypeRegistryImpl.isInternalTypeId(255), false);
+        expect(TypeRegistryImpl.isInternalTypeId(256), true);
+        expect(TypeRegistryImpl.isInternalTypeId(319), true);
+        expect(TypeRegistryImpl.isInternalTypeId(320), false);
       });
     });
   });

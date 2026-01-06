@@ -1,0 +1,14 @@
+name: Publish hive_ce_generator to pub.dev
+
+on:
+    push:
+        tags:
+            - "hive_ce_generator-[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+    publish:
+        permissions:
+            id-token: write
+        uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+        with:
+            working-directory: hive_generator

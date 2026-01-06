@@ -1,4 +1,4 @@
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';

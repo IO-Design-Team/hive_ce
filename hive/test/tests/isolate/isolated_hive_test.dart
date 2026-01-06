@@ -1,8 +1,8 @@
 // This is a test
-// ignore_for_file: prefer_async_await
+// ignore_for_file: rexios_lints/prefer_async_await
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:test/test.dart';
 

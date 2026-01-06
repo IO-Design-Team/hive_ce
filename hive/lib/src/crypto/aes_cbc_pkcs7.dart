@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/src/crypto/aes_engine.dart';
+import 'package:meta/meta.dart';
 
 /// AES CBC implementation with PKCS7 padding
+@immutable
 class AesCbcPkcs7 {
   static final _lastInputBlockBuffer = Uint8List(16);
 

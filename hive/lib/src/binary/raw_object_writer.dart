@@ -1,0 +1,47 @@
+import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
+
+/// A binary writer that writes raw objects
+class RawObjectWriter extends BinaryWriterImpl {
+  /// Constructor
+  RawObjectWriter(super.typeRegistry);
+
+  @override
+  void write<T>(T value, {bool withTypeId = true}) {
+    if (value == null ||
+        value is int ||
+        value is double ||
+        value is bool ||
+        value is String ||
+        value is List ||
+        value is Set ||
+        value is Map) {
+      super.write(value, withTypeId: withTypeId);
+      return;
+    }
+
+    final resolved = typeRegistry.findAdapterForValue(value);
+    if (resolved == null) {
+      throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
+          'Did you forget to register an adapter?');
+    }
+
+    final nested = RawObjectWriter(typeRegistry);
+    resolved.adapter.write(nested, value);
+    final bytes = nested.toBytes();
+
+    final typeId = resolved.typeId;
+    final isEnum = value is Enum;
+    final isInternal = TypeRegistryImpl.isInternalTypeId(typeId);
+
+    if (withTypeId) writeTypeId(typeId);
+
+    if (!isInternal) {
+      writeByte(isEnum ? 1 : 0);
+      writeInt32(bytes.length);
+    }
+
+    writeBytes(bytes);
+  }
+}

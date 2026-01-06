@@ -3,18 +3,19 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/box_impl.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/box/lazy_box_impl.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:meta/meta.dart';
 
@@ -66,8 +67,9 @@ RECOMMENDED ACTIONS:
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
   }) {
-    if (!{'main', hiveIsolateName}.contains(isolateDebugName)) {
-      debugPrint(unsafeIsolateWarning);
+    if (Logger.unsafeIsolateWarning &&
+        !{'main', hiveIsolateName}.contains(isolateDebugName)) {
+      Logger.w(unsafeIsolateWarning);
     }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);
@@ -150,13 +152,16 @@ RECOMMENDED ACTIONS:
         _boxes[name] = newBox;
 
         completer.complete();
+
+        if (!_isolated) HiveConnect.registerBox(newBox);
+
         return newBox;
       } catch (error, stackTrace) {
-        unawaited(newBox?.close());
+        newBox?.close().ignore();
         completer.completeError(error, stackTrace);
         rethrow;
       } finally {
-        unawaited(_openingBoxes.remove(name));
+        _openingBoxes.remove(name)?.ignore();
       }
     }
   }

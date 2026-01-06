@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
@@ -140,9 +140,9 @@ Frame frameWithLength(Frame frame, int length) {
 
 Frame frameBodyWithLength(Frame frame, int length) {
   if (frame.deleted) {
-    return Frame.deleted(null, length: length);
+    return Frame.deleted(frame.key, length: length);
   } else {
-    return Frame(null, frame.value, length: length);
+    return Frame(frame.key, frame.value, length: length);
   }
 }
 

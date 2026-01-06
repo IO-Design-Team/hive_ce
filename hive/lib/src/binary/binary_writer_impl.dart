@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -23,7 +24,8 @@ class BinaryWriterImpl extends BinaryWriter {
       'This is due to Hive storing all numbers as 64 bit floats. '
       'Consider using a BigInt.';
 
-  final TypeRegistryImpl _typeRegistry;
+  /// The type registry to use for writing values
+  final TypeRegistryImpl typeRegistry;
   var _buffer = Uint8List(_initBufferSize);
 
   ByteData? _byteDataInstance;
@@ -39,11 +41,11 @@ class BinaryWriterImpl extends BinaryWriter {
 
   /// Not part of public API
   BinaryWriterImpl(TypeRegistry typeRegistry)
-      : _typeRegistry = typeRegistry as TypeRegistryImpl;
+      : typeRegistry = typeRegistry as TypeRegistryImpl;
 
   /// Not part of public API
   @visibleForTesting
-  BinaryWriterImpl.withBuffer(this._buffer, this._typeRegistry);
+  BinaryWriterImpl.withBuffer(this._buffer, this.typeRegistry);
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -105,7 +107,7 @@ class BinaryWriterImpl extends BinaryWriter {
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
-    if (kDebugMode && value >= maxInt) debugPrint(intWarning);
+    if (kDebugMode && value >= maxInt) Logger.w(intWarning);
     writeDouble(value.toDouble());
   }
 
@@ -253,7 +255,6 @@ class BinaryWriterImpl extends BinaryWriter {
   ///   followed by two bytes
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  @visibleForTesting
   void writeTypeId(int typeId) {
     if (typeId < 256) {
       writeByte(typeId);
@@ -273,7 +274,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
     if (!frame.deleted) {
       if (verbatim) {
-        _writeBytes(frame.value as Uint8List);
+        writeBytes(frame.value as Uint8List);
       } else if (cipher == null) {
         write(frame.value);
       } else {
@@ -296,7 +297,9 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Add the given bytes to the buffer verbatim
-  int _writeBytes(Uint8List bytes) {
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  int writeBytes(Uint8List bytes) {
     final length = bytes.length;
     _reserveBytes(length);
     _buffer.setRange(_offset, _offset + length, bytes);
@@ -330,7 +333,7 @@ class BinaryWriterImpl extends BinaryWriter {
       typeId = FrameValueType.mapT;
       write = () => writeMap(value);
     } else {
-      final resolved = _typeRegistry.findAdapterForValue(value);
+      final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
@@ -397,7 +400,7 @@ class BinaryWriterImpl extends BinaryWriter {
     HiveCipher cipher, {
     bool withTypeId = true,
   }) {
-    final valueWriter = BinaryWriterImpl(_typeRegistry)
+    final valueWriter = BinaryWriterImpl(typeRegistry)
       ..write(value, withTypeId: withTypeId);
     final inp = valueWriter._buffer;
     final inpLength = valueWriter._offset;

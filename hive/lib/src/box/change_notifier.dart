@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:meta/meta.dart';
 
@@ -17,8 +17,14 @@ class ChangeNotifier {
   const ChangeNotifier.debug(this._streamController);
 
   /// Not part of public API
-  void notify(Frame frame) {
-    _streamController.add(BoxEvent(frame.key, frame.value, frame.deleted));
+  void notify(Frame frame, {Object? deletedValue}) {
+    _streamController.add(
+      BoxEvent(
+        frame.key,
+        frame.deleted ? deletedValue : frame.value,
+        frame.deleted,
+      ),
+    );
   }
 
   /// Not part of public API

@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
@@ -56,7 +57,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       _isolateNameServer = isolateNameServer;
 
       if (_isolateNameServer == null) {
-        debugPrint(HiveIsolate.noIsolateNameServerWarning);
+        Logger.w(HiveIsolate.noIsolateNameServerWarning);
       }
 
       final send =
@@ -74,7 +75,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       _boxChannel = IsolateMethodChannel('box', connection);
     }
 
-    return _hiveChannel.invokeMethod('init', {'path': path});
+    return _hiveChannel.invokeMethod(
+      'init',
+      {'path': path, 'logger_level': Logger.level.name},
+    );
   }
 
   Future<IsolatedBoxBase<E>> _openBox<E>(
@@ -150,12 +154,15 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         _boxes[name] = newBox;
 
         completer.complete();
+
+        HiveConnect.registerBox(newBox);
+
         return newBox;
       } catch (error, stackTrace) {
         completer.completeError(error, stackTrace);
         rethrow;
       } finally {
-        unawaited(_openingBoxes.remove(name));
+        _openingBoxes.remove(name)?.ignore();
       }
     }
   }
@@ -248,7 +255,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   /// Not part of public API
   Future<void> unregisterBox(String name) async {
     name = name.toLowerCase();
-    unawaited(_openingBoxes.remove(name));
+    _openingBoxes.remove(name)?.ignore();
     _boxes.remove(name);
     await _hiveChannel.invokeMethod('unregisterBox', {'name': name});
   }

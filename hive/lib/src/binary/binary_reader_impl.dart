@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
@@ -309,6 +309,14 @@ class BinaryReaderImpl extends BinaryReader {
     skip(4); // Skip CRC
 
     return frame;
+  }
+
+  /// Read [length] bytes from the buffer
+  Uint8List readBytes(int length) {
+    _requireBytes(length);
+    final bytes = _buffer.sublist(_offset, _offset + length);
+    _offset += length;
+    return bytes;
   }
 
   @override

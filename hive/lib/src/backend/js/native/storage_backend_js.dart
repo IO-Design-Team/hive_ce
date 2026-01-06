@@ -3,7 +3,7 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
@@ -12,6 +12,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart';
 
@@ -82,7 +83,7 @@ class StorageBackendJs extends StorageBackend {
         if (kDebugMode) {
           final isIntType = value is int || value is List<int>;
           if (isIntType && isWasm) {
-            debugPrint(wasmIntWarning);
+            Logger.w(wasmIntWarning);
           }
         }
 
@@ -136,22 +137,30 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   @visibleForTesting
-  Future<List<Object?>> getKeys({bool cursor = false}) async {
+  Future<List<Object>> getKeys({bool cursor = false}) async {
     final store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
       final result = await getStore(false).getAllKeys(null).asFuture<JSArray>();
-      return result.toDart.map((e) {
-        if (e.isA<JSNumber>()) {
-          e as JSNumber;
-          return e.toDartInt;
-        } else if (e.isA<JSString>()) {
-          e as JSString;
-          return e.toDart;
-        }
-      }).toList();
+      return result.toDart
+          .map((e) {
+            if (e.isA<JSNumber>()) {
+              e as JSNumber;
+              return e.toDartInt;
+            } else if (e.isA<JSString>()) {
+              e as JSString;
+              return e.toDart;
+            }
+          })
+          .whereType<Object>()
+          .toList();
     } else {
-      return store.iterate().map((e) => e.key.dartify()).toList();
+      return store
+          .iterate()
+          .map((e) => e.key.dartify())
+          .where((e) => e is Object)
+          .cast<Object>()
+          .toList();
     }
   }
 
@@ -231,7 +240,7 @@ class StorageBackendJs extends StorageBackend {
   Future<void> deleteFromDisk() async {
     final indexDB = window.self.indexedDB;
 
-    debugPrint('Delete ${_db.name} // $objectStoreName from disk');
+    Logger.d('Delete ${_db.name} // $objectStoreName from disk');
 
     // directly deleting the entire DB if a non-collection Box
     if (_db.objectStoreNames.length == 1) {
