@@ -210,9 +210,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
 
     JSAny? value;
-    if (_isPrimitive(val) ||
-        _isPrimitiveIterable(val) ||
-        _isPrimitiveMap(val)) {
+    if (_isPrimitive(val)) {
       value = val.jsify();
     } else {
       if (fromJson == null) {
@@ -235,19 +233,38 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     return;
   }
 
+/// Checks if a value is a primitive type.
+  ///
+  /// Primitive types are:
+  /// - num
+  /// - bool
+  /// - String
+  ///
+  /// If the value is a Map, it will be checked if all of its values are
+  /// primitive. If the value is an Iterable, it will be checked if all of
+  /// its elements are primitive.
   bool _isPrimitive(Object? val) {
+    if (val is Map) {
+      return _isPrimitiveMap(val);
+    } else if (val is Iterable) {
+      return _isPrimitiveIterable(val);
+    } else {
+      return __isPrimitive(val);
+    }
+  }
+
+  bool __isPrimitive(Object? val) {
     return val is num || val is bool || val is String;
   }
 
-  bool _isPrimitiveIterable(Object val) {
-    return val is Iterable && val.every(_isPrimitive);
+  bool _isPrimitiveIterable(Iterable val) {
+    return val.every(_isPrimitive);
   }
 
-  bool _isPrimitiveMap(Object val) {
-    return val is Map &&
-        val.entries.every(
-          (entry) => _isPrimitive(entry.key) && _isPrimitive(entry.value),
-        );
+  bool _isPrimitiveMap(Map val) {
+    return val.entries.every(
+      (entry) => __isPrimitive(entry.key) && _isPrimitive(entry.value),
+    );
   }
 
   @override
