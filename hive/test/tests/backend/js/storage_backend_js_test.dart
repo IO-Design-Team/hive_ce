@@ -123,9 +123,11 @@ void main() async {
       test('primitive', () {
         final backend = _getBackend();
         expect(backend.decodeValue(null), null);
+        expect(backend.decodeValue(11.toJS), 11);
         expect(backend.decodeValue(17.25.toJS), 17.25);
         expect(backend.decodeValue(true.toJS), true);
         expect(backend.decodeValue('hello'.toJS), 'hello');
+        expect(backend.decodeValue([11, 12, 13].jsify()), [11, 12, 13]);
         expect(backend.decodeValue([17.25, 17.26].jsify()), [17.25, 17.26]);
 
         final bytes = Uint8List.fromList([1, 2, 3]);
