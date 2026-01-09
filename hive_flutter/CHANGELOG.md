@@ -1,4 +1,4 @@
-## NEXT
+## 2.3.4
 
 - Adds `hive_ce_flutter.dart` to make the publish action happy
 
