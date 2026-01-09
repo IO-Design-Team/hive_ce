@@ -2,16 +2,12 @@ name: example
 
 dependencies:
   hive_ce: any
-  # TODO: Waiting on analyzer 9 support
-  # freezed_annotation: ^3.0.0
   meta: ^1.17.0
 
 dev_dependencies:
   rexios_lints: ^17.0.2
   hive_ce_generator: any
   build_runner: ^2.5.4
-  # TODO: Waiting on analyzer 9 support
-  # freezed: ^3.0.6
 
 environment:
   sdk: ^3.9.0
