@@ -8,6 +8,12 @@ abstract class Logger {
   /// If the unsafe isolate warning is enabled
   static var unsafeIsolateWarning = true;
 
+  /// If the unmatched isolation warning is enabled
+  static var unmatchedIsolationWarning = true;
+
+  /// If the no isolate name server warning is enabled
+  static var noIsolateNameServerWarning = true;
+
   /// Log a verbose message
   static void v(Object? message) {
     if (level.index > LoggerLevel.verbose.index) return;
