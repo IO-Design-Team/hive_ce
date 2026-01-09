@@ -210,9 +210,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
 
     JSAny? value;
-    if (_isPrimitive(val) ||
-        _isPrimitiveIterable(val) ||
-        _isPrimitiveMap(val)) {
+    if (_isPrimitive(val)) {
       value = val.jsify();
     } else {
       if (fromJson == null) {
@@ -236,18 +234,14 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   }
 
   bool _isPrimitive(Object? val) {
-    return val is num || val is bool || val is String;
-  }
-
-  bool _isPrimitiveIterable(Object val) {
-    return val is Iterable && val.every(_isPrimitive);
-  }
-
-  bool _isPrimitiveMap(Object val) {
-    return val is Map &&
-        val.entries.every(
-          (entry) => _isPrimitive(entry.key) && _isPrimitive(entry.value),
-        );
+    return val is num ||
+        val is bool ||
+        val is String ||
+        (val is Iterable && val.every(_isPrimitive)) ||
+        (val is Map &&
+            val.entries.every(
+              (entry) => _isPrimitive(entry.key) && _isPrimitive(entry.value),
+            ));
   }
 
   @override

@@ -155,6 +155,29 @@ void main() {
       await box.put('json_test', testObject);
       expect(await box.get('json_test'), testObject);
     });
+
+    test('nested primitive types', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox('cats');
+
+      const value = [
+        1,
+        2,
+        [
+          3,
+          4,
+          [5, 6],
+        ],
+        {
+          'a': 1,
+          'b': [2, 3],
+          'c': {'d': 4},
+        },
+      ];
+
+      await box.put('nested_test', value);
+      expect(await box.get('nested_test'), value);
+    });
   });
 }
 
