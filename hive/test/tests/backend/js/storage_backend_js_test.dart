@@ -154,6 +154,7 @@ void main() async {
           final value = backend.decodeValue(bytes);
           expect(value, testFrame.value);
 
+          // Ensure int and List<int> are not decoded as doubles
           if (testFrame.value is! Uint8List &&
               (testFrame.value is int || testFrame.value is List<int>)) {
             expect(value.runtimeType, testFrame.value.runtimeType);
