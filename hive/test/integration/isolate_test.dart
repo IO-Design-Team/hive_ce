@@ -204,9 +204,9 @@ void main() {
           );
 
           await IsolatedHive.openBox('box2');
-          final ignoredOutput = await captureOutput(() {
+          final ignoredOutput = await captureOutput(() async {
             HiveLogger.unmatchedIsolationWarning = false;
-            Hive.init(path);
+            await Hive.openBox('box2');
           }).toList();
 
           expect(
