@@ -182,7 +182,7 @@ void main() {
 
           final ignoredOutput = await captureOutput(() {
             HiveLogger.noIsolateNameServerWarning = false;
-            IsolatedHiveImpl().init(null, isolateNameServer: TestIns());
+            IsolatedHiveImpl().init(null);
           }).toList();
           expect(ignoredOutput, isEmpty);
         });
