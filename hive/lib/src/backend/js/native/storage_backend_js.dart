@@ -68,8 +68,8 @@ class StorageBackendJs extends StorageBackend {
           value is List<double> ||
           value is List<bool> ||
           value is List<String>) {
-        // Since ints do not exist in WASM, treat them as non-primitive values
-        // so that they get encoded with type IDs
+        // For WASM compatibility, ints need to be treated as non-primitive
+        // values and encoded with type IDs
         return value.jsify();
       }
     }
