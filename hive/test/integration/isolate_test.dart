@@ -204,11 +204,11 @@ void main() {
           );
 
           await IsolatedHive.openBox('box2');
-
           final ignoredOutput = await captureOutput(() {
             HiveLogger.unmatchedIsolationWarning = false;
             Hive.init(path);
           }).toList();
+
           expect(
             ignoredOutput,
             isNot(contains(StorageBackendVm.unmatchedIsolationWarning)),
