@@ -11,7 +11,6 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart';
@@ -23,17 +22,6 @@ class StorageBackendJs extends StorageBackend {
   /// If this is a WASM environment
   @visibleForTesting
   static const isWasm = bool.fromEnvironment('dart.tool.dart2wasm');
-
-  /// Warning message printed when writing `int` values in a WASM environment
-  @visibleForTesting
-  static const wasmIntWarning =
-      'WARNING: You are writing a type of `int` or `List<int>` in a WASM '
-      'environment. This value will read as a `double` or `List<double>` '
-      'on subsequent app launches and need manually casted back to the correct '
-      'type. Ensure you are doing one of the following:\n'
-      ' - (box.get(key) as num).toInt()\n'
-      ' - (box.get(key) as List).cast<num>().map((e) => e.toInt()).toList()\n\n'
-      'Also consider using TypeAdapters since they automatically handle this.';
 
   final IDBDatabase _db;
   final HiveCipher? _cipher;
@@ -74,19 +62,14 @@ class StorageBackendJs extends StorageBackend {
         if (!_isEncoded(value)) {
           return value.buffer.toJS;
         }
-      } else if (value is num ||
+      } else if (value is double ||
           value is bool ||
           value is String ||
-          value is List<num> ||
+          value is List<double> ||
           value is List<bool> ||
           value is List<String>) {
-        if (kDebugMode) {
-          final isIntType = value is int || value is List<int>;
-          if (isIntType && isWasm) {
-            Logger.w(wasmIntWarning);
-          }
-        }
-
+        // For WASM compatibility, ints need to be treated as non-primitive
+        // values and encoded with type IDs
         return value.jsify();
       }
     }
