@@ -151,6 +151,11 @@ void main() async {
           final bytes = backend.encodeValue(testFrame);
           final value = backend.decodeValue(bytes);
           expect(value, testFrame.value);
+
+          if (testFrame.value is! Uint8List &&
+              (testFrame.value is int || testFrame.value is List<int>)) {
+            expect(value.runtimeType, testFrame.value.runtimeType);
+          }
         }
       });
     });
