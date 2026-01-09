@@ -179,6 +179,12 @@ void main() {
             () => IsolatedHiveImpl().init(null, isolateNameServer: TestIns()),
           ).toList();
           expect(safeOutput, isEmpty);
+
+          final ignoredOutput = await captureOutput(() {
+            HiveLogger.noIsolateNameServerWarning = false;
+            IsolatedHiveImpl().init(null);
+          }).toList();
+          expect(ignoredOutput, isEmpty);
         });
 
         test('unmatched isolation', () async {
@@ -188,13 +194,24 @@ void main() {
           await IsolatedHive.init(path, isolateNameServer: StubIns());
           Hive.init(path);
 
-          await IsolatedHive.openBox('test');
+          await IsolatedHive.openBox('box1');
           final output =
-              await captureOutput(() => Hive.openBox('test')).toList();
+              await captureOutput(() => Hive.openBox('box1')).toList();
 
           expect(
             output,
             contains(StorageBackendVm.unmatchedIsolationWarning),
+          );
+
+          await IsolatedHive.openBox('box2');
+          final ignoredOutput = await captureOutput(() async {
+            HiveLogger.unmatchedIsolationWarning = false;
+            await Hive.openBox('box2');
+          }).toList();
+
+          expect(
+            ignoredOutput,
+            isNot(contains(StorageBackendVm.unmatchedIsolationWarning)),
           );
         });
       });

@@ -115,7 +115,7 @@ RECOMMENDED ACTIONS:
       } catch (_) {
         props = LockProps();
       }
-      if (props.isolated && !isolated) {
+      if (Logger.unmatchedIsolationWarning && props.isolated && !isolated) {
         Logger.w(unmatchedIsolationWarning);
       }
     }

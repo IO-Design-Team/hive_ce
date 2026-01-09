@@ -56,7 +56,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     if (_connection == null) {
       _isolateNameServer = isolateNameServer;
 
-      if (_isolateNameServer == null) {
+      if (Logger.noIsolateNameServerWarning && _isolateNameServer == null) {
         Logger.w(HiveIsolate.noIsolateNameServerWarning);
       }
 

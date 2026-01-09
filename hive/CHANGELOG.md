@@ -1,3 +1,7 @@
+## NEXT
+
+- Adds more options to the logger to ignore specific warnings
+
 ## 2.16.0
 
 - Implements a proper logging system
