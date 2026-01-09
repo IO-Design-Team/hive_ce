@@ -1,6 +1,7 @@
 ## NEXT
 
 - Fixes WASM int decoding (by [@flrnsbt](https://github.com/flrnsbt) in [#262](https://github.com/IO-Design-Team/hive_ce/pull/262))
+- Adds nested primitive support to `CollectionBox`
 - Adds more options to the logger to ignore specific warnings
 
 ## 2.16.0
