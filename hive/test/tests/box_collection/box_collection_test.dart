@@ -155,6 +155,30 @@ void main() {
       await box.put('json_test', testObject);
       expect(await box.get('json_test'), testObject);
     });
+
+    test('primitives', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox('cats');
+
+      const value = [
+        null,
+        1,
+        2,
+        [
+          3,
+          4,
+          [5, 6, null],
+        ],
+        {
+          'a': 1,
+          'b': [2, 3],
+          'c': {'d': 4, 'e': null},
+        },
+      ];
+
+      await box.put('nested_test', value);
+      expect(await box.get('nested_test'), value);
+    });
   });
 }
 
