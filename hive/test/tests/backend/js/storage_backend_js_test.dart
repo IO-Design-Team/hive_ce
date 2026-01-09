@@ -60,8 +60,8 @@ void main() async {
     group('.encodeValue()', () {
       test('primitive', () {
         final values = [
-          null, 11, 17.25, true, 'hello', //
-          [11, 12, 13], [17.25, 17.26], [true, false], ['str1', 'str2'], //
+          null, 17.25, true, 'hello', //
+          [17.25, 17.26], [true, false], ['str1', 'str2'], //
         ];
         final backend = _getBackend();
         for (final value in values) {
@@ -117,42 +117,15 @@ void main() async {
           expect(encoded, [0x90, 0xA9, ...writer.toBytes()]);
         });
       });
-
-      group('int', () {
-        void expectWarning(Object obj) {
-          var output = '';
-          runZoned(
-            () => _getBackend().encodeValue(Frame('key', obj)),
-            zoneSpecification: ZoneSpecification(
-              print: (_, __, ___, line) => output += line,
-            ),
-          );
-
-          if (StorageBackendJs.isWasm) {
-            expect(output, StorageBackendJs.wasmIntWarning);
-          } else {
-            expect(output, isEmpty);
-          }
-        }
-
-        test('prints warning for `int` type', () => expectWarning(11));
-
-        test(
-          'prints warning for `List<int>` type',
-          () => expectWarning([11, 12, 13]),
-        );
-      });
     });
 
     group('.decodeValue()', () {
       test('primitive', () {
         final backend = _getBackend();
         expect(backend.decodeValue(null), null);
-        expect(backend.decodeValue(11.toJS), 11);
         expect(backend.decodeValue(17.25.toJS), 17.25);
         expect(backend.decodeValue(true.toJS), true);
         expect(backend.decodeValue('hello'.toJS), 'hello');
-        expect(backend.decodeValue([11, 12, 13].jsify()), [11, 12, 13]);
         expect(backend.decodeValue([17.25, 17.26].jsify()), [17.25, 17.26]);
 
         final bytes = Uint8List.fromList([1, 2, 3]);
