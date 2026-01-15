@@ -153,9 +153,9 @@ class StorageBackendVm extends StorageBackend {
       final reader = BinaryReaderImpl(bytes, registry);
       final readFrame = reader.readFrame(
         cipher: _cipher,
+        keyCrc: _keyCrc,
         lazy: false,
         verbatim: verbatim,
-        keyCrc: _keyCrc,
       );
 
       if (readFrame == null) {
