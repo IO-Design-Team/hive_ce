@@ -313,13 +313,11 @@ void main() {
           await box.put('key', 'value');
           await box.close();
 
-          captureOutput(
-            () => isolatedHive.openBox(
-              'test',
-              encryptionCipher: HiveAesCipher(key),
-            ),
+          final box2 = await isolatedHive.openBox(
+            'test',
+            encryptionCipher: HiveAesCipher(key),
           );
-          expect(await box.get('key'), 'value');
+          expect(await box2.get('key'), 'value');
         },
       );
     },
