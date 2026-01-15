@@ -1,5 +1,6 @@
-## NEXT
+## 2.18.0
 
+- Fixes an issue with IsolatedHive encryption
 - Automatically disables the unsafe isolate warning when running in a test
 
 ## 2.17.0
