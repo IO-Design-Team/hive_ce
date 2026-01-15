@@ -320,6 +320,52 @@ void main() {
           expect(await box2.get('key'), 'value');
         },
       );
+
+      test('Encrypted IsolatedBox data compatable with IsolatedLazyBox',
+          () async {
+        final dir = await getTempDir();
+        final key = Hive.generateSecureKey();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final box = await isolatedHive.openBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        await box.put('key', 'value');
+        await box.close();
+
+        final lazyBox = await isolatedHive.openLazyBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        expect(await lazyBox.get('key'), 'value');
+      });
+
+      test('Encrypted IsolatedLazyBox data compatable with IsolatedBox',
+          () async {
+        final dir = await getTempDir();
+        final key = Hive.generateSecureKey();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final lazyBox = await isolatedHive.openLazyBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        await lazyBox.put('key', 'value');
+        await lazyBox.close();
+
+        final box = await isolatedHive.openBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        expect(await box.get('key'), 'value');
+      });
     },
     onPlatform: {
       'chrome': Skip('Isolates are not supported on web'),
