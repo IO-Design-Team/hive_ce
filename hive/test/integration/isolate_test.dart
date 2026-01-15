@@ -235,17 +235,9 @@ void main() {
         expect(await box.get('key'), 'value');
       });
 
-      test('Encrypted Hive data is compatible with IsolatedHive', () async {
+      test('Encrypted IsolatedHive data compatable with Hive', () async {
         final dir = await getTempDir();
         final cipher = HiveAesCipher(Hive.generateSecureKey());
-
-        final hive = HiveImpl();
-        addTearDown(hive.close);
-        hive.init(dir.path);
-
-        final box = await hive.openBox('test', encryptionCipher: cipher);
-        await box.put('key', 'value');
-        await box.close();
 
         final isolatedHive = IsolatedHiveImpl();
         addTearDown(isolatedHive.close);
@@ -253,11 +245,50 @@ void main() {
 
         final isolatedBox =
             await isolatedHive.openBox('test', encryptionCipher: cipher);
-        expect(await isolatedBox.get('key'), 'value');
+        await isolatedBox.put('key', 'value');
+        await isolatedBox.close();
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test', encryptionCipher: cipher);
+        expect(await box.get('key'), 'value');
       });
+
+      test(
+        'IsolatedHive data encrypted with no keyCrc is readable',
+        () async {
+          final dir = await getTempDir();
+          final key = Hive.generateSecureKey();
+
+          final isolatedHive = IsolatedHiveImpl();
+          addTearDown(isolatedHive.close);
+          await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+          final box = await isolatedHive.openBox('test',
+              encryptionCipher: ZeroKeyCrcCipher(key));
+          await box.put('key', 'value');
+          await box.close();
+
+          await isolatedHive.openBox(
+            'test',
+            encryptionCipher: HiveAesCipher(key),
+          );
+          expect(await box.get('key'), 'value');
+        },
+      );
     },
     onPlatform: {
       'chrome': Skip('Isolates are not supported on web'),
     },
   );
+}
+
+/// Test cipher that always returns a zero key CRC
+class ZeroKeyCrcCipher extends HiveAesCipher {
+  ZeroKeyCrcCipher(super.key);
+
+  @override
+  int calculateKeyCrc() => 0;
 }
