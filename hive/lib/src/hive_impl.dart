@@ -68,7 +68,9 @@ RECOMMENDED ACTIONS:
         HiveStorageBackendPreference.native,
   }) {
     if (Logger.unsafeIsolateWarning &&
-        !{'main', hiveIsolateName}.contains(isolateDebugName)) {
+        !{'main', hiveIsolateName}.contains(isolateDebugName) &&
+        // Do not print this warning if this code is running in a test
+        !isolateDebugName.startsWith('test_suite')) {
       Logger.w(unsafeIsolateWarning);
     }
     homePath = path;
