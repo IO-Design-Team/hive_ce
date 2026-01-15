@@ -18,12 +18,6 @@ class BinaryWriterImpl extends BinaryWriter {
   /// The maximum integer that can be stored in a 64 bit float (2^53)
   static const maxInt = 9007199254740992;
 
-  /// Warning message printed when attempting to store an integer that is too large
-  static const intWarning =
-      'WARNING: Writing integer values greater than 2^53 will result in precision loss. '
-      'This is due to Hive storing all numbers as 64 bit floats. '
-      'Consider using a BigInt.';
-
   /// The type registry to use for writing values
   final TypeRegistryImpl typeRegistry;
   var _buffer = Uint8List(_initBufferSize);
@@ -107,7 +101,7 @@ class BinaryWriterImpl extends BinaryWriter {
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
-    if (kDebugMode && value >= maxInt) Logger.w(intWarning);
+    if (kDebugMode && value >= maxInt) Logger.w(HiveWarning.bigInt);
     writeDouble(value.toDouble());
   }
 

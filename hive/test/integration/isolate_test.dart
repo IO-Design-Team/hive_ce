@@ -5,11 +5,11 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:hive_ce/hive_ce.dart';
-import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
@@ -122,7 +122,7 @@ void main() {
       group('warnings', () {
         test('unsafe isolate', () async {
           final patchedWarning =
-              HiveImpl.unsafeIsolateWarning.replaceFirst(isolateNameRegex, '');
+              HiveWarning.unsafeIsolate.replaceFirst(isolateNameRegex, '');
 
           final safeOutput = await Isolate.run(
             debugName: 'main',
@@ -172,7 +172,7 @@ void main() {
               await captureOutput(() => IsolatedHiveImpl().init(null)).toList();
           expect(
             unsafeOutput,
-            contains(HiveIsolate.noIsolateNameServerWarning),
+            contains(HiveWarning.noIsolateNameServer),
           );
 
           final safeOutput = await captureOutput(
@@ -200,7 +200,7 @@ void main() {
 
           expect(
             output,
-            contains(StorageBackendVm.unmatchedIsolationWarning),
+            contains(HiveWarning.unmatchedIsolation),
           );
 
           await IsolatedHive.openBox('box2');
@@ -211,7 +211,7 @@ void main() {
 
           expect(
             ignoredOutput,
-            isNot(contains(StorageBackendVm.unmatchedIsolationWarning)),
+            isNot(contains(HiveWarning.unmatchedIsolation)),
           );
         });
       });

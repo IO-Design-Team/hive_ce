@@ -7,6 +7,7 @@ import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -18,6 +19,8 @@ class BinaryReaderImpl extends BinaryReader {
 
   int _bufferLimit;
   var _offset = 0;
+
+  var _crcRecalculationWarningPrinted = false;
 
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])
@@ -295,6 +298,11 @@ class BinaryReaderImpl extends BinaryReader {
           length: crcLength,
         );
         if (computedCrc2 != crc) return null;
+
+        if (!_crcRecalculationWarningPrinted) {
+          Logger.w(HiveWarning.crcRecalculationNeeded);
+          _crcRecalculationWarningPrinted = true;
+        }
       } else {
         return null;
       }
