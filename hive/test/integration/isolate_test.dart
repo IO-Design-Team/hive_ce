@@ -216,7 +216,7 @@ void main() {
         });
       });
 
-      test('IsolatedHive data compatable with Hive', () async {
+      test('IsolatedHive data compatible with Hive', () async {
         final dir = await getTempDir();
 
         final isolatedHive = IsolatedHiveImpl();
@@ -235,7 +235,7 @@ void main() {
         expect(await box.get('key'), 'value');
       });
 
-      test('Hive data compatable with IsolatedHive', () async {
+      test('Hive data compatible with IsolatedHive', () async {
         final dir = await getTempDir();
 
         final hive = HiveImpl();
@@ -254,7 +254,7 @@ void main() {
         expect(await isolatedBox.get('key'), 'value');
       });
 
-      test('Encrypted IsolatedHive data compatable with Hive', () async {
+      test('Encrypted IsolatedHive data compatible with Hive', () async {
         final dir = await getTempDir();
         final cipher = HiveAesCipher(Hive.generateSecureKey());
 
@@ -275,7 +275,7 @@ void main() {
         expect(await box.get('key'), 'value');
       });
 
-      test('Encrypted Hive data compatable with IsolatedHive', () async {
+      test('Encrypted Hive data compatible with IsolatedHive', () async {
         final dir = await getTempDir();
         final cipher = HiveAesCipher(Hive.generateSecureKey());
 
@@ -321,7 +321,7 @@ void main() {
         },
       );
 
-      test('Encrypted IsolatedBox data compatable with IsolatedLazyBox',
+      test('Encrypted IsolatedBox data compatible with IsolatedLazyBox',
           () async {
         final dir = await getTempDir();
         final key = Hive.generateSecureKey();
@@ -344,7 +344,7 @@ void main() {
         expect(await lazyBox.get('key'), 'value');
       });
 
-      test('Encrypted IsolatedLazyBox data compatable with IsolatedBox',
+      test('Encrypted IsolatedLazyBox data compatible with IsolatedBox',
           () async {
         final dir = await getTempDir();
         final key = Hive.generateSecureKey();

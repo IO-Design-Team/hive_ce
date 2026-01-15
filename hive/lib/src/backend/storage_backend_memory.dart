@@ -51,7 +51,7 @@ class StorageBackendMemory extends StorageBackend {
   }
 
   @override
-  Future<dynamic> readValue(Frame frame, {bool verbatim = false, int? keyCrc}) {
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
     throw UnsupportedError('This operation is unsupported for memory boxes.');
   }
 

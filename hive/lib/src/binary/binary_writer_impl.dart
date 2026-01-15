@@ -100,7 +100,7 @@ class BinaryWriterImpl extends BinaryWriter {
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
-    if (HiveLogger.bigIntWarning && value >= maxInt) {
+    if (Logger.bigIntWarning && value >= maxInt) {
       Logger.w(HiveWarning.bigInt);
     }
     writeDouble(value.toDouble());
