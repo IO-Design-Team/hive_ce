@@ -13,6 +13,7 @@ class FrameHelper {
     TypeRegistry registry,
     HiveCipher? cipher, {
     bool verbatim = false,
+    int? keyCrc,
   }) {
     final reader = BinaryReaderImpl(bytes, registry);
 
@@ -24,6 +25,7 @@ class FrameHelper {
         lazy: false,
         frameOffset: frameOffset,
         verbatim: verbatim,
+        keyCrc: keyCrc,
       );
       if (frame == null) return frameOffset;
 

@@ -1,4 +1,5 @@
 import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/hive_impl.dart';
@@ -20,40 +21,52 @@ Future<dynamic> handleHiveMethodCall(
       Logger.level = LoggerLevel.values.byName(loggerLevel);
     case 'openBox':
       final name = call.arguments['name'];
+      final lazy = call.arguments['lazy'];
+
       if (boxHandlers.containsKey(name)) {
         // Ensure this is a valid `openBox` call
-        Hive.box(name);
+        if (lazy) {
+          Hive.lazyBox(name);
+        } else {
+          Hive.box(name);
+        }
         return;
       }
 
-      final box = await Hive.openBox(
-        name,
-        keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
-        compactionStrategy:
-            call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
-        crashRecovery: call.arguments['crashRecovery'],
-        path: call.arguments['path'],
-        bytes: call.arguments['bytes'],
-        collection: call.arguments['collection'],
-      );
-      boxHandlers[name] = IsolatedBoxHandler(box, connection);
-    case 'openLazyBox':
-      final name = call.arguments['name'];
-      if (boxHandlers.containsKey(name)) {
-        // Ensure this is a valid `openLazyBox` call
-        Hive.lazyBox(name);
-        return;
+      final keyComparator =
+          call.arguments['keyComparator'] ?? defaultKeyComparator;
+      final compactionStrategy =
+          call.arguments['compactionStrategy'] ?? defaultCompactionStrategy;
+      final crashRecovery = call.arguments['crashRecovery'];
+      final path = call.arguments['path'];
+      final bytes = call.arguments['bytes'];
+      final collection = call.arguments['collection'];
+
+      final BoxBase box;
+      if (lazy) {
+        box = await Hive.openLazyBox(
+          name,
+          keyComparator: keyComparator,
+          compactionStrategy: compactionStrategy,
+          crashRecovery: crashRecovery,
+          path: path,
+          collection: collection,
+        );
+      } else {
+        box = await Hive.openBox(
+          name,
+          keyComparator: keyComparator,
+          compactionStrategy: compactionStrategy,
+          crashRecovery: crashRecovery,
+          path: path,
+          bytes: bytes,
+          collection: collection,
+        );
       }
 
-      final box = await Hive.openLazyBox(
-        name,
-        keyComparator: call.arguments['keyComparator'] ?? defaultKeyComparator,
-        compactionStrategy:
-            call.arguments['compactionStrategy'] ?? defaultCompactionStrategy,
-        crashRecovery: call.arguments['crashRecovery'],
-        path: call.arguments['path'],
-        collection: call.arguments['collection'],
-      );
+      final keyCrc = call.arguments['keyCrc'];
+      (box as BoxBaseImpl).keyCrc = keyCrc;
+
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
     case 'deleteBoxFromDisk':
       await Hive.deleteBoxFromDisk(

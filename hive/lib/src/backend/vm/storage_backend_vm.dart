@@ -105,6 +105,7 @@ RECOMMENDED ACTIONS:
     Keystore keystore,
     bool lazy, {
     bool isolated = false,
+    int? keyCrc,
   }) async {
     this.registry = registry;
 
@@ -133,9 +134,11 @@ RECOMMENDED ACTIONS:
         registry,
         _cipher,
         verbatim: isolated,
+        keyCrc: keyCrc,
       );
     } else {
-      recoveryOffset = await _frameHelper.keysFromFile(path, keystore, _cipher);
+      recoveryOffset =
+          await _frameHelper.keysFromFile(path, keystore, _cipher, keyCrc);
     }
 
     if (recoveryOffset != -1) {
@@ -151,15 +154,23 @@ RECOMMENDED ACTIONS:
   }
 
   @override
-  Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
+  Future<dynamic> readValue(
+    Frame frame, {
+    bool verbatim = false,
+    int? keyCrc,
+  }) {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
       final bytes = await readRaf.read(frame.length!);
 
       final reader = BinaryReaderImpl(bytes, registry);
-      final readFrame =
-          reader.readFrame(cipher: _cipher, lazy: false, verbatim: verbatim);
+      final readFrame = reader.readFrame(
+        cipher: _cipher,
+        lazy: false,
+        verbatim: verbatim,
+        keyCrc: keyCrc,
+      );
 
       if (readFrame == null) {
         throw HiveError(

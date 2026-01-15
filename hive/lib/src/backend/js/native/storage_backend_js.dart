@@ -166,6 +166,7 @@ class StorageBackendJs extends StorageBackend {
     Keystore keystore,
     bool lazy, {
     bool isolated = false,
+    int? keyCrc,
   }) async {
     _registry = registry;
     final keys = await getKeys();
@@ -186,7 +187,11 @@ class StorageBackendJs extends StorageBackend {
   }
 
   @override
-  Future<Object?> readValue(Frame frame, {bool verbatim = false}) async {
+  Future<Object?> readValue(
+    Frame frame, {
+    bool verbatim = false,
+    int? keyCrc,
+  }) async {
     final value = await getStore(false).get(frame.key.jsify()).asFuture();
     return decodeValue(value);
   }

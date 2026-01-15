@@ -28,11 +28,12 @@ class FrameIoHelper extends FrameHelper {
     String path,
     Keystore keystore,
     HiveCipher? cipher,
+    int? keyCrc,
   ) async {
     final raf = await openFile(path);
     final fileReader = BufferedFileReader(raf);
     try {
-      return await _KeyReader(fileReader).readKeys(keystore, cipher);
+      return await _KeyReader(fileReader).readKeys(keystore, cipher, keyCrc);
     } finally {
       await raf.close();
     }
@@ -45,6 +46,7 @@ class FrameIoHelper extends FrameHelper {
     TypeRegistry registry,
     HiveCipher? cipher, {
     bool verbatim = false,
+    int? keyCrc,
   }) async {
     final bytes = await readFile(path);
     return framesFromBytes(
@@ -53,6 +55,7 @@ class FrameIoHelper extends FrameHelper {
       registry,
       cipher,
       verbatim: verbatim,
+      keyCrc: keyCrc,
     );
   }
 }
@@ -64,7 +67,11 @@ class _KeyReader {
 
   _KeyReader(this.fileReader);
 
-  Future<int> readKeys(Keystore keystore, HiveCipher? cipher) async {
+  Future<int> readKeys(
+    Keystore keystore,
+    HiveCipher? cipher,
+    int? keyCrc,
+  ) async {
     await _load(4);
     while (true) {
       final frameOffset = fileReader.offset;
@@ -88,6 +95,7 @@ class _KeyReader {
         cipher: cipher,
         lazy: true,
         frameOffset: frameOffset,
+        keyCrc: keyCrc,
       );
       if (frame == null) return frameOffset;
 

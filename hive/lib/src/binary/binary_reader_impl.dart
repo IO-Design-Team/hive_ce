@@ -262,6 +262,7 @@ class BinaryReaderImpl extends BinaryReader {
     bool lazy = false,
     int frameOffset = 0,
     bool verbatim = false,
+    int? keyCrc,
   }) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;
@@ -274,15 +275,30 @@ class BinaryReaderImpl extends BinaryReader {
     if (availableBytes < frameLength - 4) return null;
 
     final crc = _buffer.readUint32(_offset + frameLength - 8);
+    final crcOffset = _offset - 4;
+    final crcLength = frameLength - 4;
     final computedCrc = Crc32.compute(
       _buffer,
-      offset: _offset - 4,
-      length: frameLength - 4,
-      crc: cipher?.calculateKeyCrc() ?? 0,
+      offset: crcOffset,
+      length: crcLength,
+      crc: keyCrc ?? cipher?.calculateKeyCrc() ?? 0,
     );
 
     // frame is corrupted or provided chiper is different
-    if (computedCrc != crc) return null;
+    if (computedCrc != crc) {
+      if (keyCrc != null) {
+        // Attempt to calculate the crc without the key crc
+        // This maintains compatibility with data written by IsolatedHive before keyCrc was introduced
+        final computedCrc2 = Crc32.compute(
+          _buffer,
+          offset: crcOffset,
+          length: crcLength,
+        );
+        if (computedCrc2 != crc) return null;
+      } else {
+        return null;
+      }
+    }
 
     _limitAvailableBytes(frameLength - 8);
     Frame frame;

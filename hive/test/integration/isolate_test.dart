@@ -266,8 +266,10 @@ void main() {
           addTearDown(isolatedHive.close);
           await isolatedHive.init(dir.path, isolateNameServer: StubIns());
 
-          final box = await isolatedHive.openBox('test',
-              encryptionCipher: ZeroKeyCrcCipher(key));
+          final box = await isolatedHive.openBox(
+            'test',
+            encryptionCipher: ZeroKeyCrcCipher(key),
+          );
           await box.put('key', 'value');
           await box.close();
 

@@ -136,6 +136,7 @@ void main() {
             any(),
             any(),
             any(),
+            any(),
           ),
         ).thenAnswer((i) => Future.value(recoveryOffset));
         return helper;

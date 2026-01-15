@@ -31,12 +31,14 @@ class StorageBackendMemory extends StorageBackend {
     Keystore? keystore,
     bool lazy, {
     bool isolated = false,
+    int? keyCrc,
   }) {
     final recoveryOffset = _frameHelper.framesFromBytes(
       _bytes!, // Initialized at constructor and nulled after initialization
       keystore,
       registry,
       _cipher,
+      keyCrc: keyCrc,
     );
 
     if (recoveryOffset != -1) {
@@ -49,7 +51,7 @@ class StorageBackendMemory extends StorageBackend {
   }
 
   @override
-  Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false, int? keyCrc}) {
     throw UnsupportedError('This operation is unsupported for memory boxes.');
   }
 

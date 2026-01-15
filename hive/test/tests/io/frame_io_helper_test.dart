@@ -44,7 +44,7 @@ void main() {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
         final recoveryOffset =
-            await ioHelper.keysFromFile('null', keystore, null);
+            await ioHelper.keysFromFile('null', keystore, null, null);
         expect(recoveryOffset, -1);
 
         final testKeystore = Keystore.debug(
@@ -58,7 +58,7 @@ void main() {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
         final recoveryOffset =
-            await ioHelper.keysFromFile('null', keystore, testCipher);
+            await ioHelper.keysFromFile('null', keystore, testCipher, null);
         expect(recoveryOffset, -1);
 
         final testKeystore = Keystore.debug(
