@@ -18,8 +18,8 @@ abstract class Logger {
   /// If the no isolate name server warning is enabled
   static var noIsolateNameServerWarning = true;
 
-  /// If the crc recalculation warning is enabled
-  static var crcRecalculationWarning = true;
+  /// If the crc recompute warning is enabled
+  static var crcRecomputeWarning = true;
 
   /// Log a verbose message
   static void v(Object? message) {
@@ -126,9 +126,8 @@ RECOMMENDED ACTIONS:
 
 ''';
 
-  /// Warning message printed when CRC recalculation is needed
-  static const crcRecalculationNeeded =
-      'WARNING: CRC recalculation needed for frame.'
+  /// Warning message printed when CRC recompute is needed
+  static const crcRecomputeNeeded = 'WARNING: CRC recompute needed for frame.'
       ' This happens when IsolatedHive was used with encryption before it was properly handled.'
       ' IsolatedHive will continue to work, but read performance may be degraded for old entries.'
       ' To restore performance, rewrite all box entries.'

@@ -122,8 +122,8 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       try {
         final params = {
           'name': name,
-          'keyCrc': cipher?.calculateKeyCrc(),
           'lazy': lazy,
+          'keyCrc': cipher?.calculateKeyCrc(),
           'keyComparator': comparator,
           'compactionStrategy': compaction,
           'crashRecovery': recovery,

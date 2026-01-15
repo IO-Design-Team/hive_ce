@@ -93,9 +93,9 @@ class _KeyReader {
 
       final frame = _reader.readFrame(
         cipher: cipher,
+        keyCrc: keyCrc,
         lazy: true,
         frameOffset: frameOffset,
-        keyCrc: keyCrc,
       );
       if (frame == null) return frameOffset;
 

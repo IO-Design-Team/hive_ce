@@ -20,7 +20,7 @@ class BinaryReaderImpl extends BinaryReader {
   int _bufferLimit;
   var _offset = 0;
 
-  var _crcRecalculationWarningPrinted = false;
+  var _crcRecomputeWarningPrinted = false;
 
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])
@@ -299,10 +299,9 @@ class BinaryReaderImpl extends BinaryReader {
         );
         if (computedCrc2 != crc) return null;
 
-        if (Logger.crcRecalculationWarning &&
-            !_crcRecalculationWarningPrinted) {
-          Logger.w(HiveWarning.crcRecalculationNeeded);
-          _crcRecalculationWarningPrinted = true;
+        if (Logger.crcRecomputeWarning && !_crcRecomputeWarningPrinted) {
+          Logger.w(HiveWarning.crcRecomputeNeeded);
+          _crcRecomputeWarningPrinted = true;
         }
       } else {
         return null;
