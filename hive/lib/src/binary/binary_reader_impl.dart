@@ -290,7 +290,7 @@ class BinaryReaderImpl extends BinaryReader {
     // frame is corrupted or provided chiper is different
     if (computedCrc != crc) {
       if (keyCrc != null) {
-        // Attempt to calculate the crc without the key crc
+        // Attempt to compute the crc without the key crc
         // This maintains compatibility with data written by IsolatedHive before keyCrc was introduced
         final computedCrc2 = Crc32.compute(
           _buffer,
