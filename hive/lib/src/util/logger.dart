@@ -6,6 +6,9 @@ abstract class Logger {
   /// The overall logging level
   static var level = kDebugMode ? LoggerLevel.debug : LoggerLevel.info;
 
+  /// If the big int warning is enabled
+  static var bigIntWarning = true;
+
   /// If the unsafe isolate warning is enabled
   static var unsafeIsolateWarning = true;
 

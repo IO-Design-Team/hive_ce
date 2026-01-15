@@ -6,7 +6,6 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
@@ -101,7 +100,9 @@ class BinaryWriterImpl extends BinaryWriter {
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
-    if (kDebugMode && value >= maxInt) Logger.w(HiveWarning.bigInt);
+    if (HiveLogger.bigIntWarning && value >= maxInt) {
+      Logger.w(HiveWarning.bigInt);
+    }
     writeDouble(value.toDouble());
   }
 

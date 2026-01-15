@@ -299,7 +299,8 @@ class BinaryReaderImpl extends BinaryReader {
         );
         if (computedCrc2 != crc) return null;
 
-        if (!_crcRecalculationWarningPrinted) {
+        if (Logger.crcRecalculationWarning &&
+            !_crcRecalculationWarningPrinted) {
           Logger.w(HiveWarning.crcRecalculationNeeded);
           _crcRecalculationWarningPrinted = true;
         }
