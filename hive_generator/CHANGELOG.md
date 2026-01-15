@@ -1,3 +1,7 @@
+## 1.11.1
+
+- Upgrades `analyzer` to `10.0.0`
+
 ## 1.11.0
 
 - Adds support for `ignoredFields` in the schema migrator
