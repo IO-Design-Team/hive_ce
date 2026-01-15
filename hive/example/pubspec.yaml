@@ -13,7 +13,6 @@ environment:
   sdk: ^3.9.0
 
 dependency_overrides:
-  analyzer: ^9.0.0
   hive_ce:
     path: ../
   hive_ce_generator:
