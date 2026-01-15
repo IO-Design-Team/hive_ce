@@ -31,7 +31,6 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.38.6
-          channel: ${{ matrix.flutter-channel }}
       - run: |
           dart pub get
           dart format . --set-exit-if-changed
@@ -97,7 +96,6 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.38.6
-          channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: flutter pub get
       - name: Run tests
@@ -123,7 +121,6 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.38.6
-          channel: ${{ matrix.flutter-channel }}
       - name: Install dependencies
         run: dart pub get
       - name: Run tests
