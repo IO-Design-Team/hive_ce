@@ -235,6 +235,25 @@ void main() {
         expect(await box.get('key'), 'value');
       });
 
+      test('Hive data compatable with IsolatedHive', () async {
+        final dir = await getTempDir();
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test');
+        await box.put('key', 'value');
+        await box.close();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox = await isolatedHive.openBox('test');
+        expect(await isolatedBox.get('key'), 'value');
+      });
+
       test('Encrypted IsolatedHive data compatable with Hive', () async {
         final dir = await getTempDir();
         final cipher = HiveAesCipher(Hive.generateSecureKey());
@@ -294,9 +313,11 @@ void main() {
           await box.put('key', 'value');
           await box.close();
 
-          await isolatedHive.openBox(
-            'test',
-            encryptionCipher: HiveAesCipher(key),
+          captureOutput(
+            () => isolatedHive.openBox(
+              'test',
+              encryptionCipher: HiveAesCipher(key),
+            ),
           );
           expect(await box.get('key'), 'value');
         },

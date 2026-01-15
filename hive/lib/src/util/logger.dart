@@ -133,7 +133,7 @@ RECOMMENDED ACTIONS:
       ' IsolatedHive will continue to work, but read performance may be degraded for old entries.'
       ' To restore performance, rewrite all box entries.'
       ' This only needs to be done once.'
-      '\n\nEXAMPLE\n\n'
+      '\n\nEXAMPLE:\n'
       '''
 for (final key in await box.keys) {
   await box.put(key, await box.get(key));
