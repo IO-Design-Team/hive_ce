@@ -256,6 +256,27 @@ void main() {
         expect(await box.get('key'), 'value');
       });
 
+      test('Encrypted Hive data compatable with IsolatedHive', () async {
+        final dir = await getTempDir();
+        final cipher = HiveAesCipher(Hive.generateSecureKey());
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test', encryptionCipher: cipher);
+        await box.put('key', 'value');
+        await box.close();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox =
+            await isolatedHive.openBox('test', encryptionCipher: cipher);
+        expect(await isolatedBox.get('key'), 'value');
+      });
+
       test(
         'IsolatedHive data encrypted with no keyCrc is readable',
         () async {

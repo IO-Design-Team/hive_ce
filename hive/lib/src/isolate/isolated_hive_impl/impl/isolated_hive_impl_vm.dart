@@ -122,6 +122,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       try {
         final params = {
           'name': name,
+          'keyCrc': cipher?.calculateKeyCrc(),
           'lazy': lazy,
           'keyComparator': comparator,
           'compactionStrategy': compaction,
@@ -129,7 +130,6 @@ class IsolatedHiveImpl extends TypeRegistryImpl
           'path': path,
           'bytes': bytes,
           'collection': collection,
-          'keyCrc': cipher?.calculateKeyCrc(),
         };
 
         await _hiveChannel.invokeMethod('openBox', params);

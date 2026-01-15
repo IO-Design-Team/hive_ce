@@ -36,11 +36,6 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   /// Whether this box is isolated
   final bool isolated;
 
-  /// They key CRC for the box
-  ///
-  /// Used by [IsolatedHive] to support opening encrypted boxes
-  int? keyCrc;
-
   var _open = true;
 
   /// Not part of public API
@@ -109,7 +104,6 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
       keystore,
       lazy,
       isolated: isolated,
-      keyCrc: keyCrc,
     );
   }
 

@@ -265,7 +265,12 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Not part of public API
-  int writeFrame(Frame frame, {HiveCipher? cipher, bool verbatim = false}) {
+  int writeFrame(
+    Frame frame, {
+    HiveCipher? cipher,
+    int? keyCrc,
+    bool verbatim = false,
+  }) {
     final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
@@ -289,7 +294,7 @@ class BinaryWriterImpl extends BinaryWriter {
       _buffer,
       offset: startOffset,
       length: frameLength - 4,
-      crc: cipher?.calculateKeyCrc() ?? 0,
+      crc: keyCrc ?? cipher?.calculateKeyCrc() ?? 0,
     );
     writeUint32(crc);
 

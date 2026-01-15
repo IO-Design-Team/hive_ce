@@ -37,6 +37,7 @@ RECOMMENDED ACTIONS:
   final File _lockFile;
   final bool _crashRecovery;
   final HiveCipher? _cipher;
+  final int? _keyCrc;
   final FrameIoHelper _frameHelper;
 
   final ReadWriteSync _sync;
@@ -73,6 +74,7 @@ RECOMMENDED ACTIONS:
     this._lockFile,
     this._crashRecovery,
     this._cipher,
+    this._keyCrc,
   )   : _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
@@ -82,6 +84,7 @@ RECOMMENDED ACTIONS:
     this._lockFile,
     this._crashRecovery,
     this._cipher,
+    this._keyCrc,
     this._frameHelper,
     this._sync,
   );
@@ -105,7 +108,6 @@ RECOMMENDED ACTIONS:
     Keystore keystore,
     bool lazy, {
     bool isolated = false,
-    int? keyCrc,
   }) async {
     this.registry = registry;
 
@@ -133,12 +135,12 @@ RECOMMENDED ACTIONS:
         keystore,
         registry,
         _cipher,
+        _keyCrc,
         verbatim: isolated,
-        keyCrc: keyCrc,
       );
     } else {
       recoveryOffset =
-          await _frameHelper.keysFromFile(path, keystore, _cipher, keyCrc);
+          await _frameHelper.keysFromFile(path, keystore, _cipher, _keyCrc);
     }
 
     if (recoveryOffset != -1) {
@@ -157,7 +159,6 @@ RECOMMENDED ACTIONS:
   Future<dynamic> readValue(
     Frame frame, {
     bool verbatim = false,
-    int? keyCrc,
   }) {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
@@ -169,7 +170,7 @@ RECOMMENDED ACTIONS:
         cipher: _cipher,
         lazy: false,
         verbatim: verbatim,
-        keyCrc: keyCrc,
+        keyCrc: _keyCrc,
       );
 
       if (readFrame == null) {
@@ -188,8 +189,12 @@ RECOMMENDED ACTIONS:
       final writer = BinaryWriterImpl(registry);
 
       for (final frame in frames) {
-        frame.length =
-            writer.writeFrame(frame, cipher: _cipher, verbatim: verbatim);
+        frame.length = writer.writeFrame(
+          frame,
+          cipher: _cipher,
+          keyCrc: _keyCrc,
+          verbatim: verbatim,
+        );
       }
 
       try {

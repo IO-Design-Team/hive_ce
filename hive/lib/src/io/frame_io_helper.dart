@@ -44,9 +44,9 @@ class FrameIoHelper extends FrameHelper {
     String path,
     Keystore keystore,
     TypeRegistry registry,
-    HiveCipher? cipher, {
+    HiveCipher? cipher,
+    int? keyCrc, {
     bool verbatim = false,
-    int? keyCrc,
   }) async {
     final bytes = await readFile(path);
     return framesFromBytes(
@@ -54,8 +54,8 @@ class FrameIoHelper extends FrameHelper {
       keystore,
       registry,
       cipher,
+      keyCrc,
       verbatim: verbatim,
-      keyCrc: keyCrc,
     );
   }
 }

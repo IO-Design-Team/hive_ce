@@ -22,11 +22,10 @@ abstract class StorageBackend {
     Keystore keystore,
     bool lazy, {
     bool isolated = false,
-    int? keyCrc,
   });
 
   /// Read value from backend
-  Future<dynamic> readValue(Frame frame, {bool verbatim = false, int? keyCrc});
+  Future<dynamic> readValue(Frame frame, {bool verbatim = false});
 
   /// Write a list of frames to the backend
   Future<void> writeFrames(List<Frame> frames, {bool verbatim = false});
@@ -55,6 +54,7 @@ abstract class BackendManagerInterface {
     String? path,
     bool crashRecovery,
     HiveCipher? cipher,
+    int? keyCrc,
     String? collection,
   );
 

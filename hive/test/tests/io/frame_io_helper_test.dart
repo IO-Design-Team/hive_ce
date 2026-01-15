@@ -77,8 +77,13 @@ void main() {
       test('frame', () async {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
-        final recoveryOffset =
-            await ioHelper.framesFromFile('null', keystore, testRegistry, null);
+        final recoveryOffset = await ioHelper.framesFromFile(
+          'null',
+          keystore,
+          testRegistry,
+          null,
+          null,
+        );
         expect(recoveryOffset, -1);
 
         final testKeystore = Keystore.debug(
@@ -96,6 +101,7 @@ void main() {
           keystore,
           testRegistry,
           testCipher,
+          null,
         );
         expect(recoveryOffset, -1);
 

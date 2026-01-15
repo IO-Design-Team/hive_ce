@@ -40,6 +40,7 @@ StorageBackendVm _getBackend({
   File? lockFile,
   bool crashRecovery = false,
   HiveCipher? cipher,
+  int? keyCrc,
   FrameIoHelper? ioHelper,
   ReadWriteSync? sync,
   RandomAccessFile? readRaf,
@@ -50,6 +51,7 @@ StorageBackendVm _getBackend({
     lockFile ?? MockFile(),
     crashRecovery,
     cipher,
+    keyCrc,
     ioHelper ?? MockFrameIoHelper(),
     sync ?? ReadWriteSync(),
   );
@@ -125,6 +127,7 @@ void main() {
         final helper = MockFrameIoHelper();
         when(
           () => helper.framesFromFile(
+            any(),
             any(),
             any(),
             any(),

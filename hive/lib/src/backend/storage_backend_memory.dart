@@ -9,13 +9,14 @@ import 'package:hive_ce/src/box/keystore.dart';
 /// In-memory Storage backend
 class StorageBackendMemory extends StorageBackend {
   final HiveCipher? _cipher;
+  final int? _keyCrc;
 
   final FrameHelper _frameHelper;
 
   Uint8List? _bytes;
 
   /// Not part of public API
-  StorageBackendMemory(Uint8List? bytes, this._cipher)
+  StorageBackendMemory(Uint8List? bytes, this._cipher, this._keyCrc)
       : _bytes = bytes,
         _frameHelper = FrameHelper();
 
@@ -31,14 +32,13 @@ class StorageBackendMemory extends StorageBackend {
     Keystore? keystore,
     bool lazy, {
     bool isolated = false,
-    int? keyCrc,
   }) {
     final recoveryOffset = _frameHelper.framesFromBytes(
       _bytes!, // Initialized at constructor and nulled after initialization
       keystore,
       registry,
       _cipher,
-      keyCrc: keyCrc,
+      _keyCrc,
     );
 
     if (recoveryOffset != -1) {

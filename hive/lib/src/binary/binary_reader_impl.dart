@@ -259,10 +259,10 @@ class BinaryReaderImpl extends BinaryReader {
   /// Not part of public API
   Frame? readFrame({
     HiveCipher? cipher,
+    int? keyCrc,
     bool lazy = false,
     int frameOffset = 0,
     bool verbatim = false,
-    int? keyCrc,
   }) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;

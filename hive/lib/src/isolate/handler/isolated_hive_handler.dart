@@ -1,5 +1,4 @@
 import 'package:hive_ce/hive_ce.dart';
-import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/hive_impl.dart';
@@ -33,6 +32,7 @@ Future<dynamic> handleHiveMethodCall(
         return;
       }
 
+      final keyCrc = call.arguments['keyCrc'];
       final keyComparator =
           call.arguments['keyComparator'] ?? defaultKeyComparator;
       final compactionStrategy =
@@ -44,8 +44,9 @@ Future<dynamic> handleHiveMethodCall(
 
       final BoxBase box;
       if (lazy) {
-        box = await Hive.openLazyBox(
+        box = await (Hive as HiveImpl).openLazyBox(
           name,
+          keyCrc: keyCrc,
           keyComparator: keyComparator,
           compactionStrategy: compactionStrategy,
           crashRecovery: crashRecovery,
@@ -53,8 +54,9 @@ Future<dynamic> handleHiveMethodCall(
           collection: collection,
         );
       } else {
-        box = await Hive.openBox(
+        box = await (Hive as HiveImpl).openBox(
           name,
+          keyCrc: keyCrc,
           keyComparator: keyComparator,
           compactionStrategy: compactionStrategy,
           crashRecovery: crashRecovery,
@@ -63,9 +65,6 @@ Future<dynamic> handleHiveMethodCall(
           collection: collection,
         );
       }
-
-      final keyCrc = call.arguments['keyCrc'];
-      (box as BoxBaseImpl).keyCrc = keyCrc;
 
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
     case 'deleteBoxFromDisk':

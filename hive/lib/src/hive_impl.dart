@@ -79,6 +79,7 @@ RECOMMENDED ACTIONS:
     String name,
     bool lazy,
     HiveCipher? cipher,
+    int? keyCrc,
     KeyComparator comparator,
     CompactionStrategy compaction,
     bool recovery,
@@ -117,13 +118,14 @@ RECOMMENDED ACTIONS:
       try {
         StorageBackend backend;
         if (bytes != null) {
-          backend = StorageBackendMemory(bytes, cipher);
+          backend = StorageBackendMemory(bytes, cipher, keyCrc);
         } else {
           backend = await _manager.open(
             name,
             path ?? homePath,
             recovery,
             cipher,
+            keyCrc,
             collection,
           );
         }
@@ -170,6 +172,7 @@ RECOMMENDED ACTIONS:
   Future<Box<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
+    int? keyCrc,
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
@@ -185,6 +188,7 @@ RECOMMENDED ACTIONS:
       name,
       false,
       encryptionCipher,
+      keyCrc,
       keyComparator,
       compactionStrategy,
       crashRecovery,
@@ -198,6 +202,7 @@ RECOMMENDED ACTIONS:
   Future<LazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
+    int? keyCrc,
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
@@ -212,6 +217,7 @@ RECOMMENDED ACTIONS:
       name,
       true,
       encryptionCipher,
+      keyCrc,
       keyComparator,
       compactionStrategy,
       crashRecovery,

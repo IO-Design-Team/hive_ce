@@ -17,6 +17,7 @@ class BackendManager implements BackendManagerInterface {
     String? path,
     bool crashRecovery,
     HiveCipher? cipher,
+    int? keyCrc,
     String? collection,
   ) {
     throw UnimplementedError();
