@@ -6,6 +6,7 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -160,7 +161,7 @@ void main() {
       final output2 =
           await captureOutput(() => bw.writeInt(BinaryWriterImpl.maxInt))
               .toList();
-      expect(output2, contains(BinaryWriterImpl.intWarning));
+      expect(output2, contains(HiveWarning.bigInt));
 
       bw = getWriter();
       bw.writeInt(BinaryWriterImpl.maxInt + 1);

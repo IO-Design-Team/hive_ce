@@ -57,7 +57,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       _isolateNameServer = isolateNameServer;
 
       if (Logger.noIsolateNameServerWarning && _isolateNameServer == null) {
-        Logger.w(HiveIsolate.noIsolateNameServerWarning);
+        Logger.w(HiveWarning.noIsolateNameServer);
       }
 
       final send =
@@ -122,6 +122,8 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       try {
         final params = {
           'name': name,
+          'lazy': lazy,
+          'keyCrc': cipher?.calculateKeyCrc(),
           'keyComparator': comparator,
           'compactionStrategy': compaction,
           'crashRecovery': recovery,
@@ -130,26 +132,23 @@ class IsolatedHiveImpl extends TypeRegistryImpl
           'collection': collection,
         };
 
-        final IsolatedBoxBaseImpl<E> newBox;
-        if (lazy) {
-          await _hiveChannel.invokeMethod('openLazyBox', params);
-          newBox = IsolatedLazyBoxImpl<E>(
-            this,
-            name,
-            cipher,
-            connection,
-            _boxChannel,
-          );
-        } else {
-          await _hiveChannel.invokeMethod('openBox', params);
-          newBox = IsolatedBoxImpl<E>(
-            this,
-            name,
-            cipher,
-            connection,
-            _boxChannel,
-          );
-        }
+        await _hiveChannel.invokeMethod('openBox', params);
+
+        final newBox = lazy
+            ? IsolatedLazyBoxImpl<E>(
+                this,
+                name,
+                cipher,
+                connection,
+                _boxChannel,
+              )
+            : IsolatedBoxImpl<E>(
+                this,
+                name,
+                cipher,
+                connection,
+                _boxChannel,
+              );
 
         _boxes[name] = newBox;
 

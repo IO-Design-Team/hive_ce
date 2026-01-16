@@ -23,21 +23,6 @@ import 'package:hive_ce/src/backend/storage_backend.dart';
 
 /// Not part of public API
 class HiveImpl extends TypeRegistryImpl implements HiveInterface {
-  /// Warning message printed when accessing Hive from an unsafe isolate
-  @visibleForTesting
-  static final unsafeIsolateWarning = '''
-⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
-
-Accessing Hive from an unsafe isolate (current isolate: "$isolateDebugName")
-This can lead to DATA CORRUPTION as Hive boxes are not designed for concurrent
-access across isolates. Each isolate would maintain its own box cache,
-potentially causing data inconsistency and corruption.
-
-RECOMMENDED ACTIONS:
-- Use IsolatedHive instead
-
-''';
-
   static final BackendManagerInterface _defaultBackendManager =
       BackendManager.select();
 
@@ -71,7 +56,7 @@ RECOMMENDED ACTIONS:
         !{'main', hiveIsolateName}.contains(isolateDebugName) &&
         // Do not print this warning if this code is running in a test
         !isolateDebugName.startsWith('test_suite')) {
-      Logger.w(unsafeIsolateWarning);
+      Logger.w(HiveWarning.unsafeIsolate);
     }
     homePath = path;
     _managerOverride = BackendManager.select(backendPreference);
@@ -81,6 +66,7 @@ RECOMMENDED ACTIONS:
     String name,
     bool lazy,
     HiveCipher? cipher,
+    int? keyCrc,
     KeyComparator comparator,
     CompactionStrategy compaction,
     bool recovery,
@@ -119,13 +105,14 @@ RECOMMENDED ACTIONS:
       try {
         StorageBackend backend;
         if (bytes != null) {
-          backend = StorageBackendMemory(bytes, cipher);
+          backend = StorageBackendMemory(bytes, cipher, keyCrc);
         } else {
           backend = await _manager.open(
             name,
             path ?? homePath,
             recovery,
             cipher,
+            keyCrc,
             collection,
           );
         }
@@ -172,6 +159,7 @@ RECOMMENDED ACTIONS:
   Future<Box<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
+    int? keyCrc,
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
@@ -187,6 +175,7 @@ RECOMMENDED ACTIONS:
       name,
       false,
       encryptionCipher,
+      keyCrc,
       keyComparator,
       compactionStrategy,
       crashRecovery,
@@ -200,6 +189,7 @@ RECOMMENDED ACTIONS:
   Future<LazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
+    int? keyCrc,
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
@@ -214,6 +204,7 @@ RECOMMENDED ACTIONS:
       name,
       true,
       encryptionCipher,
+      keyCrc,
       keyComparator,
       compactionStrategy,
       crashRecovery,
