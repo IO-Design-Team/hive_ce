@@ -26,6 +26,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   String? selectedBox;
   HiveSchema? schema;
+  final searchController = TextEditingController();
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     boxRegisteredSubscription.cancel();
     boxUnregisteredSubscription.cancel();
     boxEventSubscription.cancel();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -64,6 +66,11 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   Widget build(BuildContext context) {
     final selectedBox = this.selectedBox;
     final selectedBoxData = boxData[selectedBox];
+    final query = searchController.text;
+    final filteredBoxes = boxData.keys
+        .where((b) => b.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    
 
     return SplitPane(
       axis: Axis.horizontal,
@@ -71,19 +78,37 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
       children: [
         DevToolsAreaPane(
           header: const AreaPaneHeader(title: Text('Boxes')),
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final box = boxData.keys.elementAt(index);
-              return ListTile(
-                title: Text(box),
-                selected: selectedBox == box,
-                onTap: () {
-                  loadBoxData(box);
-                  setState(() => this.selectedBox = box);
-                },
-              );
-            },
-            itemCount: boxData.keys.length,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: DevToolsClearableTextField(
+                  controller: searchController,
+                  onChanged: (_) => setState(() {}),
+                  onSubmitted: (_) => setState(() {}),
+                  prefixIcon: const Icon(Icons.search),
+                  hintText: 'Search boxes',
+                ),
+              ),
+              Expanded(
+                child: filteredBoxes.isEmpty
+                    ? Center(child: Text('No boxes matching "$query"'))
+                    : ListView.builder(
+                        itemBuilder: (context, index) {
+                          final box = filteredBoxes[index];
+                          return ListTile(
+                            title: Text(box),
+                            selected: selectedBox == box,
+                            onTap: () {
+                              loadBoxData(box);
+                              setState(() => this.selectedBox = box);
+                            },
+                          );
+                        },
+                        itemCount: filteredBoxes.length,
+                      ),
+              ),
+            ],
           ),
         ),
         if (selectedBox == null)
