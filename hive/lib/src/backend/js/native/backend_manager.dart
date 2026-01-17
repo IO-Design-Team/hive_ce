@@ -18,6 +18,7 @@ class BackendManager implements BackendManagerInterface {
     String? path,
     bool crashRecovery,
     HiveCipher? cipher,
+    int? keyCrc,
     String? collection,
   ) async {
     // compatibility for old store format

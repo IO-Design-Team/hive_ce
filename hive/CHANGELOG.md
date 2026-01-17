@@ -1,3 +1,8 @@
+## 2.18.0
+
+- Fixes an issue with IsolatedHive encryption
+- Automatically disables the unsafe isolate warning when running in a test
+
 ## 2.17.0
 
 - Fixes WASM int decoding (by [@flrnsbt](https://github.com/flrnsbt) in [#262](https://github.com/IO-Design-Team/hive_ce/pull/262))

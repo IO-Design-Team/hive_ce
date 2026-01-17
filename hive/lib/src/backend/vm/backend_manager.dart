@@ -23,6 +23,7 @@ class BackendManager implements BackendManagerInterface {
     String? path,
     bool crashRecovery,
     HiveCipher? cipher,
+    int? keyCrc,
     String? collection,
   ) async {
     if (path == null) {
@@ -45,7 +46,8 @@ class BackendManager implements BackendManagerInterface {
     final file = await findHiveFileAndCleanUp(name, path);
     final lockFile = File('$path$_delimiter$name.lock');
 
-    final backend = StorageBackendVm(file, lockFile, crashRecovery, cipher);
+    final backend =
+        StorageBackendVm(file, lockFile, crashRecovery, cipher, keyCrc);
     await backend.open();
     return backend;
   }

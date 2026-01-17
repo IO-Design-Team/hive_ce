@@ -6,7 +6,6 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
-import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/extensions.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
@@ -17,12 +16,6 @@ class BinaryWriterImpl extends BinaryWriter {
 
   /// The maximum integer that can be stored in a 64 bit float (2^53)
   static const maxInt = 9007199254740992;
-
-  /// Warning message printed when attempting to store an integer that is too large
-  static const intWarning =
-      'WARNING: Writing integer values greater than 2^53 will result in precision loss. '
-      'This is due to Hive storing all numbers as 64 bit floats. '
-      'Consider using a BigInt.';
 
   /// The type registry to use for writing values
   final TypeRegistryImpl typeRegistry;
@@ -107,7 +100,9 @@ class BinaryWriterImpl extends BinaryWriter {
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
-    if (kDebugMode && value >= maxInt) Logger.w(intWarning);
+    if (Logger.bigIntWarning && value >= maxInt) {
+      Logger.w(HiveWarning.bigInt);
+    }
     writeDouble(value.toDouble());
   }
 
@@ -265,7 +260,12 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Not part of public API
-  int writeFrame(Frame frame, {HiveCipher? cipher, bool verbatim = false}) {
+  int writeFrame(
+    Frame frame, {
+    HiveCipher? cipher,
+    int? keyCrc,
+    bool verbatim = false,
+  }) {
     final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
@@ -289,7 +289,7 @@ class BinaryWriterImpl extends BinaryWriter {
       _buffer,
       offset: startOffset,
       length: frameLength - 4,
-      crc: cipher?.calculateKeyCrc() ?? 0,
+      crc: keyCrc ?? cipher?.calculateKeyCrc() ?? 0,
     );
     writeUint32(crc);
 

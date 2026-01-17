@@ -54,6 +54,7 @@ abstract class BackendManagerInterface {
     String? path,
     bool crashRecovery,
     HiveCipher? cipher,
+    int? keyCrc,
     String? collection,
   );
 

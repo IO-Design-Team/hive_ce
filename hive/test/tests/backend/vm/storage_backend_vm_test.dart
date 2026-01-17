@@ -40,6 +40,7 @@ StorageBackendVm _getBackend({
   File? lockFile,
   bool crashRecovery = false,
   HiveCipher? cipher,
+  int? keyCrc,
   FrameIoHelper? ioHelper,
   ReadWriteSync? sync,
   RandomAccessFile? readRaf,
@@ -50,6 +51,7 @@ StorageBackendVm _getBackend({
     lockFile ?? MockFile(),
     crashRecovery,
     cipher,
+    keyCrc,
     ioHelper ?? MockFrameIoHelper(),
     sync ?? ReadWriteSync(),
   );
@@ -129,10 +131,12 @@ void main() {
             any(),
             any(),
             any(),
+            any(),
           ),
         ).thenAnswer((i) => Future.value(recoveryOffset));
         when(
           () => helper.keysFromFile(
+            any(),
             any(),
             any(),
             any(),

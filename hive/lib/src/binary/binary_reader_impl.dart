@@ -7,6 +7,7 @@ import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/extensions.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
@@ -18,6 +19,8 @@ class BinaryReaderImpl extends BinaryReader {
 
   int _bufferLimit;
   var _offset = 0;
+
+  var _crcRecomputeWarningPrinted = false;
 
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])
@@ -259,6 +262,7 @@ class BinaryReaderImpl extends BinaryReader {
   /// Not part of public API
   Frame? readFrame({
     HiveCipher? cipher,
+    int? keyCrc,
     bool lazy = false,
     int frameOffset = 0,
     bool verbatim = false,
@@ -274,15 +278,35 @@ class BinaryReaderImpl extends BinaryReader {
     if (availableBytes < frameLength - 4) return null;
 
     final crc = _buffer.readUint32(_offset + frameLength - 8);
+    final crcOffset = _offset - 4;
+    final crcLength = frameLength - 4;
     final computedCrc = Crc32.compute(
       _buffer,
-      offset: _offset - 4,
-      length: frameLength - 4,
-      crc: cipher?.calculateKeyCrc() ?? 0,
+      offset: crcOffset,
+      length: crcLength,
+      crc: keyCrc ?? cipher?.calculateKeyCrc() ?? 0,
     );
 
     // frame is corrupted or provided chiper is different
-    if (computedCrc != crc) return null;
+    if (computedCrc != crc) {
+      if (keyCrc != null) {
+        // Attempt to compute the crc without the key crc
+        // This maintains compatibility with data written by IsolatedHive before keyCrc was introduced
+        final computedCrc2 = Crc32.compute(
+          _buffer,
+          offset: crcOffset,
+          length: crcLength,
+        );
+        if (computedCrc2 != crc) return null;
+
+        if (Logger.crcRecomputeWarning && !_crcRecomputeWarningPrinted) {
+          Logger.w(HiveWarning.crcRecomputeNeeded);
+          _crcRecomputeWarningPrinted = true;
+        }
+      } else {
+        return null;
+      }
+    }
 
     _limitAvailableBytes(frameLength - 8);
     Frame frame;
