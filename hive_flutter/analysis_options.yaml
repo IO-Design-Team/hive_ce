@@ -1,4 +1,4 @@
-include: package:rexios_lints/flutter/package.yaml
+include: package:rexios_lints/flutter/package_extra.yaml
 
 linter:
   rules:
