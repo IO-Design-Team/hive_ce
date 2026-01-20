@@ -172,7 +172,7 @@ class _DataTableViewState extends State<DataTableView> {
           ),
         ),
         filteredData.isEmpty
-            ? const Expanded(child: Center(child: Text('No search results')))
+            ? const Expanded(child: Center(child: Text('No data to display')))
             : Expanded(
                 child: TableView.builder(
                   rowCount: filteredData.length + 1,

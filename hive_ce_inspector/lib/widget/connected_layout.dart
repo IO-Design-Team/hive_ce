@@ -38,7 +38,10 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     }
 
     boxRegisteredSubscription = widget.client.boxRegistered.listen(
-      (name) => setState(() => boxData[name] = BoxData(name: name)),
+      (name) => setState(() {
+        boxData[name] = BoxData(name: name);
+        filter(searchController.text);
+      }),
     );
     boxUnregisteredSubscription = widget.client.boxUnregistered.listen(
       (name) => setState(
@@ -61,14 +64,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     boxUnregisteredSubscription.cancel();
     boxEventSubscription.cancel();
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(ConnectedLayout oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.boxes != widget.boxes) {
-      filter(searchController.text);
-    }
   }
 
   @override
@@ -95,7 +90,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
               ),
               Expanded(
                 child: filteredBoxes.isEmpty
-                    ? const Center(child: Text('No matching boxes'))
+                    ? const Center(child: Text('No boxes to display'))
                     : ListView.builder(
                         itemBuilder: (context, index) {
                           final box = filteredBoxes[index];
