@@ -25,6 +25,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   late final StreamSubscription<String> boxUnregisteredSubscription;
   late final StreamSubscription<BoxEventPayload> boxEventSubscription;
 
+  late List<String> filteredBoxes = boxData.keys.toList();
   String? selectedBox;
   HiveSchema? schema;
 
@@ -62,14 +63,23 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     super.dispose();
   }
 
+  void filter(String query) {
+    final List<String> newBoxes;
+    if (query.isEmpty) {
+      newBoxes = boxData.keys.toList();
+    } else {
+      newBoxes = boxData.keys
+          .where((e) => e.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+
+    setState(() => filteredBoxes = newBoxes);
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedBox = this.selectedBox;
     final selectedBoxData = boxData[selectedBox];
-    final query = searchController.text;
-    final filteredBoxes = boxData.keys
-        .where((e) => e.toLowerCase().contains(query.toLowerCase()))
-        .toList();
 
     return SplitPane(
       axis: Axis.horizontal,
@@ -85,8 +95,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                   controller: searchController,
                   hintText: 'Search',
                   prefixIcon: const Icon(Icons.search),
-                  onChanged: (_) => setState(() {}),
-                  onSubmitted: (_) => setState(() {}),
+                  onChanged: filter,
                 ),
               ),
               Expanded(

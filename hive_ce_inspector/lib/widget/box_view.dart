@@ -120,10 +120,29 @@ class DataTableView extends StatefulWidget {
 class _DataTableViewState extends State<DataTableView> {
   final searchController = TextEditingController();
 
+  late List<KeyedObject> filteredData = widget.data;
+
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
+  }
+
+  void filter(String query) {
+    final List<KeyedObject> newData;
+    if (query.isEmpty) {
+      newData = widget.data;
+    } else {
+      newData = widget.data
+          .where(
+            (e) =>
+                e.key.toString().toLowerCase().contains(query.toLowerCase()) ||
+                e.value.toString().toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
+    }
+
+    setState(() => filteredData = newData);
   }
 
   @override
@@ -134,20 +153,6 @@ class _DataTableViewState extends State<DataTableView> {
       columnCount = 1 + firstValue.fields.length;
     } else {
       columnCount = 2;
-    }
-
-    final query = searchController.text;
-    final List<KeyedObject> filteredData;
-    if (query.isEmpty) {
-      filteredData = widget.data;
-    } else {
-      filteredData = widget.data
-          .where(
-            (e) =>
-                e.key.toString().toLowerCase().contains(query.toLowerCase()) ||
-                e.value.toString().toLowerCase().contains(query.toLowerCase()),
-          )
-          .toList();
     }
 
     final largeDataset = widget.data.length > 100000;
@@ -167,8 +172,8 @@ class _DataTableViewState extends State<DataTableView> {
                   controller: searchController,
                   hintText: 'Search',
                   prefixIcon: const Icon(Icons.search),
-                  onChanged: !largeDataset ? (_) => setState(() {}) : null,
-                  onSubmitted: largeDataset ? (_) => setState(() {}) : null,
+                  onChanged: !largeDataset ? filter : null,
+                  onSubmitted: largeDataset ? filter : null,
                 ),
               ),
               if (largeDataset) const Text('Submit to search'),
@@ -222,6 +227,7 @@ class _DataTableViewState extends State<DataTableView> {
                     }
 
                     final object = filteredData[rowIndex];
+                    final query = searchController.text;
 
                     if (column == 0) {
                       final keyString = object.key.toString();
