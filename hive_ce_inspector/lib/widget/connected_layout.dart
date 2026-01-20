@@ -67,7 +67,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
   void didUpdateWidget(ConnectedLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.boxes != widget.boxes) {
-      filteredBoxes = boxData.keys.toList();
+      filter(searchController.text);
     }
   }
 
