@@ -128,21 +128,12 @@ class _DataTableViewState extends State<DataTableView> {
     super.dispose();
   }
 
-  void filter(String query) {
-    final List<KeyedObject> newData;
-    if (query.isEmpty) {
-      newData = widget.data;
-    } else {
-      newData = widget.data
-          .where(
-            (e) =>
-                e.key.toString().toLowerCase().contains(query.toLowerCase()) ||
-                e.value.toString().toLowerCase().contains(query.toLowerCase()),
-          )
-          .toList();
+  @override
+  void didUpdateWidget(DataTableView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.data != widget.data) {
+      filter(searchController.text);
     }
-
-    setState(() => filteredData = newData);
   }
 
   @override
@@ -314,6 +305,23 @@ class _DataTableViewState extends State<DataTableView> {
               ),
       ],
     );
+  }
+
+  void filter(String query) {
+    final List<KeyedObject> newData;
+    if (query.isEmpty) {
+      newData = widget.data;
+    } else {
+      newData = widget.data
+          .where(
+            (e) =>
+                e.key.toString().toLowerCase().contains(query.toLowerCase()) ||
+                e.value.toString().toLowerCase().contains(query.toLowerCase()),
+          )
+          .toList();
+    }
+
+    setState(() => filteredData = newData);
   }
 }
 

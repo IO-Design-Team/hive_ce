@@ -63,17 +63,12 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     super.dispose();
   }
 
-  void filter(String query) {
-    final List<String> newBoxes;
-    if (query.isEmpty) {
-      newBoxes = boxData.keys.toList();
-    } else {
-      newBoxes = boxData.keys
-          .where((e) => e.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+  @override
+  void didUpdateWidget(ConnectedLayout oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.boxes != widget.boxes) {
+      filteredBoxes = boxData.keys.toList();
     }
-
-    setState(() => filteredBoxes = newBoxes);
   }
 
   @override
@@ -131,6 +126,19 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
           ),
       ],
     );
+  }
+
+  void filter(String query) {
+    final List<String> newBoxes;
+    if (query.isEmpty) {
+      newBoxes = boxData.keys.toList();
+    } else {
+      newBoxes = boxData.keys
+          .where((e) => e.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+
+    setState(() => filteredBoxes = newBoxes);
   }
 
   void loadBoxData(String box) async {
