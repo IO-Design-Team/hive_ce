@@ -86,6 +86,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                   hintText: 'Search',
                   prefixIcon: const Icon(Icons.search),
                   onChanged: (_) => setState(() {}),
+                  onSubmitted: (_) => setState(() {}),
                 ),
               ),
               Expanded(
