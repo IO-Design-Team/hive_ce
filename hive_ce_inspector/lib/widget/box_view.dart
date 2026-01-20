@@ -156,7 +156,7 @@ class _DataTableViewState extends State<DataTableView> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           child: Column(
             spacing: 8,
             crossAxisAlignment: CrossAxisAlignment.start,

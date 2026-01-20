@@ -19,6 +19,7 @@ class ConnectedLayout extends StatefulWidget {
 
 class _ConnectedLayoutState extends State<ConnectedLayout> {
   final boxData = <String, BoxData>{};
+  final searchController = TextEditingController();
 
   late final StreamSubscription<String> boxRegisteredSubscription;
   late final StreamSubscription<String> boxUnregisteredSubscription;
@@ -26,7 +27,6 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   String? selectedBox;
   HiveSchema? schema;
-  final searchController = TextEditingController();
 
   @override
   void initState() {
@@ -55,10 +55,10 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   @override
   void dispose() {
+    searchController.dispose();
     boxRegisteredSubscription.cancel();
     boxUnregisteredSubscription.cancel();
     boxEventSubscription.cancel();
-    searchController.dispose();
     super.dispose();
   }
 
@@ -68,9 +68,8 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     final selectedBoxData = boxData[selectedBox];
     final query = searchController.text;
     final filteredBoxes = boxData.keys
-        .where((b) => b.toLowerCase().contains(query.toLowerCase()))
+        .where((e) => e.toLowerCase().contains(query.toLowerCase()))
         .toList();
-    
 
     return SplitPane(
       axis: Axis.horizontal,
@@ -84,15 +83,15 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
                 padding: const EdgeInsets.all(8),
                 child: DevToolsClearableTextField(
                   controller: searchController,
+                  hintText: 'Search',
+                  prefixIcon: const Icon(Icons.search),
                   onChanged: (_) => setState(() {}),
                   onSubmitted: (_) => setState(() {}),
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search boxes',
                 ),
               ),
               Expanded(
                 child: filteredBoxes.isEmpty
-                    ? Center(child: Text('No boxes matching "$query"'))
+                    ? const Center(child: Text('No matching boxes'))
                     : ListView.builder(
                         itemBuilder: (context, index) {
                           final box = filteredBoxes[index];
