@@ -1,3 +1,7 @@
+## 2.19.0
+
+- Adds box search to the inspector (by [@ElNgatia](https://github.com/ElNgatia) in [#280](https://github.com/IO-Design-Team/hive_ce/pull/280))
+
 ## 2.18.0
 
 - Fixes an issue with IsolatedHive encryption
