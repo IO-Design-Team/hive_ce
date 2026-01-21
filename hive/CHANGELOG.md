@@ -1,3 +1,7 @@
+## 2.19.1
+
+- Updates `isolate_channel` to `0.4.0`
+
 ## 2.19.0
 
 - Adds box search to the inspector (by [@ElNgatia](https://github.com/ElNgatia) in [#280](https://github.com/IO-Design-Team/hive_ce/pull/280))

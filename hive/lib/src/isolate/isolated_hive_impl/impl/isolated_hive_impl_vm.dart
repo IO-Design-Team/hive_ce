@@ -65,7 +65,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
 
       final IsolateConnection connection;
       if (send != null) {
-        connection = connectToIsolate(send);
+        connection = await connectToIsolate(send);
       } else {
         connection = await _spawnHiveIsolate();
       }
