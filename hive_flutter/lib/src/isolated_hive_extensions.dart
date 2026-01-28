@@ -18,6 +18,7 @@ extension IsolatedHiveX on IsolatedHiveInterface {
     String? subDirectory,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
+    bool obfuscateBoxNames = false,
   }) async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,11 @@ extension IsolatedHiveX on IsolatedHiveInterface {
       path = path_helper.join(appDir.path, subDirectory);
     }
 
-    await init(path, isolateNameServer: const IsolateNameServer());
+    await init(
+      path,
+      isolateNameServer: const IsolateNameServer(),
+      obfuscateBoxNames: obfuscateBoxNames,
+    );
 
     final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
     if (!isAdapterRegistered(colorAdapter.typeId)) {

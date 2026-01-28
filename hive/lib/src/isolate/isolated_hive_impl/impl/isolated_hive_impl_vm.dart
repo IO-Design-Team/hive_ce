@@ -29,13 +29,13 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   @override
   IsolateConnection get connection => _connection!;
 
-  late Future<IsolateConnection> Function() _spawnHiveIsolate =
-      () => spawnIsolate(
-            isolateEntryPoint,
-            debugName: hiveIsolateName,
-            onConnect: onConnect,
-            onExit: onExit,
-          );
+  late Future<IsolateConnection> Function() _spawnHiveIsolate = () =>
+      spawnIsolate(
+        isolateEntryPoint,
+        debugName: hiveIsolateName,
+        onConnect: onConnect,
+        onExit: onExit,
+      );
 
   @override
   void onConnect(SendPort send) =>
@@ -52,6 +52,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   Future<void> init(
     String? path, {
     IsolateNameServer? isolateNameServer,
+    bool obfuscateBoxNames = false,
   }) async {
     if (_connection == null) {
       _isolateNameServer = isolateNameServer;
@@ -75,7 +76,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       _boxChannel = IsolateMethodChannel('box', connection);
     }
 
-    return _hiveChannel.invokeMethod('init', {'path': path});
+    return _hiveChannel.invokeMethod('init', {
+      'path': path,
+      'obfuscateBoxNames': obfuscateBoxNames,
+    });
   }
 
   Future<IsolatedBoxBase<E>> _openBox<E>(
@@ -176,16 +180,17 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     String? collection,
   }) async =>
       await _openBox<E>(
-        name,
-        false,
-        encryptionCipher,
-        keyComparator,
-        compactionStrategy,
-        crashRecovery,
-        path,
-        bytes,
-        collection,
-      ) as IsolatedBox<E>;
+            name,
+            false,
+            encryptionCipher,
+            keyComparator,
+            compactionStrategy,
+            crashRecovery,
+            path,
+            bytes,
+            collection,
+          )
+          as IsolatedBox<E>;
 
   @override
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
@@ -198,16 +203,17 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     String? collection,
   }) async =>
       await _openBox<E>(
-        name,
-        true,
-        encryptionCipher,
-        keyComparator,
-        compactionStrategy,
-        crashRecovery,
-        path,
-        null,
-        collection,
-      ) as IsolatedLazyBox<E>;
+            name,
+            true,
+            encryptionCipher,
+            keyComparator,
+            compactionStrategy,
+            crashRecovery,
+            path,
+            null,
+            collection,
+          )
+          as IsolatedLazyBox<E>;
 
   IsolatedBoxBase<E> _getBoxInternal<E>(String name, bool lazy) {
     final lowerCaseName = name.toLowerCase();
@@ -219,8 +225,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         final typeName = box is IsolatedLazyBox
             ? 'IsolatedLazyBox<${box.valueType}>'
             : 'IsolatedBox<${box.valueType}>';
-        throw HiveError('The box "$lowerCaseName" is already open '
-            'and of type $typeName.');
+        throw HiveError(
+          'The box "$lowerCaseName" is already open '
+          'and of type $typeName.',
+        );
       }
     } else {
       throw HiveError(
@@ -264,10 +272,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     if (box != null) {
       await box.deleteFromDisk();
     } else {
-      await _hiveChannel.invokeMethod(
-        'deleteBoxFromDisk',
-        {'name': name.toLowerCase(), 'path': path},
-      );
+      await _hiveChannel.invokeMethod('deleteBoxFromDisk', {
+        'name': name.toLowerCase(),
+        'path': path,
+      });
     }
   }
 
