@@ -8,6 +8,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   Future<void> init(
     String? path, {
     IsolateNameServer? isolateNameServer,
+    bool obfuscateBoxNames = false,
   }) {
     throw UnimplementedError();
   }

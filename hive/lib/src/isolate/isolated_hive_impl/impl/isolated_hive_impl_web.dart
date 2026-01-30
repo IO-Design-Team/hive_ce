@@ -13,8 +13,8 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   Future<void> init(
     String? path, {
     IsolateNameServer? isolateNameServer,
-  }) async =>
-      Hive.init(path);
+    bool obfuscateBoxNames = false,
+  }) async => Hive.init(path, obfuscateBoxNames: obfuscateBoxNames);
 
   @override
   Future<IsolatedBox<E>> openBox<E>(
@@ -26,19 +26,18 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     String? path,
     Uint8List? bytes,
     String? collection,
-  }) async =>
-      IsolatedBoxImpl(
-        await Hive.openBox(
-          name,
-          encryptionCipher: encryptionCipher,
-          keyComparator: keyComparator ?? defaultKeyComparator,
-          compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
-          crashRecovery: crashRecovery,
-          path: path,
-          bytes: bytes,
-          collection: collection,
-        ),
-      );
+  }) async => IsolatedBoxImpl(
+    await Hive.openBox(
+      name,
+      encryptionCipher: encryptionCipher,
+      keyComparator: keyComparator ?? defaultKeyComparator,
+      compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
+      crashRecovery: crashRecovery,
+      path: path,
+      bytes: bytes,
+      collection: collection,
+    ),
+  );
 
   @override
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
@@ -49,18 +48,17 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     bool crashRecovery = true,
     String? path,
     String? collection,
-  }) async =>
-      IsolatedLazyBoxImpl(
-        await Hive.openLazyBox(
-          name,
-          encryptionCipher: encryptionCipher,
-          keyComparator: keyComparator ?? defaultKeyComparator,
-          compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
-          crashRecovery: crashRecovery,
-          path: path,
-          collection: collection,
-        ),
-      );
+  }) async => IsolatedLazyBoxImpl(
+    await Hive.openLazyBox(
+      name,
+      encryptionCipher: encryptionCipher,
+      keyComparator: keyComparator ?? defaultKeyComparator,
+      compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
+      crashRecovery: crashRecovery,
+      path: path,
+      collection: collection,
+    ),
+  );
 
   @override
   IsolatedBox<E> box<E>(String name) => IsolatedBoxImpl(Hive.box(name));

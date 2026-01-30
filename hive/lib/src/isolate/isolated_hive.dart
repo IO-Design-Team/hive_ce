@@ -12,6 +12,7 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   Future<void> init(
     String? path, {
     IsolateNameServer? isolateNameServer,
+    bool obfuscateBoxNames = false,
   });
 
   /// Open a box in the isolate

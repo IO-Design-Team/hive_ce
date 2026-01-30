@@ -13,7 +13,10 @@ Future<dynamic> handleHiveMethodCall(
 ) async {
   switch (call.method) {
     case 'init':
-      Hive.init(call.arguments['path']);
+      Hive.init(
+        call.arguments['path'],
+        obfuscateBoxNames: call.arguments['obfuscateBoxNames'] ?? false,
+      );
       (Hive as HiveImpl).setIsolated();
     case 'openBox':
       final name = call.arguments['name'];
