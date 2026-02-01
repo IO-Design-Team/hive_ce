@@ -58,13 +58,27 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
       (fields[2] as List).cast<String>(),
       (fields[3] as Set).cast<String>(),
       (fields[4] as List).cast<String>(),
+      (fields[5] as List).cast<String>().lockUnsafe,
+      (fields[6] as Set).cast<String>().lockUnsafe,
+      (fields[7] as Map).cast<String, String>().lockUnsafe,
+      (fields[11] as Map)
+          .map(
+            (dynamic k, dynamic v) => MapEntry(
+              k as String,
+              (v as Map).cast<String, String>().build(),
+            ),
+          )
+          .build(),
+      (fields[8] as List).cast<String>().build(),
+      (fields[9] as Set).cast<String>().build(),
+      (fields[10] as Map).cast<String, String>().build(),
     );
   }
 
   @override
   void write(BinaryWriter writer, ClassSpec2 obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.value)
       ..writeByte(1)
@@ -74,7 +88,21 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
       ..writeByte(3)
       ..write(obj.set)
       ..writeByte(4)
-      ..write(obj.list);
+      ..write(obj.list)
+      ..writeByte(5)
+      ..write(obj.iList.unlockView)
+      ..writeByte(6)
+      ..write(obj.iSet.unlockView)
+      ..writeByte(7)
+      ..write(obj.iMap.unlockView)
+      ..writeByte(8)
+      ..write(obj.builtList.asList())
+      ..writeByte(9)
+      ..write(obj.builtSet.asSet())
+      ..writeByte(10)
+      ..write(obj.builtMap.asMap())
+      ..writeByte(11)
+      ..write(obj.iListList.map((k, v) => MapEntry(k, v.asMap())).asMap());
   }
 
   @override

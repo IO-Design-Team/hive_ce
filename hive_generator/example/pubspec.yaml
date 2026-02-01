@@ -2,6 +2,8 @@ name: example
 dependencies:
   hive_ce: any
   meta: ^1.14.0
+  fast_immutable_collections: ^11.1.0
+  built_collection: ^5.1.1
 dev_dependencies:
   rexios_lints: ^17.0.2
   build_runner: ^2.5.4

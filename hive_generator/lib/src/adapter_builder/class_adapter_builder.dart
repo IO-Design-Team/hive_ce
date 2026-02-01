@@ -10,9 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
-import 'package:source_gen/source_gen.dart';
-
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
+import 'package:source_gen/source_gen.dart';
 
 /// TODO: Document this!
 class ClassAdapterBuilder extends AdapterBuilder {
@@ -44,6 +43,52 @@ class ClassAdapterBuilder extends AdapterBuilder {
     Uint8List,
     inPackage: 'typed_data',
     inSdk: true,
+  );
+
+  /// [TypeChecker] for [ImmutableCollection].
+  static final iCollectionChecker = const TypeChecker.typeNamedLiterally(
+    'ImmutableCollection',
+    inPackage: 'fast_immutable_collections',
+  );
+
+  /// [TypeChecker] for [IList].
+  static final iListChecker = const TypeChecker.typeNamedLiterally(
+    'IList',
+    inPackage: 'fast_immutable_collections',
+  );
+
+  /// [TypeChecker] for [ISet].
+  static final iSetChecker = const TypeChecker.typeNamedLiterally(
+    'ISet',
+    inPackage: 'fast_immutable_collections',
+  );
+
+  /// [TypeChecker] for [IMap].
+  static final iMapChecker = const TypeChecker.typeNamedLiterally(
+    'IMap',
+    inPackage: 'fast_immutable_collections',
+  );
+
+  /// [TypeChecker] for [BuiltList], [BuiltSet], [BuiltMap].
+  static final builtCollectionChecker =
+      TypeChecker.any([builtListChecker, builtSetChecker, builtMapChecker]);
+
+  /// [TypeChecker] for [BuiltList].
+  static final builtListChecker = const TypeChecker.typeNamedLiterally(
+    'BuiltList',
+    inPackage: 'built_collection',
+  );
+
+  /// [TypeChecker] for [BuiltSet].
+  static final builtSetChecker = const TypeChecker.typeNamedLiterally(
+    'BuiltSet',
+    inPackage: 'built_collection',
+  );
+
+  /// [TypeChecker] for [BuiltMap].
+  static final builtMapChecker = const TypeChecker.typeNamedLiterally(
+    'BuiltMap',
+    inPackage: 'built_collection',
   );
 
   @override
@@ -124,13 +169,17 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
-    } else if (setChecker.isAssignableFromType(type)) {
-      return '($variable as Set$suffix)${_castIterable(type)}';
+    } else if (setChecker.isAssignableFromType(type) ||
+        iSetChecker.isAssignableFromType(type) ||
+        builtSetChecker.isAssignableFromType(type)) {
+      return '($variable as Set$suffix)${_castIterable(type)}${_lockCollection(type)}';
     } else if (iterableChecker.isAssignableFromType(type) &&
         !isUint8List(type)) {
-      return '($variable as List$suffix)${_castIterable(type)}';
-    } else if (mapChecker.isAssignableFromType(type)) {
-      return '($variable as Map$suffix)${_castMap(type)}';
+      return '($variable as List$suffix)${_castIterable(type)}${_lockCollection(type)}';
+    } else if (mapChecker.isAssignableFromType(type) ||
+        iMapChecker.isAssignableFromType(type) ||
+        builtMapChecker.isAssignableFromType(type)) {
+      return '($variable as Map$suffix)${_castMap(type)}${_lockCollection(type)}';
     } else if (type.isDartCoreInt) {
       return '($variable as num$suffix)$suffix.toInt()';
     } else if (type.isDartCoreDouble) {
@@ -143,7 +192,9 @@ class ClassAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
   bool isMapOrIterable(DartType type) {
     return iterableChecker.isAssignableFromType(type) ||
-        mapChecker.isAssignableFromType(type);
+        mapChecker.isAssignableFromType(type) ||
+        iMapChecker.isAssignableFromType(type) ||
+        builtMapChecker.isAssignableFromType(type);
   }
 
   /// TODO: Document this!
@@ -185,6 +236,16 @@ class ClassAdapterBuilder extends AdapterBuilder {
     }
   }
 
+  String _lockCollection(DartType type) {
+    if (iCollectionChecker.isAssignableFromType(type)) {
+      return '.lockUnsafe';
+    } else if (builtCollectionChecker.isAssignableFromType(type)) {
+      return '.build()';
+    } else {
+      return '';
+    }
+  }
+
   @override
   String buildWrite() {
     final code = StringBuffer();
@@ -195,11 +256,59 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(obj.${field.name}${_unlockNestedCollection(field.type)})''');
     }
     code.writeln(';');
 
     return code.toString();
+  }
+
+  String _unlockCollection(DartType type) {
+    if (iCollectionChecker.isAssignableFromType(type)) {
+      return '.unlockView';
+    } else if (builtSetChecker.isAssignableFromType(type)) {
+      return '.asSet()';
+    } else if (builtListChecker.isAssignableFromType(type)) {
+      return '.asList()';
+    } else if (builtMapChecker.isAssignableFromType(type)) {
+      return '.asMap()';
+    } else {
+      return '';
+    }
+  }
+
+  String _unlockNestedCollection(DartType type) {
+    if (iSetChecker.isAssignableFromType(type) ||
+        iListChecker.isAssignableFromType(type) ||
+        builtSetChecker.isAssignableFromType(type) ||
+        builtListChecker.isAssignableFromType(type)) {
+      final paramType = type as ParameterizedType;
+      final arg = paramType.typeArguments[0];
+      if (iSetChecker.isAssignableFromType(arg) ||
+          builtSetChecker.isAssignableFromType(arg)) {
+        return '.map((e) => e${_unlockNestedCollection(arg)}).toSet()';
+      } else if (iListChecker.isAssignableFromType(arg) ||
+          builtListChecker.isAssignableFromType(arg)) {
+        return '.map((e) => e${_unlockNestedCollection(arg)}).toList()';
+      } else {
+        return _unlockCollection(type);
+      }
+    } else if (iMapChecker.isAssignableFromType(type) ||
+        builtMapChecker.isAssignableFromType(type)) {
+      final paramType = type as ParameterizedType;
+      final arg1 = paramType.typeArguments[0];
+      final arg2 = paramType.typeArguments[1];
+      if (iCollectionChecker.isAssignableFromType(arg1) ||
+          iCollectionChecker.isAssignableFromType(arg2) ||
+          builtCollectionChecker.isAssignableFromType(arg1) ||
+          builtCollectionChecker.isAssignableFromType(arg2)) {
+        return '.map((k, v) => MapEntry(k${_unlockNestedCollection(arg1)}, v${_unlockNestedCollection(arg2)}))${_unlockCollection(type)}';
+      } else {
+        return _unlockCollection(type);
+      }
+    } else {
+      return '';
+    }
   }
 }
 

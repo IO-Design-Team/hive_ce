@@ -1,3 +1,5 @@
+import 'package:built_collection/built_collection.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:meta/meta.dart';
 
@@ -26,7 +28,29 @@ class ClassSpec2 {
   final Set<String> set;
   final List<String> list;
 
-  const ClassSpec2(this.value, this.value2, this.iterable, this.set, this.list);
+  final IList<String> iList;
+  final ISet<String> iSet;
+  final IMap<String, String> iMap;
+  final BuiltMap<String, BuiltMap<String, String>> iListList;
+
+  final BuiltList<String> builtList;
+  final BuiltSet<String> builtSet;
+  final BuiltMap<String, String> builtMap;
+
+  const ClassSpec2(
+    this.value,
+    this.value2,
+    this.iterable,
+    this.set,
+    this.list,
+    this.iList,
+    this.iSet,
+    this.iMap,
+    this.iListList,
+    this.builtList,
+    this.builtSet,
+    this.builtMap,
+  );
 }
 
 class ClassSpec3 {

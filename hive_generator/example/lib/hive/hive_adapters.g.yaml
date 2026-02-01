@@ -13,7 +13,7 @@ types:
         index: 1
   ClassSpec2:
     typeId: 51
-    nextIndex: 5
+    nextIndex: 12
     fields:
       value:
         index: 0
@@ -25,6 +25,20 @@ types:
         index: 3
       list:
         index: 4
+      iList:
+        index: 5
+      iSet:
+        index: 6
+      iMap:
+        index: 7
+      builtList:
+        index: 8
+      builtSet:
+        index: 9
+      builtMap:
+        index: 10
+      iListList:
+        index: 11
   EnumSpec:
     typeId: 52
     nextIndex: 2
