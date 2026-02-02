@@ -1,3 +1,7 @@
+## 2.19.2
+
+- Updates `isolate_channel` to `0.6.0`
+
 ## 2.19.1
 
 - Updates `isolate_channel` to `0.4.0`
