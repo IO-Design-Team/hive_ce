@@ -76,7 +76,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
           // This would be unsafe in release mode
           if (kDebugMode) {
             connectFuture =
-                connectFuture.timeout(const Duration(milliseconds: 50));
+                connectFuture.timeout(const Duration(milliseconds: 250));
           }
           connection = await connectFuture;
         } on TimeoutException {
