@@ -1,3 +1,7 @@
+## 2.19.3
+
+- IsolatedHive: Handles stale send ports on hot restart
+
 ## 2.19.2
 
 - Updates `isolate_channel` to `0.6.0`

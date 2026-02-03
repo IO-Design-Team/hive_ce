@@ -9,6 +9,7 @@ import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart'
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
+import 'package:hive_ce/src/util/debug_utils.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:hive_ce/src/util/type_utils.dart';
 import 'package:isolate_channel/isolate_channel.dart';
@@ -38,8 +39,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
           );
 
   @override
-  void onConnect(SendPort send) =>
-      _isolateNameServer?.registerPortWithName(send, hiveIsolateName);
+  void onConnect(SendPort send) {
+    _isolateNameServer?.removePortNameMapping(hiveIsolateName);
+    _isolateNameServer?.registerPortWithName(send, hiveIsolateName);
+  }
 
   @override
   void onExit() => _isolateNameServer?.removePortNameMapping(hiveIsolateName);
@@ -63,9 +66,22 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       final send =
           _isolateNameServer?.lookupPortByName(hiveIsolateName) as SendPort?;
 
-      final IsolateConnection connection;
+      IsolateConnection connection;
       if (send != null) {
-        connection = await connectToIsolate(send);
+        try {
+          var connectFuture = connectToIsolate(send);
+
+          // Sometimes the INS does not get cleared on a hot restart
+          // This results in the send port being stale
+          // This would be unsafe in release mode
+          if (kDebugMode) {
+            connectFuture =
+                connectFuture.timeout(const Duration(milliseconds: 50));
+          }
+          connection = await connectFuture;
+        } on TimeoutException {
+          connection = await _spawnHiveIsolate();
+        }
       } else {
         connection = await _spawnHiveIsolate();
       }
