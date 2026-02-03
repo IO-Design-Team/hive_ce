@@ -8,6 +8,7 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:isolate_channel/isolate_channel.dart';
@@ -365,6 +366,25 @@ void main() {
           encryptionCipher: HiveAesCipher(key),
         );
         expect(await box.get('key'), 'value');
+      });
+
+      test('Stale send port', () async {
+        final dir = await getTempDir();
+        final hive = IsolatedHiveImpl();
+        addTearDown(hive.close);
+
+        final ins = TestIns();
+        ins.registerPortWithName(ReceivePort().sendPort, hiveIsolateName);
+
+        var spawned = false;
+        (hive as HiveIsolate).spawnHiveIsolate = () {
+          spawned = true;
+          return spawnIsolate(isolateEntryPoint);
+        };
+
+        await hive.init(dir.path, isolateNameServer: ins);
+
+        expect(spawned, isTrue);
       });
     },
     onPlatform: {
