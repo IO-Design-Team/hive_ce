@@ -1,3 +1,24 @@
+## 2.19.3
+
+- IsolatedHive: Handles stale send ports on hot restart
+
+## 2.19.2
+
+- Updates `isolate_channel` to `0.6.0`
+
+## 2.19.1
+
+- Updates `isolate_channel` to `0.4.0`
+
+## 2.19.0
+
+- Adds box search to the inspector (by [@ElNgatia](https://github.com/ElNgatia) in [#280](https://github.com/IO-Design-Team/hive_ce/pull/280))
+
+## 2.18.0
+
+- Fixes an issue with IsolatedHive encryption
+- Automatically disables the unsafe isolate warning when running in a test
+
 ## 2.17.0
 
 - Fixes WASM int decoding (by [@flrnsbt](https://github.com/flrnsbt) in [#262](https://github.com/IO-Design-Team/hive_ce/pull/262))

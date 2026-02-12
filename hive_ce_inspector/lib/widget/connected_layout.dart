@@ -19,11 +19,13 @@ class ConnectedLayout extends StatefulWidget {
 
 class _ConnectedLayoutState extends State<ConnectedLayout> {
   final boxData = <String, BoxData>{};
+  final searchController = TextEditingController();
 
   late final StreamSubscription<String> boxRegisteredSubscription;
   late final StreamSubscription<String> boxUnregisteredSubscription;
   late final StreamSubscription<BoxEventPayload> boxEventSubscription;
 
+  late List<String> filteredBoxes = boxData.keys.toList();
   String? selectedBox;
   HiveSchema? schema;
 
@@ -36,7 +38,10 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
     }
 
     boxRegisteredSubscription = widget.client.boxRegistered.listen(
-      (name) => setState(() => boxData[name] = BoxData(name: name)),
+      (name) => setState(() {
+        boxData[name] = BoxData(name: name);
+        filter(searchController.text);
+      }),
     );
     boxUnregisteredSubscription = widget.client.boxUnregistered.listen(
       (name) => setState(
@@ -54,6 +59,7 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
 
   @override
   void dispose() {
+    searchController.dispose();
     boxRegisteredSubscription.cancel();
     boxUnregisteredSubscription.cancel();
     boxEventSubscription.cancel();
@@ -71,19 +77,36 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
       children: [
         DevToolsAreaPane(
           header: const AreaPaneHeader(title: Text('Boxes')),
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final box = boxData.keys.elementAt(index);
-              return ListTile(
-                title: Text(box),
-                selected: selectedBox == box,
-                onTap: () {
-                  loadBoxData(box);
-                  setState(() => this.selectedBox = box);
-                },
-              );
-            },
-            itemCount: boxData.keys.length,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: DevToolsClearableTextField(
+                  controller: searchController,
+                  hintText: 'Search',
+                  prefixIcon: const Icon(Icons.search),
+                  onChanged: filter,
+                ),
+              ),
+              Expanded(
+                child: filteredBoxes.isEmpty
+                    ? const Center(child: Text('No boxes to display'))
+                    : ListView.builder(
+                        itemBuilder: (context, index) {
+                          final box = filteredBoxes[index];
+                          return ListTile(
+                            title: Text(box),
+                            selected: selectedBox == box,
+                            onTap: () {
+                              loadBoxData(box);
+                              setState(() => this.selectedBox = box);
+                            },
+                          );
+                        },
+                        itemCount: filteredBoxes.length,
+                      ),
+              ),
+            ],
           ),
         ),
         if (selectedBox == null)
@@ -98,6 +121,19 @@ class _ConnectedLayoutState extends State<ConnectedLayout> {
           ),
       ],
     );
+  }
+
+  void filter(String query) {
+    final List<String> newBoxes;
+    if (query.isEmpty) {
+      newBoxes = boxData.keys.toList();
+    } else {
+      newBoxes = boxData.keys
+          .where((e) => e.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    }
+
+    setState(() => filteredBoxes = newBoxes);
   }
 
   void loadBoxData(String box) async {

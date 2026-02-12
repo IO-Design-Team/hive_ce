@@ -18,25 +18,11 @@ import 'package:meta/meta.dart';
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
-  /// Warning for existing lock of unmatched isolation
-  @visibleForTesting
-  static const unmatchedIsolationWarning = '''
-⚠️ WARNING: HIVE MULTI-ISOLATE RISK DETECTED ⚠️
-
-You are opening this box with Hive, but this box was previously opened with
-IsolatedHive. This can lead to DATA CORRUPTION as Hive boxes are not designed
-for concurrent access across isolates. Each isolate would maintain its own box
-cache, potentially causing data inconsistency and corruption.
-
-RECOMMENDED ACTIONS:
-- ALWAYS use IsolatedHive to perform box operations when working with multiple
-  isolates
-''';
-
   final File _file;
   final File _lockFile;
   final bool _crashRecovery;
   final HiveCipher? _cipher;
+  final int? _keyCrc;
   final FrameIoHelper _frameHelper;
 
   final ReadWriteSync _sync;
@@ -73,6 +59,7 @@ RECOMMENDED ACTIONS:
     this._lockFile,
     this._crashRecovery,
     this._cipher,
+    this._keyCrc,
   )   : _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
@@ -82,6 +69,7 @@ RECOMMENDED ACTIONS:
     this._lockFile,
     this._crashRecovery,
     this._cipher,
+    this._keyCrc,
     this._frameHelper,
     this._sync,
   );
@@ -116,7 +104,7 @@ RECOMMENDED ACTIONS:
         props = LockProps();
       }
       if (Logger.unmatchedIsolationWarning && props.isolated && !isolated) {
-        Logger.w(unmatchedIsolationWarning);
+        Logger.w(HiveWarning.unmatchedIsolation);
       }
     }
 
@@ -132,10 +120,12 @@ RECOMMENDED ACTIONS:
         keystore,
         registry,
         _cipher,
+        _keyCrc,
         verbatim: isolated,
       );
     } else {
-      recoveryOffset = await _frameHelper.keysFromFile(path, keystore, _cipher);
+      recoveryOffset =
+          await _frameHelper.keysFromFile(path, keystore, _cipher, _keyCrc);
     }
 
     if (recoveryOffset != -1) {
@@ -158,8 +148,12 @@ RECOMMENDED ACTIONS:
       final bytes = await readRaf.read(frame.length!);
 
       final reader = BinaryReaderImpl(bytes, registry);
-      final readFrame =
-          reader.readFrame(cipher: _cipher, lazy: false, verbatim: verbatim);
+      final readFrame = reader.readFrame(
+        cipher: _cipher,
+        keyCrc: _keyCrc,
+        lazy: false,
+        verbatim: verbatim,
+      );
 
       if (readFrame == null) {
         throw HiveError(
@@ -177,8 +171,12 @@ RECOMMENDED ACTIONS:
       final writer = BinaryWriterImpl(registry);
 
       for (final frame in frames) {
-        frame.length =
-            writer.writeFrame(frame, cipher: _cipher, verbatim: verbatim);
+        frame.length = writer.writeFrame(
+          frame,
+          cipher: _cipher,
+          keyCrc: _keyCrc,
+          verbatim: verbatim,
+        );
       }
 
       try {

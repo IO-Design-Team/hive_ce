@@ -5,11 +5,12 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:hive_ce/hive_ce.dart';
-import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate.dart';
+import 'package:hive_ce/src/isolate/isolated_hive_impl/hive_isolate_name.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/isolated_hive_impl.dart';
+import 'package:hive_ce/src/util/logger.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
@@ -122,7 +123,7 @@ void main() {
       group('warnings', () {
         test('unsafe isolate', () async {
           final patchedWarning =
-              HiveImpl.unsafeIsolateWarning.replaceFirst(isolateNameRegex, '');
+              HiveWarning.unsafeIsolate.replaceFirst(isolateNameRegex, '');
 
           final safeOutput = await Isolate.run(
             debugName: 'main',
@@ -172,7 +173,7 @@ void main() {
               await captureOutput(() => IsolatedHiveImpl().init(null)).toList();
           expect(
             unsafeOutput,
-            contains(HiveIsolate.noIsolateNameServerWarning),
+            contains(HiveWarning.noIsolateNameServer),
           );
 
           final safeOutput = await captureOutput(
@@ -200,7 +201,7 @@ void main() {
 
           expect(
             output,
-            contains(StorageBackendVm.unmatchedIsolationWarning),
+            contains(HiveWarning.unmatchedIsolation),
           );
 
           await IsolatedHive.openBox('box2');
@@ -211,12 +212,12 @@ void main() {
 
           expect(
             ignoredOutput,
-            isNot(contains(StorageBackendVm.unmatchedIsolationWarning)),
+            isNot(contains(HiveWarning.unmatchedIsolation)),
           );
         });
       });
 
-      test('IsolatedHive data compatable with Hive', () async {
+      test('IsolatedHive data compatible with Hive', () async {
         final dir = await getTempDir();
 
         final isolatedHive = IsolatedHiveImpl();
@@ -234,9 +235,168 @@ void main() {
         final box = await hive.openBox('test');
         expect(await box.get('key'), 'value');
       });
+
+      test('Hive data compatible with IsolatedHive', () async {
+        final dir = await getTempDir();
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test');
+        await box.put('key', 'value');
+        await box.close();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox = await isolatedHive.openBox('test');
+        expect(await isolatedBox.get('key'), 'value');
+      });
+
+      test('Encrypted IsolatedHive data compatible with Hive', () async {
+        final dir = await getTempDir();
+        final cipher = HiveAesCipher(Hive.generateSecureKey());
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox =
+            await isolatedHive.openBox('test', encryptionCipher: cipher);
+        await isolatedBox.put('key', 'value');
+        await isolatedBox.close();
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test', encryptionCipher: cipher);
+        expect(await box.get('key'), 'value');
+      });
+
+      test('Encrypted Hive data compatible with IsolatedHive', () async {
+        final dir = await getTempDir();
+        final cipher = HiveAesCipher(Hive.generateSecureKey());
+
+        final hive = HiveImpl();
+        addTearDown(hive.close);
+        hive.init(dir.path);
+
+        final box = await hive.openBox('test', encryptionCipher: cipher);
+        await box.put('key', 'value');
+        await box.close();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final isolatedBox =
+            await isolatedHive.openBox('test', encryptionCipher: cipher);
+        expect(await isolatedBox.get('key'), 'value');
+      });
+
+      test(
+        'IsolatedHive data encrypted with no keyCrc is readable',
+        () async {
+          final dir = await getTempDir();
+          final key = Hive.generateSecureKey();
+
+          final isolatedHive = IsolatedHiveImpl();
+          addTearDown(isolatedHive.close);
+          await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+          final box = await isolatedHive.openBox(
+            'test',
+            encryptionCipher: ZeroKeyCrcCipher(key),
+          );
+          await box.put('key', 'value');
+          await box.close();
+
+          final box2 = await isolatedHive.openBox(
+            'test',
+            encryptionCipher: HiveAesCipher(key),
+          );
+          expect(await box2.get('key'), 'value');
+        },
+      );
+
+      test('Encrypted IsolatedBox data compatible with IsolatedLazyBox',
+          () async {
+        final dir = await getTempDir();
+        final key = Hive.generateSecureKey();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final box = await isolatedHive.openBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        await box.put('key', 'value');
+        await box.close();
+
+        final lazyBox = await isolatedHive.openLazyBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        expect(await lazyBox.get('key'), 'value');
+      });
+
+      test('Encrypted IsolatedLazyBox data compatible with IsolatedBox',
+          () async {
+        final dir = await getTempDir();
+        final key = Hive.generateSecureKey();
+
+        final isolatedHive = IsolatedHiveImpl();
+        addTearDown(isolatedHive.close);
+        await isolatedHive.init(dir.path, isolateNameServer: StubIns());
+
+        final lazyBox = await isolatedHive.openLazyBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        await lazyBox.put('key', 'value');
+        await lazyBox.close();
+
+        final box = await isolatedHive.openBox(
+          'test',
+          encryptionCipher: HiveAesCipher(key),
+        );
+        expect(await box.get('key'), 'value');
+      });
+
+      test('Stale send port', () async {
+        final dir = await getTempDir();
+        final hive = IsolatedHiveImpl();
+        addTearDown(hive.close);
+
+        final ins = TestIns();
+        ins.registerPortWithName(ReceivePort().sendPort, hiveIsolateName);
+
+        var spawned = false;
+        (hive as HiveIsolate).spawnHiveIsolate = () {
+          spawned = true;
+          return spawnIsolate(isolateEntryPoint);
+        };
+
+        await hive.init(dir.path, isolateNameServer: ins);
+
+        expect(spawned, isTrue);
+      });
     },
     onPlatform: {
       'chrome': Skip('Isolates are not supported on web'),
     },
   );
+}
+
+/// Test cipher that always returns a zero key CRC
+class ZeroKeyCrcCipher extends HiveAesCipher {
+  ZeroKeyCrcCipher(super.key);
+
+  @override
+  int calculateKeyCrc() => 0;
 }
