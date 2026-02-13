@@ -10,7 +10,9 @@ extension HiveX on HiveInterface {
   ///
   /// You can provide a [subDir] where the boxes should be stored.
   ///
-  /// Also registers the flutter type adapters.
+  /// Also registers the flutter type adapters
+  /// - [colorAdapterTypeId] - The type id for the color adapter (default: 200)
+  /// - [timeOfDayAdapterTypeId] - The type id for the time of day adapter (default: 201)
   Future<void> initFlutter([
     String? subDir,
     HiveStorageBackendPreference backendPreference =
