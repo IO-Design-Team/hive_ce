@@ -22,7 +22,7 @@ class PersonAdapter extends TypeAdapter<Person> {
       bestFriend: fields[2] as Person?,
       friends: fields[3] == null
           ? const IList.empty()
-          : (fields[3] as List).cast<Person>(),
+          : const IListConverter().fromHive(fields[3]),
       job: fields[4] == null ? Job.unemployed : fields[4] as Job,
     );
   }

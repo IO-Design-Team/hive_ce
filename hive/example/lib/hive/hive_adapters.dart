@@ -11,9 +11,7 @@ part 'hive_adapters.g.dart';
 class IListConverter extends HiveConverter<IList, List> {
   const IListConverter();
 
-  @override
-  IList fromHive(List value) => IList(value);
+  IList<T> fromHive<T>(List<T> value) => IList(value);
 
-  @override
-  List toHive(IList object) => object.toList();
+  List<T> toHive<T>(IList<T> object) => object.toList();
 }

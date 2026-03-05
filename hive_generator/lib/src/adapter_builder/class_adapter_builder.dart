@@ -127,6 +127,12 @@ class ClassAdapterBuilder extends AdapterBuilder {
   }
 
   String _convert(DartType type, String variable) {
+    final converter =
+        converters.firstWhereOrNull((e) => type.isAssignableTo(e.type));
+    if (converter != null) {
+      return 'const ${converter.name}().fromHive($variable)';
+    }
+
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
@@ -142,14 +148,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      final converter =
-          converters.firstWhereOrNull((e) => type.isAssignableTo(e.type));
-      if (converter != null) {
-        print(converter.type);
-        return 'const ${converter.name}().fromHive($variable)';
-      } else {
-        return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
-      }
+      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
   }
 

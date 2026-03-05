@@ -25,7 +25,7 @@ class GenerateAdapters {
   final Set<int> reservedTypeIds;
 
   /// The converters to use
-  final List<HiveConverter> converters;
+  final List<BaseHiveConverter> converters;
 }
 
 /// Configuration that specifies the generation of a TypeAdapter
@@ -54,8 +54,10 @@ abstract class HiveConverter<T, S> {
   const HiveConverter();
 
   /// Convert a value from Hive
-  T fromHive(S value);
+  /// Is not actually declared here to allow for generic type parameters
+  // T fromHive(S value);
 
   /// Convert a value to Hive
-  S toHive(T object);
+  /// Is not actually declared here to allow for generic type parameters
+  // S toHive(T object);
 }
