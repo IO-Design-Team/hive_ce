@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:example/hive/hive_registrar.g.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:meta/meta.dart';
 
@@ -10,14 +11,14 @@ class Person {
     required this.name,
     required this.age,
     this.bestFriend,
-    this.friends = const [],
+    this.friends = const IList.empty(),
     this.job = Job.unemployed,
   });
 
   final String name;
   final int age;
   final Person? bestFriend;
-  final List<Person> friends;
+  final IList<Person> friends;
   final Job job;
 
   @override

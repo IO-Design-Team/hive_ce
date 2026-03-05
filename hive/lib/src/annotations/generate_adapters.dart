@@ -9,6 +9,7 @@ class GenerateAdapters {
     this.specs, {
     this.firstTypeId = 0,
     this.reservedTypeIds = const {},
+    this.converters = const [],
   });
   // coverage:ignore-end
 
@@ -22,6 +23,9 @@ class GenerateAdapters {
   ///
   /// These type ids will be skipped during generation
   final Set<int> reservedTypeIds;
+
+  /// The converters to use
+  final List<HiveConverter> converters;
 }
 
 /// Configuration that specifies the generation of a TypeAdapter
@@ -37,4 +41,21 @@ class AdapterSpec<T> {
   /// This should only be used to simplify migrations from `HiveType`
   /// annotations. Model classes should only contain fields to be persisted.
   final Set<String> ignoredFields;
+}
+
+/// Convert a type to a type Hive can store
+///
+/// [T] is the type to convert to/from
+///
+/// [S] is the type stored in Hive
+@immutable
+abstract class HiveConverter<T, S> {
+  /// Constructor
+  const HiveConverter();
+
+  /// Convert a value from Hive
+  T fromHive(S value);
+
+  /// Convert a value to Hive
+  S toHive(T object);
 }

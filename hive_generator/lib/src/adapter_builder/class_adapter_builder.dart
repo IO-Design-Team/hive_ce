@@ -10,9 +10,11 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
+import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
 class ClassAdapterBuilder extends AdapterBuilder {
@@ -21,6 +23,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     super.cls,
     super.getters,
     super.setters,
+    this.converters,
   );
 
   /// [TypeChecker] for [HiveList].
@@ -45,6 +48,9 @@ class ClassAdapterBuilder extends AdapterBuilder {
     inPackage: 'typed_data',
     inSdk: true,
   );
+
+  /// The converters to use
+  final List<RevivedHiveConverter> converters;
 
   @override
   String buildRead() {
@@ -101,7 +107,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
   String _value(DartType type, AdapterField field) {
     final variable = 'fields[${field.index}]';
-    final value = _cast(type, variable);
+    final value = _convert(type, variable);
 
     final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
     final constructorDefaultIsNull = field.constructorDefault == null;
@@ -120,7 +126,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     return '$variable == null ? $defaultValue : $value';
   }
 
-  String _cast(DartType type, String variable) {
+  String _convert(DartType type, String variable) {
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
@@ -136,7 +142,14 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
+      final converter =
+          converters.firstWhereOrNull((e) => type.isAssignableTo(e.type));
+      if (converter != null) {
+        print(converter.type);
+        return 'const ${converter.name}().fromHive($variable)';
+      } else {
+        return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
+      }
     }
   }
 
@@ -165,7 +178,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
         cast = '.toList()';
       }
 
-      return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
+      return '$suffix.map((e) => ${_convert(arg, 'e')})$cast';
     } else {
       return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
     }
@@ -178,7 +191,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final suffix = _accessorSuffixFromType(type);
     if (isMapOrIterable(arg1) || isMapOrIterable(arg2)) {
       return '$suffix.map((dynamic k, dynamic v)=>'
-          'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
+          'MapEntry(${_convert(arg1, 'k')},${_convert(arg2, 'v')}))';
     } else {
       return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
           '${arg2.getPrefixedDisplayString(cls.library)}>()';
@@ -193,9 +206,15 @@ class ClassAdapterBuilder extends AdapterBuilder {
     if (getters.isNotEmpty) code.write('.');
     code.writeln('.writeByte(${getters.length})');
     for (final field in getters) {
+      final converter =
+          converters.firstWhereOrNull((e) => field.type.isAssignableTo(e.type));
+      var value = 'obj.${field.name}';
+      if (converter != null) {
+        value = 'const ${converter.name}().toHive($value)';
+      }
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write($value)''');
     }
     code.writeln(';');
 

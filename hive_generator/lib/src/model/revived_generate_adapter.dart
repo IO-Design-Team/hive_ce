@@ -15,6 +15,9 @@ class RevivedGenerateAdapters {
   /// The reserved type ids
   final Set<int> reservedTypeIds;
 
+  /// The converters
+  final List<RevivedHiveConverter> converters;
+
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
       : specs = annotation
@@ -28,7 +31,12 @@ class RevivedGenerateAdapters {
             .setValue
             .map((e) => e.toIntValue())
             .whereType<int>()
-            .toSet();
+            .toSet(),
+        converters = annotation
+            .read('converters')
+            .listValue
+            .map(RevivedHiveConverter.fromObject)
+            .toList();
 }
 
 /// A revived adapter spec
@@ -45,7 +53,7 @@ class RevivedAdapterSpec {
 
   /// Create a [RevivedAdapterSpec] from a [DartObject]
   factory RevivedAdapterSpec.fromObject(DartObject object) {
-    final type = (object.type as InterfaceType).typeArguments.single;
+    final type = (object.type as ParameterizedType).typeArguments.single;
 
     final reader = ConstantReader(object);
     final ignoredFields = reader
@@ -56,5 +64,30 @@ class RevivedAdapterSpec {
         .toSet();
 
     return RevivedAdapterSpec(type: type, ignoredFields: ignoredFields);
+  }
+}
+
+/// A revived hive converter
+@immutable
+class RevivedHiveConverter {
+  /// The name of the class
+  final String name;
+
+  /// The number of type parameters
+
+  /// The type of the converter
+  final DartType type;
+
+  /// Constructor
+  const RevivedHiveConverter({required this.name, required this.type});
+
+  /// Create a [RevivedHiveConverter] from a [DartObject]
+  factory RevivedHiveConverter.fromObject(DartObject object) {
+    final interfaceType = object.type as InterfaceType;
+    final superclass = interfaceType.superclass;
+    final name = object.type!.getDisplayString();
+    final type = superclass!.typeArguments.first;
+
+    return RevivedHiveConverter(name: name, type: type);
   }
 }

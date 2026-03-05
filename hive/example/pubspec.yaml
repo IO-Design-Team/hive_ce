@@ -1,6 +1,7 @@
 name: example
 
 dependencies:
+  fast_immutable_collections: ^11.1.0
   hive_ce: any
   meta: ^1.17.0
 

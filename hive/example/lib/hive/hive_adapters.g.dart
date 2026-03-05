@@ -21,7 +21,7 @@ class PersonAdapter extends TypeAdapter<Person> {
       age: (fields[1] as num).toInt(),
       bestFriend: fields[2] as Person?,
       friends: fields[3] == null
-          ? const []
+          ? const IList.empty()
           : (fields[3] as List).cast<Person>(),
       job: fields[4] == null ? Job.unemployed : fields[4] as Job,
     );
@@ -38,7 +38,7 @@ class PersonAdapter extends TypeAdapter<Person> {
       ..writeByte(2)
       ..write(obj.bestFriend)
       ..writeByte(3)
-      ..write(obj.friends)
+      ..write(const IListConverter().toHive(obj.friends))
       ..writeByte(4)
       ..write(obj.job);
   }
