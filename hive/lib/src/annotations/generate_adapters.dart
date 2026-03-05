@@ -25,7 +25,7 @@ class GenerateAdapters {
   final Set<int> reservedTypeIds;
 
   /// The converters to use
-  final List<BaseHiveConverter> converters;
+  final List<HiveConverter> converters;
 }
 
 /// Configuration that specifies the generation of a TypeAdapter
