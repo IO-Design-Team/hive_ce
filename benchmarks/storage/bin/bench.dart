@@ -59,7 +59,7 @@ void main() async {
   await ce.IsolatedHive.close();
   v4.Hive.closeAllBoxes();
 
-  final csv = const ListToCsvConverter().convert([
+  final csvString = csv.encode([
     [
       'Operations',
       'Hive CE Time',
@@ -79,7 +79,7 @@ void main() async {
       ],
   ]);
 
-  File('results.csv').writeAsStringSync(csv);
+  File('results.csv').writeAsStringSync(csvString);
 }
 
 // Format a duration to "00.00 s"
