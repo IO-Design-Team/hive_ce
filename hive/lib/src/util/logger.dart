@@ -1,5 +1,16 @@
+import 'dart:async';
+
 import 'package:hive_ce/src/isolate/isolate_debug_name/isolate_debug_name.dart';
 import 'package:hive_ce/src/util/debug_utils.dart';
+
+// Dispatch through the current zone so that callers (most importantly tests)
+// can intercept log output via Zone print specifications. The top-level
+// `print` function relies on the global `printToZone` mutable field, which is
+// only set as a side-effect of `_rootFork`. When `printToZone` is null in the
+// current isolate, `print` writes directly to stdout, bypassing any zone
+// `print` handler installed by `runZoned` and causing race-condition flakes
+// in tests that use `captureOutput`.
+void _zonePrint(Object? message) => Zone.current.print('$message');
 
 /// Configures the logging behavior of Hive
 abstract class Logger {
@@ -24,35 +35,35 @@ abstract class Logger {
   /// Log a verbose message
   static void v(Object? message) {
     if (level.index > LoggerLevel.verbose.index) return;
-    print(message);
+    _zonePrint(message);
   }
 
   /// Log a debug message
   static void d(Object? message) {
     if (level.index > LoggerLevel.debug.index) return;
-    print(message);
+    _zonePrint(message);
   }
 
   /// Log an informational message
   static void i(Object? message) {
     if (level.index > LoggerLevel.info.index) return;
-    print(message);
+    _zonePrint(message);
   }
 
   /// Log a warning message
   static void w(Object? message) {
     if (level.index > LoggerLevel.warn.index) return;
-    print(message);
+    _zonePrint(message);
   }
 
   /// Log an error message
   static void e(Object? message) {
     if (level.index > LoggerLevel.error.index) return;
-    print(message);
+    _zonePrint(message);
   }
 
   /// Log a message for an event that should not be possible
-  static void wtf(Object? message) => print(message);
+  static void wtf(Object? message) => _zonePrint(message);
 }
 
 /// Logging levels for Hive
