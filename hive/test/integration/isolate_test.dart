@@ -127,12 +127,12 @@ void main() {
 
           final safeOutput = await Isolate.run(
             debugName: 'main',
-            () => captureOutput(() => Hive.init(null)).toList(),
+            () => captureOutput(() => HiveImpl().init(null)).toList(),
           );
           expect(safeOutput, isEmpty);
 
           final unsafeOutput = await Isolate.run(
-            () => captureOutput(() => Hive.init(null)).toList(),
+            () => captureOutput(() => HiveImpl().init(null)).toList(),
           );
           expect(
             unsafeOutput.first.replaceFirst(isolateNameRegex, ''),
@@ -142,7 +142,7 @@ void main() {
           final ignoredOutput = await Isolate.run(
             () => captureOutput(() {
               HiveLogger.unsafeIsolateWarning = false;
-              Hive.init(null);
+              HiveImpl().init(null);
             }).toList(),
           );
           expect(ignoredOutput, isEmpty);
@@ -158,7 +158,7 @@ void main() {
             final testChannel = IsolateMethodChannel('test', connection);
             hiveChannel.setMethodCallHandler((_) {});
             testChannel.setMethodCallHandler(
-              (_) => captureOutput(() => Hive.init(null)).toList(),
+              (_) => captureOutput(() => HiveImpl().init(null)).toList(),
             );
           };
           await hive.init(null, isolateNameServer: StubIns());
@@ -189,25 +189,32 @@ void main() {
         });
 
         test('unmatched isolation', () async {
+          final hive = HiveImpl();
+          final isolatedHive = IsolatedHiveImpl();
+
           final dir = await getTempDir();
           final path = dir.path;
 
-          await IsolatedHive.init(path, isolateNameServer: StubIns());
-          Hive.init(path);
+          await isolatedHive.init(path, isolateNameServer: StubIns());
+          hive.init(path);
 
-          await IsolatedHive.openBox('box1');
+          await isolatedHive.openBox('box1');
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+
           final output =
-              await captureOutput(() => Hive.openBox('box1')).toList();
+              await captureOutput(() => hive.openBox('box1')).toList();
 
           expect(
             output,
             contains(HiveWarning.unmatchedIsolation),
           );
 
-          await IsolatedHive.openBox('box2');
+          await isolatedHive.openBox('box2');
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+
           final ignoredOutput = await captureOutput(() async {
             HiveLogger.unmatchedIsolationWarning = false;
-            await Hive.openBox('box2');
+            await hive.openBox('box2');
           }).toList();
 
           expect(
