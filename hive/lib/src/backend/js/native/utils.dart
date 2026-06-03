@@ -9,9 +9,15 @@ extension IDBRequestExtension on IDBRequest {
   Future<T> asFuture<T extends JSAny?>() {
     final completer = Completer<T>();
     onsuccess = (Event e) {
+      // Clear handlers so the browser can GC the IDBRequest and
+      // release the underlying database connection promptly.
+      onsuccess = null;
+      onerror = null;
       completer.complete(result as T);
     }.toJS;
     onerror = (Event e) {
+      onsuccess = null;
+      onerror = null;
       completer.completeError(error!);
     }.toJS;
     return completer.future;
