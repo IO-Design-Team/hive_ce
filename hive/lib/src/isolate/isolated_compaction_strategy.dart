@@ -40,7 +40,7 @@ sealed class IsolatedCompactionStrategy {
   @internal
   Map<String, dynamic> toJson();
 
-  /// From from
+  /// From json
   @internal
   static IsolatedCompactionStrategy fromJson(Map<String, dynamic> json) {
     final type = json['type'];

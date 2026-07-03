@@ -36,7 +36,8 @@ Future<dynamic> handleHiveMethodCall(
       final keyComparator =
           call.arguments['keyComparator'] ?? defaultKeyComparator;
       final compactionStrategyJson =
-          call.arguments['compactionStrategy'] as Map<String, dynamic>?;
+          (call.arguments['compactionStrategy'] as Map?)
+              ?.cast<String, dynamic>();
       final compactionStrategy = compactionStrategyJson == null
           ? defaultCompactionStrategy
           : IsolatedCompactionStrategy.fromJson(compactionStrategyJson)
