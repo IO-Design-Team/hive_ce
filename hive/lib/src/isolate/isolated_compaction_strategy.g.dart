@@ -11,8 +11,8 @@ part of 'isolated_compaction_strategy.dart';
 _ThresholdCompactionStrategy _$ThresholdCompactionStrategyFromJson(
         Map<String, dynamic> json) =>
     _ThresholdCompactionStrategy(
-      deletedThreshold: (json['deletedThreshold'] as num?)?.toInt() ?? 60,
-      deletedRatio: (json['deletedRatio'] as num?)?.toDouble() ?? 0.15,
+      deletedThreshold: (json['deletedThreshold'] as num).toInt(),
+      deletedRatio: (json['deletedRatio'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$ThresholdCompactionStrategyToJson(
