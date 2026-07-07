@@ -71,6 +71,9 @@ class BackendManager implements BackendManagerInterface {
     // directly deleting the entire DB if a non-collection Box
     if (collection == null) {
       await indexedDB!.deleteDatabase(databaseName).asFuture();
+      // Firefox (and some privacy modes) need a beat before the database
+      // is truly released. Without this delay the next open() can hang.
+      await Future.delayed(const Duration(milliseconds: 100));
     } else {
       final request = indexedDB!.open(databaseName, 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
