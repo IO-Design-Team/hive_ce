@@ -75,5 +75,27 @@ void main() {
       // appends a tombstone rather than reclaiming space
       expect(await _fileSize(box), greaterThanOrEqualTo(sizeAfterPuts));
     });
+
+    test('.always() always compacts the box', () async {
+      final dir = await getTempDir();
+      final hive = IsolatedHiveImpl();
+      addTearDown(hive.close);
+      await hive.init(dir.path, isolateNameServer: StubIns());
+
+      final box = await hive.openBox<String>(
+        'test',
+        compactionStrategy: const IsolatedCompactionStrategy.always(),
+      );
+
+      await _putEntries(box, 10);
+      final sizeAfterPuts = await _fileSize(box);
+
+      for (var i = 0; i < 5; i++) {
+        await box.delete('key$i');
+      }
+
+      expect(await box.length, 5);
+      expect(await _fileSize(box), lessThan(sizeAfterPuts));
+    });
   });
 }

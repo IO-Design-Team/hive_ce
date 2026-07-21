@@ -36,6 +36,9 @@ sealed class IsolatedCompactionStrategy {
   /// Never compacts the box
   const factory IsolatedCompactionStrategy.never() = _NeverCompactionStrategy;
 
+  /// Always compacts the box
+  const factory IsolatedCompactionStrategy.always() = _AlwaysCompactionStrategy;
+
   /// To json
   @internal
   Map<String, dynamic> toJson();
@@ -48,6 +51,7 @@ sealed class IsolatedCompactionStrategy {
       _ThresholdCompactionStrategy.type =>
         _ThresholdCompactionStrategy.fromJson(json),
       _NeverCompactionStrategy.type => const _NeverCompactionStrategy(),
+      _AlwaysCompactionStrategy.type => const _AlwaysCompactionStrategy(),
       _ => throw HiveError('Unknown IsolatedCompactionStrategy type: $type'),
     };
   }
@@ -99,6 +103,21 @@ class _NeverCompactionStrategy extends IsolatedCompactionStrategy {
 
   @override
   CompactionStrategy resolve() => (_, __) => false;
+
+  @override
+  Map<String, dynamic> toJson() => {'type': type};
+}
+
+/// See [IsolatedCompactionStrategy.always]
+@immutable
+class _AlwaysCompactionStrategy extends IsolatedCompactionStrategy {
+  static const type = 'always';
+
+  /// Constructor
+  const _AlwaysCompactionStrategy();
+
+  @override
+  CompactionStrategy resolve() => (_, __) => true;
 
   @override
   Map<String, dynamic> toJson() => {'type': type};
