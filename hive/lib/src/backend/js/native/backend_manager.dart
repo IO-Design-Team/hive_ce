@@ -40,6 +40,11 @@ class BackendManager implements BackendManagerInterface {
       Logger.i(
         'Creating objectStore $objectStoreName in database $databaseName...',
       );
+      // Close the existing connection before requesting a version upgrade.
+      // IndexedDB blocks upgrades until all existing connections are
+      // closed; without this the second open() would hang forever.
+      db.close();
+      await Future.delayed(const Duration(milliseconds: 50));
       final request = indexedDB!.open(databaseName, db.version + 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
@@ -66,6 +71,9 @@ class BackendManager implements BackendManagerInterface {
     // directly deleting the entire DB if a non-collection Box
     if (collection == null) {
       await indexedDB!.deleteDatabase(databaseName).asFuture();
+      // Firefox (and some privacy modes) need a beat before the database
+      // is truly released. Without this delay the next open() can hang.
+      await Future.delayed(const Duration(milliseconds: 100));
     } else {
       final request = indexedDB!.open(databaseName, 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
@@ -76,6 +84,8 @@ class BackendManager implements BackendManagerInterface {
       }.toJS;
       final db = await request.asFuture<IDBDatabase>();
       if (db.objectStoreNames.length == 0) {
+        db.close();
+        await Future.delayed(const Duration(milliseconds: 50));
         await indexedDB!.deleteDatabase(databaseName).asFuture();
       }
     }
@@ -95,7 +105,20 @@ class BackendManager implements BackendManagerInterface {
           (e.target as IDBOpenDBRequest).transaction!.abort();
           exists = false;
         }.toJS;
-        await request.asFuture();
+        try {
+          final db = await request.asFuture<IDBDatabase>();
+          // open() succeeded without upgrade. Verify it has the object store;
+          // otherwise this is a ghost database left by a previous aborted
+          // existence check and must be cleaned up.
+          if (!db.objectStoreNames.contains(objectStoreName)) {
+            db.close();
+            await Future.delayed(const Duration(milliseconds: 50));
+            await indexedDB!.deleteDatabase(databaseName).asFuture();
+            exists = false;
+          }
+        } catch (_) {
+          exists = false;
+        }
       } else {
         final request = indexedDB!.open(collection, 1);
         request.onupgradeneeded = (IDBVersionChangeEvent e) {
