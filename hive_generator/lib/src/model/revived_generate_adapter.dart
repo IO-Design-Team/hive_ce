@@ -17,18 +17,18 @@ class RevivedGenerateAdapters {
 
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
-      : specs = annotation
-            .read('specs')
-            .listValue
-            .map(RevivedAdapterSpec.fromObject)
-            .toList(),
-        firstTypeId = annotation.read('firstTypeId').intValue,
-        reservedTypeIds = annotation
-            .read('reservedTypeIds')
-            .setValue
-            .map((e) => e.toIntValue())
-            .whereType<int>()
-            .toSet();
+    : specs = annotation
+          .read('specs')
+          .listValue
+          .map(RevivedAdapterSpec.fromObject)
+          .toList(),
+      firstTypeId = annotation.read('firstTypeId').intValue,
+      reservedTypeIds = annotation
+          .read('reservedTypeIds')
+          .setValue
+          .map((e) => e.toIntValue())
+          .whereType<int>()
+          .toSet();
 }
 
 /// A revived adapter spec

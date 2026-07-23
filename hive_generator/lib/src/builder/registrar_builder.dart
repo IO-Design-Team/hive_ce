@@ -21,8 +21,9 @@ class RegistrarBuilder implements Builder {
     final uris = <String>[];
     final adapters = <String>[];
     Uri? registrarUri;
-    await for (final input
-        in buildStep.findAssets(Glob('**/*.hive_registrar.info'))) {
+    await for (final input in buildStep.findAssets(
+      Glob('**/*.hive_registrar.info'),
+    )) {
       final content = await buildStep.readAsString(input);
       final data = RegistrarIntermediate.fromJson(jsonDecode(content));
       final uri = data.uri;
@@ -30,8 +31,10 @@ class RegistrarBuilder implements Builder {
       adapters.addAll(data.adapters);
       if (data.registrarLocation) {
         if (registrarUri != null) {
-          final sortedUris =
-              [registrarUri, uri].map((e) => e.toString()).toList()..sort();
+          final sortedUris = [
+            registrarUri,
+            uri,
+          ].map((e) => e.toString()).toList()..sort();
           final urisString = sortedUris.map((e) => '- $e').join('\n');
           throw HiveError(
             'GenerateAdapters annotation found in more than one file:\n$urisString',
@@ -52,9 +55,9 @@ class RegistrarBuilder implements Builder {
     if (buildConfigFile.existsSync()) {
       final buildConfigContent = buildConfigFile.readAsStringSync();
       final buildConfig = loadYaml(buildConfigContent);
-      final configIgnores = buildConfig?['targets']?[r'$default']?['builders']
-                  ?['source_gen|combining_builder']?['options']
-              ?['ignore_for_file'] as YamlList? ??
+      final configIgnores =
+          buildConfig?['targets']?[r'$default']?['builders']?['source_gen|combining_builder']?['options']?['ignore_for_file']
+              as YamlList? ??
           [];
       ignores.addAll(configIgnores.cast<String>());
     }

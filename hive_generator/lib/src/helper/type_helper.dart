@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
 
 /// TODO: Document this!
 const kConstConstructors = true;
@@ -67,7 +66,7 @@ String literalToString(DartObject object, List<String> typeInformation) {
   if (reader.isDouble || reader.isInt || reader.isString || reader.isBool) {
     final value = reader.literalValue;
 
-    if (value is String) return escapeDartString(value);
+    if (value is String) return _escapeDartString(value);
 
     if (value is double) {
       if (value.isNaN) {
@@ -136,3 +135,41 @@ String literalToString(DartObject object, List<String> typeInformation) {
 /// TODO: Document this!
 Never throwUnsupported(String message) =>
     throw InvalidGenerationSourceError('Error with `@HiveField`. $message');
+
+/// Returns a quoted String literal for [value] that can be used in generated
+/// Dart code.
+String _escapeDartString(String value) {
+  final escaped = StringBuffer("'");
+  for (final unit in value.runes) {
+    switch (unit) {
+      case 0x27: // '
+        escaped.write(r"\'");
+      case 0x5C: // \
+        escaped.write(r'\\');
+      case 0x24: // $
+        escaped.write(r'\$');
+      case 0x08: // \b
+        escaped.write(r'\b');
+      case 0x09: // \t
+        escaped.write(r'\t');
+      case 0x0A: // \n
+        escaped.write(r'\n');
+      case 0x0B: // \v
+        escaped.write(r'\v');
+      case 0x0C: // \f
+        escaped.write(r'\f');
+      case 0x0D: // \r
+        escaped.write(r'\r');
+      default:
+        if (unit < 0x20 || unit == 0x7F) {
+          escaped.write(
+            '\\x${unit.toRadixString(16).toUpperCase().padLeft(2, '0')}',
+          );
+        } else {
+          escaped.writeCharCode(unit);
+        }
+    }
+  }
+  escaped.write("'");
+  return escaped.toString();
+}

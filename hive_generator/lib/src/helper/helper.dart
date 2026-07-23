@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
@@ -11,8 +12,19 @@ import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
-final _hiveFieldChecker =
-    const TypeChecker.typeNamed(HiveField, inPackage: 'hive_ce');
+/// Convenience helpers for [DartType]
+extension DartTypeExtension on DartType {
+  /// Whether this type is an enum
+  bool get isEnum {
+    final type = this;
+    return type is InterfaceType && type.element is EnumElement;
+  }
+}
+
+final _hiveFieldChecker = const TypeChecker.typeNamed(
+  HiveField,
+  inPackage: 'hive_ce',
+);
 final _freezedDefaultChecker = const TypeChecker.fromUrl(
   'package:freezed_annotation/freezed_annotation.dart#Default',
 );
@@ -72,8 +84,10 @@ InterfaceElement getClass(Element element) {
 
 /// Generate a default adapter name from the type name
 String generateAdapterName(String typeName) {
-  var adapterName =
-      '${typeName}Adapter'.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '');
+  var adapterName = '${typeName}Adapter'.replaceAll(
+    RegExp(r'[^A-Za-z0-9]+'),
+    '',
+  );
   if (adapterName.startsWith('_')) {
     adapterName = adapterName.substring(1);
   }

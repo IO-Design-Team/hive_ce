@@ -62,23 +62,14 @@ void main() {
   group('schema_migrator', () {
     test('does not run if not enabled', () {
       expectGeneration(
-        input: {
-          ...pubspec(),
-          ...adapters,
-        },
-        output: {
-          'lib/hive_schema.g.yaml': fileDoesNotExist,
-        },
+        input: {...pubspec(), ...adapters},
+        output: {'lib/hive_schema.g.yaml': fileDoesNotExist},
       );
     });
 
     test('generates schema', () {
       expectGeneration(
-        input: {
-          ...pubspec(),
-          ...buildYaml,
-          ...adapters,
-        },
+        input: {...pubspec(), ...buildYaml, ...adapters},
         output: {
           'lib/hive/hive_adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
@@ -93,7 +84,8 @@ import 'package:hive_ce_generator_test/adapters_2.dart';
 ])
 part 'hive_adapters.g.dart';
 ''',
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 5
 types:
@@ -231,17 +223,15 @@ part 'hive_adapters.g.dart';
       );
     });
 
-    test(
-      'works with freezed classes',
-      () {
-        expectGeneration(
-          input: {
-            ...pubspec(
-              dependencies: {'freezed_annotation: any'},
-              devDependencies: {'freezed: any'},
-            ),
-            ...buildYaml,
-            'lib/adapters.dart': '''
+    test('works with freezed classes', () {
+      expectGeneration(
+        input: {
+          ...pubspec(
+            dependencies: {'freezed_annotation: any'},
+            devDependencies: {'freezed: any'},
+          ),
+          ...buildYaml,
+          'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -254,9 +244,9 @@ sealed class Class with _\$Class {
   factory Class({@HiveField(0) required int value}) = _Class;
 }
 ''',
-          },
-          output: {
-            'lib/hive/hive_adapters.dart': '''
+        },
+        output: {
+          'lib/hive/hive_adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator_test/adapters.dart';
 
@@ -265,7 +255,8 @@ import 'package:hive_ce_generator_test/adapters.dart';
 ])
 part 'hive_adapters.g.dart';
 ''',
-            'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -276,10 +267,8 @@ types:
       value:
         index: 0
 ''',
-          },
-        );
-      },
-      skip: 'Waiting on freezed analyzer 9 suport',
-    );
+        },
+      );
+    }, skip: 'Waiting on freezed analyzer 9 suport');
   });
 }

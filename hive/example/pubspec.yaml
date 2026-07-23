@@ -5,12 +5,12 @@ dependencies:
   meta: ^1.17.0
 
 dev_dependencies:
-  rexios_lints: ^17.0.2
+  rexios_lints: ^18.1.0
   hive_ce_generator: any
   build_runner: ^2.5.4
 
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.11.0
 
 dependency_overrides:
   hive_ce:
