@@ -20,6 +20,8 @@ dev_dependencies:
 dependency_overrides:
   hive_ce:
     path: ../../hive
+  # Flutter stable currently pins meta 1.18.0; analyzer 14 requires ^1.18.3.
+  meta: ^1.18.3
 
 flutter:
   uses-material-design: true
