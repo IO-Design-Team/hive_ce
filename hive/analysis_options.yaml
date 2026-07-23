@@ -6,5 +6,6 @@ linter:
 
 plugins:
   rexios_lints:
+    version: ^17.0.2
     diagnostics:
       not_null_assertion: false
