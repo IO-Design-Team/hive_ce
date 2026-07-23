@@ -1,6 +1,8 @@
 ## 1.11.3
 
 - Upgrades `analyzer` to `14.0.0`
+- Requires Dart SDK `^3.11.0`
+- Removes `source_helper` dependency
 
 ## 1.11.2
 
