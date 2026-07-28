@@ -27,9 +27,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
-  ByteData get _byteData {
-    return _byteDataInstance ??= ByteData.view(_buffer.buffer);
-  }
+  ByteData get _byteData => _byteDataInstance ??= ByteData.view(_buffer.buffer);
 
   /// Not part of public API
   BinaryWriterImpl(TypeRegistry typeRegistry)

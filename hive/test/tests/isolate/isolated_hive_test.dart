@@ -311,8 +311,7 @@ void main() {
 
           final box1 = await hive.openBox('testBox1');
           await box1.put('key', 'value');
-          final box1Path = await box1.path;
-          if (box1Path == null) fail('expected non-null path');
+          final box1Path = expectNotNull(await box1.path);
           final box1File = File(box1Path);
 
           await hive.deleteBoxFromDisk('testBox1');
@@ -325,8 +324,7 @@ void main() {
 
           final box1 = await hive.openBox('testBox1');
           await box1.put('key', 'value');
-          final path = await box1.path;
-          if (path == null) fail('expected non-null path');
+          final path = expectNotNull(await box1.path);
           await box1.close();
           final box1File = File(path);
 
@@ -350,14 +348,12 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final box1Path = await box1.path;
-        if (box1Path == null) fail('expected non-null path');
+        final box1Path = expectNotNull(await box1.path);
         final box1File = File(box1Path);
 
         final box2 = await hive.openBox('testBox2');
         await box2.put('key', 'value');
-        final box2Path = await box2.path;
-        if (box2Path == null) fail('expected non-null path');
+        final box2Path = expectNotNull(await box2.path);
         final box2File = File(box2Path);
 
         await hive.deleteFromDisk();

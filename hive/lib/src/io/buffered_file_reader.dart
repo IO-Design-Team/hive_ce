@@ -11,11 +11,8 @@ class BufferedFileReader {
   static const defaultChunkSize = 1000 * 64;
 
   /// Not part of public API
-  ///
-  /// Nullable because of testing. [loadBytes] can throw if the count is not in
-  /// the buffer.
   @visibleForTesting
-  final RandomAccessFile? file;
+  final RandomAccessFile file;
 
   /// Not part of public API
   @visibleForTesting
@@ -78,10 +75,6 @@ class BufferedFileReader {
       }
 
       _bufferOffset = 0;
-      final file = this.file;
-      if (file == null) {
-        throw StateError('BufferedFileReader has no file.');
-      }
       final readBytes = await file.readInto(buffer, remaining);
       _bufferSize = remaining + readBytes;
       _fileOffset += readBytes;

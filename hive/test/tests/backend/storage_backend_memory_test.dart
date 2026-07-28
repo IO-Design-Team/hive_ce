@@ -11,12 +11,12 @@ import '../common.dart';
 void main() {
   group('StorageBackendMemory', () {
     test('.path is null', () {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       expect(backend.path, null);
     });
 
     test('.supportsCompaction is false', () {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       expect(backend.supportsCompaction, false);
     });
 
@@ -36,7 +36,7 @@ void main() {
     });
 
     test('.readValue() throws UnsupportedError', () {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       expect(
         () => backend.readValue(Frame('key', 'val')),
         throwsUnsupportedError,
@@ -44,27 +44,27 @@ void main() {
     });
 
     test('.writeFrames() does nothing', () async {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       await backend.writeFrames([Frame('key', 'val')]);
     });
 
     test('.compact() throws UnsupportedError', () {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       expect(() => backend.compact([]), throwsUnsupportedError);
     });
 
     test('.clear() does nothing', () async {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       await backend.clear();
     });
 
     test('.close() does nothing', () async {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       await backend.close();
     });
 
     test('.deleteFromDisk() throws UnsupportedError', () {
-      final backend = StorageBackendMemory(null, null, null);
+      final backend = StorageBackendMemory(Uint8List(0), null, null);
       expect(backend.deleteFromDisk, throwsUnsupportedError);
     });
   });

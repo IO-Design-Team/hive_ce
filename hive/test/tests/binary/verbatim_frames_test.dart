@@ -5,6 +5,7 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:test/test.dart';
 
+import '../common.dart';
 import '../frames.dart';
 
 void main() {
@@ -21,8 +22,8 @@ void main() {
 
       final verbatimReader =
           BinaryReaderImpl(verbatimWriter.toBytes(), testRegistry);
-      final decodedFrame = verbatimReader.readFrame(verbatim: true);
-      if (decodedFrame == null) fail('expected non-null frame');
+      final decodedFrame =
+          expectNotNull(verbatimReader.readFrame(verbatim: true));
 
       expect(decodedFrame.key, encodedFrame.key);
       expect(decodedFrame.value, encodedFrame.value);

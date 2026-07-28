@@ -81,16 +81,13 @@ class BoxCollection implements implementation.BoxCollection {
     bool readOnly = false,
   }) async {
     await runZoned(() async {
+      final boxNames =
+          CollectionBox.transactionBoxes[Zone.current] = <String>{};
       try {
-        CollectionBox.transactionBoxes[Zone.current] = <String>{};
         await action();
       } finally {
         final flushFutures = <Future<void>>[];
-        final transactionBoxes = CollectionBox.transactionBoxes[Zone.current];
-        if (transactionBoxes == null) {
-          throw StateError('Transaction zone has no box set.');
-        }
-        for (final boxName in transactionBoxes) {
+        for (final boxName in boxNames) {
           final i = _openBoxes.indexWhere((box) => box.name == boxName);
           if (i != -1) {
             flushFutures.add(_openBoxes[i].flush());
@@ -240,27 +237,20 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   }
 
   Future<void> _flushOrMark() async {
-    final zone = _getTransactionZone();
-    if (zone == null) {
+    final boxNames = _getTransactionBoxes();
+    if (boxNames == null) {
       await flush();
     } else {
-      final transactionBoxes = CollectionBox.transactionBoxes[zone];
-      if (transactionBoxes == null) {
-        throw StateError('Transaction zone has no box set.');
-      }
-      transactionBoxes.add(name);
+      boxNames.add(name);
     }
   }
 
-  Zone? _getTransactionZone([Zone? testZone]) {
+  Set<String>? _getTransactionBoxes([Zone? testZone]) {
     testZone ??= Zone.current;
     if (testZone == Zone.root) {
       return null;
     }
-    if (transactionBoxes.keys.contains(testZone)) {
-      return testZone;
-    }
-    return _getTransactionZone(testZone.parent);
+    return transactionBoxes[testZone] ?? _getTransactionBoxes(testZone.parent);
   }
 
   static const _maxKeyLength = 255;

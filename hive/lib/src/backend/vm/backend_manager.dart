@@ -72,19 +72,15 @@ class BackendManager implements BackendManagerInterface {
     }
   }
 
+  String _boxDirectory(String? path, String? collection) {
+    if (path == null) throw ArgumentError.notNull('path');
+    if (path.endsWith(_delimiter)) path = path.substring(0, path.length - 1);
+    return collection == null ? path : path + collection;
+  }
+
   @override
   Future<void> deleteBox(String name, String? path, String? collection) async {
-    if (path == null) {
-      throw ArgumentError.notNull('path');
-    }
-
-    if (path.endsWith(_delimiter)) {
-      path = path.substring(0, path.length - 1);
-    }
-
-    if (collection != null) {
-      path = path + collection;
-    }
+    path = _boxDirectory(path, collection);
 
     await _deleteFileIfExists(File('$path$_delimiter$name.hive'));
     await _deleteFileIfExists(File('$path$_delimiter$name.hivec'));
@@ -99,17 +95,7 @@ class BackendManager implements BackendManagerInterface {
 
   @override
   Future<bool> boxExists(String name, String? path, String? collection) async {
-    if (path == null) {
-      throw ArgumentError.notNull('path');
-    }
-
-    if (path.endsWith(_delimiter)) {
-      path = path.substring(0, path.length - 1);
-    }
-
-    if (collection != null) {
-      path = path + collection;
-    }
+    path = _boxDirectory(path, collection);
 
     return await File('$path$_delimiter$name.hive').exists() ||
         await File('$path$_delimiter$name.hivec').exists() ||

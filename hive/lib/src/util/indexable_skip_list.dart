@@ -245,15 +245,7 @@ abstract class _Iterator<K, V, E> implements Iterator<E> {
   _Iterator(this.node);
 
   @override
-  bool moveNext() {
-    final node = this.node;
-    if (node == null) {
-      throw StateError('No current element');
-    }
-    final next = node.next[0];
-    this.node = next;
-    return next != null;
-  }
+  bool moveNext() => (node = node?.next[0]) != null;
 }
 
 class _KeyIterator<K, V> extends _Iterator<K, V, K> {

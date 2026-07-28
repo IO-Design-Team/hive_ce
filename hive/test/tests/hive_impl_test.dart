@@ -40,12 +40,11 @@ void main() {
       expect(() => hive.init('MYPATH'), returnsNormally);
       expect(hive.homePath, 'MYPATH');
 
-      final dateTimeAdapter = hive.findAdapterForValue(DateTime.timestamp());
-      if (dateTimeAdapter == null) fail('expected non-null adapter');
+      final dateTimeAdapter =
+          expectNotNull(hive.findAdapterForValue(DateTime.timestamp()));
       expect(dateTimeAdapter.adapter, isA<DateTimeWithTimezoneAdapter>());
 
-      final typeIdAdapter = hive.findAdapterForTypeId(16);
-      if (typeIdAdapter == null) fail('expected non-null adapter');
+      final typeIdAdapter = expectNotNull(hive.findAdapterForTypeId(16));
       expect(typeIdAdapter.adapter, isA<DateTimeAdapter>());
     });
 
@@ -312,8 +311,7 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final box1Path = box1.path;
-        if (box1Path == null) fail('expected non-null path');
+        final box1Path = expectNotNull(box1.path);
         final box1File = File(box1Path);
 
         await hive.deleteBoxFromDisk('testBox1');
@@ -328,8 +326,7 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final path = box1.path;
-        if (path == null) fail('expected non-null path');
+        final path = expectNotNull(box1.path);
         await box1.close();
         final box1File = File(path);
 
@@ -352,14 +349,12 @@ void main() {
 
       final box1 = await hive.openBox('testBox1');
       await box1.put('key', 'value');
-      final box1Path = box1.path;
-      if (box1Path == null) fail('expected non-null path');
+      final box1Path = expectNotNull(box1.path);
       final box1File = File(box1Path);
 
       final box2 = await hive.openBox('testBox2');
       await box2.put('key', 'value');
-      final box2Path = box2.path;
-      if (box2Path == null) fail('expected non-null path');
+      final box2Path = expectNotNull(box2.path);
       final box2File = File(box2Path);
 
       await hive.deleteFromDisk();

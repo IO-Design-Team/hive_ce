@@ -16,7 +16,7 @@ class StorageBackendMemory extends StorageBackend {
   Uint8List? _bytes;
 
   /// Not part of public API
-  StorageBackendMemory(Uint8List? bytes, this._cipher, this._keyCrc)
+  StorageBackendMemory(Uint8List bytes, this._cipher, this._keyCrc)
       : _bytes = bytes,
         _frameHelper = FrameHelper();
 

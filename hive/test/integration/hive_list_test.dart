@@ -3,6 +3,7 @@ import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:test/test.dart';
 
+import '../tests/common.dart';
 import 'integration.dart';
 
 class _TestObject extends HiveObject {
@@ -49,8 +50,7 @@ void main() {
       obj.list = HiveListImpl(box.box as Box<_TestObject>);
       await box.put('obj', obj);
 
-      var list = obj.list;
-      if (list == null) fail('expected non-null list');
+      var list = expectNotNull(obj.list);
 
       for (var i = 0; i < 100; i++) {
         final element = _TestObject('element$i');
@@ -61,11 +61,8 @@ void main() {
       await obj.save();
 
       box = await hive.reopenBox(box);
-      final reloaded = await box.get('obj');
-      if (reloaded == null) fail('expected non-null obj');
-      obj = reloaded;
-      list = obj.list;
-      if (list == null) fail('expected non-null list');
+      obj = expectNotNull(await box.get('obj'));
+      list = expectNotNull(obj.list);
       (list as HiveListImpl).debugHive = hive.hive as HiveImpl;
 
       for (var i = 0; i < 100; i++) {

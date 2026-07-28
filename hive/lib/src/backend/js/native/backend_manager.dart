@@ -10,15 +10,7 @@ import 'package:web/web.dart';
 /// Opens IndexedDB databases
 class BackendManager implements BackendManagerInterface {
   /// TODO: Document this!
-  IDBFactory? get indexedDB => window.self.indexedDB;
-
-  IDBFactory get _indexedDB {
-    final indexedDB = this.indexedDB;
-    if (indexedDB == null) {
-      throw HiveError('IndexedDB is not available.');
-    }
-    return indexedDB;
-  }
+  IDBFactory get indexedDB => window.self.indexedDB;
 
   @override
   Future<StorageBackend> open(
@@ -33,7 +25,7 @@ class BackendManager implements BackendManagerInterface {
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;
 
-    final request = _indexedDB.open(databaseName, 1);
+    final request = indexedDB.open(databaseName, 1);
     request.onupgradeneeded = (IDBVersionChangeEvent e) {
       final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
       if (!db.objectStoreNames.contains(objectStoreName)) {
@@ -48,7 +40,7 @@ class BackendManager implements BackendManagerInterface {
       Logger.i(
         'Creating objectStore $objectStoreName in database $databaseName...',
       );
-      final request = _indexedDB.open(databaseName, db.version + 1);
+      final request = indexedDB.open(databaseName, db.version + 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (!db.objectStoreNames.contains(objectStoreName)) {
@@ -73,9 +65,9 @@ class BackendManager implements BackendManagerInterface {
 
     // directly deleting the entire DB if a non-collection Box
     if (collection == null) {
-      await _indexedDB.deleteDatabase(databaseName).asFuture();
+      await indexedDB.deleteDatabase(databaseName).asFuture();
     } else {
-      final request = _indexedDB.open(databaseName, 1);
+      final request = indexedDB.open(databaseName, 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (db.objectStoreNames.contains(objectStoreName)) {
@@ -84,7 +76,7 @@ class BackendManager implements BackendManagerInterface {
       }.toJS;
       final db = await request.asFuture<IDBDatabase>();
       if (db.objectStoreNames.length == 0) {
-        await _indexedDB.deleteDatabase(databaseName).asFuture();
+        await indexedDB.deleteDatabase(databaseName).asFuture();
       }
     }
   }
@@ -98,7 +90,7 @@ class BackendManager implements BackendManagerInterface {
     try {
       var exists = true;
       if (collection == null) {
-        final request = _indexedDB.open(databaseName, 1);
+        final request = indexedDB.open(databaseName, 1);
         request.onupgradeneeded = (IDBVersionChangeEvent e) {
           final transaction = (e.target as IDBOpenDBRequest).transaction;
           if (transaction == null) {
@@ -109,7 +101,7 @@ class BackendManager implements BackendManagerInterface {
         }.toJS;
         await request.asFuture();
       } else {
-        final request = _indexedDB.open(collection, 1);
+        final request = indexedDB.open(collection, 1);
         request.onupgradeneeded = (IDBVersionChangeEvent e) {
           final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
           exists = db.objectStoreNames.contains(objectStoreName);
