@@ -1,10 +1,6 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
-part 'registrar_intermediate.g.dart';
-
 /// Intermediate information to generate the Hive registrar
-@JsonSerializable()
 @immutable
 class RegistrarIntermediate {
   /// The URI of the file this intermediate describes
@@ -27,8 +23,16 @@ class RegistrarIntermediate {
 
   /// From json
   factory RegistrarIntermediate.fromJson(Map<String, dynamic> json) =>
-      _$RegistrarIntermediateFromJson(json);
+      RegistrarIntermediate(
+        uri: Uri.parse(json['uri'] as String),
+        adapters: (json['adapters'] as List).cast<String>(),
+        registrarLocation: json['registrarLocation'] as bool,
+      );
 
   /// To json
-  Map<String, dynamic> toJson() => _$RegistrarIntermediateToJson(this);
+  Map<String, dynamic> toJson() => {
+        'uri': uri.toString(),
+        'adapters': adapters,
+        'registrarLocation': registrarLocation,
+      };
 }

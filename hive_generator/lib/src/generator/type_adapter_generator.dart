@@ -8,7 +8,7 @@ import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
+import 'package:hive_ce_generator/src/helper/source_helper.dart';
 import 'package:meta/meta.dart';
 
 /// TODO: Document this!

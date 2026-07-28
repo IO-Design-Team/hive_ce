@@ -12,7 +12,7 @@ dependencies:
     path: ../../hive_flutter
 
 dev_dependencies:
-  rexios_lints: ^17.0.2
+  rexios_lints: ^18.1.0
   build_runner: ^2.5.4
   hive_ce_generator:
     path: ../../hive_generator
@@ -20,6 +20,7 @@ dev_dependencies:
 dependency_overrides:
   hive_ce:
     path: ../../hive
+  meta: ^1.18.3
 
 flutter:
   uses-material-design: true
