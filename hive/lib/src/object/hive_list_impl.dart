@@ -40,7 +40,9 @@ class HiveListImpl<E extends HiveObjectMixin>
   /// Not part of public API
   HiveListImpl.lazy(this.boxName, List<dynamic>? keys) : _keys = keys;
 
-  /// The keys of a lazy list. Non-null whenever [_delegate] is null.
+  /// The keys backing a lazy list
+  ///
+  /// Only null if a delegate backed list has been disposed
   List<dynamic> get _lazyKeys {
     final keys = _keys;
     if (keys == null) {
