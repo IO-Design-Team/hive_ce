@@ -208,7 +208,10 @@ class IndexableSkipList<K, V> {
       }
     }
 
-    return node!;
+    if (node == null) {
+      throw StateError('Skip list is inconsistent.');
+    }
+    return node;
   }
 
   /// Not part of public API
@@ -242,14 +245,14 @@ abstract class _Iterator<K, V, E> implements Iterator<E> {
   _Iterator(this.node);
 
   @override
-  bool moveNext() => (node = node!.next[0]) != null;
+  bool moveNext() => (node = node?.next[0]) != null;
 }
 
 class _KeyIterator<K, V> extends _Iterator<K, V, K> {
   _KeyIterator(_Node<K?, V?> super.node);
 
   @override
-  K get current => node!.key!;
+  K get current => node?.key ?? (throw StateError('No current element'));
 }
 
 @immutable
@@ -266,7 +269,7 @@ class _ValueIterator<K, V> extends _Iterator<K, V, V> {
   _ValueIterator(_Node<K?, V?> super.node);
 
   @override
-  V get current => node!.value!;
+  V get current => node?.value ?? (throw StateError('No current element'));
 }
 
 @immutable

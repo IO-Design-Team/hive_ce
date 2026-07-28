@@ -89,7 +89,7 @@ void main() {
         final adapter = TestAdapter();
         registry.registerAdapter(adapter);
 
-        final resolved = registry.findAdapterForValue(123)!;
+        final resolved = expectNotNull(registry.findAdapterForValue(123));
         expect(resolved.typeId, 32);
         expect(resolved.adapter, adapter);
       });
@@ -149,8 +149,9 @@ void main() {
             final registry = TypeRegistryImpl();
             registry.registerAdapter(TestAdapter(100));
 
-            final foundAdapter1 = registry.findAdapterForType<int>();
-            expect(foundAdapter1!.adapter.typeId, 100);
+            final foundAdapter1 =
+                expectNotNull(registry.findAdapterForType<int>());
+            expect(foundAdapter1.adapter.typeId, 100);
 
             final output = await captureOutput(
               () => registry.registerAdapter(TestAdapter(200), override: true),
@@ -160,15 +161,17 @@ void main() {
               contains(contains('Removed existing adapter TestAdapter')),
             );
 
-            final foundAdapter2 = registry.findAdapterForType<int>();
-            expect(foundAdapter2!.adapter.typeId, 200);
+            final foundAdapter2 =
+                expectNotNull(registry.findAdapterForType<int>());
+            expect(foundAdapter2.adapter.typeId, 200);
           });
 
           test('internal', () async {
             final registry = TypeRegistryImpl();
 
-            final foundAdapter1 = registry.findAdapterForType<Duration>();
-            expect(foundAdapter1!.adapter.typeId, 20);
+            final foundAdapter1 =
+                expectNotNull(registry.findAdapterForType<Duration>());
+            expect(foundAdapter1.adapter.typeId, 20);
 
             final output = await captureOutput(
               () => registry.registerAdapter(
@@ -186,8 +189,9 @@ void main() {
               ),
             );
 
-            final foundAdapter2 = registry.findAdapterForType<Duration>();
-            expect(foundAdapter2!.adapter.typeId, 60);
+            final foundAdapter2 =
+                expectNotNull(registry.findAdapterForType<Duration>());
+            expect(foundAdapter2.adapter.typeId, 60);
           });
         });
       });
@@ -209,14 +213,14 @@ void main() {
         test('external', () {
           final registry = TypeRegistryImpl();
           registry.registerAdapter(TestAdapter(224));
-          final resolved = registry.findAdapterForValue(123)!;
+          final resolved = expectNotNull(registry.findAdapterForValue(123));
           expect(resolved.typeId, 320);
         });
 
         test('internal', () {
           final registry = TypeRegistryImpl();
           registry.registerAdapter(TestAdapter(32), internal: true);
-          final resolved = registry.findAdapterForValue(123)!;
+          final resolved = expectNotNull(registry.findAdapterForValue(123));
           expect(resolved.typeId, 256);
         });
       });
@@ -227,7 +231,7 @@ void main() {
       final adapter = TestAdapter();
       registry.registerAdapter(adapter);
 
-      final resolvedAdapter = registry.findAdapterForTypeId(32)!;
+      final resolvedAdapter = expectNotNull(registry.findAdapterForTypeId(32));
       expect(resolvedAdapter.typeId, 32);
       expect(resolvedAdapter.adapter, adapter);
     });
@@ -238,7 +242,8 @@ void main() {
         final adapter = TestAdapter();
         registry.registerAdapter(adapter);
 
-        final resolvedAdapter = registry.findAdapterForValue(123)!;
+        final resolvedAdapter =
+            expectNotNull(registry.findAdapterForValue(123));
         expect(resolvedAdapter.typeId, 32);
         expect(resolvedAdapter.adapter, adapter);
       });
@@ -250,7 +255,8 @@ void main() {
         registry.registerAdapter(adapter1);
         registry.registerAdapter(adapter2);
 
-        final resolvedAdapter = registry.findAdapterForValue(123)!;
+        final resolvedAdapter =
+            expectNotNull(registry.findAdapterForValue(123));
         expect(resolvedAdapter.typeId, 32);
         expect(resolvedAdapter.adapter, adapter1);
       });
@@ -323,7 +329,7 @@ void main() {
       test('registers IgnoredTypeAdapter', () {
         final registry = TypeRegistryImpl();
         registry.ignoreTypeId(0);
-        final resolved = registry.findAdapterForTypeId(32)!;
+        final resolved = expectNotNull(registry.findAdapterForTypeId(32));
         expect(resolved.adapter is IgnoredTypeAdapter, true);
       });
 

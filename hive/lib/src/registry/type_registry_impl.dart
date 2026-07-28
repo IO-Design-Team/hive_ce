@@ -186,8 +186,8 @@ class TypeRegistryImpl implements TypeRegistry {
       }
 
       final existingResolvedAdapter = findAdapterForType<T>();
-      final existingTypeAdapter = existingResolvedAdapter?.adapter;
-      if (existingTypeAdapter != null) {
+      if (existingResolvedAdapter != null) {
+        final existingTypeAdapter = existingResolvedAdapter.adapter;
         final adapterTypeId = adapter.typeId;
         final existingAdapterTypeId = existingTypeAdapter.typeId;
 
@@ -198,7 +198,7 @@ class TypeRegistryImpl implements TypeRegistry {
               '${existingTypeAdapter.runtimeType} (typeId $existingAdapterTypeId)';
 
           if (override) {
-            _typeAdapters.remove(existingResolvedAdapter!.typeId);
+            _typeAdapters.remove(existingResolvedAdapter.typeId);
             Logger.d(
               'Removed existing adapter $existingAdapterTypeString for type $T '
               'and replaced with $adapterTypeString.',

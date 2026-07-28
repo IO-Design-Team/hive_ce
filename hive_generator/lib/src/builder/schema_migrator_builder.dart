@@ -57,7 +57,10 @@ class SchemaMigratorBuilder implements Builder {
       final cls = getClass(type.element);
       final className = cls.displayName;
 
-      final library = type.element.library!;
+      final library = type.element.library;
+      if (library == null) {
+        throw 'Element has no library: ${type.element.displayName}';
+      }
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
         typeId: typeId,

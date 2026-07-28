@@ -5,12 +5,12 @@ Future _asyncRead(
   ReadWriteSync rw,
   int id,
   List<String> history, {
-  bool? throwError = false,
+  bool throwError = false,
 }) {
   return rw.syncRead(() async {
     history.add('startread$id');
     await Future.delayed(Duration(milliseconds: 10));
-    if (throwError!) {
+    if (throwError) {
       throw 'error$id';
     }
     history.add('stopread$id');
@@ -21,12 +21,12 @@ Future _asyncWrite(
   ReadWriteSync rw,
   int id,
   List<String> history, {
-  bool? throwError = false,
+  bool throwError = false,
 }) {
   return rw.syncWrite(() async {
     history.add('startwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
-    if (throwError!) {
+    if (throwError) {
       throw 'error$id';
     }
     history.add('stopwrite$id');
@@ -37,12 +37,12 @@ Future _asyncReadWrite(
   ReadWriteSync rw,
   int id,
   List<String> history, {
-  bool? throwError = false,
+  bool throwError = false,
 }) {
   return rw.syncReadWrite(() async {
     history.add('startreadwrite$id');
     await Future.delayed(Duration(milliseconds: 10));
-    if (throwError!) {
+    if (throwError) {
       throw 'error$id';
     }
     history.add('stopreadwrite$id');
@@ -53,7 +53,7 @@ typedef _Operation = Future Function(
   ReadWriteSync rw,
   int id,
   List<String> history, {
-  bool? throwError,
+  bool throwError,
 });
 
 Future _asyncOperation(

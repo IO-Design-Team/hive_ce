@@ -47,15 +47,18 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     }
     _validateSchema(schema);
 
+    int schemaTypeId(RevivedAdapterSpec spec) {
+      final name = spec.type.getDisplayString();
+      final type = schema.types[name];
+      if (type == null) throw 'Missing schema type: $name';
+      return type.typeId;
+    }
+
     // Sort existing types by type ID
     final existingSpecs = revived.specs
         .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
         .toList()
-      ..sort((a, b) {
-        final aTypeId = schema.types[a.type.getDisplayString()]!.typeId;
-        final bTypeId = schema.types[b.type.getDisplayString()]!.typeId;
-        return aTypeId.compareTo(bTypeId);
-      });
+      ..sort((a, b) => schemaTypeId(a).compareTo(schemaTypeId(b)));
 
     // Maintain order of new types
     final newSpecs = revived.specs
@@ -75,7 +78,11 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final newTypes = <String, HiveSchemaType>{};
     final content = StringBuffer();
     for (final spec in existingSpecs + newSpecs) {
-      final typeKey = spec.type.element!.displayName;
+      final element = spec.type.element;
+      if (element == null) {
+        throw 'AdapterSpec type has no element: ${spec.type}';
+      }
+      final typeKey = element.displayName;
 
       final schemaType = schema.types[typeKey] ??
           HiveSchemaType(
@@ -84,7 +91,7 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
             fields: {},
           );
       final result = TypeAdapterGenerator.generateTypeAdapter(
-        element: spec.type.element!,
+        element: element,
         library: library,
         typeId: schemaType.typeId,
         schema: schemaType,

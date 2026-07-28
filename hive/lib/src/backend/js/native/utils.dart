@@ -12,7 +12,9 @@ extension IDBRequestExtension on IDBRequest {
       completer.complete(result as T);
     }.toJS;
     onerror = (Event e) {
-      completer.completeError(error!);
+      completer.completeError(
+        error ?? StateError('IDBRequest failed without an error'),
+      );
     }.toJS;
     return completer.future;
   }
@@ -34,7 +36,9 @@ extension IDBObjectStoreExtension on IDBObjectStore {
       cursor.continue_();
     }.toJS;
     request.onerror = (Event e) {
-      controller.addError(request.error!);
+      controller.addError(
+        request.error ?? StateError('IDBRequest failed without an error'),
+      );
     }.toJS;
     return controller.stream;
   }

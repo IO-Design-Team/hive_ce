@@ -33,7 +33,8 @@ Future _performTest(bool lazy, {required TestType type}) async {
     final boxFile = File(path.join(dir.path, 'testbox$i.hive'));
     await boxFile.writeAsBytes(subBytes);
 
-    final subFrames = frames.takeWhile((f) => f.offset + f.length! <= i + 1);
+    final subFrames =
+        frames.takeWhile((f) => f.offset + expectNotNull(f.length) <= i + 1);
     final subKeystore = Keystore.debug(frames: subFrames);
     if (lazy) {
       final box = await hive.openLazyBox('testbox$i');

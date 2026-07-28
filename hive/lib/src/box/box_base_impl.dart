@@ -94,7 +94,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   @override
   dynamic keyAt(int index) {
     checkOpen();
-    return keystore.getAt(index)!.key;
+    return keystore.keyAt(index);
   }
 
   /// Not part of public API
@@ -138,12 +138,12 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
 
   @override
   Future<void> putAt(int index, E value) {
-    return putAll({keystore.getAt(index)!.key: value});
+    return putAll({keystore.keyAt(index): value});
   }
 
   @override
   Future<void> deleteAt(int index) {
-    return delete(keystore.getAt(index)!.key);
+    return delete(keystore.keyAt(index));
   }
 
   @override

@@ -40,31 +40,35 @@ class HiveListImpl<E extends HiveObjectMixin>
   /// Not part of public API
   HiveListImpl.lazy(this.boxName, List<dynamic>? keys) : _keys = keys;
 
-  @override
-  Iterable<dynamic> get keys {
-    if (_delegate == null) {
-      return _keys!;
-    } else {
-      return super.keys;
+  /// The keys backing a lazy list
+  ///
+  /// Only null if a delegate backed list has been disposed
+  List<dynamic> get _lazyKeys {
+    final keys = _keys;
+    if (keys == null) {
+      throw HiveError('HiveList has neither delegate nor keys.');
     }
+    return keys;
   }
 
   @override
+  Iterable<dynamic> get keys => _delegate == null ? _lazyKeys : super.keys;
+
+  @override
   Box get box {
-    if (_box == null) {
-      final box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
-      if (box == null) {
-        throw HiveError(
-          'To use this list, you have to open the box "$boxName" first.',
-        );
-      } else if (box is! Box) {
-        throw HiveError('The box "$boxName" is a lazy box. '
-            'You can only use HiveLists with normal boxes.');
-      } else {
-        _box = box;
-      }
+    final box = _box;
+    if (box != null) return box;
+
+    final opened = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
+    if (opened == null) {
+      throw HiveError(
+        'To use this list, you have to open the box "$boxName" first.',
+      );
+    } else if (opened is! Box) {
+      throw HiveError('The box "$boxName" is a lazy box. '
+          'You can only use HiveLists with normal boxes.');
     }
-    return _box!;
+    return _box = opened;
   }
 
   @override
@@ -73,34 +77,38 @@ class HiveListImpl<E extends HiveObjectMixin>
       throw HiveError('HiveList has already been disposed.');
     }
 
-    if (_invalidated) {
-      final retained = <E>[];
-      for (final obj in _delegate!) {
-        if (obj.isInHiveList(this)) {
-          retained.add(obj);
-        }
-      }
-      _delegate = retained;
-      _invalidated = false;
-    } else if (_delegate == null) {
+    final delegate = _delegate;
+    if (delegate == null) {
       final list = <E>[];
-      for (final key in _keys!) {
+      for (final key in _lazyKeys) {
         if (box.containsKey(key)) {
           final obj = box.get(key) as E;
           obj.linkHiveList(this);
           list.add(obj);
         }
       }
-      _delegate = list;
+      return _delegate = list;
     }
 
-    return _delegate!;
+    if (_invalidated) {
+      final retained = <E>[];
+      for (final obj in delegate) {
+        if (obj.isInHiveList(this)) {
+          retained.add(obj);
+        }
+      }
+      _invalidated = false;
+      return _delegate = retained;
+    }
+
+    return delegate;
   }
 
   @override
   void dispose() {
-    if (_delegate != null) {
-      for (final element in _delegate!) {
+    final delegate = _delegate;
+    if (delegate != null) {
+      for (final element in delegate) {
         element.unlinkHiveList(this);
       }
       _delegate = null;
@@ -161,8 +169,9 @@ class HiveListImpl<E extends HiveObjectMixin>
 
   @override
   HiveList<T> castHiveList<T extends HiveObjectMixin>() {
-    if (_delegate != null) {
-      return HiveListImpl(box, objects: _delegate!.cast());
+    final delegate = _delegate;
+    if (delegate != null) {
+      return HiveListImpl(box, objects: delegate.cast());
     } else {
       return HiveListImpl.lazy(boxName, _keys);
     }

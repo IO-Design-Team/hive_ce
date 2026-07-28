@@ -7,6 +7,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+/// Fails the test if [value] is null, otherwise returns it
+T expectNotNull<T extends Object>(T? value) =>
+    value ?? fail('Expected a non-null $T');
+
 Matcher hiveErrorPredicate(List<String> containing) => predicate(
       (e) {
         final message = e.toString().toLowerCase();

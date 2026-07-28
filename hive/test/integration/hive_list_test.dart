@@ -3,6 +3,7 @@ import 'package:hive_ce/src/hive_impl.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:test/test.dart';
 
+import '../tests/common.dart';
 import 'integration.dart';
 
 class _TestObject extends HiveObject {
@@ -49,30 +50,33 @@ void main() {
       obj.list = HiveListImpl(box.box as Box<_TestObject>);
       await box.put('obj', obj);
 
+      var list = expectNotNull(obj.list);
+
       for (var i = 0; i < 100; i++) {
         final element = _TestObject('element$i');
         await box.add(element);
-        obj.list!.add(element);
+        list.add(element);
       }
 
       await obj.save();
 
       box = await hive.reopenBox(box);
-      obj = (await box.get('obj'))!;
-      (obj.list as HiveListImpl).debugHive = hive.hive as HiveImpl;
+      obj = expectNotNull(await box.get('obj'));
+      list = expectNotNull(obj.list);
+      (list as HiveListImpl).debugHive = hive.hive as HiveImpl;
 
       for (var i = 0; i < 100; i++) {
-        expect(obj.list![i].name, 'element$i');
+        expect(list[i].name, 'element$i');
       }
 
-      await obj.list![99].delete();
-      expect(obj.list!.length, 99);
+      await list[99].delete();
+      expect(list.length, 99);
 
-      await obj.list![50].delete();
-      expect(obj.list![50].name, 'element51');
+      await list[50].delete();
+      expect(list[50].name, 'element51');
 
-      await obj.list![0].delete();
-      expect(obj.list![0].name, 'element1');
+      await list[0].delete();
+      expect(list[0].name, 'element1');
     },
     timeout: longTimeout,
   );

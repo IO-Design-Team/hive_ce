@@ -16,7 +16,7 @@ class StorageBackendMemory extends StorageBackend {
   Uint8List? _bytes;
 
   /// Not part of public API
-  StorageBackendMemory(Uint8List? bytes, this._cipher, this._keyCrc)
+  StorageBackendMemory(Uint8List bytes, this._cipher, this._keyCrc)
       : _bytes = bytes,
         _frameHelper = FrameHelper();
 
@@ -29,12 +29,16 @@ class StorageBackendMemory extends StorageBackend {
   @override
   Future<void> initialize(
     TypeRegistry registry,
-    Keystore? keystore,
+    Keystore keystore,
     bool lazy, {
     bool isolated = false,
   }) {
+    final bytes = _bytes;
+    if (bytes == null) {
+      throw HiveError('Memory backend has already been initialized.');
+    }
     final recoveryOffset = _frameHelper.framesFromBytes(
-      _bytes!, // Initialized at constructor and nulled after initialization
+      bytes,
       keystore,
       registry,
       _cipher,

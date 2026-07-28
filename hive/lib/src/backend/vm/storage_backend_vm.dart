@@ -16,6 +16,12 @@ import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
+extension on Frame {
+  /// The frame length, which is only set once the frame has been read from or
+  /// written to disk
+  int get requireLength => length ?? (throw HiveError('Frame has no length.'));
+}
+
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
   final File _file;
@@ -145,7 +151,7 @@ class StorageBackendVm extends StorageBackend {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
-      final bytes = await readRaf.read(frame.length!);
+      final bytes = await readRaf.read(frame.requireLength);
 
       final reader = BinaryReaderImpl(bytes, registry);
       final readFrame = reader.readFrame(
@@ -188,7 +194,7 @@ class StorageBackendVm extends StorageBackend {
 
       for (final frame in frames) {
         frame.offset = writeOffset;
-        writeOffset += frame.length!;
+        writeOffset += frame.requireLength;
       }
     });
   }
@@ -222,12 +228,13 @@ class StorageBackendVm extends StorageBackend {
             reader.skip(skip);
           }
 
-          if (reader.remainingInBuffer < frame.length!) {
-            if (await reader.loadBytes(frame.length!) < frame.length!) {
+          final length = frame.requireLength;
+          if (reader.remainingInBuffer < length) {
+            if (await reader.loadBytes(length) < length) {
               throw HiveError('Could not compact box: Unexpected EOF.');
             }
           }
-          await writer.write(reader.viewBytes(frame.length!));
+          await writer.write(reader.viewBytes(length));
         }
         await writer.flush();
       } finally {
@@ -252,7 +259,7 @@ class StorageBackendVm extends StorageBackend {
       for (final frame in sortedFrames) {
         if (frame.offset == -1) continue;
         frame.offset = offset;
-        offset += frame.length!;
+        offset += frame.requireLength;
       }
     });
   }
