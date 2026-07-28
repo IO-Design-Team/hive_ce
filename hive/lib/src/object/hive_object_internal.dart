@@ -39,7 +39,10 @@ extension HiveObjectInternal on HiveObjectMixin {
 
   /// Not part of public API
   void unlinkHiveList(HiveList list) {
-    final currentIndex = _hiveLists[list]!;
+    final currentIndex = _hiveLists[list];
+    if (currentIndex == null) {
+      throw StateError('HiveList is not linked to this object.');
+    }
     final newIndex = _hiveLists[list] = currentIndex - 1;
     if (newIndex <= 0) {
       _hiveLists.remove(list);

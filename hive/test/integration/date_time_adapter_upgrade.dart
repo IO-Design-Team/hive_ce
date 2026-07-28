@@ -18,20 +18,20 @@ void main() {
       });
 
       test('uses DateTimeWithTimeZoneAdapter for writing new values', () {
-        final result = registry.findAdapterForValue(DateTime.timestamp())!;
-        expect(result, isNotNull);
+        final result = registry.findAdapterForValue(DateTime.timestamp());
+        if (result == null) fail('expected non-null adapter');
         expect(result.adapter, isA<DateTimeWithTimezoneAdapter>());
       });
 
       test('uses DateTimeWithTimeZoneAdapter for reading if typeId = 18', () {
-        final result = registry.findAdapterForTypeId(18)!;
-        expect(result, isNotNull);
+        final result = registry.findAdapterForTypeId(18);
+        if (result == null) fail('expected non-null adapter');
         expect(result.adapter, isA<DateTimeWithTimezoneAdapter>());
       });
 
       test('uses DateTimeAdapter for reading if typeId = 16', () {
-        final result = registry.findAdapterForTypeId(16)!;
-        expect(result, isNotNull);
+        final result = registry.findAdapterForTypeId(16);
+        if (result == null) fail('expected non-null adapter');
         expect(result.adapter, isA<DateTimeAdapter>());
       });
     });

@@ -22,23 +22,24 @@ mixin HiveObjectMixin {
   /// not been added to a box yet.
   dynamic get key => _key;
 
-  void _requireInitialized() {
-    if (_box == null) {
+  BoxBase _requireInitialized() {
+    final box = _box;
+    if (box == null) {
       throw HiveError('This object is currently not in a box.');
     }
+    return box;
   }
 
   /// Persists this object.
   Future<void> save() {
-    _requireInitialized();
-    return _box!.put(_key, this);
+    return _requireInitialized().put(_key, this);
   }
 
   /// Deletes this object from the box it is stored in.
   Future<void> delete() async {
-    _requireInitialized();
-    await _box!.delete(_key);
-    if (_box?.lazy == true) {
+    final box = _requireInitialized();
+    await box.delete(_key);
+    if (box.lazy) {
       // Lazy boxes won't automatically dispose their HiveObjects
       dispose();
     }
@@ -49,9 +50,10 @@ mixin HiveObjectMixin {
   /// For lazy boxes this only checks if the key exists in the box and NOT
   /// whether this instance is actually stored in the box.
   bool get isInBox {
-    if (_box != null) {
-      if (_box!.lazy) {
-        return _box!.containsKey(_key);
+    final box = _box;
+    if (box != null) {
+      if (box.lazy) {
+        return box.containsKey(_key);
       } else {
         return true;
       }

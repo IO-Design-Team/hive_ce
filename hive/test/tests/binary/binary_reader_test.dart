@@ -389,10 +389,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          expectFrame(
-            reader.readFrame(lazy: false, frameOffset: offset)!,
-            frame,
-          );
+          final read = reader.readFrame(lazy: false, frameOffset: offset);
+          if (read == null) fail('expected non-null frame');
+          expectFrame(read, frame);
           offset += frameBytes[i].length;
         }
       });
@@ -403,10 +402,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          expectFrame(
-            reader.readFrame(lazy: true, frameOffset: offset)!,
-            frame.toLazy(),
-          );
+          final read = reader.readFrame(lazy: true, frameOffset: offset);
+          if (read == null) fail('expected non-null frame');
+          expectFrame(read, frame.toLazy());
           offset += frameBytes[i].length;
         }
       });
@@ -417,14 +415,13 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          expectFrame(
-            reader.readFrame(
-              lazy: false,
-              frameOffset: offset,
-              cipher: testCipher,
-            )!,
-            frame,
+          final read = reader.readFrame(
+            lazy: false,
+            frameOffset: offset,
+            cipher: testCipher,
           );
+          if (read == null) fail('expected non-null frame');
+          expectFrame(read, frame);
           offset += frameBytesEncrypted[i].length;
         }
       });
@@ -435,14 +432,13 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          expectFrame(
-            reader.readFrame(
-              lazy: true,
-              frameOffset: offset,
-              cipher: testCipher,
-            )!,
-            frame.toLazy(),
+          final read = reader.readFrame(
+            lazy: true,
+            frameOffset: offset,
+            cipher: testCipher,
           );
+          if (read == null) fail('expected non-null frame');
+          expectFrame(read, frame.toLazy());
           offset += frameBytesEncrypted[i].length;
         }
       });

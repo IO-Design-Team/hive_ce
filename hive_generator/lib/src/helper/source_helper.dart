@@ -26,7 +26,8 @@ String escapeDartString(String value) {
   var canBeRaw = true;
 
   value = value.replaceAllMapped(_escapeRegExp, (match) {
-    final value = match[0]!;
+    final value = match[0];
+    if (value == null) throw 'Unexpected empty regex match.';
     if (value == "'") {
       hasSingleQuote = true;
       return value;

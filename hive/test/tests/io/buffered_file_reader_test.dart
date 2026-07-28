@@ -40,7 +40,9 @@ void main() {
         expect(reader.remainingInBuffer, 0);
         expect(reader.offset, 5);
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
 
       test('fails if not enough bytes available', () async {
@@ -51,7 +53,9 @@ void main() {
 
         expect(() => reader.skip(4), throwsA(anything));
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
     });
 
@@ -67,7 +71,9 @@ void main() {
         expect(reader.viewBytes(3), [3, 4, 5]);
         expect(reader.offset, 5);
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
 
       test('fails if not enough bytes available', () async {
@@ -76,7 +82,9 @@ void main() {
 
         expect(() => reader.viewBytes(6), throwsA(anything));
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
     });
 
@@ -89,7 +97,9 @@ void main() {
         expect(reader.viewBytes(2), [1, 2]);
         expect(reader.viewBytes(1), [3]);
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
 
       test('increases the buffer if it is too small', () async {
@@ -100,7 +110,9 @@ void main() {
         expect(await reader.loadBytes(3), 3);
         expect(reader.viewBytes(3), [3, 4, 5]);
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
 
       test('copies unused bytes', () async {
@@ -114,7 +126,9 @@ void main() {
         expect(await reader.loadBytes(5), 4);
         expect(reader.viewBytes(3), [4, 5, 6]);
 
-        await reader.file!.close();
+        final file = reader.file;
+        if (file == null) fail('expected non-null file');
+        await file.close();
       });
     });
   });

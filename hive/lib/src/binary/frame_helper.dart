@@ -29,7 +29,11 @@ class FrameHelper {
       );
       if (frame == null) return frameOffset;
 
-      keystore!.insert(frame, notify: false);
+      final store = keystore;
+      if (store == null) {
+        throw HiveError('Keystore is required to read frames.');
+      }
+      store.insert(frame, notify: false);
     }
 
     return -1;

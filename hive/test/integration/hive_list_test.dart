@@ -49,30 +49,37 @@ void main() {
       obj.list = HiveListImpl(box.box as Box<_TestObject>);
       await box.put('obj', obj);
 
+      var list = obj.list;
+      if (list == null) fail('expected non-null list');
+
       for (var i = 0; i < 100; i++) {
         final element = _TestObject('element$i');
         await box.add(element);
-        obj.list!.add(element);
+        list.add(element);
       }
 
       await obj.save();
 
       box = await hive.reopenBox(box);
-      obj = (await box.get('obj'))!;
-      (obj.list as HiveListImpl).debugHive = hive.hive as HiveImpl;
+      final reloaded = await box.get('obj');
+      if (reloaded == null) fail('expected non-null obj');
+      obj = reloaded;
+      list = obj.list;
+      if (list == null) fail('expected non-null list');
+      (list as HiveListImpl).debugHive = hive.hive as HiveImpl;
 
       for (var i = 0; i < 100; i++) {
-        expect(obj.list![i].name, 'element$i');
+        expect(list[i].name, 'element$i');
       }
 
-      await obj.list![99].delete();
-      expect(obj.list!.length, 99);
+      await list[99].delete();
+      expect(list.length, 99);
 
-      await obj.list![50].delete();
-      expect(obj.list![50].name, 'element51');
+      await list[50].delete();
+      expect(list[50].name, 'element51');
 
-      await obj.list![0].delete();
-      expect(obj.list![0].name, 'element1');
+      await list[0].delete();
+      expect(list[0].name, 'element1');
     },
     timeout: longTimeout,
   );

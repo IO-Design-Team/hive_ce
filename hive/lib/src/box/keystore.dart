@@ -212,21 +212,22 @@ class Keystore<E> {
     final canceled = transactions.removeFirst();
 
     deleted_loop:
-    for (final key in canceled.deleted.keys) {
-      final deletedFrame = canceled.deleted[key];
+    for (final entry in canceled.deleted.entries) {
+      final key = entry.key;
+      final deletedFrame = entry.value;
       for (final t in transactions) {
         if (t.deleted.containsKey(key)) {
-          t.deleted[key] = deletedFrame!;
+          t.deleted[key] = deletedFrame;
           continue deleted_loop;
         }
         if (t.added.contains(key)) {
-          t.deleted[key] = deletedFrame!;
+          t.deleted[key] = deletedFrame;
           continue deleted_loop;
         }
       }
 
       _store.insert(key, deletedFrame);
-      _notifier.notify(deletedFrame!);
+      _notifier.notify(deletedFrame);
     }
 
     added_loop:

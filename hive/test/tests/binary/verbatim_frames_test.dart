@@ -21,7 +21,8 @@ void main() {
 
       final verbatimReader =
           BinaryReaderImpl(verbatimWriter.toBytes(), testRegistry);
-      final decodedFrame = verbatimReader.readFrame(verbatim: true)!;
+      final decodedFrame = verbatimReader.readFrame(verbatim: true);
+      if (decodedFrame == null) fail('expected non-null frame');
 
       expect(decodedFrame.key, encodedFrame.key);
       expect(decodedFrame.value, encodedFrame.value);

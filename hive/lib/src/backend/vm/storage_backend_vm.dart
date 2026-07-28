@@ -145,7 +145,11 @@ class StorageBackendVm extends StorageBackend {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
-      final bytes = await readRaf.read(frame.length!);
+      final length = frame.length;
+      if (length == null) {
+        throw HiveError('Frame has no length.');
+      }
+      final bytes = await readRaf.read(length);
 
       final reader = BinaryReaderImpl(bytes, registry);
       final readFrame = reader.readFrame(
@@ -188,7 +192,11 @@ class StorageBackendVm extends StorageBackend {
 
       for (final frame in frames) {
         frame.offset = writeOffset;
-        writeOffset += frame.length!;
+        final length = frame.length;
+        if (length == null) {
+          throw HiveError('Frame has no length.');
+        }
+        writeOffset += length;
       }
     });
   }
@@ -222,12 +230,16 @@ class StorageBackendVm extends StorageBackend {
             reader.skip(skip);
           }
 
-          if (reader.remainingInBuffer < frame.length!) {
-            if (await reader.loadBytes(frame.length!) < frame.length!) {
+          final length = frame.length;
+          if (length == null) {
+            throw HiveError('Frame has no length.');
+          }
+          if (reader.remainingInBuffer < length) {
+            if (await reader.loadBytes(length) < length) {
               throw HiveError('Could not compact box: Unexpected EOF.');
             }
           }
-          await writer.write(reader.viewBytes(frame.length!));
+          await writer.write(reader.viewBytes(length));
         }
         await writer.flush();
       } finally {
@@ -252,7 +264,11 @@ class StorageBackendVm extends StorageBackend {
       for (final frame in sortedFrames) {
         if (frame.offset == -1) continue;
         frame.offset = offset;
-        offset += frame.length!;
+        final length = frame.length;
+        if (length == null) {
+          throw HiveError('Frame has no length.');
+        }
+        offset += length;
       }
     });
   }

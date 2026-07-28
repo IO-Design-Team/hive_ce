@@ -86,7 +86,11 @@ class BoxCollection implements implementation.BoxCollection {
         await action();
       } finally {
         final flushFutures = <Future<void>>[];
-        for (final boxName in CollectionBox.transactionBoxes[Zone.current]!) {
+        final transactionBoxes = CollectionBox.transactionBoxes[Zone.current];
+        if (transactionBoxes == null) {
+          throw StateError('Transaction zone has no box set.');
+        }
+        for (final boxName in transactionBoxes) {
           final i = _openBoxes.indexWhere((box) => box.name == boxName);
           if (i != -1) {
             flushFutures.add(_openBoxes[i].flush());
@@ -240,7 +244,11 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (zone == null) {
       await flush();
     } else {
-      transactionBoxes[zone]!.add(name);
+      final boxes = transactionBoxes[zone];
+      if (boxes == null) {
+        throw StateError('Transaction zone has no box set.');
+      }
+      boxes.add(name);
     }
   }
 

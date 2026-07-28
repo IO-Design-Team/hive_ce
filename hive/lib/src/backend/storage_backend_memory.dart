@@ -33,8 +33,12 @@ class StorageBackendMemory extends StorageBackend {
     bool lazy, {
     bool isolated = false,
   }) {
+    final bytes = _bytes;
+    if (bytes == null) {
+      throw HiveError('Memory backend has already been initialized.');
+    }
     final recoveryOffset = _frameHelper.framesFromBytes(
-      _bytes!, // Initialized at constructor and nulled after initialization
+      bytes,
       keystore,
       registry,
       _cipher,

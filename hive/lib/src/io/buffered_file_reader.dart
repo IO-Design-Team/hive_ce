@@ -78,7 +78,11 @@ class BufferedFileReader {
       }
 
       _bufferOffset = 0;
-      final readBytes = await file!.readInto(buffer, remaining);
+      final raf = file;
+      if (raf == null) {
+        throw StateError('BufferedFileReader has no file.');
+      }
+      final readBytes = await raf.readInto(buffer, remaining);
       _bufferSize = remaining + readBytes;
       _fileOffset += readBytes;
 
