@@ -47,21 +47,18 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     }
     _validateSchema(schema);
 
+    int schemaTypeId(RevivedAdapterSpec spec) {
+      final name = spec.type.getDisplayString();
+      final type = schema.types[name];
+      if (type == null) throw 'Missing schema type: $name';
+      return type.typeId;
+    }
+
     // Sort existing types by type ID
     final existingSpecs = revived.specs
         .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
         .toList()
-      ..sort((a, b) {
-        final aTypeId = schema.types[a.type.getDisplayString()]?.typeId;
-        final bTypeId = schema.types[b.type.getDisplayString()]?.typeId;
-        if (aTypeId == null) {
-          throw 'Missing schema type: ${a.type.getDisplayString()}';
-        }
-        if (bTypeId == null) {
-          throw 'Missing schema type: ${b.type.getDisplayString()}';
-        }
-        return aTypeId.compareTo(bTypeId);
-      });
+      ..sort((a, b) => schemaTypeId(a).compareTo(schemaTypeId(b)));
 
     // Maintain order of new types
     final newSpecs = revived.specs

@@ -17,7 +17,8 @@ import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
 extension on Frame {
-  /// The frame length, which is only set once the frame has been written
+  /// The frame length, which is only set once the frame has been read from or
+  /// written to disk
   int get requireLength => length ?? (throw HiveError('Frame has no length.'));
 }
 
