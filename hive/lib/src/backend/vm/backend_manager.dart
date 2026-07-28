@@ -74,22 +74,21 @@ class BackendManager implements BackendManagerInterface {
 
   @override
   Future<void> deleteBox(String name, String? path, String? collection) async {
-    var resolvedPath = path;
-    if (resolvedPath == null) {
+    if (path == null) {
       throw ArgumentError.notNull('path');
     }
 
-    if (resolvedPath.endsWith(_delimiter)) {
-      resolvedPath = resolvedPath.substring(0, resolvedPath.length - 1);
+    if (path.endsWith(_delimiter)) {
+      path = path.substring(0, path.length - 1);
     }
 
     if (collection != null) {
-      resolvedPath = resolvedPath + collection;
+      path = path + collection;
     }
 
-    await _deleteFileIfExists(File('$resolvedPath$_delimiter$name.hive'));
-    await _deleteFileIfExists(File('$resolvedPath$_delimiter$name.hivec'));
-    await _deleteFileIfExists(File('$resolvedPath$_delimiter$name.lock'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.hive'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.hivec'));
+    await _deleteFileIfExists(File('$path$_delimiter$name.lock'));
   }
 
   Future<void> _deleteFileIfExists(File file) async {
@@ -100,21 +99,20 @@ class BackendManager implements BackendManagerInterface {
 
   @override
   Future<bool> boxExists(String name, String? path, String? collection) async {
-    var resolvedPath = path;
-    if (resolvedPath == null) {
+    if (path == null) {
       throw ArgumentError.notNull('path');
     }
 
-    if (resolvedPath.endsWith(_delimiter)) {
-      resolvedPath = resolvedPath.substring(0, resolvedPath.length - 1);
+    if (path.endsWith(_delimiter)) {
+      path = path.substring(0, path.length - 1);
     }
 
     if (collection != null) {
-      resolvedPath = resolvedPath + collection;
+      path = path + collection;
     }
 
-    return await File('$resolvedPath$_delimiter$name.hive').exists() ||
-        await File('$resolvedPath$_delimiter$name.hivec').exists() ||
-        await File('$resolvedPath$_delimiter$name.lock').exists();
+    return await File('$path$_delimiter$name.hive').exists() ||
+        await File('$path$_delimiter$name.hivec').exists() ||
+        await File('$path$_delimiter$name.lock').exists();
   }
 }

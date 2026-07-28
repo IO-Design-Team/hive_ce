@@ -208,11 +208,10 @@ class IndexableSkipList<K, V> {
       }
     }
 
-    final result = node;
-    if (result == null) {
+    if (node == null) {
       throw StateError('Skip list is inconsistent.');
     }
-    return result;
+    return node;
   }
 
   /// Not part of public API
