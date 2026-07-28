@@ -29,7 +29,7 @@ class StorageBackendMemory extends StorageBackend {
   @override
   Future<void> initialize(
     TypeRegistry registry,
-    Keystore? keystore,
+    Keystore keystore,
     bool lazy, {
     bool isolated = false,
   }) {

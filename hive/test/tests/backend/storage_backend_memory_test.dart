@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:hive_ce/src/backend/storage_backend_memory.dart';
 import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:test/test.dart';
 
@@ -24,7 +25,11 @@ void main() {
         final bytes = Uint8List.fromList([1, 2, 3, 4]);
         final backend = StorageBackendMemory(bytes, null, null);
         expect(
-          () => backend.initialize(TypeRegistryImpl.nullImpl, null, false),
+          () => backend.initialize(
+            TypeRegistryImpl.nullImpl,
+            Keystore.debug(),
+            false,
+          ),
           throwsHiveError(['Wrong checksum']),
         );
       });
