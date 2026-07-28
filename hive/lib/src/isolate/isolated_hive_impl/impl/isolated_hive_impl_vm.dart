@@ -28,7 +28,13 @@ class IsolatedHiveImpl extends TypeRegistryImpl
   final _openingBoxes = <String, Future>{};
 
   @override
-  IsolateConnection get connection => _connection!;
+  IsolateConnection get connection {
+    final connection = _connection;
+    if (connection == null) {
+      throw HiveError('IsolatedHive is not initialized');
+    }
+    return connection;
+  }
 
   late Future<IsolateConnection> Function() _spawnHiveIsolate =
       () => spawnIsolate(

@@ -311,7 +311,8 @@ void main() {
 
           final box1 = await hive.openBox('testBox1');
           await box1.put('key', 'value');
-          final box1File = File((await box1.path)!);
+          final box1Path = expectNotNull(await box1.path);
+          final box1File = File(box1Path);
 
           await hive.deleteBoxFromDisk('testBox1');
           expect(await box1File.exists(), false);
@@ -323,7 +324,7 @@ void main() {
 
           final box1 = await hive.openBox('testBox1');
           await box1.put('key', 'value');
-          final path = (await box1.path)!;
+          final path = expectNotNull(await box1.path);
           await box1.close();
           final box1File = File(path);
 
@@ -347,11 +348,13 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final box1File = File((await box1.path)!);
+        final box1Path = expectNotNull(await box1.path);
+        final box1File = File(box1Path);
 
         final box2 = await hive.openBox('testBox2');
         await box2.put('key', 'value');
-        final box2File = File((await box2.path)!);
+        final box2Path = expectNotNull(await box2.path);
+        final box2File = File(box2Path);
 
         await hive.deleteFromDisk();
         expect(await box1File.exists(), false);

@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
+import 'package:hive_ce_generator/src/helper/source_helper.dart';
 import 'package:meta/meta.dart';
 
 /// Generate a Hive schema from existing HiveType annotations
@@ -57,7 +57,10 @@ class SchemaMigratorBuilder implements Builder {
       final cls = getClass(type.element);
       final className = cls.displayName;
 
-      final library = type.element.library!;
+      final library = type.element.library;
+      if (library == null) {
+        throw 'Element has no library: ${type.element.displayName}';
+      }
       final typeId = readTypeId(type.annotation);
       final result = TypeAdapterGenerator.getAccessors(
         typeId: typeId,

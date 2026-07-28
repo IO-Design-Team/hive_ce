@@ -36,8 +36,11 @@ HiveFieldInfo? getHiveFieldAnn(Element? element) {
   final obj = _hiveFieldChecker.firstAnnotationOfExact(element);
   if (obj == null) return null;
 
+  final index = obj.getField('index')?.toIntValue();
+  if (index == null) throw 'HiveField index is null.';
+
   return HiveFieldInfo(
-    obj.getField('index')!.toIntValue()!,
+    index,
     obj.getField('defaultValue'),
   );
 }

@@ -389,10 +389,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          expectFrame(
-            reader.readFrame(lazy: false, frameOffset: offset)!,
-            frame,
-          );
+          final readFrame =
+              expectNotNull(reader.readFrame(lazy: false, frameOffset: offset));
+          expectFrame(readFrame, frame);
           offset += frameBytes[i].length;
         }
       });
@@ -403,10 +402,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          expectFrame(
-            reader.readFrame(lazy: true, frameOffset: offset)!,
-            frame.toLazy(),
-          );
+          final readFrame =
+              expectNotNull(reader.readFrame(lazy: true, frameOffset: offset));
+          expectFrame(readFrame, frame.toLazy());
           offset += frameBytes[i].length;
         }
       });
@@ -417,14 +415,14 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          expectFrame(
+          final readFrame = expectNotNull(
             reader.readFrame(
               lazy: false,
               frameOffset: offset,
               cipher: testCipher,
-            )!,
-            frame,
+            ),
           );
+          expectFrame(readFrame, frame);
           offset += frameBytesEncrypted[i].length;
         }
       });
@@ -435,14 +433,14 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          expectFrame(
+          final readFrame = expectNotNull(
             reader.readFrame(
               lazy: true,
               frameOffset: offset,
               cipher: testCipher,
-            )!,
-            frame.toLazy(),
+            ),
           );
+          expectFrame(readFrame, frame.toLazy());
           offset += frameBytesEncrypted[i].length;
         }
       });

@@ -40,11 +40,12 @@ void main() {
       expect(() => hive.init('MYPATH'), returnsNormally);
       expect(hive.homePath, 'MYPATH');
 
-      expect(
-        hive.findAdapterForValue(DateTime.timestamp())!.adapter,
-        isA<DateTimeWithTimezoneAdapter>(),
-      );
-      expect(hive.findAdapterForTypeId(16)!.adapter, isA<DateTimeAdapter>());
+      final dateTimeAdapter =
+          expectNotNull(hive.findAdapterForValue(DateTime.timestamp()));
+      expect(dateTimeAdapter.adapter, isA<DateTimeWithTimezoneAdapter>());
+
+      final typeIdAdapter = expectNotNull(hive.findAdapterForTypeId(16));
+      expect(typeIdAdapter.adapter, isA<DateTimeAdapter>());
     });
 
     group('.openBox()', () {
@@ -310,7 +311,8 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final box1File = File(box1.path!);
+        final box1Path = expectNotNull(box1.path);
+        final box1File = File(box1Path);
 
         await hive.deleteBoxFromDisk('testBox1');
         expect(await box1File.exists(), false);
@@ -324,7 +326,7 @@ void main() {
 
         final box1 = await hive.openBox('testBox1');
         await box1.put('key', 'value');
-        final path = box1.path!;
+        final path = expectNotNull(box1.path);
         await box1.close();
         final box1File = File(path);
 
@@ -347,11 +349,13 @@ void main() {
 
       final box1 = await hive.openBox('testBox1');
       await box1.put('key', 'value');
-      final box1File = File(box1.path!);
+      final box1Path = expectNotNull(box1.path);
+      final box1File = File(box1Path);
 
       final box2 = await hive.openBox('testBox2');
       await box2.put('key', 'value');
-      final box2File = File(box1.path!);
+      final box2Path = expectNotNull(box2.path);
+      final box2File = File(box2Path);
 
       await hive.deleteFromDisk();
       expect(await box1File.exists(), false);

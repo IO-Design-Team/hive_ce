@@ -9,7 +9,7 @@ class FrameHelper {
   /// Not part of public API
   int framesFromBytes(
     Uint8List bytes,
-    Keystore? keystore,
+    Keystore keystore,
     TypeRegistry registry,
     HiveCipher? cipher,
     int? keyCrc, {
@@ -29,7 +29,7 @@ class FrameHelper {
       );
       if (frame == null) return frameOffset;
 
-      keystore!.insert(frame, notify: false);
+      keystore.insert(frame, notify: false);
     }
 
     return -1;

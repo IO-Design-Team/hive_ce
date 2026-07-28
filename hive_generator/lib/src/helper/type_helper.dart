@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
+import 'package:hive_ce_generator/src/helper/source_helper.dart';
 
 /// TODO: Document this!
 const kConstConstructors = true;
@@ -56,7 +56,9 @@ String literalToString(DartObject object, List<String> typeInformation) {
   } else if (object.type is FunctionType) {
     badType = 'Function';
   } else if (!reader.isLiteral) {
-    badType = object.type!.element!.displayName;
+    final element = object.type?.element;
+    if (element == null) throwUnsupported('Unable to determine type.');
+    badType = element.displayName;
   }
 
   if (badType != null) {
