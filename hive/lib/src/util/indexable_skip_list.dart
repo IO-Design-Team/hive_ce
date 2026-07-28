@@ -252,17 +252,7 @@ class _KeyIterator<K, V> extends _Iterator<K, V, K> {
   _KeyIterator(_Node<K?, V?> super.node);
 
   @override
-  K get current {
-    final node = this.node;
-    if (node == null) {
-      throw StateError('No current element');
-    }
-    final key = node.key;
-    if (key == null) {
-      throw StateError('No current key');
-    }
-    return key;
-  }
+  K get current => node?.key ?? (throw StateError('No current element'));
 }
 
 @immutable
@@ -279,17 +269,7 @@ class _ValueIterator<K, V> extends _Iterator<K, V, V> {
   _ValueIterator(_Node<K?, V?> super.node);
 
   @override
-  V get current {
-    final node = this.node;
-    if (node == null) {
-      throw StateError('No current element');
-    }
-    final value = node.value;
-    if (value == null) {
-      throw StateError('No current value');
-    }
-    return value;
-  }
+  V get current => node?.value ?? (throw StateError('No current element'));
 }
 
 @immutable
