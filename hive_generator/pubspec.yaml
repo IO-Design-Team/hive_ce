@@ -11,7 +11,6 @@ dependencies:
   source_gen: ^4.0.0
   hive_ce: ^2.16.0
   analyzer: ^12.0.0
-  source_helper: ^1.1.0
   glob: ^2.1.2
   path: ^1.9.0
   yaml: ^3.1.2

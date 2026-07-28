@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:source_helper/source_helper.dart';
+import 'package:hive_ce_generator/src/helper/source_helper.dart';
 
 /// TODO: Document this!
 const kConstConstructors = true;
