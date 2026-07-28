@@ -15,7 +15,6 @@ dependencies:
   path: ^1.9.0
   yaml: ^3.1.2
   yaml_writer: ^2.0.1
-  json_annotation: ^4.9.0
   collection: ^1.18.0
   meta: ^1.14.0
 
@@ -23,4 +22,3 @@ dev_dependencies:
   test: ^1.17.11
   build_runner: ^2.5.4
   rexios_lints: ^17.0.3
-  json_serializable: ^6.8.0
