@@ -42,8 +42,7 @@ class HiveListImpl<E extends HiveObjectMixin>
 
   @override
   Iterable<dynamic> get keys {
-    final delegate = _delegate;
-    if (delegate == null) {
+    if (_delegate == null) {
       final keys = _keys;
       if (keys == null) {
         throw HiveError('HiveList has neither delegate nor keys.');
