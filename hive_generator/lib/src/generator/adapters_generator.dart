@@ -52,15 +52,15 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
         .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
         .toList()
       ..sort((a, b) {
-        final aSchema = schema.types[a.type.getDisplayString()];
-        final bSchema = schema.types[b.type.getDisplayString()];
-        if (aSchema == null) {
+        final aTypeId = schema.types[a.type.getDisplayString()]?.typeId;
+        final bTypeId = schema.types[b.type.getDisplayString()]?.typeId;
+        if (aTypeId == null) {
           throw 'Missing schema type: ${a.type.getDisplayString()}';
         }
-        if (bSchema == null) {
+        if (bTypeId == null) {
           throw 'Missing schema type: ${b.type.getDisplayString()}';
         }
-        return aSchema.typeId.compareTo(bSchema.typeId);
+        return aTypeId.compareTo(bTypeId);
       });
 
     // Maintain order of new types

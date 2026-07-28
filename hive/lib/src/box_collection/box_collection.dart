@@ -244,11 +244,11 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (zone == null) {
       await flush();
     } else {
-      final boxes = transactionBoxes[zone];
-      if (boxes == null) {
+      final transactionBoxes = CollectionBox.transactionBoxes[zone];
+      if (transactionBoxes == null) {
         throw StateError('Transaction zone has no box set.');
       }
-      boxes.add(name);
+      transactionBoxes.add(name);
     }
   }
 

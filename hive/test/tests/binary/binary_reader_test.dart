@@ -389,9 +389,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          final read = reader.readFrame(lazy: false, frameOffset: offset);
-          if (read == null) fail('expected non-null frame');
-          expectFrame(read, frame);
+          final readFrame = reader.readFrame(lazy: false, frameOffset: offset);
+          if (readFrame == null) fail('expected non-null frame');
+          expectFrame(readFrame, frame);
           offset += frameBytes[i].length;
         }
       });
@@ -402,9 +402,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          final read = reader.readFrame(lazy: true, frameOffset: offset);
-          if (read == null) fail('expected non-null frame');
-          expectFrame(read, frame.toLazy());
+          final readFrame = reader.readFrame(lazy: true, frameOffset: offset);
+          if (readFrame == null) fail('expected non-null frame');
+          expectFrame(readFrame, frame.toLazy());
           offset += frameBytes[i].length;
         }
       });
@@ -415,13 +415,13 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          final read = reader.readFrame(
+          final readFrame = reader.readFrame(
             lazy: false,
             frameOffset: offset,
             cipher: testCipher,
           );
-          if (read == null) fail('expected non-null frame');
-          expectFrame(read, frame);
+          if (readFrame == null) fail('expected non-null frame');
+          expectFrame(readFrame, frame);
           offset += frameBytesEncrypted[i].length;
         }
       });
@@ -432,13 +432,13 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
-          final read = reader.readFrame(
+          final readFrame = reader.readFrame(
             lazy: true,
             frameOffset: offset,
             cipher: testCipher,
           );
-          if (read == null) fail('expected non-null frame');
-          expectFrame(read, frame.toLazy());
+          if (readFrame == null) fail('expected non-null frame');
+          expectFrame(readFrame, frame.toLazy());
           offset += frameBytesEncrypted[i].length;
         }
       });

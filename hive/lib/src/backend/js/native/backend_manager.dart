@@ -13,11 +13,11 @@ class BackendManager implements BackendManagerInterface {
   IDBFactory? get indexedDB => window.self.indexedDB;
 
   IDBFactory get _indexedDB {
-    final db = indexedDB;
-    if (db == null) {
+    final indexedDB = this.indexedDB;
+    if (indexedDB == null) {
       throw HiveError('IndexedDB is not available.');
     }
-    return db;
+    return indexedDB;
   }
 
   @override

@@ -56,20 +56,26 @@ class HiveListImpl<E extends HiveObjectMixin>
 
   @override
   Box get box {
-    final existing = _box;
-    if (existing != null) return existing;
-
-    final box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
+    if (_box == null) {
+      final box = (_hive as HiveImpl).getBoxWithoutCheckInternal(boxName);
+      if (box == null) {
+        throw HiveError(
+          'To use this list, you have to open the box "$boxName" first.',
+        );
+      } else if (box is! Box) {
+        throw HiveError('The box "$boxName" is a lazy box. '
+            'You can only use HiveLists with normal boxes.');
+      } else {
+        _box = box;
+      }
+    }
+    final box = _box;
     if (box == null) {
       throw HiveError(
         'To use this list, you have to open the box "$boxName" first.',
       );
-    } else if (box is! Box) {
-      throw HiveError('The box "$boxName" is a lazy box. '
-          'You can only use HiveLists with normal boxes.');
-    } else {
-      return _box = box;
     }
+    return box;
   }
 
   @override
