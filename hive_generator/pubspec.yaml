@@ -10,7 +10,7 @@ dependencies:
   build: ^4.0.0
   source_gen: ^4.0.0
   hive_ce: ^2.16.0
-  analyzer: ^12.0.0
+  analyzer: ^14.1.0
   glob: ^2.1.2
   path: ^1.9.0
   yaml: ^3.1.2
@@ -21,4 +21,4 @@ dependencies:
 dev_dependencies:
   test: ^1.17.11
   build_runner: ^2.5.4
-  rexios_lints: ^17.0.3
+  rexios_lints: ^18.1.0
