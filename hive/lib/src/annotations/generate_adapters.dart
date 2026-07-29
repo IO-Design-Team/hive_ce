@@ -27,8 +27,8 @@ class GenerateAdapters {
 
   /// A list of [HiveConverter]s to apply when generating adapters for [specs]
   ///
-  /// These converters are used when a matching converter is not found on the
-  /// field or class. See [HiveConverter] for details.
+  /// A converter is selected by matching its type parameter [T] against each
+  /// field type. See [HiveConverter] for details.
   final List<HiveConverter> converters;
 }
 
@@ -37,10 +37,7 @@ class GenerateAdapters {
 class AdapterSpec<T> {
   /// Constructor
   // coverage:ignore-start
-  const AdapterSpec({
-    this.ignoredFields = const {},
-    this.converters = const [],
-  });
+  const AdapterSpec({this.ignoredFields = const {}});
   // coverage:ignore-end
 
   /// Fields that should be ignored
@@ -48,11 +45,4 @@ class AdapterSpec<T> {
   /// This should only be used to simplify migrations from `HiveType`
   /// annotations. Model classes should only contain fields to be persisted.
   final Set<String> ignoredFields;
-
-  /// A list of [HiveConverter]s to apply when generating an adapter for [T]
-  ///
-  /// These converters take precedence over [GenerateAdapters.converters], but
-  /// are overridden by converters placed on the class or field. See
-  /// [HiveConverter] for details.
-  final List<HiveConverter> converters;
 }

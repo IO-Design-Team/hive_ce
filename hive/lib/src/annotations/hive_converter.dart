@@ -8,45 +8,26 @@ import 'package:meta/meta.dart';
 /// write natively (such as [String], [int], [List], [Set], or [Map]) or a type
 /// with a registered [TypeAdapter].
 ///
-/// [HiveConverter]s can be placed either on the class:
+/// Pass converter instances to [GenerateAdapters.converters]:
 ///
 /// ```dart
-/// class MyHiveConverter extends HiveConverter<Value, String> {
-///   const MyHiveConverter();
+/// class EpochDateTimeConverter implements HiveConverter<DateTime, int> {
+///   const EpochDateTimeConverter();
 ///
 ///   @override
-///   Value fromHive(String hive) => Value(hive);
+///   DateTime fromHive(int hive) =>
+///       DateTime.fromMillisecondsSinceEpoch(hive);
 ///
 ///   @override
-///   String toHive(Value object) => object.toString();
+///   int toHive(DateTime object) => object.millisecondsSinceEpoch;
 /// }
 ///
-/// @GenerateAdapters([AdapterSpec<Example>()])
-/// @MyHiveConverter()
-/// class Example {
-///   final Value property;
-/// }
-/// ```
-///
-/// or on a property:
-///
-/// ```dart
-/// @GenerateAdapters([AdapterSpec<Example>()])
-/// class Example {
-///   @MyHiveConverter()
-///   final Value property;
-/// }
-/// ```
-///
-/// Or finally, passed to the [GenerateAdapters] or [AdapterSpec] annotation:
-///
-/// ```dart
 /// @GenerateAdapters(
-///   [AdapterSpec<Example>()],
-///   converters: [MyHiveConverter()],
+///   [AdapterSpec<Event>()],
+///   converters: [EpochDateTimeConverter()],
 /// )
-/// class Example {
-///   final Value property;
+/// class Event {
+///   final DateTime time;
 /// }
 /// ```
 @immutable

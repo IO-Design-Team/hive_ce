@@ -44,14 +44,10 @@ class RevivedAdapterSpec {
   /// Fields that should be ignored
   final Set<String> ignoredFields;
 
-  /// Converters for this type
-  final List<DartObject> converters;
-
   /// Constructor
   const RevivedAdapterSpec({
     required this.type,
     required this.ignoredFields,
-    this.converters = const [],
   });
 
   /// Create a [RevivedAdapterSpec] from a [DartObject]
@@ -66,11 +62,7 @@ class RevivedAdapterSpec {
         .whereType<String>()
         .toSet();
 
-    return RevivedAdapterSpec(
-      type: type,
-      ignoredFields: ignoredFields,
-      converters: _readConverters(reader),
-    );
+    return RevivedAdapterSpec(type: type, ignoredFields: ignoredFields);
   }
 }
 

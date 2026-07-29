@@ -3,7 +3,6 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
-import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -13,10 +12,10 @@ class HiveConverterMatch {
   /// Expression used to access the converter instance
   final String accessString;
 
-  /// The Dart field type converted from/to ([HiveConverter]'s [T])
+  /// The Dart field type converted from/to (HiveConverter's `T`)
   final DartType fieldType;
 
-  /// The Hive-stored type ([HiveConverter]'s [S]), with type args substituted
+  /// The Hive-stored type (HiveConverter's `S`), with type args substituted
   final DartType hiveType;
 
   /// Whether the converter class is generic and was instantiated with type args
@@ -36,141 +35,34 @@ const _hiveConverterChecker = TypeChecker.typeNamedLiterally(
   inPackage: 'hive_ce',
 );
 
-/// Resolve a [HiveConverter] for [targetType] from field/class annotations and
-/// configured converter lists
-///
-/// Matching priority (same as json_serializable's [JsonConverter]):
-/// 1. Annotations on the field getter
-/// 2. Annotations on the field
-/// 3. Annotations on the class
-/// 4. [specConverters] (from [AdapterSpec.converters])
-/// 5. [globalConverters] (from [GenerateAdapters.converters])
+/// Resolve a HiveConverter for [targetType] from [GenerateAdapters.converters]
 HiveConverterMatch? findHiveConverter({
   required DartType targetType,
-  required AdapterFieldContext field,
-  List<DartObject> specConverters = const [],
-  List<DartObject> globalConverters = const [],
+  required List<DartObject> converters,
 }) {
-  List<_HiveConverterCandidate> converterMatches(
-    List<ElementAnnotation> items,
-  ) =>
-      items
-          .map(
-            (annotation) => _compatibleMatch(
-              targetType,
-              annotation,
-              annotation.computeConstantValue(),
-            ),
-          )
-          .whereType<_HiveConverterCandidate>()
-          .toList();
+  final matches = converters
+      .map((e) => _compatibleMatch(targetType, e))
+      .whereType<_HiveConverterCandidate>()
+      .toList();
 
-  var matchingAnnotations = converterMatches(
-    field.getterAnnotations,
-  );
+  if (matches.isEmpty) return null;
 
-  if (matchingAnnotations.isEmpty) {
-    matchingAnnotations = converterMatches(field.fieldAnnotations);
-  }
-
-  if (matchingAnnotations.isEmpty) {
-    matchingAnnotations = converterMatches(field.classAnnotations);
-  }
-
-  if (matchingAnnotations.isEmpty) {
-    matchingAnnotations = specConverters
-        .map((e) => _compatibleMatch(targetType, null, e))
-        .whereType<_HiveConverterCandidate>()
-        .toList();
-  }
-
-  if (matchingAnnotations.isEmpty) {
-    matchingAnnotations = globalConverters
-        .map((e) => _compatibleMatch(targetType, null, e))
-        .whereType<_HiveConverterCandidate>()
-        .toList();
-  }
-
-  return _converterFrom(matchingAnnotations, targetType);
-}
-
-/// Field context needed to look up converter annotations
-@immutable
-class AdapterFieldContext {
-  /// Annotations on the getter
-  final List<ElementAnnotation> getterAnnotations;
-
-  /// Annotations on the field/variable
-  final List<ElementAnnotation> fieldAnnotations;
-
-  /// Annotations on the enclosing class
-  final List<ElementAnnotation> classAnnotations;
-
-  /// Constructor
-  const AdapterFieldContext({
-    required this.getterAnnotations,
-    required this.fieldAnnotations,
-    required this.classAnnotations,
-  });
-
-  /// Create from an [AdapterField] and its enclosing class
-  factory AdapterFieldContext.from({
-    required AdapterField field,
-    required InterfaceElement cls,
-  }) {
-    final variable = field.element.variable;
-    return AdapterFieldContext(
-      getterAnnotations: variable.getter?.metadata.annotations ?? const [],
-      fieldAnnotations: variable.metadata.annotations,
-      classAnnotations: cls.metadata.annotations,
-    );
-  }
-}
-
-HiveConverterMatch? _converterFrom(
-  List<_HiveConverterCandidate> matchingAnnotations,
-  DartType targetType,
-) {
-  if (matchingAnnotations.isEmpty) return null;
-
-  if (matchingAnnotations.length > 1) {
+  if (matches.length > 1) {
     throw InvalidGenerationSourceError(
       'Found more than one matching converter for '
       '`${targetType.getDisplayString()}`.',
-      element: matchingAnnotations[1].elementAnnotation?.element,
     );
   }
 
-  final match = matchingAnnotations.single;
-  final annotationElement = match.elementAnnotation?.element;
-  if (annotationElement is PropertyAccessorElement) {
-    final enclosing = annotationElement.enclosingElement;
+  return _converterFrom(matches.single);
+}
 
-    final accessorName = annotationElement.name;
-    if (accessorName == null) {
-      throw InvalidGenerationSourceError(
-        'Could not resolve converter accessor name.',
-        element: annotationElement,
-      );
-    }
-    final accessString = enclosing is ClassElement
-        ? '${enclosing.name}.$accessorName'
-        : accessorName;
-
-    return HiveConverterMatch(
-      accessString: accessString,
-      fieldType: match.fieldType,
-      hiveType: match.hiveType,
-      isGeneric: false,
-    );
-  }
-
+HiveConverterMatch _converterFrom(_HiveConverterCandidate match) {
   final reviver = ConstantReader(match.annotation).revive();
   if (reviver.namedArguments.isNotEmpty ||
       reviver.positionalArguments.isNotEmpty) {
     throw InvalidGenerationSourceError(
       'Converters with constructor arguments are not supported.',
-      element: match.elementAnnotation?.element,
     );
   }
 
@@ -180,7 +72,6 @@ HiveConverterMatch? _converterFrom(
   if (className == null) {
     throw InvalidGenerationSourceError(
       'Could not resolve converter class name.',
-      element: match.elementAnnotation?.element,
     );
   }
   final accessor = reviver.accessor.isEmpty ? '' : '.${reviver.accessor}';
@@ -207,11 +98,9 @@ class _HiveConverterCandidate {
   final DartObject annotation;
   final DartType fieldType;
   final DartType hiveType;
-  final ElementAnnotation? elementAnnotation;
   final String? genericTypeArgs;
 
   const _HiveConverterCandidate(
-    this.elementAnnotation,
     this.annotation,
     this.hiveType,
     this.genericTypeArgs,
@@ -221,7 +110,6 @@ class _HiveConverterCandidate {
 
 _HiveConverterCandidate? _compatibleMatch(
   DartType targetType,
-  ElementAnnotation? annotation,
   DartObject? constantValue,
 ) {
   if (constantValue == null || constantValue.isNull) return null;
@@ -247,7 +135,6 @@ _HiveConverterCandidate? _compatibleMatch(
   // Exact match (allow T for T?)
   if (fieldType == targetType || fieldType == nonNullableTarget) {
     return _HiveConverterCandidate(
-      annotation,
       constantValue,
       hiveType,
       null,
@@ -267,7 +154,6 @@ _HiveConverterCandidate? _compatibleMatch(
     }
 
     return _HiveConverterCandidate(
-      annotation,
       constantValue,
       hiveType,
       '${targetType.element.name}${_nullabilitySuffix(targetType)}',
@@ -293,7 +179,6 @@ _HiveConverterCandidate? _compatibleMatch(
     }).join(', ');
 
     return _HiveConverterCandidate(
-      annotation,
       constantValue,
       _substitute(hiveType, bindings),
       typeArgs.isEmpty ? null : typeArgs,

@@ -39,8 +39,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     String? adapterName,
     HiveSchemaType? schema,
     Set<String> ignoredFields = const {},
-    List<DartObject> specConverters = const [],
-    List<DartObject> globalConverters = const [],
+    List<DartObject> converters = const [],
   }) {
     final cls = getClass(element);
     final getAccessorsResult = getAccessors(
@@ -64,8 +63,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
             cls,
             getters,
             setters: setters,
-            specConverters: specConverters,
-            globalConverters: globalConverters,
+            converters: converters,
           );
 
     final content = '''

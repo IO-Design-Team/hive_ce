@@ -157,32 +157,6 @@ class ClassSpec3Adapter extends TypeAdapter<ClassSpec3> {
           typeId == other.typeId;
 }
 
-class ClassSpec4Adapter extends TypeAdapter<ClassSpec4> {
-  @override
-  final typeId = 54;
-
-  @override
-  ClassSpec4 read(BinaryReader reader) {
-    reader.readByte();
-    return ClassSpec4();
-  }
-
-  @override
-  void write(BinaryWriter writer, ClassSpec4 obj) {
-    writer.writeByte(0);
-  }
-
-  @override
-  int get hashCode => typeId.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ClassSpec4Adapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
-}
-
 class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
   @override
   final typeId = 55;
@@ -224,6 +198,32 @@ class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is ClassSpec5Adapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class ClassSpec4Adapter extends TypeAdapter<ClassSpec4> {
+  @override
+  final typeId = 54;
+
+  @override
+  ClassSpec4 read(BinaryReader reader) {
+    reader.readByte();
+    return ClassSpec4();
+  }
+
+  @override
+  void write(BinaryWriter writer, ClassSpec4 obj) {
+    writer.writeByte(0);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClassSpec4Adapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

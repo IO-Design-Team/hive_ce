@@ -39,10 +39,6 @@ types:
     fields:
       value:
         index: 0
-  ClassSpec4:
-    typeId: 54
-    nextIndex: 0
-    fields: {}
   ClassSpec5:
     typeId: 55
     nextIndex: 2
@@ -51,3 +47,7 @@ types:
         index: 0
       optionalTime:
         index: 1
+  ClassSpec4:
+    typeId: 54
+    nextIndex: 0
+    fields: {}
