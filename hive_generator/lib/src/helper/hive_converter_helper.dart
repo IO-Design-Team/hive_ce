@@ -3,250 +3,109 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
-/// Information about a matched HiveConverter for code generation
-@immutable
+/// A [HiveConverter] matched to a field type for code generation
 class HiveConverterMatch {
-  /// Expression used to access the converter instance
-  final String accessString;
+  /// Converter instance expression, e.g. `const UriConverter()`
+  final String access;
 
-  /// The Dart field type converted from/to (HiveConverter's `T`)
-  final DartType fieldType;
+  /// Stored Hive type display string, e.g. `String`
+  final String hiveType;
 
-  /// The Hive-stored type (HiveConverter's `S`), with type args substituted
-  final DartType hiveType;
-
-  /// Whether the converter class is generic and was instantiated with type args
-  final bool isGeneric;
+  /// Field type display string, e.g. `Uri`
+  final String fieldType;
 
   /// Constructor
   const HiveConverterMatch({
-    required this.accessString,
-    required this.fieldType,
+    required this.access,
     required this.hiveType,
-    required this.isGeneric,
+    required this.fieldType,
   });
 }
 
-const _hiveConverterChecker = TypeChecker.typeNamedLiterally(
+const _checker = TypeChecker.typeNamedLiterally(
   'HiveConverter',
   inPackage: 'hive_ce',
 );
 
-/// Resolve a HiveConverter for [targetType] from [GenerateAdapters.converters]
-HiveConverterMatch? findHiveConverter({
-  required DartType targetType,
-  required List<DartObject> converters,
-}) {
-  final matches = converters
-      .map((e) => _compatibleMatch(targetType, e))
-      .whereType<_HiveConverterCandidate>()
-      .toList();
-
-  if (matches.isEmpty) return null;
-
-  if (matches.length > 1) {
-    throw InvalidGenerationSourceError(
-      'Found more than one matching converter for '
-      '`${targetType.getDisplayString()}`.',
-    );
-  }
-
-  return _converterFrom(matches.single);
-}
-
-HiveConverterMatch _converterFrom(_HiveConverterCandidate match) {
-  final reviver = ConstantReader(match.annotation).revive();
-  if (reviver.namedArguments.isNotEmpty ||
-      reviver.positionalArguments.isNotEmpty) {
-    throw InvalidGenerationSourceError(
-      'Converters with constructor arguments are not supported.',
-    );
-  }
-
-  final annotationType = match.annotation.type;
-  final annotationTypeElement = annotationType?.element;
-  final className = annotationTypeElement?.name;
-  if (className == null) {
-    throw InvalidGenerationSourceError(
-      'Could not resolve converter class name.',
-    );
-  }
-  final accessor = reviver.accessor.isEmpty ? '' : '.${reviver.accessor}';
-
-  if (match.genericTypeArgs != null) {
-    return HiveConverterMatch(
-      accessString: '$className<${match.genericTypeArgs}>$accessor()',
-      fieldType: match.fieldType,
-      hiveType: match.hiveType,
-      isGeneric: true,
-    );
-  }
-
-  return HiveConverterMatch(
-    accessString: 'const $className$accessor()',
-    fieldType: match.fieldType,
-    hiveType: match.hiveType,
-    isGeneric: false,
-  );
-}
-
-@immutable
-class _HiveConverterCandidate {
-  final DartObject annotation;
-  final DartType fieldType;
-  final DartType hiveType;
-  final String? genericTypeArgs;
-
-  const _HiveConverterCandidate(
-    this.annotation,
-    this.hiveType,
-    this.genericTypeArgs,
-    this.fieldType,
-  );
-}
-
-_HiveConverterCandidate? _compatibleMatch(
-  DartType targetType,
-  DartObject? constantValue,
+/// Find a converter for [type] in [converters] from [GenerateAdapters]
+HiveConverterMatch? findHiveConverter(
+  DartType type,
+  List<DartObject> converters,
 ) {
-  if (constantValue == null || constantValue.isNull) return null;
-
-  final converterType = constantValue.type;
-  if (converterType is! InterfaceType) return null;
-
-  final converterClassElement = converterType.element;
-  if (converterClassElement is! ClassElement) return null;
-
-  final hiveConverterSuper = converterClassElement.allSupertypes
-      .where((e) => _hiveConverterChecker.isExactly(e.element))
-      .singleOrNull;
-
-  if (hiveConverterSuper == null) return null;
-
-  assert(hiveConverterSuper.typeArguments.length == 2);
-
-  final fieldType = hiveConverterSuper.typeArguments[0];
-  final hiveType = hiveConverterSuper.typeArguments[1];
-  final nonNullableTarget = _promoteNonNullable(targetType);
-
-  // Exact match (allow T for T?)
-  if (fieldType == targetType || fieldType == nonNullableTarget) {
-    return _HiveConverterCandidate(
-      constantValue,
-      hiveType,
-      null,
-      fieldType,
-    );
-  }
-
-  // Generic converter where T is a type parameter of the annotated class
-  if (fieldType is TypeParameterType && targetType is TypeParameterType) {
-    if (converterClassElement.typeParameters.length > 1) {
+  HiveConverterMatch? result;
+  for (final converter in converters) {
+    final match = _match(type, converter);
+    if (match == null) continue;
+    if (result != null) {
       throw InvalidGenerationSourceError(
-        '`HiveConverter` implementations can have no more than one type '
-        'argument. `${converterClassElement.name}` has '
-        '${converterClassElement.typeParameters.length}.',
-        element: converterClassElement,
+        'Found more than one matching converter for '
+        '`${type.getDisplayString()}`.',
       );
     }
+    result = match;
+  }
+  return result;
+}
 
-    return _HiveConverterCandidate(
-      constantValue,
-      hiveType,
-      '${targetType.element.name}${_nullabilitySuffix(targetType)}',
-      fieldType,
+HiveConverterMatch? _match(DartType target, DartObject object) {
+  final objectType = object.type;
+  if (objectType is! InterfaceType) return null;
+
+  final element = objectType.element;
+  if (element is! ClassElement) return null;
+
+  final hiveConverter = element.allSupertypes
+      .where((t) => _checker.isExactly(t.element))
+      .singleOrNull;
+  if (hiveConverter == null) return null;
+
+  final converted = hiveConverter.typeArguments[0];
+  final stored = hiveConverter.typeArguments[1];
+  final nonNullTarget = _nonNull(target);
+  final name = element.name;
+  if (name == null) return null;
+
+  if (converted == nonNullTarget) {
+    return HiveConverterMatch(
+      access: 'const $name()',
+      hiveType: stored.getDisplayString(),
+      fieldType: converted.getDisplayString(),
     );
   }
 
-  // Generic converter such as `HiveConverter<IList<E>, List>` matching
-  // `IList<String>` by unifying type parameters
-  final bindings = <TypeParameterElement, DartType>{};
-  if (_unify(fieldType, nonNullableTarget, bindings)) {
-    final typeArgs = converterClassElement.typeParameters.map((param) {
-      final bound = bindings[param];
-      if (bound == null) {
-        throw InvalidGenerationSourceError(
-          'Could not infer type argument `${param.name}` for converter '
-          '`${converterClassElement.name}` when matching '
-          '`${targetType.getDisplayString()}`.',
-          element: converterClassElement,
-        );
-      }
-      return bound.getDisplayString();
-    }).join(', ');
-
-    return _HiveConverterCandidate(
-      constantValue,
-      _substitute(hiveType, bindings),
-      typeArgs.isEmpty ? null : typeArgs,
-      _substitute(fieldType, bindings),
-    );
+  // e.g. `IListConverter<T>` for `IList<String>`
+  if (converted is! InterfaceType ||
+      nonNullTarget is! InterfaceType ||
+      converted.element != nonNullTarget.element ||
+      element.typeParameters.isEmpty ||
+      converted.typeArguments.length != element.typeParameters.length) {
+    return null;
   }
 
-  return null;
+  for (var i = 0; i < element.typeParameters.length; i++) {
+    final arg = converted.typeArguments[i];
+    if (arg is! TypeParameterType || arg.element != element.typeParameters[i]) {
+      return null;
+    }
+  }
+
+  final args =
+      nonNullTarget.typeArguments.map((t) => t.getDisplayString()).join(', ');
+  final bindings = {
+    for (var i = 0; i < element.typeParameters.length; i++)
+      element.typeParameters[i]: nonNullTarget.typeArguments[i],
+  };
+
+  return HiveConverterMatch(
+    access: '$name<$args>()',
+    hiveType: _substitute(stored, bindings).getDisplayString(),
+    fieldType: nonNullTarget.getDisplayString(),
+  );
 }
 
-bool _unify(
-  DartType pattern,
-  DartType concrete,
-  Map<TypeParameterElement, DartType> bindings,
-) {
-  if (pattern is TypeParameterType) {
-    final element = pattern.element;
-    final existing = bindings[element];
-    if (existing != null) {
-      return existing == concrete ||
-          existing == _promoteNonNullable(concrete) ||
-          _promoteNonNullable(existing) == _promoteNonNullable(concrete);
-    }
-    bindings[element] = concrete;
-    return true;
-  }
-
-  if (pattern is InterfaceType && concrete is InterfaceType) {
-    if (pattern.element != concrete.element) return false;
-    if (pattern.typeArguments.length != concrete.typeArguments.length) {
-      return false;
-    }
-    for (var i = 0; i < pattern.typeArguments.length; i++) {
-      if (!_unify(
-        pattern.typeArguments[i],
-        concrete.typeArguments[i],
-        bindings,
-      )) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  return pattern == concrete ||
-      pattern == _promoteNonNullable(concrete) ||
-      _promoteNonNullable(pattern) == _promoteNonNullable(concrete);
-}
-
-DartType _substitute(
-  DartType type,
-  Map<TypeParameterElement, DartType> bindings,
-) {
-  if (type is TypeParameterType) {
-    return bindings[type.element] ?? type;
-  }
-  if (type is InterfaceType && type.typeArguments.isNotEmpty) {
-    final args =
-        type.typeArguments.map((arg) => _substitute(arg, bindings)).toList();
-    return type.element.instantiate(
-      typeArguments: args,
-      nullabilitySuffix: type.nullabilitySuffix,
-    );
-  }
-  return type;
-}
-
-DartType _promoteNonNullable(DartType type) {
+DartType _nonNull(DartType type) {
   if (type.nullabilitySuffix == NullabilitySuffix.none) return type;
   if (type is InterfaceType) {
     return type.element.instantiate(
@@ -257,6 +116,18 @@ DartType _promoteNonNullable(DartType type) {
   return type;
 }
 
-String _nullabilitySuffix(DartType type) {
-  return type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+DartType _substitute(
+  DartType type,
+  Map<TypeParameterElement, DartType> bindings,
+) {
+  if (type is TypeParameterType) return bindings[type.element] ?? type;
+  if (type is InterfaceType && type.typeArguments.isNotEmpty) {
+    return type.element.instantiate(
+      typeArguments: [
+        for (final arg in type.typeArguments) _substitute(arg, bindings),
+      ],
+      nullabilitySuffix: type.nullabilitySuffix,
+    );
+  }
+  return type;
 }

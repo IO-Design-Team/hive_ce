@@ -125,7 +125,9 @@ class ClassAdapterBuilder extends AdapterBuilder {
   String _cast(DartType type, String variable) {
     final converter = _converterFor(type);
     if (converter != null) {
-      return _fromHive(converter, type, variable);
+      final call =
+          '${converter.access}.fromHive($variable as ${converter.hiveType})';
+      return _nullSafe(type, variable, call);
     }
 
     final suffix = _suffixFromType(type);
@@ -145,26 +147,6 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else {
       return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
-  }
-
-  String _fromHive(
-    HiveConverterMatch converter,
-    DartType targetType,
-    String variable,
-  ) {
-    final hiveType = converter.hiveType.getDisplayString();
-    final access = converter.accessString;
-
-    final targetIsNullable =
-        targetType.nullabilitySuffix == NullabilitySuffix.question;
-    final hiveIsNullable =
-        converter.hiveType.nullabilitySuffix == NullabilitySuffix.question;
-
-    if (targetIsNullable && !hiveIsNullable) {
-      return '$variable == null ? null : $access.fromHive($variable as $hiveType)';
-    }
-
-    return '$access.fromHive($variable as $hiveType)';
   }
 
   /// TODO: Document this!
@@ -236,64 +218,48 @@ class ClassAdapterBuilder extends AdapterBuilder {
   String _writeValue(DartType type, String expression) {
     final converter = _converterFor(type);
     if (converter != null) {
-      return _toHive(converter, type, expression);
+      final nullable = type.nullabilitySuffix == NullabilitySuffix.question;
+      final value =
+          nullable ? '$expression as ${converter.fieldType}' : expression;
+      return _nullSafe(
+        type,
+        expression,
+        '${converter.access}.toHive($value)',
+      );
     }
 
     if (setChecker.isAssignableFromType(type) ||
         (iterableChecker.isAssignableFromType(type) && !isUint8List(type))) {
-      final paramType = type as ParameterizedType;
-      final arg = paramType.typeArguments.first;
+      final arg = (type as ParameterizedType).typeArguments.first;
       final inner = _writeValue(arg, 'e');
-      if (inner != 'e') {
-        final suffix = _accessorSuffixFromType(type);
-        if (setChecker.isAssignableFromType(type)) {
-          return '$expression$suffix.map((e) => $inner).toSet()';
-        }
-        return '$expression$suffix.map((e) => $inner).toList()';
-      }
-    } else if (mapChecker.isAssignableFromType(type)) {
-      final paramType = type as ParameterizedType;
-      final arg1 = paramType.typeArguments[0];
-      final arg2 = paramType.typeArguments[1];
-      final key = _writeValue(arg1, 'k');
-      final value = _writeValue(arg2, 'v');
-      if (key != 'k' || value != 'v') {
-        final suffix = _accessorSuffixFromType(type);
-        return '$expression$suffix.map((dynamic k, dynamic v) => '
-            'MapEntry($key, $value))';
-      }
+      if (inner == 'e') return expression;
+      final suffix = _accessorSuffixFromType(type);
+      final mapped = '$expression$suffix.map((e) => $inner)';
+      return setChecker.isAssignableFromType(type)
+          ? '$mapped.toSet()'
+          : '$mapped.toList()';
+    }
+
+    if (mapChecker.isAssignableFromType(type)) {
+      final args = (type as ParameterizedType).typeArguments;
+      final key = _writeValue(args[0], 'k');
+      final value = _writeValue(args[1], 'v');
+      if (key == 'k' && value == 'v') return expression;
+      final suffix = _accessorSuffixFromType(type);
+      return '$expression$suffix.map((dynamic k, dynamic v) => '
+          'MapEntry($key, $value))';
     }
 
     return expression;
   }
 
-  String _toHive(
-    HiveConverterMatch converter,
-    DartType targetType,
-    String expression,
-  ) {
-    final access = converter.accessString;
-    final targetIsNullable =
-        targetType.nullabilitySuffix == NullabilitySuffix.question;
-    final fieldIsNullable =
-        converter.fieldType.nullabilitySuffix == NullabilitySuffix.question;
-
-    if (targetIsNullable && !fieldIsNullable) {
-      final nonNullType = converter.fieldType.getDisplayString();
-      return '$expression == null '
-          '? null '
-          ': $access.toHive($expression as $nonNullType)';
-    }
-
-    return '$access.toHive($expression)';
+  String _nullSafe(DartType type, String expression, String call) {
+    if (type.nullabilitySuffix != NullabilitySuffix.question) return call;
+    return '$expression == null ? null : $call';
   }
 
-  HiveConverterMatch? _converterFor(DartType type) {
-    return findHiveConverter(
-      targetType: type,
-      converters: converters,
-    );
-  }
+  HiveConverterMatch? _converterFor(DartType type) =>
+      findHiveConverter(type, converters);
 }
 
 /// Suffix to use when accessing a field in [type].
