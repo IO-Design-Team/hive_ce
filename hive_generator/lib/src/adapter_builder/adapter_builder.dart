@@ -49,12 +49,20 @@ abstract class AdapterBuilder {
   /// TODO: Document this!
   final List<AdapterField> setters;
 
+  /// Converters from [AdapterSpec.converters]
+  final List<DartObject> specConverters;
+
+  /// Converters from [GenerateAdapters.converters]
+  final List<DartObject> globalConverters;
+
   /// TODO: Document this!
   const AdapterBuilder(
     this.cls,
-    this.getters, [
+    this.getters, {
     this.setters = const <AdapterField>[],
-  ]);
+    this.specConverters = const [],
+    this.globalConverters = const [],
+  });
 
   /// TODO: Document this!
   String buildRead();

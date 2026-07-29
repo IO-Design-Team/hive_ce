@@ -182,3 +182,48 @@ class ClassSpec4Adapter extends TypeAdapter<ClassSpec4> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
+  @override
+  final typeId = 55;
+
+  @override
+  ClassSpec5 read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ClassSpec5(
+      const EpochDateTimeConverter().fromHive(fields[0] as int),
+      fields[1] == null
+          ? null
+          : const EpochDateTimeConverter().fromHive(fields[1] as int),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ClassSpec5 obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(const EpochDateTimeConverter().toHive(obj.time))
+      ..writeByte(1)
+      ..write(
+        obj.optionalTime == null
+            ? null
+            : const EpochDateTimeConverter().toHive(
+                obj.optionalTime as DateTime,
+              ),
+      );
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClassSpec5Adapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

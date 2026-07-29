@@ -1,3 +1,8 @@
+## 2.20.0
+
+- Adds `HiveConverter` for custom field conversion during TypeAdapter generation (similar to `json_serializable`'s `JsonConverter`)
+- Adds `converters` parameter to `GenerateAdapters` and `AdapterSpec`
+
 ## 2.19.3
 
 - IsolatedHive: Handles stale send ports on hot restart

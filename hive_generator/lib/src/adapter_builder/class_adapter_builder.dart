@@ -12,6 +12,7 @@ import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'package:hive_ce_generator/src/helper/hive_converter_helper.dart';
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
 
 /// TODO: Document this!
@@ -19,9 +20,11 @@ class ClassAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
   const ClassAdapterBuilder(
     super.cls,
-    super.getters,
+    super.getters, {
     super.setters,
-  );
+    super.specConverters,
+    super.globalConverters,
+  });
 
   /// [TypeChecker] for [HiveList].
   final hiveListChecker =
@@ -101,7 +104,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
   String _value(DartType type, AdapterField field) {
     final variable = 'fields[${field.index}]';
-    final value = _cast(type, variable);
+    final value = _cast(type, variable, field);
 
     final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
     final constructorDefaultIsNull = field.constructorDefault == null;
@@ -120,17 +123,22 @@ class ClassAdapterBuilder extends AdapterBuilder {
     return '$variable == null ? $defaultValue : $value';
   }
 
-  String _cast(DartType type, String variable) {
+  String _cast(DartType type, String variable, AdapterField field) {
+    final converter = _converterFor(type, field);
+    if (converter != null) {
+      return _fromHive(converter, type, variable);
+    }
+
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
     } else if (setChecker.isAssignableFromType(type)) {
-      return '($variable as Set$suffix)${_castIterable(type)}';
+      return '($variable as Set$suffix)${_castIterable(type, field)}';
     } else if (iterableChecker.isAssignableFromType(type) &&
         !isUint8List(type)) {
-      return '($variable as List$suffix)${_castIterable(type)}';
+      return '($variable as List$suffix)${_castIterable(type, field)}';
     } else if (mapChecker.isAssignableFromType(type)) {
-      return '($variable as Map$suffix)${_castMap(type)}';
+      return '($variable as Map$suffix)${_castMap(type, field)}';
     } else if (type.isDartCoreInt) {
       return '($variable as num$suffix)$suffix.toInt()';
     } else if (type.isDartCoreDouble) {
@@ -138,6 +146,26 @@ class ClassAdapterBuilder extends AdapterBuilder {
     } else {
       return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
     }
+  }
+
+  String _fromHive(
+    HiveConverterMatch converter,
+    DartType targetType,
+    String variable,
+  ) {
+    final hiveType = converter.hiveType.getDisplayString();
+    final access = converter.accessString;
+
+    final targetIsNullable =
+        targetType.nullabilitySuffix == NullabilitySuffix.question;
+    final hiveIsNullable =
+        converter.hiveType.nullabilitySuffix == NullabilitySuffix.question;
+
+    if (targetIsNullable && !hiveIsNullable) {
+      return '$variable == null ? null : $access.fromHive($variable as $hiveType)';
+    }
+
+    return '$access.fromHive($variable as $hiveType)';
   }
 
   /// TODO: Document this!
@@ -151,11 +179,12 @@ class ClassAdapterBuilder extends AdapterBuilder {
     return uint8ListChecker.isExactlyType(type);
   }
 
-  String _castIterable(DartType type) {
+  String _castIterable(DartType type, AdapterField field) {
     final paramType = type as ParameterizedType;
     final arg = paramType.typeArguments.first;
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg) && !isUint8List(arg)) {
+    if (isMapOrIterable(arg) && !isUint8List(arg) ||
+        _converterFor(arg, field) != null) {
       var cast = '';
       // Using assignable because Set? is not exactly Set
       if (setChecker.isAssignableFromType(type)) {
@@ -165,20 +194,23 @@ class ClassAdapterBuilder extends AdapterBuilder {
         cast = '.toList()';
       }
 
-      return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
+      return '$suffix.map((e) => ${_cast(arg, 'e', field)})$cast';
     } else {
       return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
     }
   }
 
-  String _castMap(DartType type) {
+  String _castMap(DartType type, AdapterField field) {
     final paramType = type as ParameterizedType;
     final arg1 = paramType.typeArguments[0];
     final arg2 = paramType.typeArguments[1];
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg1) || isMapOrIterable(arg2)) {
+    if (isMapOrIterable(arg1) ||
+        isMapOrIterable(arg2) ||
+        _converterFor(arg1, field) != null ||
+        _converterFor(arg2, field) != null) {
       return '$suffix.map((dynamic k, dynamic v)=>'
-          'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
+          'MapEntry(${_cast(arg1, 'k', field)},${_cast(arg2, 'v', field)}))';
     } else {
       return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
           '${arg2.getPrefixedDisplayString(cls.library)}>()';
@@ -195,11 +227,78 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(${_writeValue(field.type, 'obj.${field.name}', field)})''');
     }
     code.writeln(';');
 
     return code.toString();
+  }
+
+  String _writeValue(DartType type, String expression, AdapterField field) {
+    final converter = _converterFor(type, field);
+    if (converter != null) {
+      return _toHive(converter, type, expression);
+    }
+
+    if (setChecker.isAssignableFromType(type) ||
+        (iterableChecker.isAssignableFromType(type) && !isUint8List(type))) {
+      final paramType = type as ParameterizedType;
+      final arg = paramType.typeArguments.first;
+      final inner = _writeValue(arg, 'e', field);
+      if (inner != 'e') {
+        final suffix = _accessorSuffixFromType(type);
+        if (setChecker.isAssignableFromType(type)) {
+          return '$expression$suffix.map((e) => $inner).toSet()';
+        }
+        return '$expression$suffix.map((e) => $inner).toList()';
+      }
+    } else if (mapChecker.isAssignableFromType(type)) {
+      final paramType = type as ParameterizedType;
+      final arg1 = paramType.typeArguments[0];
+      final arg2 = paramType.typeArguments[1];
+      final key = _writeValue(arg1, 'k', field);
+      final value = _writeValue(arg2, 'v', field);
+      if (key != 'k' || value != 'v') {
+        final suffix = _accessorSuffixFromType(type);
+        return '$expression$suffix.map((dynamic k, dynamic v) => '
+            'MapEntry($key, $value))';
+      }
+    }
+
+    return expression;
+  }
+
+  String _toHive(
+    HiveConverterMatch converter,
+    DartType targetType,
+    String expression,
+  ) {
+    final access = converter.accessString;
+    final targetIsNullable =
+        targetType.nullabilitySuffix == NullabilitySuffix.question;
+    final fieldIsNullable =
+        converter.fieldType.nullabilitySuffix == NullabilitySuffix.question;
+
+    if (targetIsNullable && !fieldIsNullable) {
+      final nonNullType = converter.fieldType.getDisplayString();
+      return '$expression == null '
+          '? null '
+          ': $access.toHive($expression as $nonNullType)';
+    }
+
+    return '$access.toHive($expression)';
+  }
+
+  HiveConverterMatch? _converterFor(DartType type, AdapterField field) {
+    return findHiveConverter(
+      targetType: type,
+      field: AdapterFieldContext.from(
+        field: field,
+        cls: cls,
+      ),
+      specConverters: specConverters,
+      globalConverters: globalConverters,
+    );
   }
 }
 
