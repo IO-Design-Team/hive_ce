@@ -168,10 +168,10 @@ class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return ClassSpec5(
-      const EpochDateTimeConverter().fromHive(fields[0] as int),
+      const UriConverter().fromHive(fields[0] as String),
       fields[1] == null
           ? null
-          : const EpochDateTimeConverter().fromHive(fields[1] as int),
+          : const UriConverter().fromHive(fields[1] as String),
     );
   }
 
@@ -180,14 +180,12 @@ class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
     writer
       ..writeByte(2)
       ..writeByte(0)
-      ..write(const EpochDateTimeConverter().toHive(obj.time))
+      ..write(const UriConverter().toHive(obj.url))
       ..writeByte(1)
       ..write(
-        obj.optionalTime == null
+        obj.optionalUrl == null
             ? null
-            : const EpochDateTimeConverter().toHive(
-                obj.optionalTime as DateTime,
-              ),
+            : const UriConverter().toHive(obj.optionalUrl as Uri),
       );
   }
 

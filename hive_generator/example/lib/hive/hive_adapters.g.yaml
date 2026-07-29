@@ -43,9 +43,9 @@ types:
     typeId: 55
     nextIndex: 2
     fields:
-      time:
+      url:
         index: 0
-      optionalTime:
+      optionalUrl:
         index: 1
   ClassSpec4:
     typeId: 54

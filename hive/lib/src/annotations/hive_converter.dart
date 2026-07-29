@@ -11,23 +11,22 @@ import 'package:meta/meta.dart';
 /// Pass converter instances to [GenerateAdapters.converters]:
 ///
 /// ```dart
-/// class EpochDateTimeConverter implements HiveConverter<DateTime, int> {
-///   const EpochDateTimeConverter();
+/// class UriConverter implements HiveConverter<Uri, String> {
+///   const UriConverter();
 ///
 ///   @override
-///   DateTime fromHive(int hive) =>
-///       DateTime.fromMillisecondsSinceEpoch(hive);
+///   Uri fromHive(String hive) => Uri.parse(hive);
 ///
 ///   @override
-///   int toHive(DateTime object) => object.millisecondsSinceEpoch;
+///   String toHive(Uri object) => object.toString();
 /// }
 ///
 /// @GenerateAdapters(
-///   [AdapterSpec<Event>()],
-///   converters: [EpochDateTimeConverter()],
+///   [AdapterSpec<Website>()],
+///   converters: [UriConverter()],
 /// )
-/// class Event {
-///   final DateTime time;
+/// class Website {
+///   final Uri url;
 /// }
 /// ```
 @immutable

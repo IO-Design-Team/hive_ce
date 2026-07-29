@@ -7,16 +7,15 @@ import 'package:hive_ce/hive_ce.dart';
 part 'hive_adapters.g.dart';
 ''';
 
-const epochConverter = '''
-class EpochDateTimeConverter implements HiveConverter<DateTime, int> {
-  const EpochDateTimeConverter();
+const uriConverter = '''
+class UriConverter implements HiveConverter<Uri, String> {
+  const UriConverter();
 
   @override
-  DateTime fromHive(int hive) =>
-      DateTime.fromMillisecondsSinceEpoch(hive);
+  Uri fromHive(String hive) => Uri.parse(hive);
 
   @override
-  int toHive(DateTime object) => object.millisecondsSinceEpoch;
+  String toHive(Uri object) => object.toString();
 }
 ''';
 
@@ -29,23 +28,23 @@ void main() {
           'lib/hive/hive_adapters.dart': '''
 $directives
 
-$epochConverter
+$uriConverter
 
 @GenerateAdapters(
-  [AdapterSpec<Event>()],
-  converters: [EpochDateTimeConverter()],
+  [AdapterSpec<Website>()],
+  converters: [UriConverter()],
 )
-class Event {
-  const Event(this.time);
+class Website {
+  const Website(this.url);
 
-  final DateTime time;
+  final Uri url;
 }
 ''',
         },
         output: {
           'lib/hive/hive_adapters.g.dart': const ContainsAll([
-            'const EpochDateTimeConverter().fromHive(fields[0] as int)',
-            'const EpochDateTimeConverter().toHive(obj.time)',
+            'const UriConverter().fromHive(fields[0] as String)',
+            'const UriConverter().toHive(obj.url)',
           ]),
         },
       );
@@ -101,23 +100,23 @@ class Box {
           'lib/hive/hive_adapters.dart': '''
 $directives
 
-$epochConverter
+$uriConverter
 
 @GenerateAdapters(
-  [AdapterSpec<Timeline>()],
-  converters: [EpochDateTimeConverter()],
+  [AdapterSpec<LinkList>()],
+  converters: [UriConverter()],
 )
-class Timeline {
-  const Timeline(this.times);
+class LinkList {
+  const LinkList(this.urls);
 
-  final List<DateTime> times;
+  final List<Uri> urls;
 }
 ''',
         },
         output: {
           'lib/hive/hive_adapters.g.dart': const ContainsAll([
-            'const EpochDateTimeConverter().fromHive(e as int)',
-            'const EpochDateTimeConverter().toHive(e)',
+            'const UriConverter().fromHive(e as String)',
+            'const UriConverter().toHive(e)',
           ]),
         },
       );
@@ -130,25 +129,25 @@ class Timeline {
           'lib/hive/hive_adapters.dart': '''
 $directives
 
-$epochConverter
+$uriConverter
 
 @GenerateAdapters(
-  [AdapterSpec<Event>()],
-  converters: [EpochDateTimeConverter()],
+  [AdapterSpec<Website>()],
+  converters: [UriConverter()],
 )
-class Event {
-  const Event(this.time);
+class Website {
+  const Website(this.url);
 
-  final DateTime? time;
+  final Uri? url;
 }
 ''',
         },
         output: {
           'lib/hive/hive_adapters.g.dart': const ContainsAll([
             'fields[0] == null',
-            'const EpochDateTimeConverter().fromHive(fields[0] as int)',
-            'obj.time == null',
-            'const EpochDateTimeConverter().toHive(obj.time as DateTime)',
+            'const UriConverter().fromHive(fields[0] as String)',
+            'obj.url == null',
+            'const UriConverter().toHive(obj.url as Uri)',
           ]),
         },
       );

@@ -11,19 +11,19 @@ import 'package:meta/meta.dart';
     AdapterSpec<ClassSpec5>(),
   ],
   firstTypeId: 50,
-  converters: [EpochDateTimeConverter()],
+  converters: [UriConverter()],
 )
 part 'hive_adapters.g.dart';
 
 /// Example converter matching json_serializable's JsonConverter pattern
-class EpochDateTimeConverter implements HiveConverter<DateTime, int> {
-  const EpochDateTimeConverter();
+class UriConverter implements HiveConverter<Uri, String> {
+  const UriConverter();
 
   @override
-  DateTime fromHive(int hive) => DateTime.fromMillisecondsSinceEpoch(hive);
+  Uri fromHive(String hive) => Uri.parse(hive);
 
   @override
-  int toHive(DateTime object) => object.millisecondsSinceEpoch;
+  String toHive(Uri object) => object.toString();
 }
 
 @immutable
@@ -60,8 +60,8 @@ enum EnumSpec {
 
 @immutable
 class ClassSpec5 {
-  final DateTime time;
-  final DateTime? optionalTime;
+  final Uri url;
+  final Uri? optionalUrl;
 
-  const ClassSpec5(this.time, this.optionalTime);
+  const ClassSpec5(this.url, this.optionalUrl);
 }
