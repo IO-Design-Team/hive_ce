@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 const counterBox = 'counter';
@@ -28,9 +28,9 @@ class HiveCounterApp extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text('You have pushed the button this many times:'),
-            ValueListenableBuilder(
-              valueListenable: box.listenable(),
-              builder: (context, box, widget) {
+            StreamBuilder(
+              stream: box.watch(),
+              builder: (context, snapshot) {
                 return Text(
                   box.getAt(0).toString(),
                   style: textTheme.headlineMedium,

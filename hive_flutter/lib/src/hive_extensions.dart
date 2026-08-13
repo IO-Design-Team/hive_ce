@@ -8,27 +8,25 @@ import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 extension HiveX on HiveInterface {
   /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
   ///
-  /// You can provide a [subDir] where the boxes should be stored.
+  /// You can provide a [subDirectory] where the boxes should be stored.
   ///
   /// Also registers the flutter type adapters
   /// - [colorAdapterTypeId] - The type id for the color adapter (default: 200)
   /// - [timeOfDayAdapterTypeId] - The type id for the time of day adapter (default: 201)
-  Future<void> initFlutter([
-    String? subDir,
-    HiveStorageBackendPreference backendPreference =
-        HiveStorageBackendPreference.native,
+  Future<void> initFlutter({
+    String? subDirectory,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
-  ]) async {
+  }) async {
     WidgetsFlutterBinding.ensureInitialized();
 
     String? path;
     if (!kIsWeb) {
       final appDir = await getApplicationDocumentsDirectory();
-      path = path_helper.join(appDir.path, subDir);
+      path = path_helper.join(appDir.path, subDirectory);
     }
 
-    init(path, backendPreference: backendPreference);
+    init(path);
 
     final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
     if (!isAdapterRegistered(colorAdapter.typeId)) {
