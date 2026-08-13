@@ -14,7 +14,10 @@ class ReadWriteSync {
     _readTask = completer.future;
 
     await previousTask;
-    return await task().whenComplete(completer.complete);
+    // `return await` completes this function a microtask later than the lock,
+    // so the next queued op can start before the caller records `after*`.
+    // ignore: async_return_with_no_await
+    return task().whenComplete(completer.complete);
   }
 
   /// Run operation with write lock
@@ -25,7 +28,10 @@ class ReadWriteSync {
     _writeTask = completer.future;
 
     await previousTask;
-    return await task().whenComplete(completer.complete);
+    // `return await` completes this function a microtask later than the lock,
+    // so the next queued op can start before the caller records `after*`.
+    // ignore: async_return_with_no_await
+    return task().whenComplete(completer.complete);
   }
 
   /// Run operation with read and write lock
@@ -40,6 +46,9 @@ class ReadWriteSync {
 
     await previousReadTask;
     await previousWriteTask;
-    return await task().whenComplete(completer.complete);
+    // `return await` completes this function a microtask later than the lock,
+    // so the next queued op can start before the caller records `after*`.
+    // ignore: async_return_with_no_await
+    return task().whenComplete(completer.complete);
   }
 }
