@@ -138,7 +138,7 @@ class StorageBackendJs extends StorageBackend {
           .whereType<Object>()
           .toList();
     } else {
-      return store
+      return await store
           .iterate()
           .map((e) => e.key.dartify())
           .where((e) => e is Object)
@@ -156,7 +156,7 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture<JSArray>();
       return result.toDart.map(decodeValue);
     } else {
-      return store.iterate().map((e) => e.value.dartify()).toList();
+      return await store.iterate().map((e) => e.value.dartify()).toList();
     }
   }
 

@@ -73,7 +73,7 @@ Future<dynamic> handleHiveMethodCall(
         path: call.arguments['path'],
       );
     case 'boxExists':
-      return Hive.boxExists(
+      return await Hive.boxExists(
         call.arguments['name'],
         path: call.arguments['path'],
       );

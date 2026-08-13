@@ -196,7 +196,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       txn = transaction as IDBTransaction;
     }
     if (val == null) {
-      return delete(key, txn);
+      return await delete(key, txn);
     }
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {

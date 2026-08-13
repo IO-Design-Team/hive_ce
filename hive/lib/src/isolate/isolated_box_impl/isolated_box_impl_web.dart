@@ -90,7 +90,7 @@ abstract class IsolatedBoxBaseImpl<E>
   @override
   Future<E?> get(dynamic key, {E? defaultValue}) async {
     if (lazy) {
-      return (_box as LazyBox<E>).get(key, defaultValue: defaultValue);
+      return await (_box as LazyBox<E>).get(key, defaultValue: defaultValue);
     } else {
       return (_box as Box<E>).get(key, defaultValue: defaultValue);
     }
@@ -99,7 +99,7 @@ abstract class IsolatedBoxBaseImpl<E>
   @override
   Future<E?> getAt(int index) async {
     if (lazy) {
-      return (_box as LazyBox<E>).getAt(index);
+      return await (_box as LazyBox<E>).getAt(index);
     } else {
       return (_box as Box<E>).getAt(index);
     }
