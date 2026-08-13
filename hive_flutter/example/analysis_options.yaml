@@ -1,1 +1,14 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 include: package:rexios_lints/flutter/core_extra.yaml
+
+linter:
+  rules:
+    migrate_design_widgets: false

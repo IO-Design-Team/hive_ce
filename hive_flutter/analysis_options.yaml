@@ -1,5 +1,15 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 include: package:rexios_lints/flutter/package_extra.yaml
 
 linter:
   rules:
-    - require_trailing_commas
+    require_trailing_commas: true
+    migrate_design_widgets: false
