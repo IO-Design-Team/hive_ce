@@ -181,7 +181,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
 
     _open = false;
     await keystore.close();
-    hive.unregisterBox(name);
+    hive.unregisterBox(name, this);
     HiveConnect.unregisterBox(this);
 
     await backend.close();
@@ -192,7 +192,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
     if (_open) {
       _open = false;
       await keystore.close();
-      hive.unregisterBox(name);
+      hive.unregisterBox(name, this);
     }
 
     await backend.deleteFromDisk();

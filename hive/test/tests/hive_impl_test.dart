@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/adapters/date_time_adapter.dart';
+import 'package:hive_ce/src/box/box_base_impl.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
@@ -226,6 +227,22 @@ void main() {
           expect(caught, 2);
           expect(escaped, isEmpty);
         });
+      });
+
+      test('unregistering on behalf of another box leaves the live one alone',
+          () async {
+        final hive = await initHive();
+        final live = await hive.openBox<int>('live');
+        final other = await hive.openBox<int>('other');
+
+        hive.unregisterBox('live', other as BoxBaseImpl);
+
+        expect(hive.isBoxOpen('live'), isTrue);
+        expect(identical(hive.box<int>('live'), live), isTrue);
+
+        hive.unregisterBox('live', live as BoxBaseImpl);
+
+        expect(hive.isBoxOpen('live'), isFalse);
       });
     });
 
