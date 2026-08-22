@@ -3,6 +3,7 @@
 @TestOn('vm')
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -11,6 +12,26 @@ import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
 
 import 'common.dart';
+
+/// A value whose adapter writes fine but always refuses to read back, standing in for corrupt
+/// bytes or a format written by a newer build of an app.
+class _Undecodable {
+  const _Undecodable();
+}
+
+class _UndecodableAdapter extends TypeAdapter<_Undecodable> {
+  @override
+  final typeId = 0;
+
+  @override
+  _Undecodable read(BinaryReader reader) {
+    reader.readInt();
+    throw const FormatException('cannot decode this record');
+  }
+
+  @override
+  void write(BinaryWriter writer, _Undecodable obj) => writer.writeInt(1);
+}
 
 class _TestAdapter extends TypeAdapter<int> {
   const _TestAdapter([this.typeId = 0]);
@@ -143,6 +164,67 @@ void main() {
           await expectLater(openBox<Set<double>>(), completes);
           await expectLater(openBox<Set<bool>>(), completes);
           await expectLater(openBox<Set<String>>(), completes);
+        });
+      });
+
+      group('open failure', () {
+        test('a failed open does not leak its error to the zone', () async {
+          final hive = await initHive();
+          hive.registerAdapter(_UndecodableAdapter());
+          final box = await hive.openBox<_Undecodable>('undecodable');
+          await box.put('key', const _Undecodable());
+          await hive.close();
+
+          var caught = 0;
+          final escaped = <Object>[];
+          await runZonedGuarded(
+            () async {
+              try {
+                await hive.openBox<_Undecodable>('undecodable');
+              } on FormatException {
+                caught++;
+              }
+              await pumpEventQueue();
+            },
+            (error, _) => escaped.add(error),
+          );
+
+          expect(caught, 1);
+          expect(escaped, isEmpty);
+        });
+
+        test('retrying a failed open does not leak its error to the zone',
+            () async {
+          final hive = await initHive();
+          hive.registerAdapter(_UndecodableAdapter());
+          final box = await hive.openBox<_Undecodable>('undecodable');
+          await box.put('key', const _Undecodable());
+          await hive.close();
+
+          var caught = 0;
+          final escaped = <Object>[];
+          await runZonedGuarded(
+            () async {
+              // Deliberately back to back, with no await in between. The first attempt's cleanup
+              // runs a microtask later, by which point the retry has already registered itself.
+              try {
+                await hive.openBox<_Undecodable>('undecodable');
+              } on FormatException {
+                caught++;
+              }
+              try {
+                await hive.openBox<_Undecodable>('undecodable');
+              } on FormatException {
+                caught++;
+              }
+              await pumpEventQueue();
+            },
+            (error, _) => escaped.add(error),
+          );
+
+          // Both callers were told, and nothing went anywhere else.
+          expect(caught, 2);
+          expect(escaped, isEmpty);
         });
       });
     });
