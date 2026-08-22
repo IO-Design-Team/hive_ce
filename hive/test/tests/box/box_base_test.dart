@@ -391,7 +391,7 @@ void main() {
       await box.close();
       verifyInOrder([
         keystore.close,
-        () => hive.unregisterBox('myBox'),
+        () => hive.unregisterBox('myBox', box),
         backend.close,
       ]);
       expect(box.isOpen, false);
@@ -429,7 +429,7 @@ void main() {
         await box.deleteFromDisk();
         verifyInOrder([
           keystore.close,
-          () => hive.unregisterBox('myBox'),
+          () => hive.unregisterBox('myBox', box),
           backend.deleteFromDisk,
         ]);
         expect(box.isOpen, false);

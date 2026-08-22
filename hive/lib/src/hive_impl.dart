@@ -260,8 +260,11 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   }
 
   /// Not part of public API
-  void unregisterBox(String name) {
+  ///
+  /// [box] guards against a slow close deregistering the box that already replaced it under [name].
+  void unregisterBox(String name, [BoxBaseImpl? box]) {
     name = name.toLowerCase();
+    if (box != null && !identical(_boxes[name], box)) return;
     _boxes.remove(name);
   }
 
