@@ -4,6 +4,7 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:web/web.dart';
 
@@ -20,6 +21,7 @@ class BackendManager implements BackendManagerInterface {
     HiveCipher? cipher,
     int? keyCrc,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
   ) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
@@ -52,7 +54,13 @@ class BackendManager implements BackendManagerInterface {
 
     Logger.i('Got object store $objectStoreName in database $databaseName.');
 
-    return StorageBackendJs(db, cipher, objectStoreName);
+    return StorageBackendJs(
+      db,
+      cipher,
+      objectStoreName,
+      TypeRegistryImpl.nullImpl,
+      onUndecodableValue,
+    );
   }
 
   @override
