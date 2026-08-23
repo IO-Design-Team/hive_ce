@@ -160,6 +160,21 @@ class StorageBackendJs extends StorageBackend {
     }
   }
 
+  /// Not part of public API
+  ///
+  /// Undecoded, so a caller can decode one value at a time.
+  @visibleForTesting
+  Future<List<JSAny?>> getRawValues({bool cursor = false}) async {
+    final store = getStore(false);
+
+    if (store.has('getAll') && !cursor) {
+      final result = await store.getAll(null).asFuture<JSArray>();
+      return result.toDart;
+    } else {
+      return store.iterate().map((e) => e.value).toList();
+    }
+  }
+
   @override
   Future<int> initialize(
     TypeRegistry registry,
@@ -170,11 +185,14 @@ class StorageBackendJs extends StorageBackend {
     _registry = registry;
     final keys = await getKeys();
     if (!lazy) {
-      var i = 0;
-      final values = await getValues();
-      for (final value in values) {
-        final key = keys[i++];
-        keystore.insert(Frame(key, value), notify: false);
+      // Decoded one value at a time. getValues() maps lazily, so a failure in there cannot be
+      // tied back to its key, and its iterator retries the same element afterwards.
+      final rawValues = await getRawValues();
+      for (var i = 0; i < keys.length && i < rawValues.length; i++) {
+        keystore.insert(
+          Frame(keys[i], decodeValue(rawValues[i])),
+          notify: false,
+        );
       }
     } else {
       for (final key in keys) {
