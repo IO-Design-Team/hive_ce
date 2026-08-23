@@ -50,6 +50,36 @@ Future<IDBDatabase> _getDbWith(Map<String, Object?> content) async {
   return db;
 }
 
+/// A value whose adapter writes fine but refuses to read one particular record back.
+class _Flaky {
+  const _Flaky(this.id);
+  final String id;
+}
+
+class _FlakyAdapter extends TypeAdapter<_Flaky> {
+  @override
+  final typeId = 1;
+
+  @override
+  _Flaky read(BinaryReader reader) {
+    final id = reader.readString();
+    if (id == 'bad') throw const FormatException('cannot decode this record');
+    return _Flaky(id);
+  }
+
+  @override
+  void write(BinaryWriter writer, _Flaky obj) => writer.writeString(obj.id);
+}
+
+/// Seeds the store with values already encoded, so reading them back runs the adapter.
+Future<IDBDatabase> _getDbWithEncoded(Map<String, JSAny?> content) async {
+  final db = await _openDb();
+  final store = _getStore(db);
+  await store.clear().asFuture();
+  content.forEach((k, v) => store.put(v, k.toJS));
+  return db;
+}
+
 void main() async {
   _nullDatabase = await _openDb('nullTestBox');
   group('StorageBackendJs', () {
@@ -192,6 +222,58 @@ void main() async {
         final backend = _getBackend(db: db);
 
         expect(await backend.getValues(), [1, null, 3]);
+      });
+    });
+
+    group('.initialize() with undecodable values', () {
+      /// Registry plus an encoder that can produce records the adapter will refuse.
+      (TypeRegistryImpl, StorageBackendJs) flakySetup() {
+        final registry = TypeRegistryImpl();
+        registry.registerAdapter(_FlakyAdapter());
+        return (
+          registry,
+          StorageBackendJs(_nullDatabase, null, 'box', registry)
+        );
+      }
+
+      Future<IDBDatabase> seed(StorageBackendJs encoder) => _getDbWithEncoded({
+            'a': encoder.encodeValue(Frame('a', const _Flaky('a'))),
+            'b': encoder.encodeValue(Frame('b', const _Flaky('bad'))),
+            'c': encoder.encodeValue(Frame('c', const _Flaky('c'))),
+          });
+
+      test('without a handler the open still fails', () async {
+        final (registry, encoder) = flakySetup();
+        final db = await seed(encoder);
+        final backend = StorageBackendJs(db, null, 'box', registry);
+
+        await expectLater(
+          backend.initialize(
+            registry,
+            Keystore.debug(notifier: ChangeNotifier()),
+            false,
+          ),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      test('with a handler the bad record is skipped and reported', () async {
+        final (registry, encoder) = flakySetup();
+        final db = await seed(encoder);
+        final reported = <Object>[];
+        final backend = StorageBackendJs(
+          db,
+          null,
+          'box',
+          registry,
+          (key, error, _) => reported.add(key),
+        );
+
+        final keystore = Keystore.debug(notifier: ChangeNotifier());
+        await backend.initialize(registry, keystore, false);
+
+        expect(reported, ['b']);
+        expect(keystore.getKeys(), ['a', 'c']);
       });
     });
 

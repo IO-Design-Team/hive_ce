@@ -266,6 +266,7 @@ class BinaryReaderImpl extends BinaryReader {
     bool lazy = false,
     int frameOffset = 0,
     bool verbatim = false,
+    UndecodableValueHandler? onUndecodableValue,
   }) {
     // frame length is stored on 4 bytes
     if (availableBytes < 4) return null;
@@ -312,16 +313,25 @@ class BinaryReaderImpl extends BinaryReader {
     Frame frame;
     final dynamic key = readKey();
 
-    if (availableBytes == 0) {
+    try {
+      if (availableBytes == 0) {
+        frame = Frame.deleted(key);
+      } else if (lazy) {
+        frame = Frame.lazy(key);
+      } else if (verbatim) {
+        frame = Frame(key, viewBytes(availableBytes));
+      } else if (cipher == null) {
+        frame = Frame(key, read());
+      } else {
+        frame = Frame(key, readEncrypted(cipher));
+      }
+    } catch (error, stackTrace) {
+      // An adapter can throw anything, so nothing narrower would be honest here.
+      if (onUndecodableValue == null) rethrow;
+      onUndecodableValue(key as Object, error, stackTrace);
+      // Reported as deleted so the keystore drops it. The tail below still winds the reader to
+      // the exact frame end, which is known because the length and crc were checked up front.
       frame = Frame.deleted(key);
-    } else if (lazy) {
-      frame = Frame.lazy(key);
-    } else if (verbatim) {
-      frame = Frame(key, viewBytes(availableBytes));
-    } else if (cipher == null) {
-      frame = Frame(key, read());
-    } else {
-      frame = Frame(key, readEncrypted(cipher));
     }
 
     frame

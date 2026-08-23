@@ -14,6 +14,7 @@ class FrameHelper {
     HiveCipher? cipher,
     int? keyCrc, {
     bool verbatim = false,
+    UndecodableValueHandler? onUndecodableValue,
   }) {
     final reader = BinaryReaderImpl(bytes, registry);
 
@@ -26,6 +27,7 @@ class FrameHelper {
         lazy: false,
         frameOffset: frameOffset,
         verbatim: verbatim,
+        onUndecodableValue: onUndecodableValue,
       );
       if (frame == null) return frameOffset;
 

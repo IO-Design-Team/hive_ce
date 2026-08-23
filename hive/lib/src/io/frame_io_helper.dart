@@ -47,6 +47,7 @@ class FrameIoHelper extends FrameHelper {
     HiveCipher? cipher,
     int? keyCrc, {
     bool verbatim = false,
+    UndecodableValueHandler? onUndecodableValue,
   }) async {
     final bytes = await readFile(path);
     return framesFromBytes(
@@ -56,6 +57,7 @@ class FrameIoHelper extends FrameHelper {
       cipher,
       keyCrc,
       verbatim: verbatim,
+      onUndecodableValue: onUndecodableValue,
     );
   }
 }
