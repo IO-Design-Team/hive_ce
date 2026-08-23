@@ -30,6 +30,7 @@ class StorageBackendJs extends StorageBackend {
   final String objectStoreName;
 
   TypeRegistry _registry;
+  final UndecodableValueHandler? _onUndecodableValue;
 
   /// Not part of public API
   StorageBackendJs(
@@ -37,6 +38,7 @@ class StorageBackendJs extends StorageBackend {
     this._cipher,
     this.objectStoreName, [
     this._registry = TypeRegistryImpl.nullImpl,
+    this._onUndecodableValue,
   ]);
 
   @override
@@ -162,7 +164,7 @@ class StorageBackendJs extends StorageBackend {
 
   /// Not part of public API
   ///
-  /// Undecoded, so a caller can decode one value at a time.
+  /// Undecoded, so a caller can decode one value at a time and survive a single bad record.
   @visibleForTesting
   Future<List<JSAny?>> getRawValues({bool cursor = false}) async {
     final store = getStore(false);
@@ -185,14 +187,20 @@ class StorageBackendJs extends StorageBackend {
     _registry = registry;
     final keys = await getKeys();
     if (!lazy) {
-      // Decoded one value at a time. getValues() maps lazily, so a failure in there cannot be
-      // tied back to its key, and its iterator retries the same element afterwards.
+      // Decoded per value rather than through getValues(), whose lazy map cannot report which
+      // record failed and retries the same one after a throw.
       final rawValues = await getRawValues();
       for (var i = 0; i < keys.length && i < rawValues.length; i++) {
-        keystore.insert(
-          Frame(keys[i], decodeValue(rawValues[i])),
-          notify: false,
-        );
+        final Object? value;
+        try {
+          value = decodeValue(rawValues[i]);
+        } catch (error, stackTrace) {
+          // An adapter can throw anything, so nothing narrower would be honest here.
+          if (_onUndecodableValue == null) rethrow;
+          _onUndecodableValue(keys[i], error, stackTrace);
+          continue;
+        }
+        keystore.insert(Frame(keys[i], value), notify: false);
       }
     } else {
       for (final key in keys) {
