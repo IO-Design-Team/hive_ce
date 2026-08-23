@@ -56,6 +56,7 @@ abstract class BackendManagerInterface {
     HiveCipher? cipher,
     int? keyCrc,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
   );
 
   /// Deletes database

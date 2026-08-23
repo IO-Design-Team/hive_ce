@@ -29,6 +29,7 @@ abstract class HiveInterface implements TypeRegistry {
     String? path,
     Uint8List? bytes,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
     @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   });
 
