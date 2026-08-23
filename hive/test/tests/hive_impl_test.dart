@@ -209,15 +209,20 @@ void main() {
 
         test('throwing from the handler aborts the open', () async {
           final hive = await seeded();
+          var called = 0;
 
           await expectLater(
             hive.openBox<_Flaky>(
               'flaky',
-              onUndecodableValue: (key, error, stackTrace) =>
-                  Error.throwWithStackTrace(error, stackTrace),
+              onUndecodableValue: (key, error, stackTrace) {
+                called++;
+                Error.throwWithStackTrace(error, stackTrace);
+              },
             ),
             throwsA(isA<FormatException>()),
           );
+          // Asserted so this cannot pass just because the open failed anyway.
+          expect(called, 1);
         });
 
         test('a clean box never calls the handler', () async {
