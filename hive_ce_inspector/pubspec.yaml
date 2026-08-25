@@ -18,7 +18,7 @@ dependencies:
   dtd: ^4.0.0
 
 dev_dependencies:
-  rexios_lints: ^17.0.2
+  rexios_lints: ^19.0.0
   hive_ce_flutter: ^2.3.2
   test: ^1.26.3
 

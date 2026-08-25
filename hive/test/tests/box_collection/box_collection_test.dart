@@ -128,6 +128,13 @@ void main() {
       expect(await box.get('fluffy'), {'name': 'Fluffy', 'age': 4});
     });
 
+    test('.put() deletes a null value', () async {
+      final collection = await _openCollection(withData: true);
+      final box = await collection.openBox<dynamic>('cats');
+      await box.put('fluffy', null);
+      expect(await box.get('fluffy'), null);
+    });
+
     test('.delete()', () async {
       final collection = await _openCollection(withData: true);
       final box = await collection.openBox('cats');
