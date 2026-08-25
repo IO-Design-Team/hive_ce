@@ -1,8 +1,6 @@
 include: package:rexios_lints/dart/package_extra.yaml
 
-# Flutter 3.48 beta's analysis server requires analysis_server_plugin ^0.3.21-dev,
-# which is not on pub.dev. Without this override, plugin setup fails and
-# `dart analyze --fatal-infos` exits 4.
+# TODO: Remove this analysis_server_plugin pin. https://github.com/IO-Design-Team/hive_ce/issues/323
 plugins:
   rexios_lints:
     version: ^19.0.0
