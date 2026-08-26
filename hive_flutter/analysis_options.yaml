@@ -19,4 +19,3 @@ plugins:
 linter:
   rules:
     require_trailing_commas: true
-    migrate_design_widgets: false

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart' show TimeOfDay;
+import 'package:material_ui/material_ui.dart' show TimeOfDay;
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
