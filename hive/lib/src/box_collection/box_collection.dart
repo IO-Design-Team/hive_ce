@@ -197,7 +197,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   @override
   Future<void> put(String key, V val, [Object? transaction]) async {
     if (val == null) {
-      return delete(key);
+      return await delete(key);
     }
     final box = await _getBox();
     await box.put(_toHiveKey(key), val);
