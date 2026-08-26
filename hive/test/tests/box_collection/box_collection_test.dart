@@ -132,7 +132,7 @@ void main() {
       final collection = await _openCollection(withData: true);
       final box = await collection.openBox<dynamic>('cats');
       await box.put('fluffy', null);
-      expect(await box.get('fluffy'), null);
+      expect(await box.getAllKeys(), isNot(contains('fluffy')));
     });
 
     test('.delete()', () async {
