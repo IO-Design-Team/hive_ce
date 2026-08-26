@@ -29,6 +29,7 @@ abstract class HiveInterface implements TypeRegistry {
     String? path,
     Uint8List? bytes,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
     @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   });
 
@@ -87,6 +88,17 @@ abstract class HiveInterface implements TypeRegistry {
   @visibleForTesting
   void resetAdapters();
 }
+
+/// Called for every stored value that cannot be decoded while a box is opening.
+///
+/// Passing one to [HiveInterface.openBox] skips those records instead of failing the whole open.
+/// The [key] is handed over so the record can be logged, deleted or refetched. Throwing from here
+/// aborts the open, which is how a caller keeps hive's own errors fatal while skipping others.
+typedef UndecodableValueHandler = void Function(
+  Object key,
+  Object error,
+  StackTrace stackTrace,
+);
 
 ///
 typedef KeyComparator = int Function(dynamic key1, dynamic key2);

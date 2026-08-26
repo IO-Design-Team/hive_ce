@@ -29,6 +29,7 @@ class StorageBackendVm extends StorageBackend {
   final bool _crashRecovery;
   final HiveCipher? _cipher;
   final int? _keyCrc;
+  final UndecodableValueHandler? _onUndecodableValue;
   final FrameIoHelper _frameHelper;
 
   final ReadWriteSync _sync;
@@ -65,8 +66,9 @@ class StorageBackendVm extends StorageBackend {
     this._lockFile,
     this._crashRecovery,
     this._cipher,
-    this._keyCrc,
-  )   : _frameHelper = FrameIoHelper(),
+    this._keyCrc, [
+    this._onUndecodableValue,
+  ])  : _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
   /// Not part of public API
@@ -77,8 +79,9 @@ class StorageBackendVm extends StorageBackend {
     this._cipher,
     this._keyCrc,
     this._frameHelper,
-    this._sync,
-  );
+    this._sync, [
+    this._onUndecodableValue,
+  ]);
 
   @override
   String get path => _file.path;
@@ -128,6 +131,7 @@ class StorageBackendVm extends StorageBackend {
         _cipher,
         _keyCrc,
         verbatim: isolated,
+        onUndecodableValue: _onUndecodableValue,
       );
     } else {
       recoveryOffset =
