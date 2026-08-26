@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
+import 'dart:ui' show Color;
+
 import 'package:hive_ce/src/binary/raw_object_reader.dart';
 import 'package:hive_ce/src/binary/raw_object_writer.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:hive_ce_inspector/util/base_schema.dart';
+import 'package:material_ui/material_ui.dart' show TimeOfDay;
 import 'package:test/test.dart';
 
 void main() {
