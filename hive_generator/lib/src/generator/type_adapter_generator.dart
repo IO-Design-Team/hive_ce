@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:hive_ce/hive_ce.dart';
@@ -38,6 +39,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     String? adapterName,
     HiveSchemaType? schema,
     Set<String> ignoredFields = const {},
+    List<DartObject> converters = const [],
   }) {
     final cls = getClass(element);
     final getAccessorsResult = getAccessors(
@@ -57,7 +59,12 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     adapterName ??= generateAdapterName(cls.displayName);
     final builder = cls.thisType.isEnum
         ? EnumAdapterBuilder(cls, getters)
-        : ClassAdapterBuilder(cls, getters, setters);
+        : ClassAdapterBuilder(
+            cls,
+            getters,
+            setters: setters,
+            converters: converters,
+          );
 
     final content = '''
     class $adapterName extends TypeAdapter<${cls.displayName}> {

@@ -1,3 +1,8 @@
+## 1.12.0
+
+- Adds support for `HiveConverter` via `GenerateAdapters.converters` (similar to `json_serializable`'s `JsonConverter`)
+- Supports generic converters with inferred type arguments (e.g. `WrappedListConverter<String>`)
+
 ## 1.11.3
 
 - Upgrades `analyzer` to `14.0.0`

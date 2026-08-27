@@ -15,6 +15,9 @@ class RevivedGenerateAdapters {
   /// The reserved type ids
   final Set<int> reservedTypeIds;
 
+  /// Converters shared by all specs
+  final List<DartObject> converters;
+
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
       : specs = annotation
@@ -28,7 +31,8 @@ class RevivedGenerateAdapters {
             .setValue
             .map((e) => e.toIntValue())
             .whereType<int>()
-            .toSet();
+            .toSet(),
+        converters = _readConverters(annotation);
 }
 
 /// A revived adapter spec
@@ -41,7 +45,10 @@ class RevivedAdapterSpec {
   final Set<String> ignoredFields;
 
   /// Constructor
-  const RevivedAdapterSpec({required this.type, required this.ignoredFields});
+  const RevivedAdapterSpec({
+    required this.type,
+    required this.ignoredFields,
+  });
 
   /// Create a [RevivedAdapterSpec] from a [DartObject]
   factory RevivedAdapterSpec.fromObject(DartObject object) {
@@ -57,4 +64,10 @@ class RevivedAdapterSpec {
 
     return RevivedAdapterSpec(type: type, ignoredFields: ignoredFields);
   }
+}
+
+List<DartObject> _readConverters(ConstantReader reader) {
+  final converters = reader.read('converters');
+  if (converters.isNull) return const [];
+  return converters.listValue;
 }

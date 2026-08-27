@@ -12,6 +12,7 @@ import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'package:hive_ce_generator/src/helper/hive_converter_helper.dart';
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
 
 /// TODO: Document this!
@@ -19,9 +20,10 @@ class ClassAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
   const ClassAdapterBuilder(
     super.cls,
-    super.getters,
+    super.getters, {
     super.setters,
-  );
+    super.converters,
+  });
 
   /// [TypeChecker] for [HiveList].
   final hiveListChecker =
@@ -121,6 +123,13 @@ class ClassAdapterBuilder extends AdapterBuilder {
   }
 
   String _cast(DartType type, String variable) {
+    final converter = _converterFor(type);
+    if (converter != null) {
+      final call =
+          '${converter.access}.fromHive($variable as ${converter.hiveType})';
+      return _nullSafe(type, variable, call);
+    }
+
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
@@ -155,7 +164,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final paramType = type as ParameterizedType;
     final arg = paramType.typeArguments.first;
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg) && !isUint8List(arg)) {
+    if (isMapOrIterable(arg) && !isUint8List(arg) ||
+        _converterFor(arg) != null) {
       var cast = '';
       // Using assignable because Set? is not exactly Set
       if (setChecker.isAssignableFromType(type)) {
@@ -176,7 +186,10 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final arg1 = paramType.typeArguments[0];
     final arg2 = paramType.typeArguments[1];
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg1) || isMapOrIterable(arg2)) {
+    if (isMapOrIterable(arg1) ||
+        isMapOrIterable(arg2) ||
+        _converterFor(arg1) != null ||
+        _converterFor(arg2) != null) {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
@@ -195,12 +208,58 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(${_writeValue(field.type, 'obj.${field.name}')})''');
     }
     code.writeln(';');
 
     return code.toString();
   }
+
+  String _writeValue(DartType type, String expression) {
+    final converter = _converterFor(type);
+    if (converter != null) {
+      final nullable = type.nullabilitySuffix == NullabilitySuffix.question;
+      final value =
+          nullable ? '$expression as ${converter.fieldType}' : expression;
+      return _nullSafe(
+        type,
+        expression,
+        '${converter.access}.toHive($value)',
+      );
+    }
+
+    if (setChecker.isAssignableFromType(type) ||
+        (iterableChecker.isAssignableFromType(type) && !isUint8List(type))) {
+      final arg = (type as ParameterizedType).typeArguments.first;
+      final inner = _writeValue(arg, 'e');
+      if (inner == 'e') return expression;
+      final suffix = _accessorSuffixFromType(type);
+      final mapped = '$expression$suffix.map((e) => $inner)';
+      return setChecker.isAssignableFromType(type)
+          ? '$mapped.toSet()'
+          : '$mapped.toList()';
+    }
+
+    if (mapChecker.isAssignableFromType(type)) {
+      final args = (type as ParameterizedType).typeArguments;
+      final key = _writeValue(args[0], 'k');
+      final value = _writeValue(args[1], 'v');
+      if (key == 'k' && value == 'v') return expression;
+      final suffix = _accessorSuffixFromType(type);
+      return '$expression$suffix.map((dynamic k, dynamic v) => '
+          'MapEntry($key, $value))';
+    }
+
+    return expression;
+  }
+
+  String _nullSafe(DartType type, String expression, String call) {
+    if (type.nullabilitySuffix != NullabilitySuffix.question) return call;
+    return '$expression == null ? null : $call';
+  }
+
+  HiveConverterMatch? _converterFor(DartType type) =>
+      findHiveConverter(type, converters);
 }
 
 /// Suffix to use when accessing a field in [type].

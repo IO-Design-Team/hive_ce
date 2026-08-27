@@ -9,11 +9,21 @@ const schemaComment = HiveSchema.comment;
 const fileExists = true;
 const fileDoesNotExist = false;
 
+/// Match generated file content that contains all of [snippets]
+class ContainsAll {
+  /// The snippets that must appear in the file
+  final List<String> snippets;
+
+  /// Constructor
+  const ContainsAll(this.snippets);
+}
+
 /// Expect the given input generates the given output
 ///
 /// About [output]
-/// - A [String] value will check if the file exists and contains the given
+/// - A [String] value will check if the file exists and equals the given
 ///   content
+/// - A [ContainsAll] value will check that the file contains all snippets
 /// - [fileExists] will check if the file exists
 /// - [fileDoesNotExist] will check if the file does not exist
 ///
@@ -44,12 +54,27 @@ void expectGeneration({
     }
     return;
   } else {
-    expect(result.exitCode, 0);
+    expect(
+      result.exitCode,
+      0,
+      reason: result.stdout.toString(),
+    );
   }
 
   for (final MapEntry(:key, :value) in output.entries) {
     final file = File(path.join(projectRoot, key));
-    expect(file.existsSync(), value == true || value is String);
+    expect(
+      file.existsSync(),
+      value == true || value is String || value is ContainsAll,
+    );
+
+    if (value is ContainsAll) {
+      final content = file.readAsStringSync();
+      for (final snippet in value.snippets) {
+        expect(content, contains(snippet));
+      }
+      continue;
+    }
 
     if (value is! String) continue;
     expect(file.readAsStringSync(), value);
