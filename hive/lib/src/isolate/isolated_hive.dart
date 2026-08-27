@@ -19,7 +19,7 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
     String? path,
     Uint8List? bytes,
@@ -31,7 +31,7 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
     String? path,
     String? collection,
