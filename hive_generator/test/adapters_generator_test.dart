@@ -6,7 +6,8 @@ const directives = '''
 import 'package:hive_ce/hive_ce.dart';
 part 'hive_adapters.g.dart';''';
 
-const personSchema = '''
+const personSchema =
+    '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -26,7 +27,8 @@ void main() {
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person>()])
@@ -38,9 +40,7 @@ class Person {
 }
 ''',
         },
-        output: {
-          'lib/hive/hive_adapters.g.yaml': personSchema,
-        },
+        output: {'lib/hive/hive_adapters.g.yaml': personSchema},
       );
     });
 
@@ -50,7 +50,8 @@ class Person {
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person2>(), AdapterSpec<Person>()])
@@ -71,7 +72,8 @@ class Person2 {
           'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 2
 types:
@@ -102,7 +104,8 @@ types:
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person2>()])
@@ -116,7 +119,8 @@ class Person2 {
           'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 2
 types:
@@ -138,7 +142,8 @@ types:
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person>()])
@@ -153,7 +158,8 @@ class Person {
           'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -176,7 +182,8 @@ types:
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
   $directives
   
   @GenerateAdapters([AdapterSpec<Person>(ignoredFields: {'balance', 'age'})])
@@ -191,7 +198,8 @@ types:
   ''',
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -212,7 +220,8 @@ types:
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person>()])
@@ -226,7 +235,8 @@ class Person {
           'lib/hive/hive_adapters.g.yaml': personSchema,
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 1
 types:
@@ -248,7 +258,8 @@ types:
         expectGeneration(
           input: {
             ...pubspec(),
-            'lib/hive/hive_adapters.dart': '''
+            'lib/hive/hive_adapters.dart':
+                '''
 $directives
 
 @GenerateAdapters([])
@@ -271,7 +282,8 @@ types:
         expectGeneration(
           input: {
             ...pubspec(),
-            'lib/hive/hive_adapters.dart': '''
+            'lib/hive/hive_adapters.dart':
+                '''
 $directives
 
 @GenerateAdapters([])
@@ -296,7 +308,8 @@ types:
         expectGeneration(
           input: {
             ...pubspec(),
-            'lib/hive/hive_adapters.dart': '''
+            'lib/hive/hive_adapters.dart':
+                '''
 $directives
 
 @GenerateAdapters([])
@@ -323,7 +336,8 @@ types:
         expectGeneration(
           input: {
             ...pubspec(),
-            'lib/hive/hive_adapters.dart': '''
+            'lib/hive/hive_adapters.dart':
+                '''
 $directives
 
 @GenerateAdapters([])
@@ -351,7 +365,8 @@ types:
       expectGeneration(
         input: {
           ...pubspec(),
-          'lib/hive/hive_adapters.dart': '''
+          'lib/hive/hive_adapters.dart':
+              '''
 $directives
 
 @GenerateAdapters([AdapterSpec<Person>(), AdapterSpec<Person2>()], reservedTypeIds: {1})
@@ -371,7 +386,8 @@ class Person2 {
 ''',
         },
         output: {
-          'lib/hive/hive_adapters.g.yaml': '''
+          'lib/hive/hive_adapters.g.yaml':
+              '''
 $schemaComment
 nextTypeId: 3
 types:

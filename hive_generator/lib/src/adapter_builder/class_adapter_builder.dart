@@ -17,27 +17,34 @@ import 'package:hive_ce_generator/src/helper/type_helper.dart';
 /// TODO: Document this!
 class ClassAdapterBuilder extends AdapterBuilder {
   /// TODO: Document this!
-  const ClassAdapterBuilder(
-    super.cls,
-    super.getters,
-    super.setters,
-  );
+  const ClassAdapterBuilder(super.cls, super.getters, super.setters);
 
   /// [TypeChecker] for [HiveList].
-  final hiveListChecker =
-      const TypeChecker.typeNamed(HiveList, inPackage: 'hive_ce');
+  final hiveListChecker = const TypeChecker.typeNamed(
+    HiveList,
+    inPackage: 'hive_ce',
+  );
 
   /// [TypeChecker] for [Map].
-  final mapChecker =
-      const TypeChecker.typeNamed(Map, inPackage: 'core', inSdk: true);
+  final mapChecker = const TypeChecker.typeNamed(
+    Map,
+    inPackage: 'core',
+    inSdk: true,
+  );
 
   /// [TypeChecker] for [Set].
-  final setChecker =
-      const TypeChecker.typeNamed(Set, inPackage: 'core', inSdk: true);
+  final setChecker = const TypeChecker.typeNamed(
+    Set,
+    inPackage: 'core',
+    inSdk: true,
+  );
 
   /// [TypeChecker] for [Iterable].
-  final iterableChecker =
-      const TypeChecker.typeNamed(Iterable, inPackage: 'core', inSdk: true);
+  final iterableChecker = const TypeChecker.typeNamed(
+    Iterable,
+    inPackage: 'core',
+    inSdk: true,
+  );
 
   /// [TypeChecker] for [Uint8List].
   final uint8ListChecker = const TypeChecker.typeNamed(

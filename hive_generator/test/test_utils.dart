@@ -27,11 +27,12 @@ void expectGeneration({
 }) {
   final projectRoot = createTestProject(input);
   Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
-  final result = Process.runSync(
-    'dart',
-    ['pub', 'run', 'build_runner', 'build'],
-    workingDirectory: projectRoot,
-  );
+  final result = Process.runSync('dart', [
+    'pub',
+    'run',
+    'build_runner',
+    'build',
+  ], workingDirectory: projectRoot);
 
   if (debug) print(result.stdout);
 
@@ -57,8 +58,9 @@ void expectGeneration({
 }
 
 String createTestProject(Map<String, String> project) {
-  final directory =
-      Directory.systemTemp.createTempSync('hive_ce_generator_test');
+  final directory = Directory.systemTemp.createTempSync(
+    'hive_ce_generator_test',
+  );
 
   for (final MapEntry(:key, :value) in project.entries) {
     File(path.join(directory.path, key))
@@ -76,7 +78,8 @@ Map<String, String> pubspec({
   final hiveGeneratorPath = path.absolute(path.current);
 
   return {
-    'pubspec.yaml': '''
+    'pubspec.yaml':
+        '''
 name: hive_ce_generator_test
 
 environment:

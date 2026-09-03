@@ -33,7 +33,8 @@ extension IDBRequestExtension on IDBRequest {
       openRequest.onblocked = (Event e) {
         dispose();
         completer.completeError(
-          StateError('IndexedDB request blocked: another connection holds the database open.'),
+          StateError(
+              'IndexedDB request blocked: another connection holds the database open.'),
         );
       }.toJS;
     }
@@ -44,7 +45,8 @@ extension IDBRequestExtension on IDBRequest {
     timer = Timer(timeout ?? const Duration(seconds: 30), () {
       dispose();
       completer.completeError(
-        TimeoutException('IndexedDB request timed out after ${timeout ?? const Duration(seconds: 30)}'),
+        TimeoutException(
+            'IndexedDB request timed out after ${timeout ?? const Duration(seconds: 30)}'),
       );
     });
 

@@ -44,7 +44,7 @@ class BackendManager implements BackendManagerInterface {
       // IndexedDB blocks upgrades until all existing connections are
       // closed; without this the second open() would hang forever.
       db.close();
-      await Future.delayed(const Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 100));
       final request = indexedDB!.open(databaseName, db.version + 1);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
@@ -70,7 +70,11 @@ class BackendManager implements BackendManagerInterface {
 
     // directly deleting the entire DB if a non-collection Box
     if (collection == null) {
-      await indexedDB!.deleteDatabase(databaseName).asFuture();
+      try {
+        await indexedDB!.deleteDatabase(databaseName).asFuture();
+      } catch (_) {
+        // Ignore timeouts or other errors during deletion.
+      }
       // Firefox (and some privacy modes) need a beat before the database
       // is truly released. Without this delay the next open() can hang.
       await Future.delayed(const Duration(milliseconds: 100));
@@ -101,18 +105,13 @@ class BackendManager implements BackendManagerInterface {
       var exists = true;
       if (collection == null) {
         final request = indexedDB!.open(databaseName, 1);
-        request.onupgradeneeded = (IDBVersionChangeEvent e) {
-          (e.target as IDBOpenDBRequest).transaction!.abort();
-          exists = false;
-        }.toJS;
         try {
           final db = await request.asFuture<IDBDatabase>();
-          // open() succeeded without upgrade. Verify it has the object store;
-          // otherwise this is a ghost database left by a previous aborted
-          // existence check and must be cleaned up.
+          // If the database opened but has no object store, it is a ghost
+          // database (left by a previous existence check or partial setup).
           if (!db.objectStoreNames.contains(objectStoreName)) {
             db.close();
-            await Future.delayed(const Duration(milliseconds: 50));
+            await Future.delayed(const Duration(milliseconds: 100));
             await indexedDB!.deleteDatabase(databaseName).asFuture();
             exists = false;
           }

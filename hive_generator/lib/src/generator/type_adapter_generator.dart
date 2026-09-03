@@ -59,7 +59,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
         ? EnumAdapterBuilder(cls, getters)
         : ClassAdapterBuilder(cls, getters, setters);
 
-    final content = '''
+    final content =
+        '''
     class $adapterName extends TypeAdapter<${cls.displayName}> {
       @override
       final typeId = $typeId;
@@ -92,18 +93,20 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
   /// TODO: Document this!
   static Set<String> _getAllAccessorNames(InterfaceElement cls) {
     final isEnum = cls.thisType.isEnum;
-    final constructorFields = getConstructor(cls)
-        .formalParameters
-        .map((it) => it.displayName)
-        .toSet();
+    final constructorFields = getConstructor(
+      cls,
+    ).formalParameters.map((it) => it.displayName).toSet();
 
     final accessorNames = <String>{};
 
     final supertypes = cls.allSupertypes.map((it) => it.element);
     for (final type in [cls, ...supertypes]) {
       // Ignore Object base members
-      if (const TypeChecker.typeNamed(Object, inPackage: 'core', inSdk: true)
-          .isExactly(type)) {
+      if (const TypeChecker.typeNamed(
+        Object,
+        inPackage: 'core',
+        inSdk: true,
+      ).isExactly(type)) {
         continue;
       }
 
@@ -172,7 +175,8 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
       final int index;
       if (schema != null) {
         // Only generate one id per field name
-        index = schema.fields[name]?.index ??
+        index =
+            schema.fields[name]?.index ??
             newSchemaFields[name]?.index ??
             nextIndex++;
       } else if (annotation != null) {

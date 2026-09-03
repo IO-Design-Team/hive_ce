@@ -18,16 +18,14 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     ElementDirective directive,
     ConstantReader annotation,
     BuildStep buildStep,
-  ) =>
-      _generate(annotation, buildStep);
+  ) => _generate(annotation, buildStep);
 
   @override
   Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
-  ) =>
-      _generate(annotation, buildStep);
+  ) => _generate(annotation, buildStep);
 
   Future<String> _generate(
     ConstantReader annotation,
@@ -40,22 +38,26 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     final HiveSchema schema;
     if (await buildStep.canRead(schemaAsset)) {
       final schemaContent = await buildStep.readAsString(schemaAsset);
-      schema =
-          HiveSchema.fromJson(jsonDecode(jsonEncode(loadYaml(schemaContent))));
+      schema = HiveSchema.fromJson(
+        jsonDecode(jsonEncode(loadYaml(schemaContent))),
+      );
     } else {
       schema = HiveSchema(nextTypeId: revived.firstTypeId, types: {});
     }
     _validateSchema(schema);
 
     // Sort existing types by type ID
-    final existingSpecs = revived.specs
-        .where((spec) => schema.types.containsKey(spec.type.getDisplayString()))
-        .toList()
-      ..sort((a, b) {
-        final aTypeId = schema.types[a.type.getDisplayString()]!.typeId;
-        final bTypeId = schema.types[b.type.getDisplayString()]!.typeId;
-        return aTypeId.compareTo(bTypeId);
-      });
+    final existingSpecs =
+        revived.specs
+            .where(
+              (spec) => schema.types.containsKey(spec.type.getDisplayString()),
+            )
+            .toList()
+          ..sort((a, b) {
+            final aTypeId = schema.types[a.type.getDisplayString()]!.typeId;
+            final bTypeId = schema.types[b.type.getDisplayString()]!.typeId;
+            return aTypeId.compareTo(bTypeId);
+          });
 
     // Maintain order of new types
     final newSpecs = revived.specs
@@ -77,12 +79,9 @@ class AdaptersGenerator extends GeneratorForAnnotation<GenerateAdapters> {
     for (final spec in existingSpecs + newSpecs) {
       final typeKey = spec.type.element!.displayName;
 
-      final schemaType = schema.types[typeKey] ??
-          HiveSchemaType(
-            typeId: generateTypeId(),
-            nextIndex: 0,
-            fields: {},
-          );
+      final schemaType =
+          schema.types[typeKey] ??
+          HiveSchemaType(typeId: generateTypeId(), nextIndex: 0, fields: {});
       final result = TypeAdapterGenerator.generateTypeAdapter(
         element: spec.type.element!,
         library: library,

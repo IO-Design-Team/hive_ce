@@ -33,8 +33,7 @@ class SchemaMigratorBuilder implements Builder {
   static String hasNoPublicGetter({
     required String className,
     required String fieldName,
-  }) =>
-      '$className.$fieldName does not have a public getter';
+  }) => '$className.$fieldName does not have a public getter';
 
   @override
   final buildExtensions = const {
@@ -47,8 +46,9 @@ class SchemaMigratorBuilder implements Builder {
     await for (final input in buildStep.findAssets(Glob('**/*.dart'))) {
       if (!await buildStep.resolver.isLibrary(input)) continue;
       final library = await buildStep.resolver.libraryFor(input);
-      final hiveTypeElements = LibraryReader(library)
-          .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
+      final hiveTypeElements = LibraryReader(
+        library,
+      ).annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
       hiveTypes.addAll(hiveTypeElements);
     }
 
@@ -85,8 +85,9 @@ class SchemaMigratorBuilder implements Builder {
       final accessors = [
         ...cls.getters,
         ...cls.setters,
-        ...cls.allSupertypes
-            .expand((it) => [...it.element.getters, ...it.element.setters]),
+        ...cls.allSupertypes.expand(
+          (it) => [...it.element.getters, ...it.element.setters],
+        ),
       ];
       final info = _SchemaInfo(
         uri: uri,
@@ -116,19 +117,20 @@ class SchemaMigratorBuilder implements Builder {
 
       final firstPassFields = info.schema.fields.keys.toSet();
       final secondPassFields = secondPassInfo.schema.fields.keys.toSet();
-      final accessorsWithoutAnnotations =
-          secondPassFields.difference(firstPassFields);
+      final accessorsWithoutAnnotations = secondPassFields.difference(
+        firstPassFields,
+      );
 
-      schemaInfos
-          .add(info.copyWith(ignoredFields: accessorsWithoutAnnotations));
+      schemaInfos.add(
+        info.copyWith(ignoredFields: accessorsWithoutAnnotations),
+      );
     }
     schemaInfos.sort((a, b) => a.schema.typeId.compareTo(b.schema.typeId));
-    final nextTypeId =
-        schemaInfos.isEmpty ? 0 : schemaInfos.last.schema.typeId + 1;
+    final nextTypeId = schemaInfos.isEmpty
+        ? 0
+        : schemaInfos.last.schema.typeId + 1;
 
-    final types = {
-      for (final type in schemaInfos) type.className: type.schema,
-    };
+    final types = {for (final type in schemaInfos) type.className: type.schema};
 
     final imports = schemaInfos
         .map((e) => e.uri)
@@ -171,14 +173,14 @@ class _SchemaInfo {
     required ConstructorElement constructor,
     required List<PropertyAccessorElement> accessors,
     required HiveSchemaType schema,
-  })  : ignoredFields = {},
-        schema = _sanitizeSchema(
-          className: className,
-          isEnum: isEnum,
-          schema: schema,
-          constructor: constructor,
-          accessors: accessors,
-        );
+  }) : ignoredFields = {},
+       schema = _sanitizeSchema(
+         className: className,
+         isEnum: isEnum,
+         schema: schema,
+         constructor: constructor,
+         accessors: accessors,
+       );
 
   const _SchemaInfo._({
     required this.uri,
@@ -187,15 +189,12 @@ class _SchemaInfo {
     required this.schema,
   });
 
-  _SchemaInfo copyWith({
-    Set<String>? ignoredFields,
-  }) =>
-      _SchemaInfo._(
-        uri: uri,
-        className: className,
-        ignoredFields: ignoredFields ?? this.ignoredFields,
-        schema: schema,
-      );
+  _SchemaInfo copyWith({Set<String>? ignoredFields}) => _SchemaInfo._(
+    uri: uri,
+    className: className,
+    ignoredFields: ignoredFields ?? this.ignoredFields,
+    schema: schema,
+  );
 
   static HiveSchemaType _sanitizeSchema({
     required String className,
@@ -210,13 +209,16 @@ class _SchemaInfo {
     final sanitizedFields = <String, HiveSchemaField>{};
     for (final MapEntry(key: fieldName, value: schema)
         in schema.fields.entries) {
-      final publicFieldName =
-          fieldName.startsWith('_') ? fieldName.substring(1) : fieldName;
+      final publicFieldName = fieldName.startsWith('_')
+          ? fieldName.substring(1)
+          : fieldName;
 
-      final isInConstructor = constructor.formalParameters
-          .any((e) => e.displayName == publicFieldName);
-      final publicAccessors =
-          accessors.where((e) => e.displayName == publicFieldName).toList();
+      final isInConstructor = constructor.formalParameters.any(
+        (e) => e.displayName == publicFieldName,
+      );
+      final publicAccessors = accessors
+          .where((e) => e.displayName == publicFieldName)
+          .toList();
       final hasPublicSetter = publicAccessors.any((e) => e is SetterElement);
       final hasPublicGetter = publicAccessors.any((e) => e is GetterElement);
 

@@ -16,9 +16,7 @@ part 'type.g.dart';
 class Type {}
 ''',
         },
-        output: {
-          'lib/hive_registrar.g.dart': fileExists,
-        },
+        output: {'lib/hive_registrar.g.dart': fileExists},
       );
     });
 
@@ -34,9 +32,7 @@ part 'hive_adapters.g.dart';
 void _() {}
 ''',
         },
-        output: {
-          'lib/hive_registrar.g.dart': fileDoesNotExist,
-        },
+        output: {'lib/hive_registrar.g.dart': fileDoesNotExist},
       );
     });
 
@@ -52,9 +48,7 @@ part 'hive_adapters.g.dart';
 class Type {}
 ''',
         },
-        output: {
-          'lib/hive/hive_registrar.g.dart': fileExists,
-        },
+        output: {'lib/hive/hive_registrar.g.dart': fileExists},
       );
     });
 
