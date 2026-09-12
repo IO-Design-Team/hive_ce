@@ -66,20 +66,20 @@ class HiveColor {
 
   /// Convert a [Color] to a [HiveColor]
   HiveColor.fromColor(Color color)
-      : a = color.a,
-        r = color.r,
-        g = color.g,
-        b = color.b,
-        colorSpace = color.colorSpace.name;
+    : a = color.a,
+      r = color.r,
+      g = color.g,
+      b = color.b,
+      colorSpace = color.colorSpace.name;
 
   /// Convert a [HiveColor] to a [Color]
   Color toColor() => Color.from(
-        alpha: a,
-        red: r,
-        green: g,
-        blue: b,
-        colorSpace: ColorSpace.values.byName(colorSpace),
-      );
+    alpha: a,
+    red: r,
+    green: g,
+    blue: b,
+    colorSpace: ColorSpace.values.byName(colorSpace),
+  );
 }
 
 /// Adapter for the new Color fields

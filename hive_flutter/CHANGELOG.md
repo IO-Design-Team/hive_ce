@@ -1,3 +1,16 @@
+## 3.0.0
+
+- BREAKING: Requires Flutter `>=3.44.0`
+- BREAKING: `TimeOfDayAdapter` now uses `TimeOfDay` from `package:material_ui`
+  - MIGRATION: Import `TimeOfDay` from `package:material_ui/material_ui.dart` instead of `package:flutter/material.dart`
+- BREAKING: Removes deprecated `WatchBoxBuilder` and `BoxWidgetBuilder`
+  - MIGRATION: Use `StreamBuilder` with `box.watch()`
+- BREAKING: Removes `Box.listenable()` and `LazyBox.listenable()`
+  - MIGRATION: Use `StreamBuilder` with `box.watch()`
+- BREAKING: `Hive.initFlutter` arguments are now named (matches `IsolatedHive.initFlutter`)
+  - Drops unused `backendPreference` (`HiveStorageBackendPreference.webWorker` was never implemented)
+  - MIGRATION: `Hive.initFlutter(path, preference, colorId, timeId)` → `Hive.initFlutter(subDirectory: path, colorAdapterTypeId: colorId, timeOfDayAdapterTypeId: timeId)`
+
 ## 2.3.4
 
 - Adds `hive_ce_flutter.dart` to make the publish action happy
