@@ -23,6 +23,7 @@ sealed class IsolatedCompactionStrategy {
   ///
   /// This is only ever called inside the Hive isolate. Implementations must not
   /// capture any state that cannot be sent across an isolate boundary.
+  @internal
   CompactionStrategy resolve();
 
   /// Compacts the box once more than [deletedThreshold] entries have been

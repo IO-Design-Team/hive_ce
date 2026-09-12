@@ -20,7 +20,7 @@ Future<void> _putEntries(IsolatedBox<String> box, int count) async {
 }
 
 Future<int> _fileSize(IsolatedBox box) async =>
-    File((await box.path)!).length();
+    await File(expectNotNull(await box.path)).length();
 
 void main() {
   group('IsolatedCompactionStrategy', () {
