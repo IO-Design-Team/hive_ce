@@ -1,1 +1,8 @@
 include: package:rexios_lints/dart/core_extra.yaml
+
+# TODO: Remove this analysis_server_plugin pin. https://github.com/IO-Design-Team/hive_ce/issues/323
+plugins:
+  rexios_lints:
+    version: ^19.0.0
+  dependency_overrides:
+    analysis_server_plugin: 0.3.20

@@ -77,7 +77,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'putAll':
         await box.putAll(call.arguments['entries']);
       case 'add':
-        return box.add(call.arguments['value']);
+        return await box.add(call.arguments['value']);
       case 'addAll':
         final keys = await box.addAll(call.arguments['values']);
         return keys.toList();
@@ -90,7 +90,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'compact':
         await box.compact();
       case 'clear':
-        return box.clear();
+        return await box.clear();
       case 'close':
         await box.close();
         _close();
@@ -112,7 +112,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
             .toList();
       case 'get':
         if (box.lazy) {
-          return (box as LazyBox).get(
+          return await (box as LazyBox).get(
             call.arguments['key'],
             defaultValue: IsolatedBoxBaseImpl.defaultValuePlaceholder,
           );
@@ -124,7 +124,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
         }
       case 'getAt':
         if (box.lazy) {
-          return (box as LazyBox).getAt(call.arguments['index']);
+          return await (box as LazyBox).getAt(call.arguments['index']);
         } else {
           return (box as Box).getAt(call.arguments['index']);
         }

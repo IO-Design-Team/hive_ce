@@ -28,10 +28,7 @@ extension HiveX on HiveInterface {
       path = path_helper.join(appDir.path, subDir);
     }
 
-    init(
-      path,
-      backendPreference: backendPreference,
-    );
+    init(path, backendPreference: backendPreference);
 
     final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
     if (!isAdapterRegistered(colorAdapter.typeId)) {

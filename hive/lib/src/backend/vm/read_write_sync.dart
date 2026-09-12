@@ -14,6 +14,8 @@ class ReadWriteSync {
     _readTask = completer.future;
 
     await previousTask;
+    // Do not await: that delays this function past the lock Completer.
+    // ignore: async_return_with_no_await
     return task().whenComplete(completer.complete);
   }
 
@@ -25,6 +27,8 @@ class ReadWriteSync {
     _writeTask = completer.future;
 
     await previousTask;
+    // Do not await: that delays this function past the lock Completer.
+    // ignore: async_return_with_no_await
     return task().whenComplete(completer.complete);
   }
 
@@ -40,6 +44,8 @@ class ReadWriteSync {
 
     await previousReadTask;
     await previousWriteTask;
+    // Do not await: that delays this function past the lock Completer.
+    // ignore: async_return_with_no_await
     return task().whenComplete(completer.complete);
   }
 }

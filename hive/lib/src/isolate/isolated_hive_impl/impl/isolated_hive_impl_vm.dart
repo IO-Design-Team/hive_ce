@@ -97,7 +97,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
       _boxChannel = IsolateMethodChannel('box', connection);
     }
 
-    return _hiveChannel.invokeMethod(
+    return await _hiveChannel.invokeMethod(
       'init',
       {'path': path, 'logger_level': Logger.level.name},
     );

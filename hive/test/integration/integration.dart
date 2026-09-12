@@ -190,13 +190,13 @@ extension HiveWrapperX on HiveWrapper {
       cipher = HiveAesCipher(encryptionKey);
     }
     if (box.lazy) {
-      return openLazyBox(
+      return await openLazyBox(
         box.name,
         crashRecovery: false,
         encryptionCipher: cipher,
       );
     } else {
-      return this.openBox(
+      return await this.openBox(
         box.name,
         crashRecovery: false,
         encryptionCipher: cipher,
