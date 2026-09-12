@@ -1,3 +1,7 @@
+## 2.20.0
+
+- IsolatedHive compaction now uses `IsolatedCompactionStrategy`
+
 ## 2.19.3
 
 - IsolatedHive: Handles stale send ports on hot restart
