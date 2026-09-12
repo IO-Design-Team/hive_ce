@@ -35,8 +35,13 @@ Future<dynamic> handleHiveMethodCall(
       final keyCrc = call.arguments['keyCrc'];
       final keyComparator =
           call.arguments['keyComparator'] ?? defaultKeyComparator;
-      final compactionStrategy =
-          call.arguments['compactionStrategy'] ?? defaultCompactionStrategy;
+      final compactionStrategyJson =
+          (call.arguments['compactionStrategy'] as Map?)
+              ?.cast<String, dynamic>();
+      final compactionStrategy = compactionStrategyJson == null
+          ? defaultCompactionStrategy
+          : IsolatedCompactionStrategy.fromJson(compactionStrategyJson)
+              .resolve();
       final crashRecovery = call.arguments['crashRecovery'];
       final path = call.arguments['path'];
       final bytes = call.arguments['bytes'];

@@ -29,6 +29,7 @@ export 'src/registry/type_adapter.dart';
 export 'src/registry/type_registry.dart';
 
 export 'src/isolate/isolate_name_server.dart';
+export 'src/isolate/isolated_compaction_strategy.dart';
 export 'src/isolate/isolated_hive.dart';
 export 'src/isolate/isolated_box.dart';
 

@@ -21,7 +21,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
     String? path,
     Uint8List? bytes,
@@ -32,7 +32,8 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
           name,
           encryptionCipher: encryptionCipher,
           keyComparator: keyComparator ?? defaultKeyComparator,
-          compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
+          compactionStrategy:
+              compactionStrategy?.resolve() ?? defaultCompactionStrategy,
           crashRecovery: crashRecovery,
           path: path,
           bytes: bytes,
@@ -45,7 +46,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
-    CompactionStrategy? compactionStrategy,
+    IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
     String? path,
     String? collection,
@@ -55,7 +56,8 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
           name,
           encryptionCipher: encryptionCipher,
           keyComparator: keyComparator ?? defaultKeyComparator,
-          compactionStrategy: compactionStrategy ?? defaultCompactionStrategy,
+          compactionStrategy:
+              compactionStrategy?.resolve() ?? defaultCompactionStrategy,
           crashRecovery: crashRecovery,
           path: path,
           collection: collection,
