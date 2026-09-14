@@ -73,6 +73,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     String? path,
     Uint8List? bytes,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
   ) async {
     assert(path == null || bytes == null);
     assert(
@@ -105,7 +106,12 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       try {
         StorageBackend backend;
         if (bytes != null) {
-          backend = StorageBackendMemory(bytes, cipher, keyCrc);
+          backend = StorageBackendMemory(
+            bytes,
+            cipher,
+            keyCrc,
+            onUndecodableValue,
+          );
         } else {
           backend = await _manager.open(
             name,
@@ -114,6 +120,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
             cipher,
             keyCrc,
             collection,
+            onUndecodableValue,
           );
         }
 
@@ -166,6 +173,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     String? path,
     Uint8List? bytes,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
     @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
   }) async {
     if (encryptionKey != null) {
@@ -182,6 +190,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       path,
       bytes,
       collection,
+      onUndecodableValue,
     ) as Box<E>;
   }
 
@@ -211,6 +220,8 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       path,
       null,
       collection,
+      // A lazy open only reads keys, so there is no value to fail on here.
+      null,
     ) as LazyBox<E>;
   }
 
