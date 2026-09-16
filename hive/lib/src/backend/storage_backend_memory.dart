@@ -10,14 +10,19 @@ import 'package:hive_ce/src/box/keystore.dart';
 class StorageBackendMemory extends StorageBackend {
   final HiveCipher? _cipher;
   final int? _keyCrc;
+  final UndecodableValueHandler? _onUndecodableValue;
 
   final FrameHelper _frameHelper;
 
   Uint8List? _bytes;
 
   /// Not part of public API
-  StorageBackendMemory(Uint8List bytes, this._cipher, this._keyCrc)
-      : _bytes = bytes,
+  StorageBackendMemory(
+    Uint8List bytes,
+    this._cipher,
+    this._keyCrc, [
+    this._onUndecodableValue,
+  ])  : _bytes = bytes,
         _frameHelper = FrameHelper();
 
   @override
@@ -43,6 +48,7 @@ class StorageBackendMemory extends StorageBackend {
       registry,
       _cipher,
       _keyCrc,
+      onUndecodableValue: _onUndecodableValue,
     );
 
     if (recoveryOffset != -1) {

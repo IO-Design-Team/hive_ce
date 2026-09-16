@@ -12,6 +12,27 @@ import 'package:test/test.dart';
 
 import 'common.dart';
 
+/// A value whose adapter writes fine but refuses to read one particular record back.
+class _Flaky {
+  const _Flaky(this.id);
+  final String id;
+}
+
+class _FlakyAdapter extends TypeAdapter<_Flaky> {
+  @override
+  final typeId = 1;
+
+  @override
+  _Flaky read(BinaryReader reader) {
+    final id = reader.readString();
+    if (id == 'bad') throw const FormatException('cannot decode this record');
+    return _Flaky(id);
+  }
+
+  @override
+  void write(BinaryWriter writer, _Flaky obj) => writer.writeString(obj.id);
+}
+
 class _TestAdapter extends TypeAdapter<int> {
   const _TestAdapter([this.typeId = 0]);
 
@@ -143,6 +164,82 @@ void main() {
           await expectLater(openBox<Set<double>>(), completes);
           await expectLater(openBox<Set<bool>>(), completes);
           await expectLater(openBox<Set<String>>(), completes);
+        });
+      });
+
+      group('undecodable values', () {
+        Future<HiveImpl> seeded() async {
+          final hive = await initHive();
+          hive.registerAdapter(_FlakyAdapter());
+          final box = await hive.openBox<_Flaky>('flaky');
+          await box.put('a', const _Flaky('a'));
+          await box.put('b', const _Flaky('bad'));
+          await box.put('c', const _Flaky('c'));
+          await hive.close();
+          return hive;
+        }
+
+        test('without a handler the open still fails, as before', () async {
+          final hive = await seeded();
+
+          await expectLater(
+            hive.openBox<_Flaky>('flaky'),
+            throwsA(isA<FormatException>()),
+          );
+        });
+
+        test('with a handler the bad record is skipped and reported', () async {
+          final hive = await seeded();
+          final reported = <Object>[];
+
+          final box = await hive.openBox<_Flaky>(
+            'flaky',
+            onUndecodableValue: (key, error, _) {
+              reported.add(key);
+              expect(error, isA<FormatException>());
+            },
+          );
+
+          expect(reported, ['b']);
+          expect(box.keys, ['a', 'c']);
+          expect(box.values.map((value) => value.id), ['a', 'c']);
+          // Dropped from the keystore entirely, not left behind as a null.
+          expect(box.containsKey('b'), isFalse);
+        });
+
+        test('throwing from the handler aborts the open', () async {
+          final hive = await seeded();
+          var called = 0;
+
+          await expectLater(
+            hive.openBox<_Flaky>(
+              'flaky',
+              onUndecodableValue: (key, error, stackTrace) {
+                called++;
+                Error.throwWithStackTrace(error, stackTrace);
+              },
+            ),
+            throwsA(isA<FormatException>()),
+          );
+          // Asserted so this cannot pass just because the open failed anyway.
+          expect(called, 1);
+        });
+
+        test('a clean box never calls the handler', () async {
+          final hive = await initHive();
+          hive.registerAdapter(_FlakyAdapter());
+          final seed = await hive.openBox<_Flaky>('clean');
+          await seed.put('a', const _Flaky('a'));
+          await hive.close();
+
+          var called = 0;
+          final box = await hive.openBox<_Flaky>(
+            'clean',
+            onUndecodableValue: (_, __, ___) => called++,
+          );
+
+          expect(called, 0);
+          expect(box.keys, ['a']);
         });
       });
     });

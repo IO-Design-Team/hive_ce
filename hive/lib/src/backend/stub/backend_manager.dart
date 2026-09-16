@@ -19,6 +19,7 @@ class BackendManager implements BackendManagerInterface {
     HiveCipher? cipher,
     int? keyCrc,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
   ) {
     throw UnimplementedError();
   }

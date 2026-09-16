@@ -25,6 +25,7 @@ class BackendManager implements BackendManagerInterface {
     HiveCipher? cipher,
     int? keyCrc,
     String? collection,
+    UndecodableValueHandler? onUndecodableValue,
   ) async {
     if (path == null) {
       throw HiveError('You need to initialize Hive or '
@@ -46,8 +47,14 @@ class BackendManager implements BackendManagerInterface {
     final file = await findHiveFileAndCleanUp(name, path);
     final lockFile = File('$path$_delimiter$name.lock');
 
-    final backend =
-        StorageBackendVm(file, lockFile, crashRecovery, cipher, keyCrc);
+    final backend = StorageBackendVm(
+      file,
+      lockFile,
+      crashRecovery,
+      cipher,
+      keyCrc,
+      onUndecodableValue,
+    );
     await backend.open();
     return backend;
   }
