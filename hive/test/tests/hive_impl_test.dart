@@ -12,6 +12,21 @@ import 'package:test/test.dart';
 
 import 'common.dart';
 
+class _ThrowsOnRead {
+  const _ThrowsOnRead();
+}
+
+class _ThrowsOnReadAdapter extends TypeAdapter<_ThrowsOnRead> {
+  @override
+  final typeId = 0;
+
+  @override
+  _ThrowsOnRead read(_) => throw FormatException();
+
+  @override
+  void write(_, __) {}
+}
+
 class _TestAdapter extends TypeAdapter<int> {
   const _TestAdapter([this.typeId = 0]);
 
@@ -144,6 +159,38 @@ void main() {
           await expectLater(openBox<Set<bool>>(), completes);
           await expectLater(openBox<Set<String>>(), completes);
         });
+      });
+
+      test('same error if already opening after a failed open', () async {
+        Future<Object> errorOf(Future<dynamic> future) async {
+          try {
+            await future;
+            fail('expected openBox to throw');
+          } catch (error) {
+            return error;
+          }
+        }
+
+        final hive = await initHive();
+        hive.registerAdapter(_ThrowsOnReadAdapter());
+
+        final box = await hive.openBox<_ThrowsOnRead>('box');
+        await box.put(0, const _ThrowsOnRead());
+        await hive.close();
+
+        await expectLater(
+          hive.openBox<_ThrowsOnRead>('box'),
+          throwsA(isA<FormatException>()),
+        );
+
+        final retry = hive.openBox<_ThrowsOnRead>('box');
+        // Failed-open close() reaches unregisterBox on the next microtask.
+        await Future<void>.value();
+        final concurrent = hive.openBox<_ThrowsOnRead>('box');
+
+        final retryError = await errorOf(retry);
+        final concurrentError = await errorOf(concurrent);
+        expect(concurrentError, same(retryError));
       });
     });
 
