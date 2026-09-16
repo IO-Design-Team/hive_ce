@@ -1,3 +1,7 @@
+## NEXT
+
+- Fixes a race where retrying a failed `openBox` could drop the in-flight open (by [@LahaLuhem](https://github.com/LahaLuhem) in [#320](https://github.com/IO-Design-Team/hive_ce/pull/320))
+
 ## 2.20.0
 
 - IsolatedHive compaction now uses `IsolatedCompactionStrategy`
