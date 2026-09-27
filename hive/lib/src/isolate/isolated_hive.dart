@@ -15,9 +15,6 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   });
 
   /// Open a box in the isolate
-  ///
-  /// [crashRecovery] cuts the file off at the first record it can't read. If
-  /// that's the very first one, as with a wrong [encryptionCipher], it throws.
   Future<IsolatedBox<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -30,9 +27,6 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   });
 
   /// Open a lazy box in the isolate
-  ///
-  /// [crashRecovery] cuts the file off at the first record it can't read. If
-  /// that's the very first one, as with a wrong [encryptionCipher], it throws.
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,

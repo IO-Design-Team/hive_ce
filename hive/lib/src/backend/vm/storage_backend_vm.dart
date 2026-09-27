@@ -136,13 +136,19 @@ class StorageBackendVm extends StorageBackend {
     }
 
     if (recoveryOffset != -1) {
-      // A crash only damages the end of the file, never a whole first frame.
-      if (recoveryOffset == 0 && await _startsWithCompleteFrame()) {
-        throw HiveError(
-          'Could not read the box. The encryptionCipher may be wrong, or the '
-          'box may be corrupted.',
-        );
+      // A crash can only leave an incomplete frame at the end of the file. A
+      // complete first frame that can't be read likely means a wrong cipher.
+      if (recoveryOffset == 0) {
+        await readRaf.setPosition(0);
+        final header = await readRaf.read(4);
+        if (header.length == 4 && header.readUint32(0) <= writeOffset) {
+          throw HiveError(
+            'Could not read the box. The encryption cipher may be wrong or the '
+            'box may be corrupted.',
+          );
+        }
       }
+
       if (_crashRecovery) {
         Logger.i('Recovering corrupted box.');
         await writeRaf.truncate(recoveryOffset);
@@ -152,14 +158,6 @@ class StorageBackendVm extends StorageBackend {
         throw HiveError('Wrong checksum in hive file. Box may be corrupted.');
       }
     }
-  }
-
-  Future<bool> _startsWithCompleteFrame() async {
-    await readRaf.setPosition(0);
-    final header = await readRaf.read(4);
-    if (header.length < 4) return false;
-    final length = header.readUint32(0);
-    return length >= 8 && length <= await readRaf.length();
   }
 
   @override

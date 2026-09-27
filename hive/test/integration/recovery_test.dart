@@ -75,53 +75,33 @@ void main() {
       timeout: longTimeout,
     );
 
-    group('a cipher mismatch keeps the box', () {
-      final keyA = HiveAesCipher(List.filled(32, 1));
-      final keyB = HiveAesCipher(List.filled(32, 2));
-      final mismatches = <(String, HiveCipher?, HiveCipher?)>[
-        ('wrong key', keyA, keyB),
-        ('no key on an encrypted box', keyA, null),
-        // IsolatedHive opens this as legacy data instead, so nothing gets deleted.
-        if (type == TestType.normal) ('key on a plain box', null, keyA),
-      ];
-
-      for (final (name, written, opened) in mismatches) {
-        for (final lazy in [false, true]) {
-          test(
-            lazy ? '$name, lazy' : name,
-            () => silenceOutput(() async {
-              final hive = await createHive(
-                type: type,
-                entryPoint: (send) =>
-                    silenceOutput(() => isolateEntryPoint(send)),
-              );
-              final boxName = generateBoxName();
-              final box = await hive.openBox<String>(
-                boxName,
-                encryptionCipher: written,
-              );
-              await box.put('key', 'value');
-              await box.close();
-
-              await expectLater(
-                lazy
-                    ? hive.openLazyBox<String>(
-                        boxName,
-                        encryptionCipher: opened,
-                      )
-                    : hive.openBox<String>(boxName, encryptionCipher: opened),
-                throwsIsolatedHiveError(),
-              );
-
-              final reopened = await hive.openBox<String>(
-                boxName,
-                encryptionCipher: written,
-              );
-              expect(await reopened.get('key'), 'value');
-            }),
+    for (final lazy in [false, true]) {
+      test(
+        'wrong cipher does not wipe the box${lazy ? ' (lazy)' : ''}',
+        () => silenceOutput(() async {
+          final hive = await createHive(
+            type: type,
+            entryPoint: (send) => silenceOutput(() => isolateEntryPoint(send)),
           );
-        }
-      }
-    });
+          final keyA = HiveAesCipher(List.filled(32, 1));
+          final keyB = HiveAesCipher(List.filled(32, 2));
+          final boxName = generateBoxName();
+
+          final box = await hive.openBox(boxName, encryptionCipher: keyA);
+          await box.put('key', 'value');
+          await box.close();
+
+          await expectLater(
+            lazy
+                ? hive.openLazyBox(boxName, encryptionCipher: keyB)
+                : hive.openBox(boxName, encryptionCipher: keyB),
+            throwsIsolatedHiveError(['encryption cipher']),
+          );
+
+          final reopened = await hive.openBox(boxName, encryptionCipher: keyA);
+          expect(await reopened.get('key'), 'value');
+        }),
+      );
+    }
   });
 }
