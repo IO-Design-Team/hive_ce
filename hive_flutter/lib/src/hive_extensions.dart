@@ -6,9 +6,11 @@ import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 
 /// Flutter extensions for Hive.
 extension HiveX on HiveInterface {
-  /// Initializes Hive with the path from [getApplicationDocumentsDirectory], or as an absolute path.
+  /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
   ///
-  /// You can provide a [dir] where the boxes should be stored.
+  /// You can provide a [dir] where the boxes should be stored. Relative paths
+  /// are resolved against [getApplicationDocumentsDirectory]. Absolute paths
+  /// are used as-is.
   ///
   /// Also registers the flutter type adapters
   /// - [colorAdapterTypeId] - The type id for the color adapter (default: 200)
@@ -24,17 +26,14 @@ extension HiveX on HiveInterface {
 
     String? path;
     if (!kIsWeb) {
-      // join accepts the latter arguments as nullable so it is safe
-      // to consider it "relative" even in that case. If the user wants an
-      // absolute path pointing to the base of a well-defined
-      // path (including one with built-in dart support),
-      // different from getApplicationDocumentsDirectory,
-      // then they should pass that directory in.
-      if (dir == null || path_helper.isRelative(dir)) {
+      // Root-relative Windows paths still take the drive from the app directory
+      if (dir != null &&
+          path_helper.isAbsolute(dir) &&
+          !path_helper.isRootRelative(dir)) {
+        path = dir;
+      } else {
         final appDir = await getApplicationDocumentsDirectory();
         path = path_helper.join(appDir.path, dir);
-      } else {
-        path = dir;
       }
     }
 
