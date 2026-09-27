@@ -1,3 +1,7 @@
+## 1.12.0
+
+- Supports `GenerateAdapters.converters`
+
 ## 1.11.3
 
 - Upgrades `analyzer` to `14.0.0`

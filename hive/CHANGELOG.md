@@ -1,3 +1,7 @@
+## 2.21.0
+
+- Adds `HiveConverter` and `GenerateAdapters.converters` for converting field types in generated adapters
+
 ## 2.20.1
 
 - Fixes a race where retrying a failed `openBox` could drop the in-flight open (by [@LahaLuhem](https://github.com/LahaLuhem) in [#320](https://github.com/IO-Design-Team/hive_ce/pull/320))

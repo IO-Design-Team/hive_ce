@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
@@ -21,7 +22,11 @@ class ClassAdapterBuilder extends AdapterBuilder {
     super.cls,
     super.getters,
     super.setters,
+    this.converters,
   );
+
+  /// Converters from [GenerateAdapters.converters]
+  final List<RevivedHiveConverter> converters;
 
   /// [TypeChecker] for [HiveList].
   final hiveListChecker =
@@ -101,7 +106,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
   String _value(DartType type, AdapterField field) {
     final variable = 'fields[${field.index}]';
-    final value = _cast(type, variable);
+    final value = _read(type, variable);
 
     final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
     final constructorDefaultIsNull = field.constructorDefault == null;
@@ -118,6 +123,37 @@ class ClassAdapterBuilder extends AdapterBuilder {
     if (defaultValue == null) return value;
 
     return '$variable == null ? $defaultValue : $value';
+  }
+
+  RevivedHiveConverter? _converter(DartType type) {
+    final nonNullType = cls.library.typeSystem.promoteToNonNull(type);
+    return converters.firstWhereOrNull((e) => e.type == nonNullType);
+  }
+
+  String _converterInstance(RevivedHiveConverter converter) =>
+      'const ${converter.converterType.getPrefixedDisplayString(cls.library)}()';
+
+  String _read(DartType type, String variable) {
+    final converter = _converter(type);
+    if (converter == null) return _cast(type, variable);
+
+    final value = '${_converterInstance(converter)}'
+        '.fromHive(${_cast(converter.hiveType, variable)})';
+    if (type.nullabilitySuffix == NullabilitySuffix.none) return value;
+    return '$variable == null ? null : $value';
+  }
+
+  String _write(AdapterField field) {
+    final variable = 'obj.${field.name}';
+    final converter = _converter(field.type);
+    if (converter == null) return variable;
+
+    final instance = _converterInstance(converter);
+    if (field.type.nullabilitySuffix == NullabilitySuffix.none) {
+      return '$instance.toHive($variable)';
+    }
+    final type = converter.type.getPrefixedDisplayString(cls.library);
+    return '$variable == null ? null : $instance.toHive($variable as $type)';
   }
 
   String _cast(DartType type, String variable) {
@@ -195,7 +231,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(${_write(field)})''');
     }
     code.writeln(';');
 
