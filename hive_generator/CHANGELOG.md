@@ -1,4 +1,4 @@
-## 1.11.4
+## NEXT
 
 - Fixes generic types being ordered as new types in `GenerateAdapters` output
 
