@@ -1,3 +1,7 @@
+## 2.4.0
+
+- `Hive.initFlutter` uses absolute paths as-is without calling `getApplicationDocumentsDirectory` (by [@jheld](https://github.com/jheld) in [#293](https://github.com/IO-Design-Team/hive_ce/pull/293))
+
 ## 2.3.4
 
 - Adds `hive_ce_flutter.dart` to make the publish action happy

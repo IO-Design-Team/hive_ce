@@ -8,13 +8,15 @@ import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 extension HiveX on HiveInterface {
   /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
   ///
-  /// You can provide a [subDir] where the boxes should be stored.
+  /// You can provide a [dir] where the boxes should be stored. Relative paths
+  /// are resolved against [getApplicationDocumentsDirectory]. Absolute paths
+  /// are used as-is.
   ///
   /// Also registers the flutter type adapters
   /// - [colorAdapterTypeId] - The type id for the color adapter (default: 200)
   /// - [timeOfDayAdapterTypeId] - The type id for the time of day adapter (default: 201)
   Future<void> initFlutter([
-    String? subDir,
+    String? dir,
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
     int? colorAdapterTypeId,
@@ -24,8 +26,15 @@ extension HiveX on HiveInterface {
 
     String? path;
     if (!kIsWeb) {
-      final appDir = await getApplicationDocumentsDirectory();
-      path = path_helper.join(appDir.path, subDir);
+      // Root-relative Windows paths still take the drive from the app directory
+      if (dir != null &&
+          path_helper.isAbsolute(dir) &&
+          !path_helper.isRootRelative(dir)) {
+        path = dir;
+      } else {
+        final appDir = await getApplicationDocumentsDirectory();
+        path = path_helper.join(appDir.path, dir);
+      }
     }
 
     init(path, backendPreference: backendPreference);
