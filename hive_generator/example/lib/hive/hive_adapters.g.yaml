@@ -41,7 +41,7 @@ types:
         index: 0
   ClassSpec5:
     typeId: 55
-    nextIndex: 3
+    nextIndex: 5
     fields:
       uri:
         index: 0
@@ -49,6 +49,10 @@ types:
         index: 1
       list:
         index: 2
+      uriList:
+        index: 3
+      uriSetMap:
+        index: 4
   ClassSpec4:
     typeId: 54
     nextIndex: 0

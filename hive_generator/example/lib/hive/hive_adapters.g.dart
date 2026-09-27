@@ -175,23 +175,54 @@ class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
       const UnmodifiableListViewConverter<String>().fromHive(
         (fields[2] as List).cast<String>(),
       ),
+      (fields[3] as List)
+          .map(
+            (e) =>
+                e == null ? null : const UriConverter().fromHive(e as String),
+          )
+          .toList(),
+      (fields[4] as Map?)?.map(
+        (dynamic k, dynamic v) => MapEntry(
+          k as String,
+          (v as Set)
+              .map((e) => const UriConverter().fromHive(e as String))
+              .toSet(),
+        ),
+      ),
     );
   }
 
   @override
   void write(BinaryWriter writer, ClassSpec5 obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(const UriConverter().toHive(obj.uri))
       ..writeByte(1)
-      ..write(
-        obj.nullableUri == null
-            ? null
-            : const UriConverter().toHive(obj.nullableUri as Uri),
-      )
+      ..write(switch (obj.nullableUri) {
+        final value? => const UriConverter().toHive(value),
+        _ => null,
+      })
       ..writeByte(2)
-      ..write(const UnmodifiableListViewConverter<String>().toHive(obj.list));
+      ..write(const UnmodifiableListViewConverter<String>().toHive(obj.list))
+      ..writeByte(3)
+      ..write(
+        obj.uriList
+            .map(
+              (e) => switch (e) {
+                final value? => const UriConverter().toHive(value),
+                _ => null,
+              },
+            )
+            .toList(),
+      )
+      ..writeByte(4)
+      ..write(
+        obj.uriSetMap?.map(
+          (k, v) =>
+              MapEntry(k, v.map((e) => const UriConverter().toHive(e)).toSet()),
+        ),
+      );
   }
 
   @override

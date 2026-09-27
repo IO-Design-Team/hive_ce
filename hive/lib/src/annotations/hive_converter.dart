@@ -3,8 +3,9 @@ import 'package:meta/meta.dart';
 /// Converts a field of type [T] to and from a type [S] that Hive can store
 ///
 /// Pass instances to [GenerateAdapters.converters]. A converter is used for
-/// fields whose type is exactly [T] (ignoring nullability). Null values are
-/// not passed to the converter.
+/// values whose type is exactly [T] (ignoring nullability), including values
+/// inside [List], [Set], and [Map] fields. Null values are not passed to the
+/// converter.
 ///
 /// Converters must have a const unnamed constructor with no arguments. Generic
 /// converters must be given concrete type arguments.

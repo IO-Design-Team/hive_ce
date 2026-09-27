@@ -76,6 +76,14 @@ class ClassSpec5 {
   final Uri uri;
   final Uri? nullableUri;
   final UnmodifiableListView<String> list;
+  final List<Uri?> uriList;
+  final Map<String, Set<Uri>>? uriSetMap;
 
-  const ClassSpec5(this.uri, this.nullableUri, this.list);
+  const ClassSpec5(
+    this.uri,
+    this.nullableUri,
+    this.list,
+    this.uriList,
+    this.uriSetMap,
+  );
 }
