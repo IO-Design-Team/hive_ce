@@ -1,3 +1,7 @@
+## 1.11.4
+
+- Fixes generic types being ordered as new types in `GenerateAdapters` output
+
 ## 1.11.3
 
 - Upgrades `analyzer` to `14.0.0`
