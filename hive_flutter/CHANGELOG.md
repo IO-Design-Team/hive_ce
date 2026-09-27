@@ -1,6 +1,6 @@
 ## 2.4.0
 
-- `Hive.initFlutter` uses absolute paths as-is without calling `getApplicationDocumentsDirectory` (thanks [@jheld](https://github.com/jheld))
+- `Hive.initFlutter` uses absolute paths as-is without calling `getApplicationDocumentsDirectory` (by [@jheld](https://github.com/jheld) in [#293](https://github.com/IO-Design-Team/hive_ce/pull/293))
 
 ## 2.3.4
 
