@@ -13,3 +13,17 @@ String join(
     '[Hive Error] Tried to use the `path` package from Flutter Web.',
   );
 }
+
+/// Stub `path.isAbsolute` method
+bool isAbsolute(String path) {
+  throw UnimplementedError(
+    '[Hive Error] Tried to use the `path` package from Flutter Web.',
+  );
+}
+
+/// Stub `path.isRootRelative` method
+bool isRootRelative(String path) {
+  throw UnimplementedError(
+    '[Hive Error] Tried to use the `path` package from Flutter Web.',
+  );
+}

@@ -1,46 +1,35 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_ce_flutter/adapters.dart'
     hide IsolatedHive, IsolateNameServer;
 import 'package:hive_ce_flutter/src/isolate/isolate_name_server.dart';
+import 'package:hive_ce_flutter/src/type_registry_extensions.dart';
 import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
-import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 
 /// Flutter extensions for [IsolatedHiveInterface]
 extension IsolatedHiveX on IsolatedHiveInterface {
   /// Initializes [IsolatedHive] with the path from
   /// [getApplicationDocumentsDirectory] and the Flutter [IsolateNameServer]
   ///
-  /// You can provide a [subDirectory] where the boxes should be stored
+  /// You can provide a [subDirectory] where the boxes should be stored.
+  /// Relative paths are resolved against [getApplicationDocumentsDirectory].
+  /// Absolute paths are used as-is.
   ///
   /// Also registers the flutter type adapters
+  ///
+  /// If [useMaterialUi] is true, [MaterialUiTimeOfDayAdapter] is registered
+  /// instead of [TimeOfDayAdapter]
   Future<void> initFlutter({
     String? subDirectory,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
+    bool useMaterialUi = false,
   }) async {
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-    } catch (_) {
-      // This will fail if the Flutter engine is not available
-    }
-
-    String? path;
-    if (!kIsWeb) {
-      final appDir = await getApplicationDocumentsDirectory();
-      path = path_helper.join(appDir.path, subDirectory);
-    }
-
-    await init(path, isolateNameServer: const IsolateNameServer());
-
-    final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
-    if (!isAdapterRegistered(colorAdapter.typeId)) {
-      registerAdapter(colorAdapter);
-    }
-
-    final timeOfDayAdapter = TimeOfDayAdapter(typeId: timeOfDayAdapterTypeId);
-    if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
-      registerAdapter(timeOfDayAdapter);
-    }
+    await initFlutterCommon(
+      dir: subDirectory,
+      initHive: (path) =>
+          init(path, isolateNameServer: const IsolateNameServer()),
+      colorAdapterTypeId: colorAdapterTypeId,
+      timeOfDayAdapterTypeId: timeOfDayAdapterTypeId,
+      useMaterialUi: useMaterialUi,
+    );
   }
 }
