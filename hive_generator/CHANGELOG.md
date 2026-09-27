@@ -1,6 +1,7 @@
 ## 1.12.0
 
 - Supports `GenerateAdapters.converters`
+- Fixes generic types being ordered as new types in `GenerateAdapters` output
 
 ## 1.11.3
 
