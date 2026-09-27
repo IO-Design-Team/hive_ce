@@ -1,14 +1,43 @@
+import 'dart:collection';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:meta/meta.dart';
 
-@GenerateAdapters([
-  AdapterSpec<ClassSpec1>(),
-  AdapterSpec<ClassSpec2>(),
-  AdapterSpec<ClassSpec3>(),
-  AdapterSpec<ClassSpec4>(),
-  AdapterSpec<EnumSpec>(),
-], firstTypeId: 50)
+@GenerateAdapters(
+  [
+    AdapterSpec<ClassSpec1>(),
+    AdapterSpec<ClassSpec2>(),
+    AdapterSpec<ClassSpec3>(),
+    AdapterSpec<ClassSpec4>(),
+    AdapterSpec<EnumSpec>(),
+    AdapterSpec<ClassSpec5>(),
+  ],
+  firstTypeId: 50,
+  converters: [UriConverter(), UnmodifiableListViewConverter<String>()],
+)
 part 'hive_adapters.g.dart';
+
+class UriConverter extends HiveConverter<Uri, String> {
+  const UriConverter();
+
+  @override
+  Uri fromHive(String value) => Uri.parse(value);
+
+  @override
+  String toHive(Uri value) => value.toString();
+}
+
+class UnmodifiableListViewConverter<E>
+    extends HiveConverter<UnmodifiableListView<E>, List<E>> {
+  const UnmodifiableListViewConverter();
+
+  @override
+  UnmodifiableListView<E> fromHive(List<E> value) =>
+      UnmodifiableListView(value);
+
+  @override
+  List<E> toHive(UnmodifiableListView<E> value) => value.toList();
+}
 
 @immutable
 class ClassSpec1 {
@@ -40,4 +69,21 @@ enum EnumSpec {
   value2;
 
   EnumSpec get getter => EnumSpec.value2;
+}
+
+@immutable
+class ClassSpec5 {
+  final Uri uri;
+  final Uri? nullableUri;
+  final UnmodifiableListView<String> list;
+  final List<Uri?> uriList;
+  final Map<String, Set<Uri>>? uriSetMap;
+
+  const ClassSpec5(
+    this.uri,
+    this.nullableUri,
+    this.list,
+    this.uriList,
+    this.uriSetMap,
+  );
 }

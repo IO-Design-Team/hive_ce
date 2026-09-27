@@ -182,3 +182,82 @@ class ClassSpec4Adapter extends TypeAdapter<ClassSpec4> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class ClassSpec5Adapter extends TypeAdapter<ClassSpec5> {
+  @override
+  final typeId = 55;
+
+  @override
+  ClassSpec5 read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ClassSpec5(
+      const UriConverter().fromHive(fields[0] as String),
+      fields[1] == null
+          ? null
+          : const UriConverter().fromHive(fields[1] as String),
+      const UnmodifiableListViewConverter<String>().fromHive(
+        (fields[2] as List).cast<String>(),
+      ),
+      (fields[3] as List)
+          .map(
+            (e) =>
+                e == null ? null : const UriConverter().fromHive(e as String),
+          )
+          .toList(),
+      (fields[4] as Map?)?.map(
+        (dynamic k, dynamic v) => MapEntry(
+          k as String,
+          (v as Set)
+              .map((e) => const UriConverter().fromHive(e as String))
+              .toSet(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ClassSpec5 obj) {
+    writer
+      ..writeByte(5)
+      ..writeByte(0)
+      ..write(const UriConverter().toHive(obj.uri))
+      ..writeByte(1)
+      ..write(switch (obj.nullableUri) {
+        final value? => const UriConverter().toHive(value),
+        _ => null,
+      })
+      ..writeByte(2)
+      ..write(const UnmodifiableListViewConverter<String>().toHive(obj.list))
+      ..writeByte(3)
+      ..write(
+        obj.uriList
+            .map(
+              (e) => switch (e) {
+                final value? => const UriConverter().toHive(value),
+                _ => null,
+              },
+            )
+            .toList(),
+      )
+      ..writeByte(4)
+      ..write(
+        obj.uriSetMap?.map(
+          (k, v) =>
+              MapEntry(k, v.map((e) => const UriConverter().toHive(e)).toSet()),
+        ),
+      );
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClassSpec5Adapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

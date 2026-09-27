@@ -10,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
+import 'package:hive_ce_generator/src/model/revived_generate_adapter.dart';
 import 'package:source_gen/source_gen.dart';
 
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
@@ -21,7 +22,11 @@ class ClassAdapterBuilder extends AdapterBuilder {
     super.cls,
     super.getters,
     super.setters,
+    this.converters,
   );
+
+  /// Converters from [GenerateAdapters.converters]
+  final List<RevivedHiveConverter> converters;
 
   /// [TypeChecker] for [HiveList].
   final hiveListChecker =
@@ -120,7 +125,57 @@ class ClassAdapterBuilder extends AdapterBuilder {
     return '$variable == null ? $defaultValue : $value';
   }
 
+  RevivedHiveConverter? _converter(DartType type) {
+    final nonNullType = cls.library.typeSystem.promoteToNonNull(type);
+    return converters.firstWhereOrNull((e) => e.type == nonNullType);
+  }
+
+  String _converterInstance(RevivedHiveConverter converter) =>
+      'const ${converter.converterType.getPrefixedDisplayString(cls.library)}()';
+
+  bool _hasConverter(DartType type) {
+    if (_converter(type) != null) return true;
+    if (hiveListChecker.isAssignableFromType(type) ||
+        isUint8List(type) ||
+        !isMapOrIterable(type)) {
+      return false;
+    }
+    return (type as ParameterizedType).typeArguments.any(_hasConverter);
+  }
+
+  String _write(DartType type, String value) {
+    final converter = _converter(type);
+    if (converter != null) {
+      final instance = _converterInstance(converter);
+      if (type.nullabilitySuffix == NullabilitySuffix.none) {
+        return '$instance.toHive($value)';
+      }
+      return 'switch ($value) { final value? => $instance.toHive(value), '
+          '_ => null }';
+    }
+
+    if (!_hasConverter(type)) return value;
+
+    final suffix = _accessorSuffixFromType(type);
+    final args = (type as ParameterizedType).typeArguments;
+    if (mapChecker.isAssignableFromType(type)) {
+      return '$value$suffix.map((k, v) => '
+          'MapEntry(${_write(args[0], 'k')}, ${_write(args[1], 'v')}))';
+    }
+    final collection =
+        setChecker.isAssignableFromType(type) ? 'toSet' : 'toList';
+    return '$value$suffix.map((e) => ${_write(args[0], 'e')}).$collection()';
+  }
+
   String _cast(DartType type, String variable) {
+    final converter = _converter(type);
+    if (converter != null) {
+      final value = '${_converterInstance(converter)}'
+          '.fromHive(${_cast(converter.hiveType, variable)})';
+      if (type.nullabilitySuffix == NullabilitySuffix.none) return value;
+      return '$variable == null ? null : $value';
+    }
+
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
@@ -155,7 +210,8 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final paramType = type as ParameterizedType;
     final arg = paramType.typeArguments.first;
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg) && !isUint8List(arg)) {
+    if ((isMapOrIterable(arg) && !isUint8List(arg)) ||
+        _converter(arg) != null) {
       var cast = '';
       // Using assignable because Set? is not exactly Set
       if (setChecker.isAssignableFromType(type)) {
@@ -176,7 +232,10 @@ class ClassAdapterBuilder extends AdapterBuilder {
     final arg1 = paramType.typeArguments[0];
     final arg2 = paramType.typeArguments[1];
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg1) || isMapOrIterable(arg2)) {
+    if (isMapOrIterable(arg1) ||
+        isMapOrIterable(arg2) ||
+        _converter(arg1) != null ||
+        _converter(arg2) != null) {
       return '$suffix.map((dynamic k, dynamic v)=>'
           'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
     } else {
@@ -195,7 +254,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(${_write(field.type, 'obj.${field.name}')})''');
     }
     code.writeln(';');
 
