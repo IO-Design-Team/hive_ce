@@ -1,6 +1,7 @@
-## NEXT
+## 2.20.1
 
 - Fixes a race where retrying a failed `openBox` could drop the in-flight open (by [@LahaLuhem](https://github.com/LahaLuhem) in [#320](https://github.com/IO-Design-Team/hive_ce/pull/320))
+- Opening a box with the wrong cipher now throws instead of wiping the box during crash recovery (by [@LahaLuhem](https://github.com/LahaLuhem) in [#330](https://github.com/IO-Design-Team/hive_ce/pull/330))
 
 ## 2.20.0
 
