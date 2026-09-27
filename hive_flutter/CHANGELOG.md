@@ -1,3 +1,9 @@
+## 2.4.0
+
+- Adds `MaterialUiTimeOfDayAdapter` for the `TimeOfDay` class from `package:material_ui`
+- Adds `useMaterialUi` flag to `initFlutter` to register `MaterialUiTimeOfDayAdapter` instead of `TimeOfDayAdapter`
+- Updates minimum Flutter version to 3.44.0
+
 ## 2.3.4
 
 - Adds `hive_ce_flutter.dart` to make the publish action happy

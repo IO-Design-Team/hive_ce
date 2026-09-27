@@ -1,17 +1,18 @@
 name: hive_ce_flutter
 description: Extension for Hive. Makes it easier to use Hive in Flutter apps.
-version: 2.3.4
+version: 2.4.0
 homepage: https://github.com/IO-Design-Team/hive_ce/tree/main/hive_flutter
 
 environment:
   sdk: ^3.4.0
-  flutter: ">=3.27.0"
+  flutter: ">=3.44.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   hive_ce: ^2.16.0
+  material_ui: ^1.0.0
   path_provider: ^2.0.10
   path: ^1.8.2
 
