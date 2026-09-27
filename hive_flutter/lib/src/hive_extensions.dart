@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_ce_flutter/adapters.dart';
+import 'package:hive_ce_flutter/src/type_registry_extensions.dart';
 import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
-import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 
 /// Flutter extensions for Hive.
 extension HiveX on HiveInterface {
@@ -15,38 +13,23 @@ extension HiveX on HiveInterface {
   /// Also registers the flutter type adapters
   /// - [colorAdapterTypeId] - The type id for the color adapter (default: 200)
   /// - [timeOfDayAdapterTypeId] - The type id for the time of day adapter (default: 201)
+  ///
+  /// If [useMaterialUi] is true, [MaterialUiTimeOfDayAdapter] is registered
+  /// instead of [TimeOfDayAdapter]
   Future<void> initFlutter([
     String? dir,
     HiveStorageBackendPreference backendPreference =
         HiveStorageBackendPreference.native,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
+    bool useMaterialUi = false,
   ]) async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    String? path;
-    if (!kIsWeb) {
-      // Root-relative Windows paths still take the drive from the app directory
-      if (dir != null &&
-          path_helper.isAbsolute(dir) &&
-          !path_helper.isRootRelative(dir)) {
-        path = dir;
-      } else {
-        final appDir = await getApplicationDocumentsDirectory();
-        path = path_helper.join(appDir.path, dir);
-      }
-    }
-
-    init(path, backendPreference: backendPreference);
-
-    final colorAdapter = ColorAdapter(typeId: colorAdapterTypeId);
-    if (!isAdapterRegistered(colorAdapter.typeId)) {
-      registerAdapter(colorAdapter);
-    }
-
-    final timeOfDayAdapter = TimeOfDayAdapter(typeId: timeOfDayAdapterTypeId);
-    if (!isAdapterRegistered(timeOfDayAdapter.typeId)) {
-      registerAdapter(timeOfDayAdapter);
-    }
+    await initFlutterCommon(
+      dir: dir,
+      initHive: (path) => init(path, backendPreference: backendPreference),
+      colorAdapterTypeId: colorAdapterTypeId,
+      timeOfDayAdapterTypeId: timeOfDayAdapterTypeId,
+      useMaterialUi: useMaterialUi,
+    );
   }
 }
