@@ -20,6 +20,9 @@ abstract class HiveInterface implements TypeRegistry {
   ///
   /// If the box is already open, the instance is returned and all provided
   /// parameters are being ignored.
+  ///
+  /// [crashRecovery] cuts the file off at the first record it can't read. If
+  /// that's the very first one, as with a wrong [encryptionCipher], it throws.
   Future<Box<E>> openBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
@@ -36,6 +39,9 @@ abstract class HiveInterface implements TypeRegistry {
   ///
   /// If the box is already open, the instance is returned and all provided
   /// parameters are being ignored.
+  ///
+  /// [crashRecovery] cuts the file off at the first record it can't read. If
+  /// that's the very first one, as with a wrong [encryptionCipher], it throws.
   Future<LazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,

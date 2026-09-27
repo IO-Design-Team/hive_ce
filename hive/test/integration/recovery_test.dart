@@ -4,6 +4,7 @@ library;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/isolate/handler/isolate_entry_point.dart';
 import 'package:path/path.dart' as path;
@@ -73,5 +74,54 @@ void main() {
       },
       timeout: longTimeout,
     );
+
+    group('a cipher mismatch keeps the box', () {
+      final keyA = HiveAesCipher(List.filled(32, 1));
+      final keyB = HiveAesCipher(List.filled(32, 2));
+      final mismatches = <(String, HiveCipher?, HiveCipher?)>[
+        ('wrong key', keyA, keyB),
+        ('no key on an encrypted box', keyA, null),
+        // IsolatedHive opens this as legacy data instead, so nothing gets deleted.
+        if (type == TestType.normal) ('key on a plain box', null, keyA),
+      ];
+
+      for (final (name, written, opened) in mismatches) {
+        for (final lazy in [false, true]) {
+          test(
+            lazy ? '$name, lazy' : name,
+            () => silenceOutput(() async {
+              final hive = await createHive(
+                type: type,
+                entryPoint: (send) =>
+                    silenceOutput(() => isolateEntryPoint(send)),
+              );
+              final boxName = generateBoxName();
+              final box = await hive.openBox<String>(
+                boxName,
+                encryptionCipher: written,
+              );
+              await box.put('key', 'value');
+              await box.close();
+
+              await expectLater(
+                lazy
+                    ? hive.openLazyBox<String>(
+                        boxName,
+                        encryptionCipher: opened,
+                      )
+                    : hive.openBox<String>(boxName, encryptionCipher: opened),
+                throwsIsolatedHiveError(),
+              );
+
+              final reopened = await hive.openBox<String>(
+                boxName,
+                encryptionCipher: written,
+              );
+              expect(await reopened.get('key'), 'value');
+            }),
+          );
+        }
+      }
+    });
   });
 }

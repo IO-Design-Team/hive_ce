@@ -13,6 +13,7 @@ import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/io/buffered_file_writer.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
+import 'package:hive_ce/src/util/extensions.dart';
 import 'package:hive_ce/src/util/logger.dart';
 import 'package:meta/meta.dart';
 
@@ -135,6 +136,13 @@ class StorageBackendVm extends StorageBackend {
     }
 
     if (recoveryOffset != -1) {
+      // A crash only damages the end of the file, never a whole first frame.
+      if (recoveryOffset == 0 && await _startsWithCompleteFrame()) {
+        throw HiveError(
+          'Could not read the box. The encryptionCipher may be wrong, or the '
+          'box may be corrupted.',
+        );
+      }
       if (_crashRecovery) {
         Logger.i('Recovering corrupted box.');
         await writeRaf.truncate(recoveryOffset);
@@ -144,6 +152,14 @@ class StorageBackendVm extends StorageBackend {
         throw HiveError('Wrong checksum in hive file. Box may be corrupted.');
       }
     }
+  }
+
+  Future<bool> _startsWithCompleteFrame() async {
+    await readRaf.setPosition(0);
+    final header = await readRaf.read(4);
+    if (header.length < 4) return false;
+    final length = header.readUint32(0);
+    return length >= 8 && length <= await readRaf.length();
   }
 
   @override
