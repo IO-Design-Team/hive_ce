@@ -3,6 +3,8 @@
 - Adds `MaterialUiTimeOfDayAdapter` for the `TimeOfDay` class from `package:material_ui`
 - Adds `useMaterialUi` flag to `initFlutter` to register `MaterialUiTimeOfDayAdapter` instead of `TimeOfDayAdapter`
 - Updates minimum Flutter version to 3.44.0
+- `Hive.initFlutter` uses absolute paths as-is without calling `getApplicationDocumentsDirectory` (by [@jheld](https://github.com/jheld) in [#293](https://github.com/IO-Design-Team/hive_ce/pull/293))
+- `IsolatedHive.initFlutter` also uses absolute paths as-is
 
 ## 2.3.4
 

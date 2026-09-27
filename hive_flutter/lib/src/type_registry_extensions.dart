@@ -10,7 +10,7 @@ import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 extension TypeRegistryX on TypeRegistry {
   /// Common Flutter initialization code
   Future<void> initFlutterCommon({
-    String? subDirectory,
+    String? dir,
     required FutureOr<void> Function(String? path) initHive,
     int? colorAdapterTypeId,
     int? timeOfDayAdapterTypeId,
@@ -24,8 +24,15 @@ extension TypeRegistryX on TypeRegistry {
 
     String? path;
     if (!kIsWeb) {
-      final appDir = await getApplicationDocumentsDirectory();
-      path = path_helper.join(appDir.path, subDirectory);
+      // Root-relative Windows paths still take the drive from the app directory
+      if (dir != null &&
+          path_helper.isAbsolute(dir) &&
+          !path_helper.isRootRelative(dir)) {
+        path = dir;
+      } else {
+        final appDir = await getApplicationDocumentsDirectory();
+        path = path_helper.join(appDir.path, dir);
+      }
     }
 
     await initHive(path);

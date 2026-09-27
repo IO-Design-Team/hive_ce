@@ -9,7 +9,9 @@ extension IsolatedHiveX on IsolatedHiveInterface {
   /// Initializes [IsolatedHive] with the path from
   /// [getApplicationDocumentsDirectory] and the Flutter [IsolateNameServer]
   ///
-  /// You can provide a [subDirectory] where the boxes should be stored
+  /// You can provide a [subDirectory] where the boxes should be stored.
+  /// Relative paths are resolved against [getApplicationDocumentsDirectory].
+  /// Absolute paths are used as-is.
   ///
   /// Also registers the flutter type adapters
   ///
@@ -22,7 +24,7 @@ extension IsolatedHiveX on IsolatedHiveInterface {
     bool useMaterialUi = false,
   }) async {
     await initFlutterCommon(
-      subDirectory: subDirectory,
+      dir: subDirectory,
       initHive: (path) =>
           init(path, isolateNameServer: const IsolateNameServer()),
       colorAdapterTypeId: colorAdapterTypeId,
