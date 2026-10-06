@@ -10,7 +10,8 @@ dependencies:
   build: ^4.0.0
   source_gen: ^4.0.0
   hive_ce: ^2.16.0
-  analyzer: ^14.0.0
+  # build_runner 2.16.1 still sets AnalysisOptionsImpl.contextFeatures, removed in 14.5.0.
+  analyzer: '>=14.0.0 <14.5.0'
   glob: ^2.1.2
   path: ^1.9.0
   yaml: ^3.1.2

@@ -17,6 +17,8 @@ dependencies:
   path: ^1.8.2
 
 dev_dependencies:
+  # build_runner 2.16.1 still sets AnalysisOptionsImpl.contextFeatures, removed in 14.5.0.
+  analyzer: '>=14.0.0 <14.5.0'
   test: ^1.21.1
   path_provider_platform_interface: ^2.0.0
   rexios_lints: ^19.0.0

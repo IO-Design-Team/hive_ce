@@ -1,3 +1,7 @@
+## 2.20.2
+
+- Fixes `deleteBoxFromDisk` throwing `PathNotFoundException` after a failed `openBox` (by [@lucasiturbide](https://github.com/lucasiturbide) in [#338](https://github.com/IO-Design-Team/hive_ce/issues/338))
+
 ## 2.20.1
 
 - Fixes a race where retrying a failed `openBox` could drop the in-flight open (by [@LahaLuhem](https://github.com/LahaLuhem) in [#320](https://github.com/IO-Design-Team/hive_ce/pull/320))

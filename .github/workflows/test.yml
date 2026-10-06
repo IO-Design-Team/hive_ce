@@ -63,6 +63,7 @@ jobs:
           sed -i '/rexios_lints:/d' pubspec.yaml
           sed -i '/build_runner:/d' pubspec.yaml
           sed -i '/json_serializable:/d' pubspec.yaml
+          sed -i '/analyzer:/d' pubspec.yaml
       - name: Install dependencies
         run: dart pub get --no-example
       - name: Run tests

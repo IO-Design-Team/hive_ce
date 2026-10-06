@@ -389,6 +389,29 @@ void main() {
         await hive.deleteBoxFromDisk('testBox1');
         await hive.close();
       });
+
+      test('after a failed openBox', () async {
+        final keyA = HiveAesCipher(List.filled(32, 1));
+        final keyB = HiveAesCipher(List.filled(32, 2));
+
+        // Repeat so the failed open's lock-file delete can overlap
+        // deleteBoxFromDisk.
+        for (var i = 0; i < 50; i++) {
+          final hive = await initHive();
+          final box = await hive.openBox('box', encryptionCipher: keyA);
+          await box.put('k', 'v');
+          await box.close();
+
+          try {
+            await hive.openBox('box', encryptionCipher: keyB);
+            fail('openBox should throw');
+          } on HiveError {
+            await hive.deleteBoxFromDisk('box');
+          }
+
+          await hive.close();
+        }
+      });
     });
 
     test('.deleteFromDisk()', () async {
