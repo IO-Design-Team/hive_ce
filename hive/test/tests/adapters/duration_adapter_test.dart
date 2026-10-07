@@ -7,21 +7,21 @@ import '../mocks.dart';
 void main() {
   group('DurationAdapter', () {
     test('.read()', () {
-      final duration = Duration(seconds: 30);
+      final duration = Duration(seconds: 30, microseconds: 7);
       final binaryReader = MockBinaryReader();
-      when(binaryReader.readInt).thenReturn(duration.inMilliseconds);
+      when(binaryReader.readDouble).thenReturn(duration.inMicroseconds / 1000);
 
       final duration2 = DurationAdapter().read(binaryReader);
-      verify(binaryReader.readInt);
+      verify(binaryReader.readDouble);
       expect(duration2, duration);
     });
 
     test('.write()', () {
-      final duration = Duration(seconds: 30);
+      final duration = Duration(seconds: 30, microseconds: 7);
       final binaryWriter = MockBinaryWriter();
 
       DurationAdapter().write(binaryWriter, duration);
-      verify(() => binaryWriter.writeInt(duration.inMilliseconds));
+      verify(() => binaryWriter.writeDouble(duration.inMicroseconds / 1000));
     });
   });
 }

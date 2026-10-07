@@ -9,13 +9,15 @@ class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
 
   @override
   T read(BinaryReader reader) {
-    final millis = reader.readInt();
-    return DateTimeWithoutTZ.fromMillisecondsSinceEpoch(millis) as T;
+    final millis = reader.readDouble();
+    return DateTimeWithoutTZ.fromMicrosecondsSinceEpoch(
+      (millis * 1000).round(),
+    ) as T;
   }
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeInt(obj.millisecondsSinceEpoch);
+    writer.writeDouble(obj.microsecondsSinceEpoch / 1000);
   }
 }
 
@@ -25,6 +27,10 @@ class DateTimeWithoutTZ extends DateTime {
   /// TODO: Document this!
   DateTimeWithoutTZ.fromMillisecondsSinceEpoch(super.millisecondsSinceEpoch)
       : super.fromMillisecondsSinceEpoch();
+
+  /// TODO: Document this!
+  DateTimeWithoutTZ.fromMicrosecondsSinceEpoch(super.microsecondsSinceEpoch)
+      : super.fromMicrosecondsSinceEpoch();
 }
 
 /// Alternative adapter for DateTime with time zone info
@@ -34,14 +40,17 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
 
   @override
   DateTime read(BinaryReader reader) {
-    final millis = reader.readInt();
+    final millis = reader.readDouble();
     final isUtc = reader.readBool();
-    return DateTime.fromMillisecondsSinceEpoch(millis, isUtc: isUtc);
+    return DateTime.fromMicrosecondsSinceEpoch(
+      (millis * 1000).round(),
+      isUtc: isUtc,
+    );
   }
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeInt(obj.millisecondsSinceEpoch);
+    writer.writeDouble(obj.microsecondsSinceEpoch / 1000);
     writer.writeBool(obj.isUtc);
   }
 }

@@ -1,3 +1,7 @@
+## 2.21.0
+
+- `DateTime` and `Duration` now preserve microseconds (by [@LahaLuhem](https://github.com/LahaLuhem) in [#340](https://github.com/IO-Design-Team/hive_ce/issues/340))
+
 ## 2.20.2
 
 - Fixes `deleteBoxFromDisk` throwing `PathNotFoundException` after a failed `openBox` (by [@lucasiturbide](https://github.com/lucasiturbide) in [#338](https://github.com/IO-Design-Team/hive_ce/issues/338))

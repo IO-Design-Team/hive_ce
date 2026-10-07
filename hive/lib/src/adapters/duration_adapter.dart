@@ -8,12 +8,12 @@ class DurationAdapter extends TypeAdapter<Duration> {
 
   @override
   Duration read(BinaryReader reader) {
-    final millis = reader.readInt();
-    return Duration(milliseconds: millis);
+    final millis = reader.readDouble();
+    return Duration(microseconds: (millis * 1000).round());
   }
 
   @override
   void write(BinaryWriter writer, Duration obj) {
-    writer.writeInt(obj.inMilliseconds);
+    writer.writeDouble(obj.inMicroseconds / 1000);
   }
 }
