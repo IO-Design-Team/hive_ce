@@ -2,9 +2,6 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:meta/meta.dart';
 
-/// Beyond 2^43 milliseconds a double cannot hold microsecond precision
-const maxMicrosecondPrecisionMillis = 8796093022208;
-
 /// Adapter for DateTime
 class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
   @override
@@ -48,11 +45,7 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    final millis = obj.millisecondsSinceEpoch;
-    final fraction = millis.abs() < maxMicrosecondPrecisionMillis
-        ? obj.microsecond / 1000
-        : 0.0;
-    writer.writeDouble(millis + fraction);
+    writer.writeDouble(obj.millisecondsSinceEpoch + obj.microsecond / 1000);
     writer.writeBool(obj.isUtc);
   }
 }

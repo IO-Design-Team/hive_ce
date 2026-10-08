@@ -1,6 +1,11 @@
 import 'package:hive_ce/hive_ce.dart';
-import 'package:hive_ce/src/adapters/date_time_adapter.dart';
 import 'package:hive_ce/src/binary/frame.dart';
+
+/// Beyond 2^43 milliseconds a double cannot hold microsecond precision
+///
+/// Unlike DateTime this must be enforced since on web the remainder of
+/// [Duration.inMicroseconds] becomes rounding noise for long durations
+const _maxMicrosecondPrecisionMillis = 8796093022208;
 
 /// Adapter for Duration
 class DurationAdapter extends TypeAdapter<Duration> {
@@ -20,7 +25,7 @@ class DurationAdapter extends TypeAdapter<Duration> {
   @override
   void write(BinaryWriter writer, Duration obj) {
     final millis = obj.inMilliseconds;
-    final fraction = millis.abs() < maxMicrosecondPrecisionMillis
+    final fraction = millis.abs() < _maxMicrosecondPrecisionMillis
         ? obj.inMicroseconds.remainder(1000) / 1000
         : 0.0;
     writer.writeDouble(millis + fraction);
