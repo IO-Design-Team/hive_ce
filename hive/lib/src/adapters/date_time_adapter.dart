@@ -45,7 +45,11 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeDouble(obj.millisecondsSinceEpoch + obj.microsecond / 1000);
+    final micros = obj.microsecond;
+    // Older SDKs truncate millisecondsSinceEpoch instead of flooring it
+    final millis =
+        obj.subtract(Duration(microseconds: micros)).millisecondsSinceEpoch;
+    writer.writeDouble(millis + micros / 1000);
     writer.writeBool(obj.isUtc);
   }
 }

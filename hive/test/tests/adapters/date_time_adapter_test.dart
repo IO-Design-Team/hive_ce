@@ -60,7 +60,7 @@ void main() {
       final dates = [
         DateTime.utc(2026, 10, 3, 12, 0, 0, 0, 1),
         DateTime.utc(1970, 1, 1, 0, 0, 0, 0, 1),
-        DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 999),
+        DateTime.fromMicrosecondsSinceEpoch(-1, isUtc: true),
         DateTime.utc(1969, 12, 31, 23, 59, 59, 998, 500),
         DateTime.utc(2110, 5, 22, 13, 24, 37, 221, 776),
         DateTime.utc(1828, 3, 4, 5, 6, 7, 8, 9),
