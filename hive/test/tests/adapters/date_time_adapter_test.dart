@@ -11,12 +11,11 @@ void main() {
     test('.read()', () {
       final now = DateTime.now();
       final binaryReader = MockBinaryReader();
-      when(binaryReader.readDouble)
-          .thenReturn(now.microsecondsSinceEpoch / 1000);
+      when(binaryReader.readInt).thenReturn(now.millisecondsSinceEpoch);
 
       final date = DateTimeAdapter().read(binaryReader);
-      verify(binaryReader.readDouble);
-      expect(date, now);
+      verify(binaryReader.readInt);
+      expect(date, now.subtract(Duration(microseconds: now.microsecond)));
     });
 
     test('.write()', () {
@@ -24,9 +23,7 @@ void main() {
       final binaryWriter = MockBinaryWriter();
 
       DateTimeAdapter().write(binaryWriter, now);
-      verify(
-        () => binaryWriter.writeDouble(now.microsecondsSinceEpoch / 1000),
-      );
+      verify(() => binaryWriter.writeInt(now.millisecondsSinceEpoch));
     });
   });
 
@@ -36,7 +33,7 @@ void main() {
         final now = DateTime.now();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readDouble)
-            .thenReturn(now.microsecondsSinceEpoch / 1000);
+            .thenReturn(now.millisecondsSinceEpoch + now.microsecond / 1000);
         when(binaryReader.readBool).thenReturn(false);
 
         final date = DateTimeWithTimezoneAdapter().read(binaryReader);
@@ -51,7 +48,7 @@ void main() {
         final now = DateTime.now().toUtc();
         final binaryReader = MockBinaryReader();
         when(binaryReader.readDouble)
-            .thenReturn(now.microsecondsSinceEpoch / 1000);
+            .thenReturn(now.millisecondsSinceEpoch + now.microsecond / 1000);
         when(binaryReader.readBool).thenReturn(true);
 
         final date = DateTimeWithTimezoneAdapter().read(binaryReader);
@@ -71,7 +68,9 @@ void main() {
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);
         verifyInOrder([
-          () => binaryWriter.writeDouble(now.microsecondsSinceEpoch / 1000),
+          () => binaryWriter.writeDouble(
+                now.millisecondsSinceEpoch + now.microsecond / 1000,
+              ),
           () => binaryWriter.writeBool(false),
         ]);
       });
@@ -82,7 +81,9 @@ void main() {
 
         DateTimeWithTimezoneAdapter().write(binaryWriter, now);
         verifyInOrder([
-          () => binaryWriter.writeDouble(now.microsecondsSinceEpoch / 1000),
+          () => binaryWriter.writeDouble(
+                now.millisecondsSinceEpoch + now.microsecond / 1000,
+              ),
           () => binaryWriter.writeBool(true),
         ]);
       });

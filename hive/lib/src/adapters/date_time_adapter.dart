@@ -2,6 +2,9 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:meta/meta.dart';
 
+/// Beyond 2^43 milliseconds a double cannot hold microsecond precision
+const maxMicrosecondPrecisionMillis = 8796093022208;
+
 /// Adapter for DateTime
 class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
   @override
@@ -9,15 +12,13 @@ class DateTimeAdapter<T extends DateTime> extends TypeAdapter<T> {
 
   @override
   T read(BinaryReader reader) {
-    final millis = reader.readDouble();
-    return DateTimeWithoutTZ.fromMicrosecondsSinceEpoch(
-      (millis * 1000).round(),
-    ) as T;
+    final millis = reader.readInt();
+    return DateTimeWithoutTZ.fromMillisecondsSinceEpoch(millis) as T;
   }
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeDouble(obj.microsecondsSinceEpoch / 1000);
+    writer.writeInt(obj.millisecondsSinceEpoch);
   }
 }
 
@@ -27,10 +28,6 @@ class DateTimeWithoutTZ extends DateTime {
   /// TODO: Document this!
   DateTimeWithoutTZ.fromMillisecondsSinceEpoch(super.millisecondsSinceEpoch)
       : super.fromMillisecondsSinceEpoch();
-
-  /// TODO: Document this!
-  DateTimeWithoutTZ.fromMicrosecondsSinceEpoch(super.microsecondsSinceEpoch)
-      : super.fromMicrosecondsSinceEpoch();
 }
 
 /// Alternative adapter for DateTime with time zone info
@@ -40,17 +37,22 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
 
   @override
   DateTime read(BinaryReader reader) {
-    final millis = reader.readDouble();
+    final value = reader.readDouble();
     final isUtc = reader.readBool();
-    return DateTime.fromMicrosecondsSinceEpoch(
-      (millis * 1000).round(),
-      isUtc: isUtc,
-    );
+    final millis = value.truncate();
+    final micros = ((value - millis).abs() * 1000).round();
+    return DateTime.fromMillisecondsSinceEpoch(millis, isUtc: isUtc)
+        .add(Duration(microseconds: micros));
   }
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeDouble(obj.microsecondsSinceEpoch / 1000);
+    final millis = obj.millisecondsSinceEpoch;
+    final fraction = millis.abs() < maxMicrosecondPrecisionMillis
+        ? obj.microsecond / 1000
+        : 0.0;
+    // Away from zero so readers that truncate get millisecondsSinceEpoch
+    writer.writeDouble(millis < 0 ? millis - fraction : millis + fraction);
     writer.writeBool(obj.isUtc);
   }
 }
