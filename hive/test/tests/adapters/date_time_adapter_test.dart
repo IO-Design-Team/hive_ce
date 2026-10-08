@@ -34,69 +34,8 @@ void main() {
   });
 
   group('DateTimeWithTimezoneAdapter', () {
-    group('.read()', () {
-      test('local', () {
-        final now = DateTime.now();
-        final binaryReader = MockBinaryReader();
-        when(binaryReader.readDouble)
-            .thenReturn(now.millisecondsSinceEpoch + now.microsecond / 1000);
-        when(binaryReader.readBool).thenReturn(false);
-
-        final date = DateTimeWithTimezoneAdapter().read(binaryReader);
-        verifyInOrder([
-          binaryReader.readDouble,
-          binaryReader.readBool,
-        ]);
-        expect(date, now);
-      });
-
-      test('UTC', () {
-        final now = DateTime.now().toUtc();
-        final binaryReader = MockBinaryReader();
-        when(binaryReader.readDouble)
-            .thenReturn(now.millisecondsSinceEpoch + now.microsecond / 1000);
-        when(binaryReader.readBool).thenReturn(true);
-
-        final date = DateTimeWithTimezoneAdapter().read(binaryReader);
-        verifyInOrder([
-          binaryReader.readDouble,
-          binaryReader.readBool,
-        ]);
-        expect(date, now);
-        expect(date.isUtc, true);
-      });
-    });
-
-    group('.write()', () {
-      test('local', () {
-        final now = DateTime.now();
-        final binaryWriter = MockBinaryWriter();
-
-        DateTimeWithTimezoneAdapter().write(binaryWriter, now);
-        verifyInOrder([
-          () => binaryWriter.writeDouble(
-                now.millisecondsSinceEpoch + now.microsecond / 1000,
-              ),
-          () => binaryWriter.writeBool(false),
-        ]);
-      });
-
-      test('UTC', () {
-        final now = DateTime.now().toUtc();
-        final binaryWriter = MockBinaryWriter();
-
-        DateTimeWithTimezoneAdapter().write(binaryWriter, now);
-        verifyInOrder([
-          () => binaryWriter.writeDouble(
-                now.millisecondsSinceEpoch + now.microsecond / 1000,
-              ),
-          () => binaryWriter.writeBool(true),
-        ]);
-      });
-    });
-
-    group('binary compatibility', () {
-      final wholeMillis = [
+    test('matches 2.20 for whole milliseconds', () {
+      final dates = [
         DateTime.utc(2026, 10, 7, 12, 30, 15, 123),
         DateTime(2026, 10, 7, 12, 30, 15, 123),
         DateTime.utc(1969, 12, 31, 23, 59, 59, 999),
@@ -107,70 +46,63 @@ void main() {
         DateTime.fromMillisecondsSinceEpoch(-_maxMillis, isUtc: true),
       ];
 
-      test('reads data written by 2.20', () {
-        for (final date in wholeMillis) {
-          final read = _read(_legacyBytes(date));
-          expect(read, date);
-          expect(read.isUtc, date.isUtc);
-        }
-      });
+      for (final date in dates) {
+        final bytes = _legacyBytes(date);
+        expect(_write(date), bytes);
+        final read = _read(bytes);
+        expect(read, date);
+        expect(read.isUtc, date.isUtc);
+      }
+    });
 
-      test('writes whole milliseconds identically to 2.20', () {
-        for (final date in wholeMillis) {
-          expect(_write(date), _legacyBytes(date));
-        }
-      });
+    test('round trips microseconds exactly between 1691 and 2248', () {
+      final random = Random(0);
+      final dates = [
+        DateTime.utc(2026, 10, 3, 12, 0, 0, 0, 1),
+        DateTime.utc(1970, 1, 1, 0, 0, 0, 0, 1),
+        DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 999),
+        DateTime.utc(1969, 12, 31, 23, 59, 59, 998, 500),
+        DateTime.utc(2110, 5, 22, 13, 24, 37, 221, 776),
+        DateTime.utc(1828, 3, 4, 5, 6, 7, 8, 9),
+        DateTime.utc(1692, 1, 1, 0, 0, 0, 0, 1),
+        DateTime.utc(2247, 12, 31, 23, 59, 59, 999, 999),
+        DateTime(2000, 1, 1, 0, 0, 0, 0, 999),
+        for (var i = 0; i < 10000; i++)
+          DateTime.fromMicrosecondsSinceEpoch(
+            ((random.nextDouble() * 2 - 1) * _preciseMillis).truncate() * 1000 +
+                random.nextInt(1000),
+            isUtc: true,
+          ),
+      ];
 
-      test('round trips microseconds exactly between 1691 and 2248', () {
-        final random = Random(0);
-        final dates = [
-          DateTime.utc(2026, 10, 3, 12, 0, 0, 0, 1),
-          DateTime.utc(1970, 1, 1, 0, 0, 0, 0, 1),
-          DateTime.utc(1969, 12, 31, 23, 59, 59, 999, 999),
-          DateTime.utc(1969, 12, 31, 23, 59, 59, 998, 500),
-          DateTime.utc(2110, 5, 22, 13, 24, 37, 221, 776),
-          DateTime.utc(1828, 3, 4, 5, 6, 7, 8, 9),
-          DateTime.utc(1692, 1, 1, 0, 0, 0, 0, 1),
-          DateTime.utc(2247, 12, 31, 23, 59, 59, 999, 999),
-          DateTime(2000, 1, 1, 0, 0, 0, 0, 999),
-          for (var i = 0; i < 10000; i++)
-            DateTime.fromMicrosecondsSinceEpoch(
-              ((random.nextDouble() * 2 - 1) * _preciseMillis).truncate() *
-                      1000 +
-                  random.nextInt(1000),
-              isUtc: true,
-            ),
-        ];
+      for (final date in dates) {
+        expect(_read(_write(date)), date);
+      }
+    });
 
-        for (final date in dates) {
-          expect(_read(_write(date)), date);
-        }
-      });
+    test('is never less precise than 2.20 outside 1691 to 2248', () {
+      final random = Random(0);
+      final dates = [
+        DateTime.utc(9999, 12, 31, 23, 59, 59, 999, 999),
+        DateTime.utc(2249, 1, 1, 0, 0, 0, 0, 1),
+        DateTime.utc(1690, 12, 31, 23, 59, 59, 999, 999),
+        for (var i = 0; i < 10000; i++)
+          DateTime.fromMillisecondsSinceEpoch(
+            (random.nextBool() ? 1 : -1) *
+                (_preciseMillis +
+                    (random.nextDouble() * (_maxMillis - _preciseMillis - 1))
+                        .floor()),
+            isUtc: true,
+          ).add(Duration(microseconds: random.nextInt(1000))),
+      ];
 
-      test('is never less precise than 2.20 outside 1691 to 2248', () {
-        final random = Random(0);
-        final dates = [
-          DateTime.utc(9999, 12, 31, 23, 59, 59, 999, 999),
-          DateTime.utc(2249, 1, 1, 0, 0, 0, 0, 1),
-          DateTime.utc(1690, 12, 31, 23, 59, 59, 999, 999),
-          for (var i = 0; i < 10000; i++)
-            DateTime.fromMillisecondsSinceEpoch(
-              (random.nextBool() ? 1 : -1) *
-                  (_preciseMillis +
-                      (random.nextDouble() * (_maxMillis - _preciseMillis - 1))
-                          .floor()),
-              isUtc: true,
-            ).add(Duration(microseconds: random.nextInt(1000))),
-        ];
-
-        for (final date in dates) {
-          final error = _read(_write(date)).difference(date).abs();
-          expect(
-            error,
-            lessThanOrEqualTo(Duration(microseconds: date.microsecond)),
-          );
-        }
-      });
+      for (final date in dates) {
+        final error = _read(_write(date)).difference(date).abs();
+        expect(
+          error,
+          lessThanOrEqualTo(Duration(microseconds: date.microsecond)),
+        );
+      }
     });
   });
 }
