@@ -39,8 +39,9 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
   DateTime read(BinaryReader reader) {
     final value = reader.readDouble();
     final isUtc = reader.readBool();
-    final millis = value.truncate();
-    final micros = ((value - millis).abs() * 1000).round();
+    final millis = value.floor();
+    final micros = ((value - millis) * 1000).round();
+    // Not fromMicrosecondsSinceEpoch since millis * 1000 is inexact on web
     return DateTime.fromMillisecondsSinceEpoch(millis, isUtc: isUtc)
         .add(Duration(microseconds: micros));
   }
@@ -51,8 +52,7 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
     final fraction = millis.abs() < maxMicrosecondPrecisionMillis
         ? obj.microsecond / 1000
         : 0.0;
-    // Away from zero so readers that truncate get millisecondsSinceEpoch
-    writer.writeDouble(millis < 0 ? millis - fraction : millis + fraction);
+    writer.writeDouble(millis + fraction);
     writer.writeBool(obj.isUtc);
   }
 }
