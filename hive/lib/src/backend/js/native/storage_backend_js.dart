@@ -52,6 +52,7 @@ class StorageBackendJs extends StorageBackend {
   }
 
   /// Not part of public API
+  @visibleForTesting
   JSAny? encodeValue(Frame frame) {
     final value = frame.value;
     if (_cipher == null) {
@@ -82,6 +83,7 @@ class StorageBackendJs extends StorageBackend {
   }
 
   /// Not part of public API
+  @visibleForTesting
   Object? decodeValue(JSAny? value) {
     if (value.isA<JSArrayBuffer>()) {
       value as JSArrayBuffer;
