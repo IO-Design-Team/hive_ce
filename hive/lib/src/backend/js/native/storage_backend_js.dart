@@ -52,7 +52,6 @@ class StorageBackendJs extends StorageBackend {
   }
 
   /// Not part of public API
-  @visibleForTesting
   JSAny? encodeValue(Frame frame) {
     final value = frame.value;
     if (_cipher == null) {
@@ -62,14 +61,8 @@ class StorageBackendJs extends StorageBackend {
         if (!_isEncoded(value)) {
           return value.buffer.toJS;
         }
-      } else if (value is double ||
-          value is bool ||
-          value is String ||
-          value is List<double> ||
-          value is List<bool> ||
-          value is List<String>) {
-        // For WASM compatibility, ints need to be treated as non-primitive
-        // values and encoded with type IDs
+      } else if (value is double || value is bool || value is String) {
+        // Ints and lists need type IDs to survive the round trip through JS
         return value.jsify();
       }
     }
@@ -89,7 +82,6 @@ class StorageBackendJs extends StorageBackend {
   }
 
   /// Not part of public API
-  @visibleForTesting
   Object? decodeValue(JSAny? value) {
     if (value.isA<JSArrayBuffer>()) {
       value as JSArrayBuffer;

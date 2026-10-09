@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/backend/js/native/storage_backend_js.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
+import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
 import 'package:web/web.dart';
@@ -127,6 +130,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
   final Map<String, V?> _cache = {};
   Set<String>? _cachedKeys;
+  late final _storage = StorageBackendJs(boxCollection._db, null, name);
 
   /// TODO: Document this!
   CollectionBox(this.name, this.boxCollection, this.fromJson);
@@ -182,7 +186,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
   Object? _decodeValue(JSAny? val) {
     if (val == null) return null;
-    final value = val.dartify();
+    final value = _storage.decodeValue(val);
     if (fromJson != null) {
       return fromJson?.call((value as Map).cast<String, dynamic>());
     }
@@ -210,7 +214,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     final store = txn.objectStore(name);
 
     JSAny? value;
-    if (_isPrimitive(val)) {
+    if (val is List && val is! Uint8List) {
+      value = _storage.encodeValue(Frame(key, val));
+    } else if (_isPrimitive(val)) {
       value = val.jsify();
     } else {
       if (fromJson == null) {

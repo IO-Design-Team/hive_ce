@@ -59,10 +59,7 @@ void main() async {
 
     group('.encodeValue()', () {
       test('primitive', () {
-        final values = [
-          null, 17.25, true, 'hello', //
-          [17.25, 17.26], [true, false], ['str1', 'str2'], //
-        ];
+        final values = [null, 17.25, true, 'hello'];
         final backend = _getBackend();
         for (final value in values) {
           expect(backend.encodeValue(Frame('key', value)).dartify(), value);
