@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
@@ -20,6 +22,26 @@ Future<BoxCollection> _openCollection({bool withData = false}) async {
     await catsBox.put('loki', {'name': 'Loki', 'age': 2});
   }
   return collection;
+}
+
+Future<void> _checkPrimitiveList<T>(String boxName, T value) async {
+  final name = 'typedPrimitiveLists_$boxName';
+  var collection = await BoxCollection.open(name, {boxName});
+  addTearDown(() async {
+    await Hive.close();
+    collection.close();
+  });
+
+  final box = await collection.openBox<T>(boxName);
+  await box.put('values', value);
+  await Hive.close();
+  collection.close();
+
+  collection = await BoxCollection.open(name, {boxName});
+  final reopened = await collection.openBox<T>(boxName);
+  final values = await reopened.get('values');
+  expect(values, value);
+  expect(values, isA<T>());
 }
 
 void main() {
@@ -165,6 +187,44 @@ void main() {
       final box = await collection.openBox('cats', fromJson: Test.fromJson);
       await box.put('json_test', testObject);
       expect(await box.get('json_test'), testObject);
+    });
+
+    group('primitive lists keep their type after reopen', () {
+      test(
+        'List<int>',
+        () => _checkPrimitiveList<List<int>>('ints', [1, 2]),
+      );
+
+      test(
+        'List<double>',
+        () => _checkPrimitiveList<List<double>>('doubles', [1.25, 2.5]),
+      );
+
+      test(
+        'List<bool>',
+        () => _checkPrimitiveList<List<bool>>('bools', [true, false]),
+      );
+
+      test(
+        'List<String>',
+        () => _checkPrimitiveList<List<String>>('strings', ['a', 'b']),
+      );
+
+      test(
+        'List<dynamic>',
+        () => _checkPrimitiveList<List<dynamic>>(
+          'lists',
+          <dynamic>[1, 'a', true],
+        ),
+      );
+
+      test(
+        'Uint8List',
+        () => _checkPrimitiveList<Uint8List>(
+          'bytes',
+          Uint8List.fromList([1, 2, 3]),
+        ),
+      );
     });
 
     test('primitives', () async {
