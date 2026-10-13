@@ -2,6 +2,7 @@
 
 - `DateTime` and `Duration` now preserve microseconds (by [@LahaLuhem](https://github.com/LahaLuhem) in [#340](https://github.com/IO-Design-Team/hive_ce/issues/340))
 - Fixes `List<double>`, `List<bool>`, and `List<String>` reading back as `List<Object?>` on web (by [@LahaLuhem](https://github.com/LahaLuhem) in [#342](https://github.com/IO-Design-Team/hive_ce/issues/342))
+- Fixes encoded values not being decoded when reading web boxes in browsers without `IDBObjectStore.getAll`
 
 ## 2.20.2
 
