@@ -34,14 +34,22 @@ class DateTimeWithTimezoneAdapter extends TypeAdapter<DateTime> {
 
   @override
   DateTime read(BinaryReader reader) {
-    final millis = reader.readInt();
+    final value = reader.readDouble();
     final isUtc = reader.readBool();
-    return DateTime.fromMillisecondsSinceEpoch(millis, isUtc: isUtc);
+    final millis = value.floor();
+    final micros = ((value - millis) * 1000).round();
+    // Not fromMicrosecondsSinceEpoch since millis * 1000 is inexact on web
+    return DateTime.fromMillisecondsSinceEpoch(millis, isUtc: isUtc)
+        .add(Duration(microseconds: micros));
   }
 
   @override
   void write(BinaryWriter writer, DateTime obj) {
-    writer.writeInt(obj.millisecondsSinceEpoch);
+    final micros = obj.microsecond;
+    // Older SDKs truncate millisecondsSinceEpoch instead of flooring it
+    final millis =
+        obj.subtract(Duration(microseconds: micros)).millisecondsSinceEpoch;
+    writer.writeDouble(millis + micros / 1000);
     writer.writeBool(obj.isUtc);
   }
 }
