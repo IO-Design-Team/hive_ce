@@ -1,3 +1,7 @@
+## NEXT
+
+- `CollectionBox` now throws when storing typed lists, sets, or other non-list iterables, since they lose their type on web
+
 ## 2.20.2
 
 - Fixes `deleteBoxFromDisk` throwing `PathNotFoundException` after a failed `openBox` (by [@lucasiturbide](https://github.com/lucasiturbide) in [#338](https://github.com/IO-Design-Team/hive_ce/issues/338))

@@ -6,6 +6,7 @@ import 'package:hive_ce/hive_ce.dart';
 
 import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
+import 'package:hive_ce/src/box_collection/unsupported_typed_list.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 
 /// TODO: Document this!
@@ -199,6 +200,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (val == null) {
       return await delete(key);
     }
+    rejectUnsupportedCollectionValue(val);
     final box = await _getBox();
     await box.put(_toHiveKey(key), val);
     await _flushOrMark();

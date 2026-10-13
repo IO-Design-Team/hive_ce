@@ -1,3 +1,6 @@
+import 'dart:collection';
+import 'dart:typed_data';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:test/test.dart';
@@ -189,6 +192,44 @@ void main() {
 
       await box.put('nested_test', value);
       expect(await box.get('nested_test'), value);
+    });
+
+    test('.put() rejects typed lists, sets, and other iterables', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox('cats');
+
+      final values = [
+        <int>[1],
+        <double>[1.5],
+        <bool>[true],
+        <String>['a'],
+        Int8List.fromList([1]),
+        <dynamic>{1},
+        Queue.of([1]),
+        [1, 2].map((e) => e),
+      ];
+      for (final value in values) {
+        await expectLater(
+          box.put('fluffy', value),
+          throwsA(isA<HiveError>()),
+          reason: '${value.runtimeType}',
+        );
+      }
+    });
+
+    test('.put() stores untyped lists and bytes', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox('cats');
+
+      final values = {
+        'list': <dynamic>[1, 'a'],
+        'empty': [],
+        'bytes': Uint8List.fromList([1, 2]),
+      };
+      for (final MapEntry(:key, :value) in values.entries) {
+        await box.put(key, value);
+        expect(await box.get(key), value);
+      }
     });
   });
 }
