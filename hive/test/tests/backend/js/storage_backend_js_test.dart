@@ -184,6 +184,22 @@ void main() async {
         expect(await backend.getValues(cursor: true), [1, null, 3]);
       });
 
+      test('with cursor decodes encoded values', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
+        await backend.writeFrames([
+          Frame('key1', 1),
+          Frame('key2', ['a', 'b']),
+        ]);
+
+        final values = await backend.getValues(cursor: true);
+        expect(values, [
+          1,
+          ['a', 'b'],
+        ]);
+        expect(values.last, isA<List<String>>());
+      });
+
       test('without cursor', () async {
         final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
         final backend = _getBackend(db: db);

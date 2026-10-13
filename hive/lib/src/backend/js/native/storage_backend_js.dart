@@ -150,7 +150,7 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture<JSArray>();
       return result.toDart.map(decodeValue);
     } else {
-      return await store.iterate().map((e) => e.value.dartify()).toList();
+      return await store.iterate().map((e) => decodeValue(e.value)).toList();
     }
   }
 

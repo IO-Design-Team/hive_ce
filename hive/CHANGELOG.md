@@ -2,7 +2,6 @@
 
 - `DateTime` and `Duration` now preserve microseconds (by [@LahaLuhem](https://github.com/LahaLuhem) in [#340](https://github.com/IO-Design-Team/hive_ce/issues/340))
 - Fixes `List<double>`, `List<bool>`, and `List<String>` reading back as `List<Object?>` on web (by [@LahaLuhem](https://github.com/LahaLuhem) in [#342](https://github.com/IO-Design-Team/hive_ce/issues/342))
-- `CollectionBox` now throws when storing typed lists, sets, or other non-list iterables, since they lose their type on web
 
 ## 2.20.2
 

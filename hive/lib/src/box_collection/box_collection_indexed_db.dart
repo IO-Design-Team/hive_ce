@@ -6,7 +6,6 @@ import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:hive_ce/src/box_collection/box_collection_stub.dart'
     as implementation;
-import 'package:hive_ce/src/box_collection/unsupported_typed_list.dart';
 import 'package:web/web.dart';
 
 /// represents a [BoxCollection] for raw use with indexed DB
@@ -199,7 +198,6 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     if (val == null) {
       return await delete(key, txn);
     }
-    rejectUnsupportedCollectionValue(val);
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => put(key, val, txn));
