@@ -59,10 +59,7 @@ void main() async {
 
     group('.encodeValue()', () {
       test('primitive', () {
-        final values = [
-          null, 17.25, true, 'hello', //
-          [17.25, 17.26], [true, false], ['str1', 'str2'], //
-        ];
+        final values = [null, 17.25, true, 'hello'];
         final backend = _getBackend();
         for (final value in values) {
           expect(backend.encodeValue(Frame('key', value)).dartify(), value);
@@ -185,6 +182,22 @@ void main() async {
         final backend = _getBackend(db: db);
 
         expect(await backend.getValues(cursor: true), [1, null, 3]);
+      });
+
+      test('with cursor decodes encoded values', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
+        await backend.writeFrames([
+          Frame('key1', 1),
+          Frame('key2', ['a', 'b']),
+        ]);
+
+        final values = await backend.getValues(cursor: true);
+        expect(values, [
+          1,
+          ['a', 'b'],
+        ]);
+        expect(values.last, isA<List<String>>());
       });
 
       test('without cursor', () async {

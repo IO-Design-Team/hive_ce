@@ -62,14 +62,8 @@ class StorageBackendJs extends StorageBackend {
         if (!_isEncoded(value)) {
           return value.buffer.toJS;
         }
-      } else if (value is double ||
-          value is bool ||
-          value is String ||
-          value is List<double> ||
-          value is List<bool> ||
-          value is List<String>) {
-        // For WASM compatibility, ints need to be treated as non-primitive
-        // values and encoded with type IDs
+      } else if (value is double || value is bool || value is String) {
+        // Ints and lists need type IDs to survive the round trip through JS
         return value.jsify();
       }
     }
@@ -156,7 +150,7 @@ class StorageBackendJs extends StorageBackend {
       final result = await store.getAll(null).asFuture<JSArray>();
       return result.toDart.map(decodeValue);
     } else {
-      return await store.iterate().map((e) => e.value.dartify()).toList();
+      return await store.iterate().map((e) => decodeValue(e.value)).toList();
     }
   }
 
