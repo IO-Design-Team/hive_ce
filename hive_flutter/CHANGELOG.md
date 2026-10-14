@@ -1,3 +1,7 @@
+## 2.5.0
+
+- `initFlutter` flushes every open box when the app is paused
+
 ## 2.4.0
 
 - Adds `MaterialUiTimeOfDayAdapter` for the `TimeOfDay` class from `package:material_ui`
