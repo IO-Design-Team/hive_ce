@@ -53,7 +53,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: browser-actions/setup-chrome@v2
-        id: setup-chrome
         if: ${{ matrix.test-platform == 'chrome' }}
       - uses: dart-lang/setup-dart@v1
         with:
@@ -68,8 +67,6 @@ jobs:
       - name: Install dependencies
         run: dart pub get --no-example
       - name: Run tests
-        env:
-          CHROME_EXECUTABLE: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
 
   test-hive_ce_inspector:
