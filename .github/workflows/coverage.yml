@@ -17,14 +17,15 @@ jobs:
       run:
         working-directory: hive
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
       - name: Collect coverage
         run: |
           dart pub get
           dart test --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --package=. --report-on=lib
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: coverage/lcov.info
+          files: hive/coverage/lcov.info
+          disable_search: true
