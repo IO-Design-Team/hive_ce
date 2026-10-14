@@ -60,6 +60,11 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   }
 
   @override
+  Future<void> flush() {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> deleteBoxFromDisk(String name, {String? path}) {
     throw UnimplementedError();
   }

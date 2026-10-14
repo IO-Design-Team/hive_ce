@@ -78,6 +78,9 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
   Future<void> close() => Hive.close();
 
   @override
+  Future<void> flush() => Hive.flush();
+
+  @override
   Future<void> deleteBoxFromDisk(String name, {String? path}) =>
       Hive.deleteBoxFromDisk(name, path: path);
 

@@ -72,6 +72,8 @@ Future<dynamic> handleHiveMethodCall(
       }
 
       boxHandlers[name] = IsolatedBoxHandler(box, connection);
+    case 'flush':
+      await Hive.flush();
     case 'deleteBoxFromDisk':
       await Hive.deleteBoxFromDisk(
         call.arguments['name'],

@@ -303,6 +303,16 @@ void main() {
       expect(box2.isOpen, false);
     });
 
+    test('.flush()', () async {
+      final hive = await initHive();
+
+      final box = await hive.openBox('box');
+      await box.put('key', 'value');
+
+      await hive.flush();
+      expect(await box.get('key'), 'value');
+    });
+
     group(
       '.deleteBoxFromDisk()',
       () {
