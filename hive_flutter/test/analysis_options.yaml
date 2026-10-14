@@ -2,4 +2,5 @@ include: ../analysis_options.yaml
 
 analyzer:
   errors:
+    deprecated_member_use: ignore
     experimental_member_use: ignore
