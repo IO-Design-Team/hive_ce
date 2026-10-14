@@ -273,6 +273,12 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     return Future.wait(closeFutures);
   }
 
+  @override
+  Future<void> flush() {
+    if (_connection == null) return Future.value();
+    return _hiveChannel.invokeMethod('flush');
+  }
+
   /// Not part of public API
   Future<void> unregisterBox(String name) async {
     name = name.toLowerCase();

@@ -263,6 +263,9 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     return Future.wait(closeFutures);
   }
 
+  @override
+  Future<void> flush() => Future.wait(_boxes.values.map((box) => box.flush()));
+
   /// Not part of public API
   void unregisterBox(String name) {
     name = name.toLowerCase();

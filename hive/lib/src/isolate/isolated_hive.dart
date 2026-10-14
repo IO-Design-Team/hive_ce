@@ -49,6 +49,9 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   /// Shutdown the isolate
   Future<void> close();
 
+  /// Flushes every open box.
+  Future<void> flush();
+
   /// Delete a box from the disk
   Future<void> deleteBoxFromDisk(String name, {String? path});
 

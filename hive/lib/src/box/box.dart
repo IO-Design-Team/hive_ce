@@ -6,7 +6,9 @@ import 'package:hive_ce/src/box/box_base.dart';
 ///
 /// Write operations are asynchronous but the new values are immediately
 /// available. The returned `Future` finishes when the change is written to
-/// the backend. If this operation fails, the changes are being reverted.
+/// the backend. If the process is killed before then, the write can be lost.
+/// See [flush].
+/// If this operation fails, the changes are being reverted.
 ///
 /// Read operations for normal boxes are synchronous (the entries are in
 /// memory). Lazy boxes have asynchronous read operations.

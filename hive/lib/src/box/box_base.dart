@@ -129,6 +129,10 @@ abstract class BoxBase<E> {
   /// In the browser, the IndexedDB database is being removed.
   Future<void> deleteFromDisk();
 
-  /// Flushes all pending changes of the box to disk.
+  /// Waits for pending writes and flushes them to disk.
+  ///
+  /// On the VM, a write's future completes once the operating system has the
+  /// bytes, which survives a process kill but not a power loss. On the web,
+  /// this does nothing.
   Future<void> flush();
 }

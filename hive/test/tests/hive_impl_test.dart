@@ -341,6 +341,21 @@ void main() {
       expect(box2.isOpen, false);
     });
 
+    test('.flush()', () async {
+      final hive = await initHive();
+
+      final box1 = await hive.openBox('box1');
+      final box2 = await hive.openBox('box2');
+      await box1.put('key', 'value1');
+      await box2.put('key', 'value2');
+
+      await hive.flush();
+      expect(box1.get('key'), 'value1');
+      expect(box2.get('key'), 'value2');
+
+      await hive.close();
+    });
+
     test('.generateSecureKey()', () {
       final hive = HiveImpl();
 

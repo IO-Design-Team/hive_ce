@@ -78,7 +78,7 @@ environment:
 
 ## Usage
 
-You can use Hive just like a map. It is not necessary to await `Futures`.
+You can use Hive just like a map. Writes are readable immediately, but a write can be lost if the process is killed before its future completes. On the VM, `flush()` waits for pending writes and flushes them to disk.
 
 <!-- embedme readme/usage.dart -->
 
