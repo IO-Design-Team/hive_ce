@@ -1,3 +1,5 @@
+// Keep the in-framework TimeOfDay type for TimeOfDayAdapter.
+// ignore_for_file: unnecessary_ignore, deprecated_member_use
 import 'package:flutter/material.dart' as flutter show TimeOfDay;
 import 'package:hive_ce/hive_ce.dart';
 import 'package:material_ui/material_ui.dart' as material_ui show TimeOfDay;

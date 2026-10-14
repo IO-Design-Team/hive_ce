@@ -1,3 +1,5 @@
+// Exercises TimeOfDayAdapter, which still uses the in-framework TimeOfDay.
+// ignore_for_file: unnecessary_ignore, deprecated_member_use
 import 'package:flutter/material.dart' as flutter show TimeOfDay;
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
