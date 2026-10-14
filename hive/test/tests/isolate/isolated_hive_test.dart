@@ -305,8 +305,6 @@ void main() {
 
     test('.flush()', () async {
       final hive = await initHive();
-      // IndexedDB is shared by every browser test. A fixed name would leak
-      // into HiveConnect.getBoxFrames, which reopens the box named "box".
       final name = generateBoxName();
 
       final box = await hive.openBox(name);
