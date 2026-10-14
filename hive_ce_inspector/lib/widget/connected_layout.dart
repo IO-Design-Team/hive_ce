@@ -1,3 +1,5 @@
+// Hosted by DevTools, which still provides the in-framework Material theme.
+// ignore_for_file: unnecessary_ignore, deprecated_member_use
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';

@@ -1,3 +1,5 @@
+// Sample still uses the in-framework Material library.
+// ignore_for_file: unnecessary_ignore, deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 

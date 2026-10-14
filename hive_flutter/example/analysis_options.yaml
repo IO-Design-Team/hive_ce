@@ -1,7 +1,4 @@
 analyzer:
-  errors:
-    # Beta deprecates package:flutter/material.dart. Kept until the 3.0 migration.
-    deprecated_member_use: ignore
   exclude:
     - build/**
     - android/**

@@ -17,6 +17,8 @@ void main() {
       test('Color.value', () {
         const color = Color(0xFF000000);
         final writer = BinaryWriterImpl(registry);
+        // This is a test
+        // ignore: deprecated_member_use
         writer.writeInt(color.value);
 
         // Write some garbage to the end of the buffer
