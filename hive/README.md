@@ -78,7 +78,7 @@ environment:
 
 ## Usage
 
-You can use Hive just like a map. It is not necessary to await `Futures`.
+A write is readable immediately. Its future completes when the backend has accepted it, and a process kill before then can drop the write. `flush()` stores pending writes on the VM.
 
 <!-- embedme readme/usage.dart -->
 

@@ -6,6 +6,20 @@ import 'package:hive_ce_flutter/adapters.dart';
 import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
 import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
 
+var _flushingOnPause = false;
+
+class _FlushOnPause extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.paused &&
+        state != AppLifecycleState.detached) {
+      return;
+    }
+    unawaited(Hive.flush());
+    unawaited(IsolatedHive.flush());
+  }
+}
+
 /// Flutter extensions for [TypeRegistry]
 extension TypeRegistryX on TypeRegistry {
   /// Common Flutter initialization code
@@ -18,6 +32,10 @@ extension TypeRegistryX on TypeRegistry {
   }) async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
+      if (!_flushingOnPause) {
+        _flushingOnPause = true;
+        WidgetsBinding.instance.addObserver(_FlushOnPause());
+      }
     } catch (_) {
       // This will fail if the Flutter engine is not available
     }

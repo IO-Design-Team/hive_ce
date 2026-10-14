@@ -1,3 +1,7 @@
+## 2.5.0
+
+- `initFlutter` stores pending writes when the app is paused or detached
+
 ## 2.4.0
 
 - Adds `MaterialUiTimeOfDayAdapter` for the `TimeOfDay` class from `package:material_ui`
