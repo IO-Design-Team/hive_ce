@@ -27,7 +27,7 @@ jobs:
       run:
         working-directory: ${{ matrix.package }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
@@ -51,8 +51,8 @@ jobs:
       run:
         working-directory: hive
     steps:
-      - uses: actions/checkout@v4
-      - uses: browser-actions/setup-chrome@v1
+      - uses: actions/checkout@v7
+      - uses: browser-actions/setup-chrome@v2
         if: ${{ matrix.test-platform == 'chrome' }}
       - uses: dart-lang/setup-dart@v1
         with:
@@ -75,7 +75,7 @@ jobs:
       run:
         working-directory: hive_ce_inspector
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
       - name: Install dependencies
         run: flutter pub get
@@ -91,7 +91,7 @@ jobs:
       run:
         working-directory: hive_flutter
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
@@ -116,7 +116,7 @@ jobs:
       run:
         working-directory: hive_generator
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
@@ -128,7 +128,7 @@ jobs:
   ensure-codegen:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
       # TODO: Figure out why puby gen needs to run twice
       - run: |
@@ -142,7 +142,7 @@ jobs:
   ensure-embedme:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: |
           npx embedme **/*.md
           git diff --exit-code
@@ -153,7 +153,7 @@ jobs:
       matrix:
         package: [hive, hive_flutter, hive_generator]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
       - run: |
           cd ${{ matrix.package }}
