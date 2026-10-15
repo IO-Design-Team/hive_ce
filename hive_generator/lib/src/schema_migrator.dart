@@ -143,7 +143,7 @@ abstract final class SchemaMigrator {
         .sorted() // Sort alphabetically
         .join('\n');
     final specs = schemaInfos.map((e) => e.adapterSpec).join(',\n  ');
-    File('lib/hive/hive_adapters.dart')
+    File(path.join('lib', 'hive', 'hive_adapters.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 import 'package:hive_ce/hive_ce.dart';
@@ -155,7 +155,7 @@ $imports
 part 'hive_adapters.g.dart';
 ''');
 
-    File('lib/hive/hive_adapters.g.yaml').writeAsStringSync(
+    File(path.join('lib', 'hive', 'hive_adapters.g.yaml')).writeAsStringSync(
       writeSchema(HiveSchema(nextTypeId: nextTypeId, types: types)),
     );
   }
