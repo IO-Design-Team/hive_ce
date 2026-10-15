@@ -17,19 +17,20 @@ const fileDoesNotExist = false;
 /// - [fileExists] will check if the file exists
 /// - [fileDoesNotExist] will check if the file does not exist
 ///
-/// Passing a value for [throws] will expect the build_runner console output to
+/// Passing a value for [throws] will expect the console output of [command] to
 /// contain the given string
 void expectGeneration({
   required Map<String, String> input,
   Map<String, Object> output = const {},
   String? throws,
+  List<String> command = const ['pub', 'run', 'build_runner', 'build'],
   bool debug = false,
 }) {
   final projectRoot = createTestProject(input);
   Process.runSync('dart', ['pub', 'get'], workingDirectory: projectRoot);
   final result = Process.runSync(
     'dart',
-    ['pub', 'run', 'build_runner', 'build'],
+    command,
     workingDirectory: projectRoot,
   );
 
@@ -38,7 +39,7 @@ void expectGeneration({
   if (throws != null) {
     expect(result.exitCode, isNot(0));
 
-    final lines = result.stdout.split('\n');
+    final lines = '${result.stdout}${result.stderr}'.split('\n');
     for (final line in throws.split('\n')) {
       expect(lines, contains(contains(line)));
     }

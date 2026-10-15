@@ -1,17 +1,9 @@
-import 'package:hive_ce_generator/src/builder/schema_migrator_builder.dart';
+import 'package:hive_ce_generator/src/schema_migrator.dart';
 import 'package:test/test.dart';
 
 import 'test_utils.dart';
 
-const buildYaml = {
-  'build.yaml': r'''
-targets:
-  $default:
-    builders:
-      hive_ce_generator|hive_schema_migrator:
-        enabled: true
-''',
-};
+const migrate = ['run', 'hive_ce_generator:migrate'];
 
 const adapters = {
   'lib/adapters.dart': '''
@@ -60,23 +52,11 @@ enum Enum {
 
 void main() {
   group('schema_migrator', () {
-    test('does not run if not enabled', () {
-      expectGeneration(
-        input: {
-          ...pubspec(),
-          ...adapters,
-        },
-        output: {
-          'lib/hive_schema.g.yaml': fileDoesNotExist,
-        },
-      );
-    });
-
     test('generates schema', () {
       expectGeneration(
+        command: migrate,
         input: {
           ...pubspec(),
-          ...buildYaml,
           ...adapters,
         },
         output: {
@@ -132,9 +112,9 @@ types:
 
     test('throws with default value', () {
       expectGeneration(
+        command: migrate,
         input: {
           ...pubspec(),
-          ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 
@@ -145,7 +125,7 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasAnnotationDefaultValue(
+        throws: SchemaMigrator.hasAnnotationDefaultValue(
           className: 'Class',
           fieldName: 'value',
         ),
@@ -154,9 +134,9 @@ class Class {
 
     test('throws with no public setter', () {
       expectGeneration(
+        command: migrate,
         input: {
           ...pubspec(),
-          ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 
@@ -169,7 +149,7 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasNoPublicSetter(
+        throws: SchemaMigrator.hasNoPublicSetter(
           className: 'Class',
           fieldName: '_value',
         ),
@@ -178,9 +158,9 @@ class Class {
 
     test('throws with no public getter', () {
       expectGeneration(
+        command: migrate,
         input: {
           ...pubspec(),
-          ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 
@@ -193,7 +173,7 @@ class Class {
 }
 ''',
         },
-        throws: SchemaMigratorBuilder.hasNoPublicGetter(
+        throws: SchemaMigrator.hasNoPublicGetter(
           className: 'Class',
           fieldName: '_value',
         ),
@@ -202,9 +182,9 @@ class Class {
 
     test('adds unannotated fields to ignored fields', () {
       expectGeneration(
+        command: migrate,
         input: {
           ...pubspec(),
-          ...buildYaml,
           'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 
@@ -235,12 +215,12 @@ part 'hive_adapters.g.dart';
       'works with freezed classes',
       () {
         expectGeneration(
+          command: migrate,
           input: {
             ...pubspec(
               dependencies: {'freezed_annotation: any'},
               devDependencies: {'freezed: any'},
             ),
-            ...buildYaml,
             'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
