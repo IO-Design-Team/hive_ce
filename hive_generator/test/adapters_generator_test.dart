@@ -22,8 +22,8 @@ types:
 
 void main() {
   group('adapters_generator', () {
-    test('fresh', () {
-      expectGeneration(
+    test('fresh', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -44,10 +44,10 @@ class Person {
       );
     });
 
-    test('add type', () {
+    test('add type', () async {
       // Adding Person2 should result in Person2 having a typeId of 1 no matter
       // the order in the annotation
-      expectGeneration(
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -96,10 +96,10 @@ types:
       );
     });
 
-    test('add and remove type', () {
+    test('add and remove type', () async {
       // Adding Person2 while removing Person should result in Person2 having a
       // typeId of 1
-      expectGeneration(
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -133,9 +133,9 @@ types:
       );
     });
 
-    test('add field', () {
+    test('add field', () async {
       // A new field on Person should have the last index no matter the order
-      expectGeneration(
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -172,8 +172,8 @@ types:
       );
     });
 
-    test('ignored fields', () {
-      expectGeneration(
+    test('ignored fields', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -208,8 +208,8 @@ types:
       );
     });
 
-    test('add and remove field', () {
-      expectGeneration(
+    test('add and remove field', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -244,8 +244,8 @@ types:
     });
 
     group('validates schema', () {
-      test('with invalid next type ID', () {
-        expectGeneration(
+      test('with invalid next type ID', () async {
+        await expectGeneration(
           input: {
             ...pubspec(),
             'lib/hive/hive_adapters.dart': '''
@@ -267,8 +267,8 @@ types:
         );
       });
 
-      test('with invalid next field index', () {
-        expectGeneration(
+      test('with invalid next field index', () async {
+        await expectGeneration(
           input: {
             ...pubspec(),
             'lib/hive/hive_adapters.dart': '''
@@ -292,8 +292,8 @@ types:
         );
       });
 
-      test('with duplicate type ID', () {
-        expectGeneration(
+      test('with duplicate type ID', () async {
+        await expectGeneration(
           input: {
             ...pubspec(),
             'lib/hive/hive_adapters.dart': '''
@@ -319,8 +319,8 @@ types:
         );
       });
 
-      test('with duplicate field index', () {
-        expectGeneration(
+      test('with duplicate field index', () async {
+        await expectGeneration(
           input: {
             ...pubspec(),
             'lib/hive/hive_adapters.dart': '''
@@ -347,8 +347,8 @@ types:
       });
     });
 
-    test('reserved type ids', () {
-      expectGeneration(
+    test('reserved type ids', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
