@@ -3,8 +3,6 @@ import 'package:test/test.dart';
 
 import 'test_utils.dart';
 
-const migrate = ['run', 'hive_ce_generator:migrate'];
-
 const adapters = {
   'lib/adapters.dart': '''
 import 'package:hive_ce/hive_ce.dart';
@@ -52,9 +50,9 @@ enum Enum {
 
 void main() {
   group('schema_migrator', () {
-    test('generates schema', () {
-      expectGeneration(
-        command: migrate,
+    test('generates schema', () async {
+      await expectGeneration(
+        migrate: true,
         input: {
           ...pubspec(),
           ...adapters,
@@ -110,9 +108,9 @@ types:
       );
     });
 
-    test('throws with default value', () {
-      expectGeneration(
-        command: migrate,
+    test('throws with default value', () async {
+      await expectGeneration(
+        migrate: true,
         input: {
           ...pubspec(),
           'lib/adapters.dart': '''
@@ -132,9 +130,9 @@ class Class {
       );
     });
 
-    test('throws with no public setter', () {
-      expectGeneration(
-        command: migrate,
+    test('throws with no public setter', () async {
+      await expectGeneration(
+        migrate: true,
         input: {
           ...pubspec(),
           'lib/adapters.dart': '''
@@ -156,9 +154,9 @@ class Class {
       );
     });
 
-    test('throws with no public getter', () {
-      expectGeneration(
-        command: migrate,
+    test('throws with no public getter', () async {
+      await expectGeneration(
+        migrate: true,
         input: {
           ...pubspec(),
           'lib/adapters.dart': '''
@@ -180,9 +178,9 @@ class Class {
       );
     });
 
-    test('adds unannotated fields to ignored fields', () {
-      expectGeneration(
-        command: migrate,
+    test('adds unannotated fields to ignored fields', () async {
+      await expectGeneration(
+        migrate: true,
         input: {
           ...pubspec(),
           'lib/adapters.dart': '''
@@ -213,9 +211,9 @@ part 'hive_adapters.g.dart';
 
     test(
       'works with freezed classes',
-      () {
-        expectGeneration(
-          command: migrate,
+      () async {
+        await expectGeneration(
+          migrate: true,
           input: {
             ...pubspec(
               dependencies: {'freezed_annotation: any'},

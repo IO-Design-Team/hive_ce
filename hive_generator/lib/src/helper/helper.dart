@@ -11,6 +11,12 @@ import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
+/// Root of the package being built, defaulting to the working directory
+///
+/// Tests point this at a temporary project because the working directory is
+/// shared by every test isolate.
+String? buildPackageRoot;
+
 final _hiveFieldChecker =
     const TypeChecker.typeNamed(HiveField, inPackage: 'hive_ce');
 final _freezedDefaultChecker = const TypeChecker.fromUrl(
@@ -113,7 +119,7 @@ extension BuildStepExtension on BuildStep {
   /// - Any files output through `buildStep.writeAsString` will be deleted
   ///   before the build starts
   void forceWriteAsString(AssetId id, String content) {
-    File(path.joinAll(id.pathSegments))
+    File(path.joinAll([buildPackageRoot ?? '', ...id.pathSegments]))
       ..createSync(recursive: true)
       ..writeAsStringSync(content);
   }

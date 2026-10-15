@@ -38,10 +38,12 @@ abstract final class SchemaMigrator {
       '$className.$fieldName does not have a public getter';
 
   /// Generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`
-  /// from the HiveType annotations in the current package
-  static Future<void> migrate() async {
-    final collection =
-        AnalysisContextCollection(includedPaths: [path.absolute('lib')]);
+  /// from the HiveType annotations in [root]
+  static Future<void> migrate({String root = '.'}) async {
+    final packageRoot = path.absolute(root);
+    final collection = AnalysisContextCollection(
+      includedPaths: [path.join(packageRoot, 'lib')],
+    );
     final hiveTypes = <AnnotatedElement>[];
     for (final context in collection.contexts) {
       for (final file in context.contextRoot.analyzedFiles()) {
@@ -143,7 +145,7 @@ abstract final class SchemaMigrator {
         .sorted() // Sort alphabetically
         .join('\n');
     final specs = schemaInfos.map((e) => e.adapterSpec).join(',\n  ');
-    File(path.join('lib', 'hive', 'hive_adapters.dart'))
+    File(path.join(packageRoot, 'lib', 'hive', 'hive_adapters.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 import 'package:hive_ce/hive_ce.dart';
@@ -155,7 +157,9 @@ $imports
 part 'hive_adapters.g.dart';
 ''');
 
-    File(path.join('lib', 'hive', 'hive_adapters.g.yaml')).writeAsStringSync(
+    File(
+      path.join(packageRoot, 'lib', 'hive', 'hive_adapters.g.yaml'),
+    ).writeAsStringSync(
       writeSchema(HiveSchema(nextTypeId: nextTypeId, types: types)),
     );
   }

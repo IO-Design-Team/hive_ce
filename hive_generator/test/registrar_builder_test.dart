@@ -4,8 +4,8 @@ import 'test_utils.dart';
 
 void main() {
   group('registrar_builder', () {
-    test('outputs to lib folder by default', () {
-      expectGeneration(
+    test('outputs to lib folder by default', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/nested/type.dart': '''
@@ -22,8 +22,8 @@ class Type {}
       );
     });
 
-    test('does not output with no types', () {
-      expectGeneration(
+    test('does not output with no types', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive_adapters.dart': '''
@@ -40,8 +40,8 @@ void _() {}
       );
     });
 
-    test('outputs next to GenerateAdapters annotation', () {
-      expectGeneration(
+    test('outputs next to GenerateAdapters annotation', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive/hive_adapters.dart': '''
@@ -58,8 +58,8 @@ class Type {}
       );
     });
 
-    test('fails with multiple GenerateAdapters in same file', () {
-      expectGeneration(
+    test('fails with multiple GenerateAdapters in same file', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive_adapters.dart': '''
@@ -78,8 +78,8 @@ class Type2 {}
       );
     });
 
-    test('fails with multiple GenerateAdapters on same element', () {
-      expectGeneration(
+    test('fails with multiple GenerateAdapters on same element', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive_adapters.dart': '''
@@ -98,8 +98,8 @@ class Type2 {}
       );
     });
 
-    test('fails with multiple GenerateAdapters files', () {
-      expectGeneration(
+    test('fails with multiple GenerateAdapters files', () async {
+      await expectGeneration(
         input: {
           ...pubspec(),
           'lib/hive_adapters.dart': '''

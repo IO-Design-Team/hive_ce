@@ -7,6 +7,7 @@ import 'package:glob/glob.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/registrar_intermediate.dart';
+import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 /// Generate the HiveRegistrar for the entire project
@@ -48,7 +49,8 @@ class RegistrarBuilder implements Builder {
     uris.sort();
 
     final ignores = <String>[];
-    final buildConfigFile = File('build.yaml');
+    final buildConfigFile =
+        File(path.join(buildPackageRoot ?? '', 'build.yaml'));
     if (buildConfigFile.existsSync()) {
       final buildConfigContent = buildConfigFile.readAsStringSync();
       final buildConfig = loadYaml(buildConfigContent);
