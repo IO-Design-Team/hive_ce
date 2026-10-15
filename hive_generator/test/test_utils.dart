@@ -5,7 +5,6 @@ import 'package:build_test/build_test.dart';
 import 'package:hive_ce_generator/hive_generator.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
-import 'package:hive_ce_generator/src/schema_migrator.dart';
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -26,10 +25,10 @@ final _packageRef = RegExp('package:(\\w+)/');
 /// - [fileExists] will check if the file exists
 /// - [fileDoesNotExist] will check if the file does not exist
 ///
-/// Passing a value for [throws] will expect the errors to contain the given
-/// string
+/// Passing a value for [throws] will expect the build errors or migrate output
+/// to contain the given string
 ///
-/// Setting [migrate] runs the schema migrator instead of the builders
+/// Setting [migrate] runs `hive_ce_generator:migrate` instead of the builders
 Future<void> expectGeneration({
   required Map<String, String> input,
   Map<String, Object> output = const {},
@@ -39,19 +38,18 @@ Future<void> expectGeneration({
 }) async {
   final project = _prepare(input);
   if (migrate) {
-    Object? error;
-    try {
-      await SchemaMigrator.migrate(root: project.path);
-    } catch (e) {
-      error = e;
-    }
-    if (debug && error != null) print(error);
+    final result = Process.runSync(
+      'dart',
+      ['run', 'hive_ce_generator:migrate'],
+      workingDirectory: project.path,
+    );
+    if (debug) print(result.stdout);
     _expect(
       project,
       output,
       throws,
-      failed: error != null,
-      messages: '${error ?? ''}',
+      failed: result.exitCode != 0,
+      messages: '${result.stdout}${result.stderr}',
     );
     return;
   }
@@ -68,6 +66,7 @@ Future<void> expectGeneration({
   try {
     result = await testBuilders(
       [
+        getTypeAdapterBuilder(const BuilderOptions({})),
         getAdaptersBuilder(const BuilderOptions({})),
         getRegistrarIntermediateBuilder(const BuilderOptions({})),
         registrar,
@@ -105,6 +104,7 @@ Map<String, String> pubspec({
   Set<String> devDependencies = const {},
 }) {
   final hivePath = path.absolute(path.current, '..', 'hive');
+  final hiveGeneratorPath = path.absolute(path.current);
 
   return {
     'pubspec.yaml': '''
@@ -118,11 +118,14 @@ dependencies:
   ${dependencies.join('\n  ')}
 
 dev_dependencies:
+  hive_ce_generator: any
   ${devDependencies.join('\n  ')}
 
 dependency_overrides:
   hive_ce:
     path: $hivePath
+  hive_ce_generator:
+    path: $hiveGeneratorPath
 ''',
   };
 }
