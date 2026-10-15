@@ -1,6 +1,7 @@
 ## NEXT
 
 - Fixes generic types being ordered as new types in `GenerateAdapters` output
+- The schema migrator is now run with `dart run hive_ce_generator:migrate` instead of as a builder
 
 ## 1.11.3
 

@@ -1,11 +1,12 @@
+import 'dart:io';
+
+import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
+import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:collection/collection.dart';
-import 'package:glob/glob.dart';
-import 'package:build/build.dart';
+import 'package:path/path.dart' as path;
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/generator/type_adapter_generator.dart';
-import 'dart:async';
-
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
 import 'package:source_gen/source_gen.dart';
@@ -13,7 +14,7 @@ import 'package:hive_ce_generator/src/helper/source_helper.dart';
 import 'package:meta/meta.dart';
 
 /// Generate a Hive schema from existing HiveType annotations
-class SchemaMigratorBuilder implements Builder {
+abstract final class SchemaMigrator {
   /// Exception if a field has a default value in the HiveField annotation
   static String hasAnnotationDefaultValue({
     required String className,
@@ -36,20 +37,22 @@ class SchemaMigratorBuilder implements Builder {
   }) =>
       '$className.$fieldName does not have a public getter';
 
-  @override
-  final buildExtensions = const {
-    r'$lib$': ['hive/hive_adapters.dart', 'hive/hive_adapters.g.yaml'],
-  };
-
-  @override
-  Future<void> build(BuildStep buildStep) async {
+  /// Generate `lib/hive/hive_adapters.dart` and `lib/hive/hive_adapters.g.yaml`
+  /// from the HiveType annotations in the current package
+  static Future<void> migrate() async {
+    final collection =
+        AnalysisContextCollection(includedPaths: [path.absolute('lib')]);
     final hiveTypes = <AnnotatedElement>[];
-    await for (final input in buildStep.findAssets(Glob('**/*.dart'))) {
-      if (!await buildStep.resolver.isLibrary(input)) continue;
-      final library = await buildStep.resolver.libraryFor(input);
-      final hiveTypeElements = LibraryReader(library)
-          .annotatedWith(TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'));
-      hiveTypes.addAll(hiveTypeElements);
+    for (final context in collection.contexts) {
+      for (final file in context.contextRoot.analyzedFiles()) {
+        if (!file.endsWith('.dart')) continue;
+        final result = await context.currentSession.getResolvedLibrary(file);
+        if (result is! ResolvedLibraryResult) continue;
+        final hiveTypeElements = LibraryReader(result.element).annotatedWith(
+          TypeChecker.typeNamed(HiveType, inPackage: 'hive_ce'),
+        );
+        hiveTypes.addAll(hiveTypeElements);
+      }
     }
 
     final schemaInfos = <_SchemaInfo>[];
@@ -140,9 +143,9 @@ class SchemaMigratorBuilder implements Builder {
         .sorted() // Sort alphabetically
         .join('\n');
     final specs = schemaInfos.map((e) => e.adapterSpec).join(',\n  ');
-    buildStep.forceWriteAsString(
-      buildStep.asset('lib/hive/hive_adapters.dart'),
-      '''
+    File('lib/hive/hive_adapters.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('''
 import 'package:hive_ce/hive_ce.dart';
 $imports
 
@@ -150,11 +153,9 @@ $imports
   $specs,
 ])
 part 'hive_adapters.g.dart';
-''',
-    );
+''');
 
-    buildStep.forceWriteAsString(
-      buildStep.asset('lib/hive/hive_adapters.g.yaml'),
+    File('lib/hive/hive_adapters.g.yaml').writeAsStringSync(
       writeSchema(HiveSchema(nextTypeId: nextTypeId, types: types)),
     );
   }
@@ -225,7 +226,7 @@ class _SchemaInfo {
 
       if (!isInConstructor && !hasPublicSetter) {
         throw InvalidGenerationSourceError(
-          SchemaMigratorBuilder.hasNoPublicSetter(
+          SchemaMigrator.hasNoPublicSetter(
             className: className,
             fieldName: fieldName,
           ),
@@ -235,7 +236,7 @@ class _SchemaInfo {
 
       if (!hasPublicGetter) {
         throw InvalidGenerationSourceError(
-          SchemaMigratorBuilder.hasNoPublicGetter(
+          SchemaMigrator.hasNoPublicGetter(
             className: className,
             fieldName: fieldName,
           ),
