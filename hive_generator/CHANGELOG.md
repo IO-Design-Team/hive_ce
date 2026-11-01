@@ -1,6 +1,6 @@
 ## 1.12.1
 
-- Supports `build: 5.0.0` (`build_runner` 2.17.1)
+- Upgrades `build` to `5.0.0`
 
 ## 1.12.0
 
