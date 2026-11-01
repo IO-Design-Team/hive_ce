@@ -1,10 +1,5 @@
 targets:
   $default:
-    # example/ is its own package. build_runner otherwise treats its
-    # checked-in *.g.dart files as outputs of this package and deletes them.
-    sources:
-      exclude:
-        - example/**
     builders:
       source_gen|combining_builder:
         options:
