@@ -1,3 +1,7 @@
+## 1.12.1
+
+- Upgrades `build` to `5.0.0`
+
 ## 1.12.0
 
 - Fixes generic types being ordered as new types in `GenerateAdapters` output
