@@ -1,5 +1,10 @@
 targets:
   $default:
+    # The example is a separate package and runs its own build_runner.
+    # Including it here makes this build delete those generated files.
+    sources:
+      exclude:
+        - example/**
     builders:
       source_gen|combining_builder:
         options:
