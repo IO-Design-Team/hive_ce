@@ -1,3 +1,7 @@
+## 1.12.1
+
+- Supports `build: 5.0.0` (`build_runner` 2.17.1)
+
 ## 1.12.0
 
 - Fixes generic types being ordered as new types in `GenerateAdapters` output
