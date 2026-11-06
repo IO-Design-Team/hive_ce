@@ -31,13 +31,19 @@ class FrameIoHelper extends FrameHelper {
     int? keyCrc,
   ) async {
     final raf = await openFile(path);
-    final fileReader = BufferedFileReader(raf);
+    final fileReader = await raf.length() > _bigBoxChunkSize
+        ? BufferedFileReader(raf, _bigBoxChunkSize)
+        : BufferedFileReader(raf);
     try {
       return await _KeyReader(fileReader).readKeys(keystore, cipher, keyCrc);
     } finally {
       await raf.close();
     }
   }
+
+  /// Reading the keys walks the whole file, so a box bigger than this is read
+  /// in chunks of this size instead of the default: far fewer reads.
+  static const _bigBoxChunkSize = 1 << 20;
 
   /// Not part of public API
   Future<int> framesFromFile(

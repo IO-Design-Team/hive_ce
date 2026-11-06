@@ -70,9 +70,7 @@ class BufferedFileReader {
         buffer = Uint8List(bytes);
       }
 
-      for (var i = 0; i < remaining; i++) {
-        buffer[i] = oldBuffer[_bufferOffset + i];
-      }
+      buffer.setRange(0, remaining, oldBuffer, _bufferOffset);
 
       _bufferOffset = 0;
       final readBytes = await file.readInto(buffer, remaining);
