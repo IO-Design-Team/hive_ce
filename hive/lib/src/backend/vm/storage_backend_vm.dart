@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/lock_props.dart';
@@ -60,6 +61,9 @@ class StorageBackendVm extends StorageBackend {
 
   var _compactionScheduled = false;
 
+  /// Blocking IO is fine in the Hive isolate and avoids async IO overhead
+  var _isolated = false;
+
   /// Not part of public API
   StorageBackendVm(
     this._file,
@@ -102,6 +106,7 @@ class StorageBackendVm extends StorageBackend {
     bool isolated = false,
   }) async {
     this.registry = registry;
+    _isolated = isolated;
 
     if (_lockFile.existsSync()) {
       late final LockProps props;
@@ -163,9 +168,14 @@ class StorageBackendVm extends StorageBackend {
   @override
   Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
     return _sync.syncRead(() async {
-      await readRaf.setPosition(frame.offset);
-
-      final bytes = await readRaf.read(frame.requireLength);
+      final Uint8List bytes;
+      if (_isolated) {
+        readRaf.setPositionSync(frame.offset);
+        bytes = readRaf.readSync(frame.requireLength);
+      } else {
+        await readRaf.setPosition(frame.offset);
+        bytes = await readRaf.read(frame.requireLength);
+      }
 
       final reader = BinaryReaderImpl(bytes, registry);
       final readFrame = reader.readFrame(
@@ -200,7 +210,11 @@ class StorageBackendVm extends StorageBackend {
       }
 
       try {
-        await writeRaf.writeFrom(writer.toBytes());
+        if (_isolated) {
+          writeRaf.writeFromSync(writer.toBytes());
+        } else {
+          await writeRaf.writeFrom(writer.toBytes());
+        }
       } catch (e) {
         await writeRaf.setPosition(writeOffset);
         rethrow;

@@ -2,6 +2,7 @@
 
 - Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
 - Speeds up writing to large boxes and encrypted boxes
+- Speeds up `IsolatedHive` writes and lazy reads
 - Fixes excessive memory usage and slow writes in `IsolatedHive`
 - Fixes `IsolatedBox.watch` delivering duplicate events after a listener cancels
 - Updates `isolate_channel` to `0.6.2`
