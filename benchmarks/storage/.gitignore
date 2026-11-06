@@ -2,5 +2,4 @@
 # Created by `dart pub`
 .dart_tool/
 
-hive_registrar.g.dart
-results.csv
+results.md

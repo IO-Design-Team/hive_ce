@@ -1,0 +1,13 @@
+name: hive_v2_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  hive: 2.2.3
+  storage_benchmark:
+    path: ../common
+
+dev_dependencies:
+  rexios_lints: ^19.0.0
