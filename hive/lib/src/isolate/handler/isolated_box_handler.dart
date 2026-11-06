@@ -43,7 +43,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   @override
   void onCancel(dynamic arguments) {
     final id = arguments as int;
-    _subscriptions.remove(id);
+    _subscriptions.remove(id)?.cancel();
   }
 
   void _close() {
