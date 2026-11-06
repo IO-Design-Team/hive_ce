@@ -1,6 +1,7 @@
 ## 2.22.1
 
 - Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
+- Speeds up opening and writing to large boxes and writing to encrypted boxes
 
 ## 2.22.0
 

@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 /// Not part of public API
 class IndexableSkipList<K, V> {
-  static const _maxHeight = 12;
+  static const _maxHeight = 32;
 
   final _Node<K, V> _head = _Node(
     null,
