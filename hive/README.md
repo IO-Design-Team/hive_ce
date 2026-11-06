@@ -48,7 +48,10 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
   - `DateTime` and `Duration` keep microsecond precision
   - Type IDs up to `65439` instead of `223`
 - **Performance**
-  - Faster box opening and writes, especially for large and encrypted boxes (see [benchmarks](#benchmarks))
+  - Faster batch writes and opening of large boxes, including encrypted boxes
+  - Lazy boxes open several times faster
+  - `IsolatedHive` individual writes are faster than Hive CE
+  - See the [benchmarks](#benchmarks)
 
 ## Benchmarks
 
@@ -58,12 +61,12 @@ All times are averaged over several runs
 
 Writing values one at a time with `add`:
 
-| Values    | Hive v2 |  Hive v4 | Hive CE | IsolatedHive |
+| Values    | Hive v2 | Hive v4  | Hive CE | IsolatedHive |
 | --------- | ------: | -------: | ------: | -----------: |
-| 1,000     |   19 ms |   129 ms |   17 ms |        36 ms |
-| 10,000    |  149 ms |   1.66 s |  156 ms |       343 ms |
-| 100,000   |  1.56 s |  18.79 s |  1.52 s |       3.62 s |
-| 1,000,000 | 20.61 s | 331.64 s | 15.44 s |      38.56 s |
+| 1,000     |   15 ms |   198 ms |   15 ms |        11 ms |
+| 10,000    |  271 ms |   2.13 s |  271 ms |       130 ms |
+| 100,000   |  1.80 s |  21.52 s |  1.90 s |       1.66 s |
+| 1,000,000 | 23.36 s | 371.17 s | 17.36 s |      13.07 s |
 
 ### Batch writes
 
@@ -71,10 +74,10 @@ Writing all values with a single `addAll` call:
 
 | Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
 | --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    0 ms |    3 ms |    0 ms |         1 ms |
-| 10,000    |    9 ms |   26 ms |    8 ms |        13 ms |
-| 100,000   |  119 ms |  265 ms |   99 ms |       126 ms |
-| 1,000,000 |  3.00 s |  3.03 s |  991 ms |       1.44 s |
+| 1,000     |    0 ms |    2 ms |    0 ms |         1 ms |
+| 10,000    |    8 ms |   27 ms |    9 ms |        13 ms |
+| 100,000   |  121 ms |  313 ms |  118 ms |       157 ms |
+| 1,000,000 |  3.66 s |  3.00 s |  1.28 s |       1.86 s |
 
 ### Opening a box
 
@@ -82,10 +85,10 @@ Opening a box and reading every value:
 
 | Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
 | --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    1 ms |    2 ms |    1 ms |         1 ms |
-| 10,000    |   12 ms |   15 ms |   12 ms |        14 ms |
-| 100,000   |  160 ms |  165 ms |  125 ms |       143 ms |
-| 1,000,000 |  3.98 s |  1.72 s |  1.29 s |       1.46 s |
+| 1,000     |    1 ms |    1 ms |    1 ms |         1 ms |
+| 10,000    |   13 ms |   14 ms |   10 ms |        14 ms |
+| 100,000   |  178 ms |  189 ms |  125 ms |       146 ms |
+| 1,000,000 |  4.34 s |  1.65 s |  1.32 s |       1.59 s |
 
 ### Encrypted and lazy boxes
 
@@ -93,9 +96,9 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 
 | Values    | Encrypted batch write | Encrypted open  | Lazy open       |
 | --------- | --------------------- | --------------- | --------------- |
-| 10,000    | 34 ms → 24 ms         | 22 ms → 20 ms   | 6 ms → 5 ms     |
-| 100,000   | 367 ms → 239 ms       | 252 ms → 216 ms | 84 ms → 52 ms   |
-| 1,000,000 | 5.73 s → 2.49 s       | 5.34 s → 2.29 s | 3.35 s → 530 ms |
+| 10,000    | 41 ms → 30 ms         | 31 ms → 27 ms   | 7 ms → 5 ms     |
+| 100,000   | 481 ms → 330 ms       | 339 ms → 291 ms | 99 ms → 59 ms   |
+| 1,000,000 | 7.21 s → 3.35 s       | 6.14 s → 2.99 s | 3.79 s → 640 ms |
 
 ### Database size
 
@@ -109,8 +112,6 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 ### Notes
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
-
-IsolatedHive is slower than Hive, but it is much faster than Hive v4 and you still get the benefit of multiple isolate support.
 
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks/storage).
 
