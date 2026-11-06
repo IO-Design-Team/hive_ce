@@ -173,7 +173,7 @@ abstract class IsolatedBoxBaseImpl<E>
     } else {
       writer.write(value);
     }
-    return writer.toBytes();
+    return Uint8List.fromList(writer.toBytes());
   }
 
   E? _readValue(Uint8List? bytes) {

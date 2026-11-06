@@ -31,13 +31,17 @@ class FrameIoHelper extends FrameHelper {
     int? keyCrc,
   ) async {
     final raf = await openFile(path);
-    final fileReader = BufferedFileReader(raf);
     try {
+      final fileReader = await raf.length() > _bigBoxChunkSize
+          ? BufferedFileReader(raf, _bigBoxChunkSize)
+          : BufferedFileReader(raf);
       return await _KeyReader(fileReader).readKeys(keystore, cipher, keyCrc);
     } finally {
       await raf.close();
     }
   }
+
+  static const _bigBoxChunkSize = 1 << 20;
 
   /// Not part of public API
   Future<int> framesFromFile(

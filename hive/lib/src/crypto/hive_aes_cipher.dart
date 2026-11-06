@@ -48,7 +48,14 @@ class HiveAesCipher implements HiveCipher {
 
   /// Generates a random initialization vector (internal)
   @visibleForTesting
-  Uint8List generateIv() => _ivRandom.nextBytes(16);
+  Uint8List generateIv() {
+    final iv = Uint8List(16);
+    final words = iv.buffer.asUint32List();
+    for (var i = 0; i < words.length; i++) {
+      words[i] = _ivRandom.nextInt(0x100000000);
+    }
+    return iv;
+  }
 
   @override
   int encrypt(
