@@ -1,0 +1,14 @@
+name: storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  json_annotation: ^4.9.0
+  meta: ^1.14.0
+
+dev_dependencies:
+  rexios_lints: ^19.0.0
+  # build_runner: ^2.5.4 # TODO: Fix this
+  json_serializable: ^6.8.0

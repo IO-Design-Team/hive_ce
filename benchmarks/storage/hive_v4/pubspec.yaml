@@ -1,0 +1,18 @@
+name: hive_v4_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  hive: ^4.0.0-dev.2
+  isar: ^4.0.0-dev.14
+  storage_benchmark:
+    path: ../common
+
+dev_dependencies:
+  rexios_lints: ^19.0.0
+
+dependency_overrides:
+  analyzer: any
+  source_gen: any
