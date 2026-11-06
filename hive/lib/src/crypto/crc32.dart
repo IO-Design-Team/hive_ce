@@ -1,12 +1,8 @@
 import 'dart:typed_data';
 
-/// Efficient CRC32 implementation (IEEE, reflected polynomial 0xEDB88320).
-///
-/// Uses slicing-by-8: eight lookup tables let the loop consume eight bytes
-/// per iteration instead of one. The result is identical to the classic
-/// byte-at-a-time table implementation.
+/// Slicing-by-8 CRC32 implementation
 class Crc32 {
-  static final List<Uint32List> _tables = _buildTables();
+  static final _tables = _buildTables();
 
   static List<Uint32List> _buildTables() {
     final tables = List.generate(8, (_) => Uint32List(256));
@@ -35,22 +31,26 @@ class Crc32 {
     int offset = 0,
     int? length,
   }) {
-    final tables = _tables;
-    final t0 = tables[0];
-    final t1 = tables[1];
-    final t2 = tables[2];
-    final t3 = tables[3];
-    final t4 = tables[4];
-    final t5 = tables[5];
-    final t6 = tables[6];
-    final t7 = tables[7];
+    final t0 = _tables[0];
+    final t1 = _tables[1];
+    final t2 = _tables[2];
+    final t3 = _tables[3];
+    final t4 = _tables[4];
+    final t5 = _tables[5];
+    final t6 = _tables[6];
+    final t7 = _tables[7];
 
-    crc = (crc ^ 0xffffffff) & 0xffffffff;
+    crc = crc ^ 0xffffffff;
 
     length ??= bytes.length;
 
     var i = offset;
     final end = offset + length;
+    // Custom ciphers can return a key CRC outside of 32 bits. Process it one
+    // byte at a time so the result matches checksums that are already stored.
+    for (; i < end && (crc < 0 || crc > 0xffffffff); i++) {
+      crc = t0[(crc ^ bytes[i]) & 0xff] ^ (crc >> 8);
+    }
     while (end - i >= 8) {
       final a = crc ^
           (bytes[i] |
@@ -60,16 +60,15 @@ class Crc32 {
       crc = t7[a & 0xff] ^
           t6[(a >> 8) & 0xff] ^
           t5[(a >> 16) & 0xff] ^
-          t4[(a >> 24) & 0xff] ^
+          t4[a >> 24] ^
           t3[bytes[i + 4]] ^
           t2[bytes[i + 5]] ^
           t1[bytes[i + 6]] ^
           t0[bytes[i + 7]];
       i += 8;
     }
-    while (i < end) {
+    for (; i < end; i++) {
       crc = t0[(crc ^ bytes[i]) & 0xff] ^ (crc >> 8);
-      i++;
     }
 
     return crc ^ 0xffffffff;

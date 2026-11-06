@@ -1,3 +1,7 @@
+## 2.22.1
+
+- Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
+
 ## 2.22.0
 
 - Adds `Hive.flush()` and `IsolatedHive.flush()` to flush every open box
