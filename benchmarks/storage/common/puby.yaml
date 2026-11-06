@@ -1,3 +1,2 @@
 exclude:
-  # TODO: Fix this
   - run build_runner
