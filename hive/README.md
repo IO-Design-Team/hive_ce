@@ -23,7 +23,7 @@ Hive is a lightweight and blazing fast key-value database written in pure Dart. 
 ## Features
 
 - 🚀 Cross platform: mobile, desktop, browser
-- ⚡ Great performance (see [benchmark](#benchmark))
+- ⚡ Great performance (see [benchmarks](#benchmarks))
 - ❤️ Simple, powerful, & intuitive API
 - 🔒 Strong encryption built in
 - 🎈 **NO** native dependencies
@@ -33,39 +33,86 @@ Hive is a lightweight and blazing fast key-value database written in pure Dart. 
 
 Hive CE is a spiritual continuation of Hive v2 with the following new features:
 
-- Hive CE Inspector DevTools extension
-  - Quickly and easily inspect the content of Hive boxes
-- Isolate support through `IsolatedHive`
-- Flutter web WASM support
-- Automatic type adapter generation using the `GenerateAdapters` annotation
-  - No more manually adding annotations to every type and field
+- **Tooling**
+  - Hive CE Inspector DevTools extension to browse and search the contents of your boxes
+- **Platforms**
+  - Isolate support through `IsolatedHive`
+  - Flutter web WASM support
+- **Code generation**
+  - Generate adapters with the `GenerateAdapters` annotation instead of annotating every type and field
   - Generate adapters for classes outside the current package
-- A `HiveRegistrar` extension that lets you register all your generated adapters in one call
-- Extends the maximum type ID from `223` to `65439`
-- Support for constructor parameter defaults
-- Support for Sets
-- A built in Duration adapter
-- Freezed support
-- Support for generating adapters with classes that use named imports
+  - Register every generated adapter in one call with the `HiveRegistrar` extension
+  - Support for Freezed, constructor parameter defaults, and named imports
+- **Types**
+  - Built-in support for `Set` and `Duration`
+  - `DateTime` and `Duration` keep microsecond precision
+  - Type IDs up to `65439` instead of `223`
+- **Performance**
+  - Faster box opening and writes, especially for large and encrypted boxes (see [benchmarks](#benchmarks))
 
-## Benchmark
+## Benchmarks
 
-This is a comparison of the time to complete a given number of write operations and the resulting database file size:
+All times are averaged over several runs
 
-| Operations | Hive CE Time | IsolatedHive Time | Hive CE Size | Hive v4 Time | Hive v4 Size |
-| ---------- | ------------ | ----------------- | ------------ | ------------ | ------------ |
-| 10         | 0.00 s       | 0.00 s            | 0.00 MB      | 0.00 s       | 1.00 MB      |
-| 100        | 0.00 s       | 0.01 s            | 0.01 MB      | 0.01 s       | 1.00 MB      |
-| 1000       | 0.02 s       | 0.03 s            | 0.11 MB      | 0.06 s       | 1.00 MB      |
-| 10000      | 0.13 s       | 0.25 s            | 1.10 MB      | 0.64 s       | 5.00 MB      |
-| 100000     | 1.40 s       | 2.64 s            | 10.97 MB     | 7.26 s       | 30.00 MB     |
-| 1000000    | 19.94 s      | 41.50 s           | 109.67 MB    | 84.87 s      | 290.00 MB    |
+### Individual writes
 
-Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of operations.
+Writing values one at a time with `add`:
+
+| Values    | Hive v2 |  Hive v4 | Hive CE | IsolatedHive |
+| --------- | ------: | -------: | ------: | -----------: |
+| 1,000     |   19 ms |   129 ms |   17 ms |        36 ms |
+| 10,000    |  149 ms |   1.66 s |  156 ms |       343 ms |
+| 100,000   |  1.56 s |  18.79 s |  1.52 s |       3.62 s |
+| 1,000,000 | 20.61 s | 331.64 s | 15.44 s |      38.56 s |
+
+### Batch writes
+
+Writing all values with a single `addAll` call:
+
+| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
+| --------- | ------: | ------: | ------: | -----------: |
+| 1,000     |    0 ms |    3 ms |    0 ms |         1 ms |
+| 10,000    |    9 ms |   26 ms |    8 ms |        13 ms |
+| 100,000   |  119 ms |  265 ms |   99 ms |       126 ms |
+| 1,000,000 |  3.00 s |  3.03 s |  991 ms |       1.44 s |
+
+### Opening a box
+
+Opening a box and reading every value:
+
+| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
+| --------- | ------: | ------: | ------: | -----------: |
+| 1,000     |    1 ms |    2 ms |    1 ms |         1 ms |
+| 10,000    |   12 ms |   15 ms |   12 ms |        14 ms |
+| 100,000   |  160 ms |  165 ms |  125 ms |       143 ms |
+| 1,000,000 |  3.98 s |  1.72 s |  1.29 s |       1.46 s |
+
+### Encrypted and lazy boxes
+
+Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy open time doesn't include reading values.
+
+| Values    | Encrypted batch write | Encrypted open  | Lazy open       |
+| --------- | --------------------- | --------------- | --------------- |
+| 10,000    | 34 ms → 24 ms         | 22 ms → 20 ms   | 6 ms → 5 ms     |
+| 100,000   | 367 ms → 239 ms       | 252 ms → 216 ms | 84 ms → 52 ms   |
+| 1,000,000 | 5.73 s → 2.49 s       | 5.34 s → 2.29 s | 3.35 s → 530 ms |
+
+### Database size
+
+| Values    |   Hive CE |   Hive v4 |
+| --------- | --------: | --------: |
+| 1,000     |   0.11 MB |   1.00 MB |
+| 10,000    |   1.10 MB |   5.00 MB |
+| 100,000   |  10.97 MB |  30.00 MB |
+| 1,000,000 | 109.67 MB | 290.00 MB |
+
+### Notes
+
+Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
 
 IsolatedHive is slower than Hive, but it is much faster than Hive v4 and you still get the benefit of multiple isolate support.
 
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/blob/main/benchmarks/storage/bin/bench.dart).
+The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks/storage).
 
 ## Getting Started
 
