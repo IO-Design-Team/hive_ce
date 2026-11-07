@@ -4,6 +4,7 @@
 
 results.md
 memory_results.md
+speed_results.md
 memory_box/
 *.db
 objectbox/download/
