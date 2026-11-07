@@ -137,8 +137,9 @@ class BinaryReaderImpl extends BinaryReader {
     Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
   ]) {
     byteCount ??= readUint32();
-    if (identical(decoder, BinaryReader.utf8Decoder))
+    if (identical(decoder, BinaryReader.utf8Decoder)) {
       return _readUtf8(byteCount);
+    }
     final view = viewBytes(byteCount);
     return decoder.convert(view);
   }
