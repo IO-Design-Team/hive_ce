@@ -53,6 +53,33 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
   - `IsolatedHive` individual writes are faster than Hive CE
   - See the [benchmarks](#benchmarks)
 
+## Getting Started
+
+Hive CE requires Dart 3. Ensure that you have the following in your `pubspec.yaml` file:
+
+```yaml
+environment:
+  sdk: ^3.0.0
+```
+
+## Usage
+
+You can use Hive just like a map. Writes are readable immediately, but a write can be lost if the process is killed before its future completes. On the VM, `flush()` waits for pending writes and flushes them to disk.
+
+<!-- embedme readme/usage.dart -->
+
+```dart
+import 'package:hive_ce/hive_ce.dart';
+
+void example() {
+  final box = Hive.box('myBox');
+  box.put('name', 'David');
+  final name = box.get('name');
+  print('Name: $name');
+}
+
+```
+
 ## Benchmarks
 
 All times are averaged over several runs
@@ -145,30 +172,3 @@ Peak memory usage above the process baseline, including native memory, averaged 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
 
 The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks).
-
-## Getting Started
-
-Hive CE requires Dart 3. Ensure that you have the following in your `pubspec.yaml` file:
-
-```yaml
-environment:
-  sdk: ^3.0.0
-```
-
-## Usage
-
-You can use Hive just like a map. Writes are readable immediately, but a write can be lost if the process is killed before its future completes. On the VM, `flush()` waits for pending writes and flushes them to disk.
-
-<!-- embedme readme/usage.dart -->
-
-```dart
-import 'package:hive_ce/hive_ce.dart';
-
-void example() {
-  final box = Hive.box('myBox');
-  box.put('name', 'David');
-  final name = box.get('name');
-  print('Name: $name');
-}
-
-```
