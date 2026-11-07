@@ -15,6 +15,12 @@ class IndexableSkipList<K, V> {
 
   final Random _random;
 
+  /// The last node before the insert position on each level
+  final _update = List<_Node<K, V>?>.filled(_maxHeight, null);
+
+  /// The index of each node in [_update] plus one
+  final _rank = List.filled(_maxHeight, 0);
+
   final Comparator<K> _comparator;
 
   var _height = 1;
@@ -36,8 +42,24 @@ class IndexableSkipList<K, V> {
 
   /// Not part of public API
   V? insert(K key, V? value) {
-    final existingNode = _getNode(key);
-    if (existingNode != null) {
+    final update = _update;
+    final rank = _rank;
+
+    var current = _head;
+    for (var level = _height - 1; level >= 0; level--) {
+      var currentRank = level == _height - 1 ? 0 : rank[level + 1];
+      while (true) {
+        final next = current.next[level];
+        if (next == null || _comparator(key, next.key as K) <= 0) break;
+        currentRank += next.width[level];
+        current = next;
+      }
+      update[level] = current;
+      rank[level] = currentRank;
+    }
+
+    final existingNode = current.next[0];
+    if (existingNode != null && _comparator(key, existingNode.key as K) == 0) {
       final oldValue = existingNode.value;
       existingNode.value = value;
       return oldValue;
@@ -50,6 +72,8 @@ class IndexableSkipList<K, V> {
     }
     if (newLevel >= _height) {
       newLevel = _height++;
+      update[newLevel] = _head;
+      rank[newLevel] = 0;
     }
 
     final newNode = _Node<K, V>(
@@ -59,52 +83,23 @@ class IndexableSkipList<K, V> {
       List.filled(newLevel + 1, 0),
     );
 
-    var current = _head;
-    // Next & Down
-    for (var level = _height - 1; level >= 0; level--) {
-      while (true) {
-        final next = current.next[level];
-        if (next == null || _comparator(key, next.key as K) < 0) break;
-        current = next;
+    final newRank = rank[0] + 1;
+    for (var level = 0; level <= newLevel; level++) {
+      final prev = update[level]!;
+      final next = prev.next[level];
+      final width = newRank - rank[level];
+      newNode.width[level] = width;
+      newNode.next[level] = next;
+      prev.next[level] = newNode;
+      if (next != null) {
+        next.width[level] -= width - 1;
       }
-
-      // CHANGE 1 - Increase all the above node's width by 1
-      if (level > newLevel) {
-        final next = current.next[level];
-        if (next != null) {
-          next.width[level]++;
-        }
-        continue;
-      }
-
-      if (level == 0) {
-        // CHANGE 2 - Nodes at level 0 always have a width of 1
-        newNode.width[0] = 1;
-      } else {
-        // CHANGE 3 - Calculate the width of the level
-        var width = 0;
-        var node = current.next[level - 1];
-        while (node != null && _comparator(key, node.key as K) >= 0) {
-          width += node.width[level - 1];
-          node = node.next[level - 1];
-        }
-
-        for (var j = level; j <= newLevel; j++) {
-          newNode.width[j] += width;
-        }
-        newNode.width[level] += 1;
-      }
-
-      // Insert new node at the correct position in this level
-      newNode.next[level] = current.next[level];
-      current.next[level] = newNode;
     }
 
-    // CHANGE 4 - Adjust the width of all next nodes
-    for (var i = 1; i <= newLevel; i++) {
-      final next = newNode.next[i];
+    for (var level = newLevel + 1; level < _height; level++) {
+      final next = update[level]!.next[level];
       if (next != null) {
-        next.width[i] -= newNode.width[i] - 1;
+        next.width[level]++;
       }
     }
 
