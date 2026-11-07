@@ -77,7 +77,10 @@ Future<void> runBenchmarks({
   File('results.md').writeAsStringSync('${results.join('\n\n')}\n');
 }
 
-/// Writes [operations] values one at a time
+/// Writes [operations] values one at a time.
+///
+/// Each value is flushed before the next write, matching Hive v4, which
+/// commits every `add` to disk.
 Future<BenchResult> _benchmarkWrites(BenchTarget target, int operations) async {
   final boxFile = File(target.type.boxFileName(_boxName));
   late dynamic box;
@@ -91,8 +94,8 @@ Future<BenchResult> _benchmarkWrites(BenchTarget target, int operations) async {
     run: () async {
       for (var i = 0; i < operations; i++) {
         await box.add(testModel);
+        await target.flush?.call(box);
       }
-      await target.flush?.call(box);
     },
     teardown: () async => await box.close(),
   );

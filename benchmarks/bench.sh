@@ -3,7 +3,7 @@ set -e
 
 cd "$(dirname "$0")"
 
-pids=""
+# Run one project at a time so they don't compete for CPU and disk
 for project in hive_ce hive_v2 hive_v4; do
   (
     echo "Running $project"
@@ -13,12 +13,5 @@ for project in hive_ce hive_v2 hive_v4; do
     ./bench
     rm bench
     echo "Results written to $project/results.md"
-  ) &
-  pids="$pids $!"
+  )
 done
-
-status=0
-for pid in $pids; do
-  wait "$pid" || status=1
-done
-exit "$status"
