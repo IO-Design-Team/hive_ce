@@ -1,6 +1,7 @@
 ## NEXT
 
 - Speeds up encryption and decryption of encrypted boxes by about 2x
+- Halves memory allocated by individual `put` calls on encrypted boxes
 
 ## 2.23.0
 
