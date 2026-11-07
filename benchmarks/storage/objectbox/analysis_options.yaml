@@ -1,0 +1,5 @@
+include: package:rexios_lints/dart/core_extra.yaml
+
+analyzer:
+  exclude:
+    - lib/objectbox.g.dart

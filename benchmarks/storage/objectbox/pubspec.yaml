@@ -1,0 +1,13 @@
+name: objectbox_storage_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  objectbox: 5.3.2
+  storage_benchmark:
+    path: ../common
+
+dev_dependencies:
+  rexios_lints: ^19.0.0
