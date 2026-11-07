@@ -399,12 +399,11 @@ class BinaryWriterImpl extends BinaryWriter {
   }) {
     final valueWriter = BinaryWriterImpl(typeRegistry)
       ..write(value, withTypeId: withTypeId);
-    final inp = valueWriter._buffer;
-    final inpLength = valueWriter._offset;
+    final inp = valueWriter.toBytes();
 
     _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    final len = cipher.encrypt(inp, 0, inpLength, _buffer, _offset);
+    final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
 
     _offset += len;
   }
