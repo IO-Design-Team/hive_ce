@@ -8,9 +8,6 @@ import 'package:test/test.dart';
 import 'message.dart';
 
 void main() {
-  final encKey = encryptionKey.map(Uint32List.fromList).toList();
-  final decKey = decryptionKey.map(Uint32List.fromList).toList();
-
   group('AesEngine', () {
     test('.generateWorkingKey()', () {
       expect(AesEngine.generateWorkingKey(key, true), encryptionKey);
@@ -24,7 +21,7 @@ void main() {
       final outPc = Uint8List(message.length);
 
       for (var i = 0; i < message.length; i += aesBlockSize) {
-        AesEngine.encryptBlock(encKey, message, i, out, i);
+        AesEngine.encryptBlock(encryptionKey, message, i, out, i);
         pcEngine.init(true, KeyParameter(key));
         pcEngine.processBlock(message, i, outPc, i);
       }
@@ -38,13 +35,13 @@ void main() {
       final encrypted = Uint8List(message.length);
 
       for (var i = 0; i < message.length; i += aesBlockSize) {
-        AesEngine.decryptBlock(encKey, message, i, out, i);
+        AesEngine.decryptBlock(encryptionKey, message, i, out, i);
         pcEngine.init(true, KeyParameter(key));
         pcEngine.processBlock(message, i, encrypted, i);
       }
 
       for (var i = 0; i < encrypted.length; i += aesBlockSize) {
-        AesEngine.decryptBlock(decKey, encrypted, i, out, i);
+        AesEngine.decryptBlock(decryptionKey, encrypted, i, out, i);
       }
       expect(out, message);
     });
