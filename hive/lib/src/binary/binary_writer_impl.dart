@@ -121,11 +121,35 @@ class BinaryWriterImpl extends BinaryWriter {
     bool writeByteCount = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
+    if (identical(encoder, BinaryWriter.utf8Encoder)) {
+      final length = value.length;
+      final countBytes = writeByteCount ? 4 : 0;
+      _reserveBytes(countBytes + length);
+      if (_writeAscii(value, _offset + countBytes)) {
+        if (writeByteCount) _buffer.writeUint32(_offset, length);
+        _offset += countBytes + length;
+        return;
+      }
+    }
+
     final bytes = encoder.convert(value);
     if (writeByteCount) {
       writeUint32(bytes.length);
     }
     _addBytes(bytes);
+  }
+
+  /// Copies [value] to [offset] if it is ASCII, which is the same as UTF-8
+  ///
+  /// The buffer must have room for `value.length` bytes at [offset]
+  bool _writeAscii(String value, int offset) {
+    final buffer = _buffer;
+    for (var i = 0; i < value.length; i++) {
+      final codeUnit = value.codeUnitAt(i);
+      if (codeUnit > 0x7f) return false;
+      buffer[offset + i] = codeUnit;
+    }
+    return true;
   }
 
   @override
@@ -186,9 +210,7 @@ class BinaryWriterImpl extends BinaryWriter {
       writeUint32(list.length);
     }
     for (final str in list) {
-      final strBytes = encoder.convert(str);
-      writeUint32(strBytes.length);
-      _addBytes(strBytes);
+      writeString(str, encoder: encoder);
     }
   }
 
@@ -219,6 +241,14 @@ class BinaryWriterImpl extends BinaryWriter {
 
     if (key is String) {
       writeByte(FrameKeyType.utf8StringT);
+      final length = key.length;
+      _reserveBytes(1 + length);
+      if (_writeAscii(key, _offset + 1)) {
+        _buffer[_offset] = length;
+        _offset += 1 + length;
+        return;
+      }
+
       final bytes = BinaryWriter.utf8Encoder.convert(key);
       writeByte(bytes.length);
       _addBytes(bytes);
