@@ -82,42 +82,46 @@ void example() {
 
 ## Benchmarks
 
-All times are averaged over several runs
+The benchmarks were run on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks).
 
-### Individual writes
+### Speed
+
+All times are averaged over several runs.
+
+#### Individual writes
 
 Writing values one at a time with `add`:
 
-| Values    | Hive v2 | Hive v4  | Hive CE | IsolatedHive |
-| --------- | ------: | -------: | ------: | -----------: |
-| 1,000     |   14 ms |   142 ms |   14 ms |        11 ms |
-| 10,000    |  162 ms |   1.81 s |  164 ms |       142 ms |
-| 100,000   |  1.71 s |  19.94 s |  1.66 s |       1.32 s |
-| 1,000,000 | 22.37 s | 339.65 s | 17.21 s |      13.13 s |
+| Values    | Hive CE | IsolatedHive | Hive v2 |  Hive v4 |
+| --------- | ------: | -----------: | ------: | -------: |
+| 1,000     |   14 ms |        11 ms |   14 ms |   142 ms |
+| 10,000    |  164 ms |       142 ms |  162 ms |   1.81 s |
+| 100,000   |  1.66 s |       1.32 s |  1.71 s |  19.94 s |
+| 1,000,000 | 17.21 s |      13.13 s | 22.37 s | 339.65 s |
 
-### Batch writes
+#### Batch writes
 
 Writing all values with a single `addAll` call:
 
-| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
-| --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    0 ms |    2 ms |    0 ms |         1 ms |
-| 10,000    |    9 ms |   26 ms |    9 ms |        15 ms |
-| 100,000   |  119 ms |  328 ms |  114 ms |       134 ms |
-| 1,000,000 |  3.63 s |  2.94 s |  1.24 s |       1.71 s |
+| Values    | Hive CE | IsolatedHive | Hive v2 | Hive v4 |
+| --------- | ------: | -----------: | ------: | ------: |
+| 1,000     |    0 ms |         1 ms |    0 ms |    2 ms |
+| 10,000    |    9 ms |        15 ms |    9 ms |   26 ms |
+| 100,000   |  114 ms |       134 ms |  119 ms |  328 ms |
+| 1,000,000 |  1.24 s |       1.71 s |  3.63 s |  2.94 s |
 
-### Opening a box
+#### Opening a box
 
 Opening a box and reading every value:
 
-| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
-| --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    1 ms |    1 ms |    1 ms |         1 ms |
-| 10,000    |   13 ms |   14 ms |   11 ms |        14 ms |
-| 100,000   |  167 ms |  192 ms |  130 ms |       143 ms |
-| 1,000,000 |  4.10 s |  1.66 s |  1.32 s |       1.50 s |
+| Values    | Hive CE | IsolatedHive | Hive v2 | Hive v4 |
+| --------- | ------: | -----------: | ------: | ------: |
+| 1,000     |    1 ms |         1 ms |    1 ms |    1 ms |
+| 10,000    |   11 ms |        14 ms |   13 ms |   14 ms |
+| 100,000   |  130 ms |       143 ms |  167 ms |  192 ms |
+| 1,000,000 |  1.32 s |       1.50 s |  4.10 s |  1.66 s |
 
-### Encrypted and lazy boxes
+#### Encrypted and lazy boxes
 
 Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy open time doesn't include reading values.
 
@@ -136,39 +140,19 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 | 100,000   |  10.97 MB |  30.00 MB |
 | 1,000,000 | 109.67 MB | 290.00 MB |
 
+Database size in Hive v4 is directly affected by the length of field names in model classes.
+
 ### Memory usage
 
-Peak memory usage above the process baseline, including native memory, averaged over three runs. Each run is a new process. Hive v2 and Hive CE keep every value of a regular box in memory while it is open. Lazy boxes only keep keys in memory and read values with `getAt`.
+Peak memory usage with 1,000,000 values, including native memory, averaged over three runs. Each run is a new process. Hive CE and Hive v2 keep every value of a regular box in memory while it is open. Lazy boxes only keep keys in memory and read values with `getAt`.
 
-#### Batch writes
-
-| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 |  Hive v4 |   sqflite |    drift |   sembast | ObjectBox |
-| --------- | -------: | -------------: | -------: | -------: | --------: | -------: | --------: | --------: |
-| 1,000     |   2.5 MB |         2.8 MB |   1.2 MB |   3.7 MB |    6.5 MB |   5.6 MB |   10.2 MB |    1.7 MB |
-| 10,000    |  15.9 MB |        15.7 MB |  10.6 MB |  13.4 MB |   48.1 MB |  14.6 MB |   50.1 MB |    6.6 MB |
-| 100,000   |  90.4 MB |        81.8 MB |  89.3 MB |  78.2 MB |  184.7 MB |  88.5 MB |  222.3 MB |   42.9 MB |
-| 1,000,000 | 594.4 MB |       542.8 MB | 594.5 MB | 480.7 MB | 1638.3 MB | 659.8 MB | 1790.7 MB |  291.7 MB |
-
-#### Opening a database
-
-| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 | Hive v4 | sqflite |  drift |   sembast | ObjectBox |
-| --------- | -------: | -------------: | -------: | ------: | ------: | -----: | --------: | --------: |
-| 1,000     |   1.6 MB |         0.6 MB |   1.6 MB |  0.6 MB |  0.9 MB | 1.4 MB |    3.9 MB |    1.3 MB |
-| 10,000    |  13.2 MB |         4.3 MB |  13.1 MB |  0.6 MB |  0.9 MB | 1.4 MB |   45.3 MB |    1.2 MB |
-| 100,000   |  77.3 MB |        27.3 MB |  77.2 MB |  0.6 MB |  0.9 MB | 1.4 MB |  143.5 MB |    1.2 MB |
-| 1,000,000 | 481.0 MB |       229.1 MB | 469.2 MB |  0.6 MB |  0.9 MB | 1.4 MB | 1127.9 MB |    1.2 MB |
-
-#### Opening a database and reading every value
-
-| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 |   Hive v4 |  sqflite |    drift |   sembast | ObjectBox |
-| --------- | -------: | -------------: | -------: | --------: | -------: | -------: | --------: | --------: |
-| 1,000     |   1.6 MB |         5.6 MB |   1.6 MB |    4.0 MB |   2.3 MB |   3.4 MB |    3.9 MB |    1.6 MB |
-| 10,000    |  13.2 MB |        38.7 MB |  13.1 MB |   20.3 MB |   7.6 MB |  16.2 MB |   45.3 MB |    5.6 MB |
-| 100,000   |  78.9 MB |        72.0 MB |  78.9 MB |  155.7 MB |  80.8 MB | 102.4 MB |  171.8 MB |   32.9 MB |
-| 1,000,000 | 496.9 MB |       355.8 MB | 485.1 MB | 1395.9 MB | 559.2 MB | 789.6 MB | 1417.1 MB |  271.2 MB |
-
-### Notes
-
-Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
-
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks).
+| Database       | Batch write |     Open | Open and read every value |
+| -------------- | ----------: | -------: | ------------------------: |
+| Hive CE        |      594 MB |   481 MB |                    497 MB |
+| Hive CE (lazy) |      543 MB |   229 MB |                    356 MB |
+| Hive v2        |      595 MB |   469 MB |                    485 MB |
+| Hive v4        |      481 MB |     1 MB |                  1,396 MB |
+| sqflite        |    1,638 MB |     1 MB |                    559 MB |
+| drift          |      660 MB |     1 MB |                    790 MB |
+| sembast        |    1,791 MB | 1,128 MB |                  1,417 MB |
+| ObjectBox      |      292 MB |     1 MB |                    271 MB |
