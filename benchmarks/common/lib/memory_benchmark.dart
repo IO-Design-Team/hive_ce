@@ -30,7 +30,8 @@ class MemoryTarget {
 
 /// Runs every memory benchmark and writes the results to `memory_results.md`
 ///
-/// Peak RSS never decreases, so every measurement runs in a new process
+/// Peak RSS never decreases, so every memory measurement runs in a new
+/// process. Database size is the size of the database left by the batch write.
 Future<void> runMemoryBenchmarks(
   List<String> args,
   List<MemoryTarget> targets,
@@ -43,18 +44,22 @@ Future<void> runMemoryBenchmarks(
   final writeResults = <List<int>>[];
   final openResults = <List<int>>[];
   final readResults = <List<int>>[];
+  final sizeResults = <List<int>>[];
   for (final count in operations) {
     final writeRow = <int>[];
     final openRow = <int>[];
     final readRow = <int>[];
+    final sizeRow = <int>[];
     for (var i = 0; i < targets.length; i++) {
-      final name = targets[i].name;
-      final [write] = await _average('$count value $name write', [
+      final target = targets[i];
+      final [write] = await _average('$count value ${target.name} write', [
         'write',
         '$i',
         '$count',
       ]);
-      final [open, read] = await _average('$count value $name open', [
+      final size = _databaseSize(target.path);
+      print('Size: ${_formatSize(size)}');
+      final [open, read] = await _average('$count value ${target.name} open', [
         'open',
         '$i',
         '$count',
@@ -62,10 +67,12 @@ Future<void> runMemoryBenchmarks(
       writeRow.add(write);
       openRow.add(open);
       readRow.add(read);
+      sizeRow.add(size);
     }
     writeResults.add(writeRow);
     openResults.add(openRow);
     readResults.add(readRow);
+    sizeResults.add(sizeRow);
   }
 
   final names = [for (final target in targets) target.name];
@@ -80,6 +87,10 @@ Future<void> runMemoryBenchmarks(
     table(openResults),
     '### Opening a database and reading every value',
     table(readResults),
+    '### Database size',
+    formatTable(names, [
+      for (final row in sizeResults) row.map(_formatSize).toList(),
+    ]),
   ];
 
   File('memory_results.md').writeAsStringSync('${results.join('\n\n')}\n');
@@ -144,5 +155,20 @@ Future<List<int>> _average(String description, List<String> args) async {
   ];
 }
 
+/// Bytes on disk for a database file, or every file in a database directory
+int _databaseSize(String path) {
+  if (FileSystemEntity.isDirectorySync(path)) {
+    var size = 0;
+    for (final entity in Directory(path).listSync(recursive: true)) {
+      if (entity is File) size += entity.lengthSync();
+    }
+    return size;
+  }
+  return File(path).lengthSync();
+}
+
 String _formatBytes(int bytes) =>
     '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB';
+
+String _formatSize(int bytes) =>
+    '${(bytes / 1024 / 1024).toStringAsFixed(2)} MB';
