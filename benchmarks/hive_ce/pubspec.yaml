@@ -6,7 +6,7 @@ environment:
 
 dependencies:
   hive_ce:
-    path: ../../../hive
+    path: ../../hive
   storage_benchmark:
     path: ../common
 
