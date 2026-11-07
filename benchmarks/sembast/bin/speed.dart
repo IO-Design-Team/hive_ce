@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:sembast/sembast_io.dart';
+import 'package:sembast/src/database_impl.dart';
 import 'package:storage_benchmark/speed_benchmark.dart';
 import 'package:storage_benchmark/test_model.dart';
 
@@ -17,7 +18,9 @@ void main() async {
           for (final value in values) value.toJson(),
         ]);
       },
-      flush: (_) async {
+      flush: (db) async {
+        // addAll returns before sembast appends the records to its file.
+        await (db as SembastDatabase).flush();
         final file = await File('memory_box.db').open(mode: FileMode.append);
         try {
           await file.flush();
