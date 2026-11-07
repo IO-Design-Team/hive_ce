@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up encryption and decryption of encrypted boxes by about 2x
+
 ## 2.23.0
 
 - Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
