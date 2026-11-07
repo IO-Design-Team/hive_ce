@@ -1,3 +1,7 @@
+## NEXT
+
+- Halves memory allocated by each write to an encrypted box
+
 ## 2.23.0
 
 - Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
