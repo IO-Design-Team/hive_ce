@@ -146,13 +146,13 @@ Database size in Hive v4 is directly affected by the length of field names in mo
 
 Peak memory usage with 1,000,000 values, including native memory, averaged over three runs. Each run is a new process. Hive CE and Hive v2 keep every value of a regular box in memory while it is open. Lazy boxes only keep keys in memory and read values with `getAt`.
 
-| Database       | Batch write |     Open | Open and read every value |
-| -------------- | ----------: | -------: | ------------------------: |
-| Hive CE        |      594 MB |   481 MB |                    497 MB |
-| Hive CE (lazy) |      543 MB |   229 MB |                    356 MB |
-| Hive v2        |      595 MB |   469 MB |                    485 MB |
-| Hive v4        |      481 MB |     1 MB |                  1,396 MB |
-| sqflite        |    1,638 MB |     1 MB |                    559 MB |
-| drift          |      660 MB |     1 MB |                    790 MB |
-| sembast        |    1,791 MB | 1,128 MB |                  1,417 MB |
-| ObjectBox      |      292 MB |     1 MB |                    271 MB |
+| Database       | Batch write |     Open | Open and read |
+| -------------- | ----------: | -------: | ------------: |
+| Hive CE        |      594 MB |   481 MB |        497 MB |
+| Hive CE (lazy) |      543 MB |   229 MB |        356 MB |
+| Hive v2        |      595 MB |   469 MB |        485 MB |
+| Hive v4        |      481 MB |     1 MB |      1,396 MB |
+| sqflite        |    1,638 MB |     1 MB |        559 MB |
+| drift          |      660 MB |     1 MB |        790 MB |
+| sembast        |    1,791 MB | 1,128 MB |      1,417 MB |
+| ObjectBox      |      292 MB |     1 MB |        271 MB |
