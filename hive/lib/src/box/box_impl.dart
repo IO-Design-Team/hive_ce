@@ -59,9 +59,7 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   @override
   Future<void> putAll(Map<dynamic, E> kvPairs) {
     final frames = <Frame>[];
-    for (final key in kvPairs.keys) {
-      frames.add(Frame(key, kvPairs[key]));
-    }
+    kvPairs.forEach((key, value) => frames.add(Frame(key, value)));
 
     return _writeFrames(frames);
   }
