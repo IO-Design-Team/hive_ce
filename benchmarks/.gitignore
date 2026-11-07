@@ -2,10 +2,9 @@
 # Created by `dart pub`
 .dart_tool/
 
-results.md
+build/
 memory_results.md
 speed_results.md
-memory_box/
-*.db
+test_box*
 objectbox/download/
-objectbox/lib/libobjectbox.dylib
+objectbox/lib/libobjectbox.*

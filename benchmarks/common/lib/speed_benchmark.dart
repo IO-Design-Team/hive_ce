@@ -1,108 +1,89 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:meta/meta.dart';
 import 'package:storage_benchmark/benchmark.dart';
+import 'package:storage_benchmark/target.dart';
 import 'package:storage_benchmark/test_model.dart';
 
-@immutable
-class SpeedTarget {
-  final String name;
+/// Times writes and opening a database to read every value, and writes the
+/// results to `speed_results.md`.
+///
+/// Write timings include [Target.flush], so they end when the data is on disk.
+Future<void> runSpeedBenchmarks({
+  List<Target> writes = const [],
+  required List<Target> batchWrites,
+  required List<Target> opens,
+}) async {
+  final writeTimes = <List<Duration>>[];
+  final batchTimes = <List<Duration>>[];
+  final openTimes = <List<Duration>>[];
+  for (final count in operations) {
+    writeTimes.add([for (final target in writes) await _write(target, count)]);
+    batchTimes.add([
+      for (final target in batchWrites) await _batchWrite(target, count),
+    ]);
+    openTimes.add([for (final target in opens) await _open(target, count)]);
+  }
 
-  /// The database file or directory
-  final String path;
-
-  /// Opens the database, creating it when [path] is missing
-  final FutureOr<dynamic> Function() open;
-
-  /// Writes [values] to an open database
-  final FutureOr<void> Function(dynamic db, List<TestModel> values) writeAll;
-
-  /// Makes the writes durable. Timed with [writeAll].
-  final FutureOr<void> Function(dynamic db)? flush;
-  final FutureOr<void> Function(dynamic db) close;
-  final FutureOr<List<Object?>> Function(dynamic db) readAll;
-
-  const SpeedTarget({
-    required this.name,
-    required this.path,
-    required this.open,
-    required this.writeAll,
-    required this.close,
-    required this.readAll,
-    this.flush,
+  writeResults('speed_results.md', {
+    if (writes.isNotEmpty)
+      'Individual writes': formatTable(writes, writeTimes, _formatTime),
+    'Batch writes': formatTable(batchWrites, batchTimes, _formatTime),
+    'Opening a database and reading every value': formatTable(
+      opens,
+      openTimes,
+      _formatTime,
+    ),
   });
 }
 
-/// Times batch writes and opening a database to read every value.
-///
-/// Writes the results to `speed_results.md`.
-Future<void> runSpeedBenchmarks(List<SpeedTarget> targets) async {
-  final batchResults = <List<Duration>>[];
-  final openResults = <List<Duration>>[];
-  for (final count in operations) {
-    batchResults.add([
-      for (final target in targets) await _benchmarkBatchWrite(target, count),
-    ]);
-    openResults.add([
-      for (final target in targets) await _benchmarkOpen(target, count),
-    ]);
-  }
-
-  final names = [for (final target in targets) target.name];
-  final results = [
-    '### Batch writes',
-    formatTable(names, [
-      for (final row in batchResults) row.map(_formatTime).toList(),
-    ]),
-    '### Opening a box',
-    formatTable(names, [
-      for (final row in openResults) row.map(_formatTime).toList(),
-    ]),
-  ];
-
-  File('speed_results.md').writeAsStringSync('${results.join('\n\n')}\n');
-}
-
-/// Writes [count] values in a single batch.
-///
-/// The database is already open. The timer includes [SpeedTarget.flush].
-Future<Duration> _benchmarkBatchWrite(SpeedTarget target, int count) {
-  final values = List.filled(count, testModel);
-  late dynamic db;
+/// Writes [count] values one at a time, flushing each before the next
+Future<Duration> _write(Target target, int count) {
+  final add = target.add ?? (throw ArgumentError('${target.name} has no add'));
+  late Object? db;
   return _average(
-    '$count operation ${target.name} batch write',
+    '$count value ${target.name} write',
+    passes: count >= 100000 ? 2 : 5,
     setup: () async {
-      _deleteDatabase(target.path);
+      deleteDatabase(target.path);
       db = await target.open();
     },
     run: () async {
-      await target.writeAll(db, values);
+      for (var i = 0; i < count; i++) {
+        await add(db, testModel);
+        await target.flush?.call(db);
+      }
+    },
+    teardown: () => target.close(db),
+  );
+}
+
+/// Writes [count] values in a single batch to a database that is already open
+Future<Duration> _batchWrite(Target target, int count) {
+  final values = List.filled(count, testModel);
+  late Object? db;
+  return _average(
+    '$count value ${target.name} batch write',
+    setup: () async {
+      deleteDatabase(target.path);
+      db = await target.open();
+    },
+    run: () async {
+      await target.addAll(db, values);
       await target.flush?.call(db);
     },
-    teardown: () async => await target.close(db),
+    teardown: () => target.close(db),
   );
 }
 
 /// Opens a database containing [count] values and reads all of them
-Future<Duration> _benchmarkOpen(SpeedTarget target, int count) async {
-  _deleteDatabase(target.path);
-  final populated = await target.open();
-  await target.writeAll(populated, List.filled(count, testModel));
-  await target.flush?.call(populated);
-  await target.close(populated);
-
-  late dynamic db;
+Future<Duration> _open(Target target, int count) async {
+  await createDatabase(target, List.filled(count, testModel));
+  late Object? db;
   return await _average(
-    '$count operation ${target.name} open',
+    '$count value ${target.name} open',
     run: () async {
       db = await target.open();
-      final values = await target.readAll(db);
-      if (values.length != count) {
-        throw StateError('Read ${values.length} values, expected $count');
-      }
+      checkCount(await target.readAll(db), count);
     },
-    teardown: () async => await target.close(db),
+    teardown: () => target.close(db),
   );
 }
 
@@ -128,15 +109,6 @@ Future<Duration> _average(
   final average = total ~/ passes;
   print('\nAverage time: $average');
   return average;
-}
-
-void _deleteDatabase(String path) {
-  final type = FileSystemEntity.typeSync(path);
-  if (type == FileSystemEntityType.directory) {
-    Directory(path).deleteSync(recursive: true);
-  } else if (type != FileSystemEntityType.notFound) {
-    File(path).deleteSync();
-  }
 }
 
 String _formatTime(Duration duration) {
