@@ -17,6 +17,9 @@ class SpeedTarget {
 
   /// Writes [values] to an open database
   final FutureOr<void> Function(dynamic db, List<TestModel> values) writeAll;
+
+  /// Makes the writes durable. Timed with [writeAll].
+  final FutureOr<void> Function(dynamic db)? flush;
   final FutureOr<void> Function(dynamic db) close;
   final FutureOr<List<Object?>> Function(dynamic db) readAll;
 
@@ -27,6 +30,7 @@ class SpeedTarget {
     required this.writeAll,
     required this.close,
     required this.readAll,
+    this.flush,
   });
 }
 
@@ -60,7 +64,9 @@ Future<void> runSpeedBenchmarks(List<SpeedTarget> targets) async {
   File('speed_results.md').writeAsStringSync('${results.join('\n\n')}\n');
 }
 
-/// Writes [count] values in a single batch. The database is already open.
+/// Writes [count] values in a single batch.
+///
+/// The database is already open. The timer includes [SpeedTarget.flush].
 Future<Duration> _benchmarkBatchWrite(SpeedTarget target, int count) {
   final values = List.filled(count, testModel);
   late dynamic db;
@@ -70,7 +76,10 @@ Future<Duration> _benchmarkBatchWrite(SpeedTarget target, int count) {
       _deleteDatabase(target.path);
       db = await target.open();
     },
-    run: () async => await target.writeAll(db, values),
+    run: () async {
+      await target.writeAll(db, values);
+      await target.flush?.call(db);
+    },
     teardown: () async => await target.close(db),
   );
 }
@@ -80,6 +89,7 @@ Future<Duration> _benchmarkOpen(SpeedTarget target, int count) async {
   _deleteDatabase(target.path);
   final populated = await target.open();
   await target.writeAll(populated, List.filled(count, testModel));
+  await target.flush?.call(populated);
   await target.close(populated);
 
   late dynamic db;

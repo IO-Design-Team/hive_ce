@@ -21,24 +21,28 @@ void main() async {
     type: DbType.hive,
     openBox: Hive.openBox,
     readAll: (box) => box.values.toList(),
+    flush: (box) => box.flush(),
   );
   final hiveEncrypted = BenchTarget(
     name: 'Hive CE (encrypted)',
     type: DbType.hive,
     openBox: (name) => Hive.openBox(name, encryptionCipher: cipher),
     readAll: (box) => box.values.toList(),
+    flush: (box) => box.flush(),
   );
   final hiveLazy = BenchTarget(
     name: 'Hive CE (lazy)',
     type: DbType.hive,
     openBox: Hive.openLazyBox,
     readAll: (box) {},
+    flush: (box) => box.flush(),
   );
   final isolatedHive = BenchTarget(
     name: 'IsolatedHive',
     type: DbType.hive,
     openBox: IsolatedHive.openBox,
     readAll: (box) async => (await box.values).toList(),
+    flush: (box) => box.flush(),
   );
 
   await runBenchmarks(

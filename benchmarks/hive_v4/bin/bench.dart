@@ -11,6 +11,7 @@ void main() async {
   Hive.defaultDirectory = '.';
   Hive.registerAdapter('TestModel', (json) => TestModel.fromJson(json));
 
+  // add and addAll commit to disk before they return.
   final hive = BenchTarget(
     name: 'Hive v4',
     type: DbType.isar,

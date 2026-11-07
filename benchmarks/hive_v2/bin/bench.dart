@@ -16,18 +16,21 @@ void main() async {
     type: DbType.hive,
     openBox: Hive.openBox,
     readAll: (box) => box.values.toList(),
+    flush: (box) => box.flush(),
   );
   final hiveEncrypted = BenchTarget(
     name: 'Hive v2 (encrypted)',
     type: DbType.hive,
     openBox: (name) => Hive.openBox(name, encryptionCipher: cipher),
     readAll: (box) => box.values.toList(),
+    flush: (box) => box.flush(),
   );
   final hiveLazy = BenchTarget(
     name: 'Hive v2 (lazy)',
     type: DbType.hive,
     openBox: Hive.openLazyBox,
     readAll: (box) {},
+    flush: (box) => box.flush(),
   );
 
   await runBenchmarks(

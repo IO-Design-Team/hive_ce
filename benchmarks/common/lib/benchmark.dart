@@ -92,6 +92,7 @@ Future<BenchResult> _benchmarkWrites(BenchTarget target, int operations) async {
       for (var i = 0; i < operations; i++) {
         await box.add(testModel);
       }
+      await target.flush?.call(box);
     },
     teardown: () async => await box.close(),
   );
@@ -112,7 +113,10 @@ Future<Duration> _benchmarkBatchWrite(BenchTarget target, int operations) {
       _delete(boxFile);
       box = await target.openBox(_boxName);
     },
-    run: () async => await box.addAll(values),
+    run: () async {
+      await box.addAll(values);
+      await target.flush?.call(box);
+    },
     teardown: () async => await box.close(),
   );
 }
@@ -123,6 +127,7 @@ Future<Duration> _benchmarkOpen(BenchTarget target, int operations) async {
   _delete(boxFile);
   var box = await target.openBox(_boxName);
   await box.addAll(List.filled(operations, testModel));
+  await target.flush?.call(box);
   await box.close();
 
   return await _average(

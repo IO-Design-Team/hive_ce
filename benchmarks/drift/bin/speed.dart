@@ -4,10 +4,17 @@ import 'package:drift/native.dart';
 import 'package:drift_storage_benchmark/database.dart';
 import 'package:storage_benchmark/speed_benchmark.dart';
 
+void _fullSynchronous(dynamic db) {
+  db.execute('PRAGMA synchronous = FULL');
+}
+
 void main() async {
   Future<TestDatabase> open() async {
     final db = TestDatabase(
-      NativeDatabase.createInBackground(File('memory_box.db')),
+      NativeDatabase.createInBackground(
+        File('memory_box.db'),
+        setup: _fullSynchronous,
+      ),
     );
     await db.executor.ensureOpen(db);
     return db;

@@ -19,6 +19,9 @@ void main() async {
     path,
     options: OpenDatabaseOptions(
       version: 1,
+      onConfigure: (db) async {
+        await db.rawQuery('PRAGMA synchronous = FULL');
+      },
       onCreate: (db, _) =>
           db.execute('CREATE TABLE $_table (id INTEGER PRIMARY KEY, $columns)'),
     ),
