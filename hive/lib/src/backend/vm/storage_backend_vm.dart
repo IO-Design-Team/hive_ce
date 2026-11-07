@@ -64,6 +64,9 @@ class StorageBackendVm extends StorageBackend {
   /// Blocking IO is fine in the Hive isolate and avoids async IO overhead
   var _isolated = false;
 
+  /// The position of [readRaf] after the last [readValue] or -1 if unknown
+  var _readPosition = -1;
+
   /// Not part of public API
   StorageBackendVm(
     this._file,
@@ -94,6 +97,7 @@ class StorageBackendVm extends StorageBackend {
   /// Not part of public API
   Future open() async {
     readRaf = await _file.open();
+    _readPosition = -1;
     writeRaf = await _file.open(mode: FileMode.writeOnlyAppend);
     writeOffset = await writeRaf.length();
   }
@@ -168,14 +172,17 @@ class StorageBackendVm extends StorageBackend {
   @override
   Future<dynamic> readValue(Frame frame, {bool verbatim = false}) {
     return _sync.syncRead(() async {
+      final seek = frame.offset != _readPosition;
+      _readPosition = -1;
       final Uint8List bytes;
       if (_isolated) {
-        readRaf.setPositionSync(frame.offset);
+        if (seek) readRaf.setPositionSync(frame.offset);
         bytes = readRaf.readSync(frame.requireLength);
       } else {
-        await readRaf.setPosition(frame.offset);
+        if (seek) await readRaf.setPosition(frame.offset);
         bytes = await readRaf.read(frame.requireLength);
       }
+      _readPosition = frame.offset + bytes.length;
 
       final reader = BinaryReaderImpl(bytes, registry);
       final readFrame = reader.readFrame(
@@ -233,6 +240,7 @@ class StorageBackendVm extends StorageBackend {
     _compactionScheduled = true;
 
     return _sync.syncReadWrite(() async {
+      _readPosition = -1;
       await readRaf.setPosition(0);
       final reader = BufferedFileReader(readRaf);
 
