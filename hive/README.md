@@ -133,12 +133,12 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 
 ### Database size
 
-| Values    |   Hive CE |   Hive v2 |   Hive v4 |  sqflite |    drift |   sembast | ObjectBox |
-| --------- | --------: | --------: | --------: | -------: | -------: | --------: | --------: |
-| 1,000     |   0.11 MB |   0.11 MB |   1.00 MB |  0.04 MB |  0.03 MB |   0.24 MB |   0.18 MB |
-| 10,000    |   1.10 MB |   1.10 MB |   5.00 MB |  0.25 MB |  0.24 MB |   2.41 MB |   1.54 MB |
-| 100,000   |  10.97 MB |  10.97 MB |  30.00 MB |  2.49 MB |  2.40 MB |  24.21 MB |  15.13 MB |
-| 1,000,000 | 109.67 MB | 109.67 MB | 290.00 MB | 24.94 MB | 24.02 MB | 243.08 MB | 150.94 MB |
+| Values    |   Hive CE |   Hive v4 |  sqflite |    drift |   sembast | ObjectBox |
+| --------- | --------: | --------: | -------: | -------: | --------: | --------: |
+| 1,000     |   0.11 MB |   1.00 MB |  0.04 MB |  0.03 MB |   0.24 MB |   0.18 MB |
+| 10,000    |   1.10 MB |   5.00 MB |  0.25 MB |  0.24 MB |   2.41 MB |   1.54 MB |
+| 100,000   |  10.97 MB |  30.00 MB |  2.49 MB |  2.40 MB |  24.21 MB |  15.13 MB |
+| 1,000,000 | 109.67 MB | 290.00 MB | 24.94 MB | 24.02 MB | 243.08 MB | 150.94 MB |
 
 Database size in Hive v4 is directly affected by the length of field names in model classes.
 
