@@ -109,6 +109,37 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 | 100,000   |  10.97 MB |  30.00 MB |
 | 1,000,000 | 109.67 MB | 290.00 MB |
 
+### Memory usage
+
+Peak memory usage above the process baseline, including native memory, averaged over three runs. Each run is a new process. Hive v2 and Hive CE keep every value of a regular box in memory while it is open. Lazy boxes only keep keys in memory and read values with `getAt`.
+
+#### Batch writes
+
+| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 |  Hive v4 |   sqflite |    drift |   sembast | ObjectBox |
+| --------- | -------: | -------------: | -------: | -------: | --------: | -------: | --------: | --------: |
+| 1,000     |   2.5 MB |         2.8 MB |   1.2 MB |   3.7 MB |    6.5 MB |   5.6 MB |   10.2 MB |    1.7 MB |
+| 10,000    |  15.9 MB |        15.7 MB |  10.6 MB |  13.4 MB |   48.1 MB |  14.6 MB |   50.1 MB |    6.6 MB |
+| 100,000   |  90.4 MB |        81.8 MB |  89.3 MB |  78.2 MB |  184.7 MB |  88.5 MB |  222.3 MB |   42.9 MB |
+| 1,000,000 | 594.4 MB |       542.8 MB | 594.5 MB | 480.7 MB | 1638.3 MB | 659.8 MB | 1790.7 MB |  291.7 MB |
+
+#### Opening a database
+
+| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 | Hive v4 | sqflite |  drift |   sembast | ObjectBox |
+| --------- | -------: | -------------: | -------: | ------: | ------: | -----: | --------: | --------: |
+| 1,000     |   1.6 MB |         0.6 MB |   1.6 MB |  0.6 MB |  0.9 MB | 1.4 MB |    3.9 MB |    1.3 MB |
+| 10,000    |  13.2 MB |         4.3 MB |  13.1 MB |  0.6 MB |  0.9 MB | 1.4 MB |   45.3 MB |    1.2 MB |
+| 100,000   |  77.3 MB |        27.3 MB |  77.2 MB |  0.6 MB |  0.9 MB | 1.4 MB |  143.5 MB |    1.2 MB |
+| 1,000,000 | 481.0 MB |       229.1 MB | 469.2 MB |  0.6 MB |  0.9 MB | 1.4 MB | 1127.9 MB |    1.2 MB |
+
+#### Opening a database and reading every value
+
+| Values    |  Hive CE | Hive CE (lazy) |  Hive v2 |   Hive v4 |  sqflite |    drift |   sembast | ObjectBox |
+| --------- | -------: | -------------: | -------: | --------: | -------: | -------: | --------: | --------: |
+| 1,000     |   1.6 MB |         5.6 MB |   1.6 MB |    4.0 MB |   2.3 MB |   3.4 MB |    3.9 MB |    1.6 MB |
+| 10,000    |  13.2 MB |        38.7 MB |  13.1 MB |   20.3 MB |   7.6 MB |  16.2 MB |   45.3 MB |    5.6 MB |
+| 100,000   |  78.9 MB |        72.0 MB |  78.9 MB |  155.7 MB |  80.8 MB | 102.4 MB |  171.8 MB |   32.9 MB |
+| 1,000,000 | 496.9 MB |       355.8 MB | 485.1 MB | 1395.9 MB | 559.2 MB | 789.6 MB | 1417.1 MB |  271.2 MB |
+
 ### Notes
 
 Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
