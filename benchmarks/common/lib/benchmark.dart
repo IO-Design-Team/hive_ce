@@ -5,9 +5,12 @@ import 'package:storage_benchmark/bench_result.dart';
 import 'package:storage_benchmark/bench_target.dart';
 import 'package:storage_benchmark/test_model.dart';
 
-const _operations = [1000, 10000, 100000, 1000000];
+/// The number of values used in each benchmark
+const operations = [1000, 10000, 100000, 1000000];
 const _boxName = 'test_box';
-const _model = TestModel(
+
+/// The value written in each benchmark
+const testModel = TestModel(
   testModelFieldZero: 0,
   testModelFieldOne: 1,
   testModelFieldTwo: 2,
@@ -29,40 +32,46 @@ Future<void> runBenchmarks({
   final writeResults = <List<BenchResult>>[];
   final batchResults = <List<Duration>>[];
   final openResults = <List<Duration>>[];
-  for (final operations in _operations) {
+  for (final count in operations) {
     writeResults.add([
-      for (final target in writeTargets)
-        await _benchmarkWrites(target, operations),
+      for (final target in writeTargets) await _benchmarkWrites(target, count),
     ]);
     batchResults.add([
       for (final target in batchTargets)
-        await _benchmarkBatchWrite(target, operations),
+        await _benchmarkBatchWrite(target, count),
     ]);
     openResults.add([
-      for (final target in openTargets)
-        await _benchmarkOpen(target, operations),
+      for (final target in openTargets) await _benchmarkOpen(target, count),
     ]);
   }
 
   final results = [
     '### Individual writes',
-    _formatTable(writeTargets, [
-      for (final row in writeResults)
-        [for (final r in row) _formatTime(r.time)],
-    ]),
+    formatTable(
+      [for (final target in writeTargets) target.name],
+      [
+        for (final row in writeResults)
+          [for (final r in row) _formatTime(r.time)],
+      ],
+    ),
     '### Batch writes',
-    _formatTable(batchTargets, [
-      for (final row in batchResults) row.map(_formatTime).toList(),
-    ]),
+    formatTable(
+      [for (final target in batchTargets) target.name],
+      [for (final row in batchResults) row.map(_formatTime).toList()],
+    ),
     '### Opening a box',
-    _formatTable(openTargets, [
-      for (final row in openResults) row.map(_formatTime).toList(),
-    ]),
+    formatTable(
+      [for (final target in openTargets) target.name],
+      [for (final row in openResults) row.map(_formatTime).toList()],
+    ),
     '### Database size',
-    _formatTable(writeTargets, [
-      for (final row in writeResults)
-        [for (final r in row) _formatSize(r.size)],
-    ]),
+    formatTable(
+      [for (final target in writeTargets) target.name],
+      [
+        for (final row in writeResults)
+          [for (final r in row) _formatSize(r.size)],
+      ],
+    ),
   ];
 
   File('results.md').writeAsStringSync('${results.join('\n\n')}\n');
@@ -81,7 +90,7 @@ Future<BenchResult> _benchmarkWrites(BenchTarget target, int operations) async {
     },
     run: () async {
       for (var i = 0; i < operations; i++) {
-        await box.add(_model);
+        await box.add(testModel);
       }
     },
     teardown: () async => await box.close(),
@@ -95,7 +104,7 @@ Future<BenchResult> _benchmarkWrites(BenchTarget target, int operations) async {
 /// Writes [operations] values in a single batch
 Future<Duration> _benchmarkBatchWrite(BenchTarget target, int operations) {
   final boxFile = File(target.type.boxFileName(_boxName));
-  final values = List.filled(operations, _model);
+  final values = List.filled(operations, testModel);
   late dynamic box;
   return _average(
     '$operations operation ${target.name} batch write',
@@ -113,7 +122,7 @@ Future<Duration> _benchmarkOpen(BenchTarget target, int operations) async {
   final boxFile = File(target.type.boxFileName(_boxName));
   _delete(boxFile);
   var box = await target.openBox(_boxName);
-  await box.addAll(List.filled(operations, _model));
+  await box.addAll(List.filled(operations, testModel));
   await box.close();
 
   return await _average(
@@ -154,11 +163,12 @@ void _delete(File file) {
   if (file.existsSync()) file.deleteSync();
 }
 
-String _formatTable(List<BenchTarget> targets, List<List<String>> cells) {
-  final headers = ['Values', for (final target in targets) target.name];
+/// Formats [cells] as a markdown table with a row for each value count
+String formatTable(List<String> names, List<List<String>> cells) {
+  final headers = ['Values', ...names];
   final rows = [
     for (var i = 0; i < cells.length; i++)
-      [_formatCount(_operations[i]), ...cells[i]],
+      [_formatCount(operations[i]), ...cells[i]],
   ];
   final widths = [
     for (var i = 0; i < headers.length; i++)

@@ -3,3 +3,8 @@
 .dart_tool/
 
 results.md
+memory_results.md
+memory_box/
+*.db
+objectbox/download/
+objectbox/lib/libobjectbox.dylib

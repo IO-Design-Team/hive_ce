@@ -53,68 +53,6 @@ Hive CE is a spiritual continuation of Hive v2 with the following new features:
   - `IsolatedHive` individual writes are faster than Hive CE
   - See the [benchmarks](#benchmarks)
 
-## Benchmarks
-
-All times are averaged over several runs
-
-### Individual writes
-
-Writing values one at a time with `add`:
-
-| Values    | Hive v2 | Hive v4  | Hive CE | IsolatedHive |
-| --------- | ------: | -------: | ------: | -----------: |
-| 1,000     |   14 ms |   142 ms |   14 ms |        11 ms |
-| 10,000    |  162 ms |   1.81 s |  164 ms |       142 ms |
-| 100,000   |  1.71 s |  19.94 s |  1.66 s |       1.32 s |
-| 1,000,000 | 22.37 s | 339.65 s | 17.21 s |      13.13 s |
-
-### Batch writes
-
-Writing all values with a single `addAll` call:
-
-| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
-| --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    0 ms |    2 ms |    0 ms |         1 ms |
-| 10,000    |    9 ms |   26 ms |    9 ms |        15 ms |
-| 100,000   |  119 ms |  328 ms |  114 ms |       134 ms |
-| 1,000,000 |  3.63 s |  2.94 s |  1.24 s |       1.71 s |
-
-### Opening a box
-
-Opening a box and reading every value:
-
-| Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
-| --------- | ------: | ------: | ------: | -----------: |
-| 1,000     |    1 ms |    1 ms |    1 ms |         1 ms |
-| 10,000    |   13 ms |   14 ms |   11 ms |        14 ms |
-| 100,000   |  167 ms |  192 ms |  130 ms |       143 ms |
-| 1,000,000 |  4.10 s |  1.66 s |  1.32 s |       1.50 s |
-
-### Encrypted and lazy boxes
-
-Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy open time doesn't include reading values.
-
-| Values    | Encrypted batch write | Encrypted open  | Lazy open       |
-| --------- | --------------------- | --------------- | --------------- |
-| 10,000    | 43 ms → 27 ms         | 31 ms → 21 ms   | 9 ms → 5 ms     |
-| 100,000   | 470 ms → 269 ms       | 326 ms → 237 ms | 98 ms → 62 ms   |
-| 1,000,000 | 7.00 s → 2.78 s       | 5.98 s → 2.32 s | 3.67 s → 632 ms |
-
-### Database size
-
-| Values    |   Hive CE |   Hive v4 |
-| --------- | --------: | --------: |
-| 1,000     |   0.11 MB |   1.00 MB |
-| 10,000    |   1.10 MB |   5.00 MB |
-| 100,000   |  10.97 MB |  30.00 MB |
-| 1,000,000 | 109.67 MB | 290.00 MB |
-
-### Notes
-
-Database size in Hive v4 is directly affected by the length of field names in model classes which is not ideal. Also Hive v4 is much slower than Hive CE for large numbers of individual writes.
-
-The benchmark was performed on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks/storage).
-
 ## Getting Started
 
 Hive CE requires Dart 3. Ensure that you have the following in your `pubspec.yaml` file:
@@ -141,3 +79,80 @@ void example() {
 }
 
 ```
+
+## Benchmarks
+
+The benchmarks were run on an M3 Max MacBook Pro. You can [see the benchmark code here](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks).
+
+### Speed
+
+All times are averaged over several runs.
+
+#### Individual writes
+
+Writing values one at a time with `add`:
+
+| Values    | Hive CE | IsolatedHive | Hive v2 |  Hive v4 |
+| --------- | ------: | -----------: | ------: | -------: |
+| 1,000     |   14 ms |        11 ms |   14 ms |   142 ms |
+| 10,000    |  164 ms |       142 ms |  162 ms |   1.81 s |
+| 100,000   |  1.66 s |       1.32 s |  1.71 s |  19.94 s |
+| 1,000,000 | 17.21 s |      13.13 s | 22.37 s | 339.65 s |
+
+#### Batch writes
+
+Writing all values with a single `addAll` call:
+
+| Values    | Hive CE | IsolatedHive | Hive v2 | Hive v4 |
+| --------- | ------: | -----------: | ------: | ------: |
+| 1,000     |    0 ms |         1 ms |    0 ms |    2 ms |
+| 10,000    |    9 ms |        15 ms |    9 ms |   26 ms |
+| 100,000   |  114 ms |       134 ms |  119 ms |  328 ms |
+| 1,000,000 |  1.24 s |       1.71 s |  3.63 s |  2.94 s |
+
+#### Opening a box
+
+Opening a box and reading every value:
+
+| Values    | Hive CE | IsolatedHive | Hive v2 | Hive v4 |
+| --------- | ------: | -----------: | ------: | ------: |
+| 1,000     |    1 ms |         1 ms |    1 ms |    1 ms |
+| 10,000    |   11 ms |        14 ms |   13 ms |   14 ms |
+| 100,000   |  130 ms |       143 ms |  167 ms |  192 ms |
+| 1,000,000 |  1.32 s |       1.50 s |  4.10 s |  1.66 s |
+
+#### Encrypted and lazy boxes
+
+Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy open time doesn't include reading values.
+
+| Values    | Encrypted batch write | Encrypted open  | Lazy open       |
+| --------- | --------------------- | --------------- | --------------- |
+| 10,000    | 43 ms → 27 ms         | 31 ms → 21 ms   | 9 ms → 5 ms     |
+| 100,000   | 470 ms → 269 ms       | 326 ms → 237 ms | 98 ms → 62 ms   |
+| 1,000,000 | 7.00 s → 2.78 s       | 5.98 s → 2.32 s | 3.67 s → 632 ms |
+
+### Database size
+
+| Values    |   Hive CE |   Hive v4 |
+| --------- | --------: | --------: |
+| 1,000     |   0.11 MB |   1.00 MB |
+| 10,000    |   1.10 MB |   5.00 MB |
+| 100,000   |  10.97 MB |  30.00 MB |
+| 1,000,000 | 109.67 MB | 290.00 MB |
+
+Database size in Hive v4 is directly affected by the length of field names in model classes.
+
+### Memory usage
+
+Peak memory usage with 1,000,000 values, including native memory, averaged over three runs. Each run is a new process. Hive CE and Hive v2 keep every value of a regular box in memory while it is open. Lazy boxes only keep keys in memory and read values with `getAt`.
+
+| Database       | Batch write |     Open | Open and read |
+| -------------- | ----------: | -------: | ------------: |
+| Hive CE        |      594 MB |   481 MB |        497 MB |
+| Hive CE (lazy) |      543 MB |   229 MB |        356 MB |
+| Hive v2        |      595 MB |   469 MB |        485 MB |
+| Hive v4        |      481 MB |     1 MB |      1,396 MB |
+| sqflite        |    1,638 MB |     1 MB |        559 MB |
+| drift          |      660 MB |     1 MB |        790 MB |
+| sembast        |    1,791 MB | 1,128 MB |      1,417 MB |
+| ObjectBox      |      292 MB |     1 MB |        271 MB |
