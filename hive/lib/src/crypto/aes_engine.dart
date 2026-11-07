@@ -115,7 +115,7 @@ class AesEngine {
 
   /// Encrypt a single block with the [workingKey].
   static void encryptBlock(
-    List<List<int>> workingKey,
+    List<Uint32List> workingKey,
     Uint8List inp,
     int inpOff,
     Uint8List out,
@@ -226,7 +226,7 @@ class AesEngine {
 
   /// Decrypt a single block with [workingKey].
   static void decryptBlock(
-    List<List<int>> workingKey,
+    List<Uint32List> workingKey,
     Uint8List inp,
     int inpOff,
     Uint8List out,
