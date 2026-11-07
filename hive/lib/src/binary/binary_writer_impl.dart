@@ -207,10 +207,10 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(map.length);
     }
-    for (final key in map.keys) {
+    map.forEach((key, value) {
       write(key);
-      write(map[key]);
-    }
+      write(value);
+    });
   }
 
   /// Not part of public API
@@ -306,87 +306,75 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void write<T>(T value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value == null) {
-      typeId = FrameValueType.nullT;
-      write = () {};
+      if (withTypeId) writeTypeId(FrameValueType.nullT);
     } else if (value is int) {
-      typeId = FrameValueType.intT;
-      write = () => writeInt(value);
+      if (withTypeId) writeTypeId(FrameValueType.intT);
+      writeInt(value);
     } else if (value is double) {
-      typeId = FrameValueType.doubleT;
-      write = () => writeDouble(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleT);
+      writeDouble(value);
     } else if (value is bool) {
-      typeId = FrameValueType.boolT;
-      write = () => writeBool(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolT);
+      writeBool(value);
     } else if (value is String) {
-      typeId = FrameValueType.stringT;
-      write = () => writeString(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringT);
+      writeString(value);
     } else if (value is List || value is Set) {
       _writeList(value as Iterable, withTypeId: withTypeId);
-      return;
     } else if (value is Map) {
-      typeId = FrameValueType.mapT;
-      write = () => writeMap(value);
+      if (withTypeId) writeTypeId(FrameValueType.mapT);
+      writeMap(value);
     } else {
       final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
       }
-      typeId = resolved.typeId;
-      write = () => resolved.adapter.write(this, value);
+      if (withTypeId) writeTypeId(resolved.typeId);
+      resolved.adapter.write(this, value);
     }
-
-    if (withTypeId) writeTypeId(typeId);
-    write();
   }
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void _writeList(Iterable value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value is HiveList) {
-      typeId = FrameValueType.hiveListT;
-      write = () => writeHiveList(value);
+      if (withTypeId) writeTypeId(FrameValueType.hiveListT);
+      writeHiveList(value);
     } else if (value is Uint8List) {
-      typeId = FrameValueType.byteListT;
-      write = () => writeByteList(value);
+      if (withTypeId) writeTypeId(FrameValueType.byteListT);
+      writeByteList(value);
     } else if (value is List<int>) {
-      typeId = FrameValueType.intListT;
-      write = () => writeIntList(value);
+      if (withTypeId) writeTypeId(FrameValueType.intListT);
+      writeIntList(value);
     } else if (value is List<double>) {
-      typeId = FrameValueType.doubleListT;
-      write = () => writeDoubleList(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleListT);
+      writeDoubleList(value);
     } else if (value is List<bool>) {
-      typeId = FrameValueType.boolListT;
-      write = () => writeBoolList(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolListT);
+      writeBoolList(value);
     } else if (value is List<String>) {
-      typeId = FrameValueType.stringListT;
-      write = () => writeStringList(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringListT);
+      writeStringList(value);
     } else if (value is List) {
-      typeId = FrameValueType.listT;
-      write = () => writeList(value);
+      if (withTypeId) writeTypeId(FrameValueType.listT);
+      writeList(value);
     } else if (value is Set<int>) {
-      typeId = FrameValueType.intSetT;
-      write = () => writeIntList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.intSetT);
+      writeIntList(value.toList());
     } else if (value is Set<double>) {
-      typeId = FrameValueType.doubleSetT;
-      write = () => writeDoubleList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.doubleSetT);
+      writeDoubleList(value.toList());
     } else if (value is Set<String>) {
-      typeId = FrameValueType.stringSetT;
-      write = () => writeStringList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.stringSetT);
+      writeStringList(value.toList());
     } else if (value is Set) {
-      typeId = FrameValueType.setT;
-      write = () => writeList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.setT);
+      writeList(value.toList());
     } else {
       throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
-
-    if (withTypeId) writeTypeId(typeId);
-    write();
   }
 
   /// Not part of public API
