@@ -63,10 +63,10 @@ Writing values one at a time with `add`:
 
 | Values    | Hive v2 | Hive v4  | Hive CE | IsolatedHive |
 | --------- | ------: | -------: | ------: | -----------: |
-| 1,000     |   15 ms |   198 ms |   15 ms |        11 ms |
-| 10,000    |  271 ms |   2.13 s |  271 ms |       130 ms |
-| 100,000   |  1.80 s |  21.52 s |  1.90 s |       1.66 s |
-| 1,000,000 | 23.36 s | 371.17 s | 17.36 s |      13.07 s |
+| 1,000     |   14 ms |   142 ms |   14 ms |        11 ms |
+| 10,000    |  162 ms |   1.81 s |  164 ms |       142 ms |
+| 100,000   |  1.71 s |  19.94 s |  1.66 s |       1.32 s |
+| 1,000,000 | 22.37 s | 339.65 s | 17.21 s |      13.13 s |
 
 ### Batch writes
 
@@ -75,9 +75,9 @@ Writing all values with a single `addAll` call:
 | Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
 | --------- | ------: | ------: | ------: | -----------: |
 | 1,000     |    0 ms |    2 ms |    0 ms |         1 ms |
-| 10,000    |    8 ms |   27 ms |    9 ms |        13 ms |
-| 100,000   |  121 ms |  313 ms |  118 ms |       157 ms |
-| 1,000,000 |  3.66 s |  3.00 s |  1.28 s |       1.86 s |
+| 10,000    |    9 ms |   26 ms |    9 ms |        15 ms |
+| 100,000   |  119 ms |  328 ms |  114 ms |       134 ms |
+| 1,000,000 |  3.63 s |  2.94 s |  1.24 s |       1.71 s |
 
 ### Opening a box
 
@@ -86,9 +86,9 @@ Opening a box and reading every value:
 | Values    | Hive v2 | Hive v4 | Hive CE | IsolatedHive |
 | --------- | ------: | ------: | ------: | -----------: |
 | 1,000     |    1 ms |    1 ms |    1 ms |         1 ms |
-| 10,000    |   13 ms |   14 ms |   10 ms |        14 ms |
-| 100,000   |  178 ms |  189 ms |  125 ms |       146 ms |
-| 1,000,000 |  4.34 s |  1.65 s |  1.32 s |       1.59 s |
+| 10,000    |   13 ms |   14 ms |   11 ms |        14 ms |
+| 100,000   |  167 ms |  192 ms |  130 ms |       143 ms |
+| 1,000,000 |  4.10 s |  1.66 s |  1.32 s |       1.50 s |
 
 ### Encrypted and lazy boxes
 
@@ -96,9 +96,9 @@ Hive v2 compared to Hive CE. Lazy boxes only load keys when opened, so the lazy 
 
 | Values    | Encrypted batch write | Encrypted open  | Lazy open       |
 | --------- | --------------------- | --------------- | --------------- |
-| 10,000    | 41 ms → 30 ms         | 31 ms → 27 ms   | 7 ms → 5 ms     |
-| 100,000   | 481 ms → 330 ms       | 339 ms → 291 ms | 99 ms → 59 ms   |
-| 1,000,000 | 7.21 s → 3.35 s       | 6.14 s → 2.99 s | 3.79 s → 640 ms |
+| 10,000    | 43 ms → 27 ms         | 31 ms → 21 ms   | 9 ms → 5 ms     |
+| 100,000   | 470 ms → 269 ms       | 326 ms → 237 ms | 98 ms → 62 ms   |
+| 1,000,000 | 7.00 s → 2.78 s       | 5.98 s → 2.32 s | 3.67 s → 632 ms |
 
 ### Database size
 
