@@ -1,3 +1,10 @@
+## 2.23.1
+
+- Speeds up encrypted boxes, with AES running about twice as fast
+- Speeds up writing values, especially strings and custom objects
+- Speeds up opening boxes, especially boxes with string keys
+- Speeds up reading `LazyBox` values in key order
+
 ## 2.23.0
 
 - Speeds up opening boxes, especially large lazy boxes (by [@jonasbernardo](https://github.com/jonasbernardo) in [#357](https://github.com/IO-Design-Team/hive_ce/pull/357))
