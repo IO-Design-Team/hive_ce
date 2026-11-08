@@ -1,3 +1,7 @@
+## 2.23.2
+
+- Adds database size and speed benchmarks comparing Hive CE with sqflite, drift, sembast, and ObjectBox
+
 ## 2.23.1
 
 - Speeds up encryption and decryption of encrypted boxes by about 2x
