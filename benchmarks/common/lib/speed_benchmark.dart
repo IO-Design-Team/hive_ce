@@ -34,7 +34,7 @@ Future<void> runSpeedBenchmarks({
   });
 }
 
-/// Writes [count] values one at a time, flushing each before the next
+/// Writes [count] values one at a time, then flushes them once
 Future<Duration> _write(Target target, int count) {
   final add = target.add ?? (throw ArgumentError('${target.name} has no add'));
   late Object? db;
@@ -48,8 +48,8 @@ Future<Duration> _write(Target target, int count) {
     run: () async {
       for (var i = 0; i < count; i++) {
         await add(db, testModel);
-        await target.flush?.call(db);
       }
+      await target.flush?.call(db);
     },
     teardown: () => target.close(db),
   );

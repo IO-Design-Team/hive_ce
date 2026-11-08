@@ -9,10 +9,7 @@ final drift = Target.create(
   path: 'test_box.db',
   open: () async {
     final db = TestDatabase(
-      NativeDatabase.createInBackground(
-        File('test_box.db'),
-        setup: _fullSynchronous,
-      ),
+      NativeDatabase.createInBackground(File('test_box.db')),
     );
     await db.executor.ensureOpen(db);
     return db;
@@ -25,6 +22,3 @@ final drift = Target.create(
   readAll: (db) => db.select(db.testModels).get(),
   close: (db) => db.close(),
 );
-
-// Runs on the background isolate, so it must be a top-level function
-void _fullSynchronous(dynamic db) => db.execute('PRAGMA synchronous = FULL');

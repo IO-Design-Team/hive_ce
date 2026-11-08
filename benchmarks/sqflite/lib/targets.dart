@@ -14,7 +14,6 @@ final sqflite = Target.create(
     _path,
     options: OpenDatabaseOptions(
       version: 1,
-      onConfigure: (db) => db.execute('PRAGMA synchronous = FULL'),
       onCreate: (db, _) {
         final columns = [
           for (final column in testModel.toJson().keys)
