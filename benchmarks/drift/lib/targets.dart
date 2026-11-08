@@ -14,6 +14,7 @@ final drift = Target.create(
     await db.executor.ensureOpen(db);
     return db;
   },
+  add: (db, value) => db.into(db.testModels).insert(value.toInsertable()),
   addAll: (db, values) => db.batch(
     (batch) => batch.insertAll(db.testModels, [
       for (final value in values) value.toInsertable(),

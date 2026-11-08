@@ -50,17 +50,20 @@ void writeResults(String file, Map<String, String> sections) {
   File(file).writeAsStringSync('$markdown\n');
 }
 
-/// Formats a markdown table with a column for each target and a row for each
+/// Formats a markdown table with a row for each target and a column for each
 /// value count
 String formatTable<T>(
   List<Target> targets,
   List<List<T>> results,
   String Function(T result) format,
 ) {
-  final headers = ['Values', for (final target in targets) target.name];
+  final headers = [
+    'Database',
+    for (var i = 0; i < results.length; i++) _formatCount(operations[i]),
+  ];
   final rows = [
-    for (var i = 0; i < results.length; i++)
-      [_formatCount(operations[i]), ...results[i].map(format)],
+    for (var j = 0; j < targets.length; j++)
+      [targets[j].name, for (final result in results) format(result[j])],
   ];
   final widths = [
     for (var i = 0; i < headers.length; i++)

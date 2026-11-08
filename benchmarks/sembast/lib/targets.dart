@@ -14,10 +14,11 @@ final sembast = Target.create(
   name: 'sembast',
   path: _path,
   open: () => databaseFactoryIo.openDatabase(_path),
+  add: (db, value) => _store.add(db, value.toJson()),
   addAll: (db, values) =>
       _store.addAll(db, [for (final value in values) value.toJson()]),
   flush: (db) async {
-    // addAll returns before sembast appends the records to its file
+    // Writes return before sembast appends the records to its file
     await (db as SembastDatabase).flush();
     final file = await File(_path).open(mode: FileMode.append);
     try {

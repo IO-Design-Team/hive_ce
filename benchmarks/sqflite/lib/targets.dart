@@ -25,6 +25,7 @@ final sqflite = Target.create(
       },
     ),
   ),
+  add: (db, value) => db.insert(_table, value.toJson()),
   addAll: (db, values) async {
     final batch = db.batch();
     for (final value in values) {
