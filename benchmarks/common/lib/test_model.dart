@@ -3,6 +3,20 @@ import 'package:meta/meta.dart';
 
 part 'test_model.g.dart';
 
+/// The value written in every benchmark
+const testModel = TestModel(
+  testModelFieldZero: 0,
+  testModelFieldOne: 1,
+  testModelFieldTwo: 2,
+  testModelFieldThree: 3,
+  testModelFieldFour: 4,
+  testModelFieldFive: 5,
+  testModelFieldSix: 6,
+  testModelFieldSeven: 7,
+  testModelFieldEight: 8,
+  testModelFieldNine: 9,
+);
+
 @JsonSerializable()
 @immutable
 class TestModel {
