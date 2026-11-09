@@ -15,5 +15,19 @@ final objectBox = Target.create(
     for (final value in values) TestEntity.fromModel(value),
   ]),
   readAll: (store) => store.box<TestEntity>().getAll(),
+  query: (store, min, max) {
+    final query = store
+        .box<TestEntity>()
+        .query(
+          TestEntity_.testModelFieldZero.greaterOrEqual(min) &
+              TestEntity_.testModelFieldZero.lessThan(max),
+        )
+        .build();
+    try {
+      return query.find();
+    } finally {
+      query.close();
+    }
+  },
   close: (store) => store.close(),
 );

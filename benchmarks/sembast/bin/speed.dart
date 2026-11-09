@@ -5,4 +5,5 @@ void main() => runSpeedBenchmarks(
   writes: [sembast],
   batchWrites: [sembast],
   opens: [sembast],
+  queries: [sembast],
 );

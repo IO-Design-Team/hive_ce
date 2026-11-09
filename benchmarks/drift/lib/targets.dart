@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:drift_storage_benchmark/database.dart';
 import 'package:storage_benchmark/target.dart';
@@ -21,5 +22,12 @@ final drift = Target.create(
     ]),
   ),
   readAll: (db) => db.select(db.testModels).get(),
+  query: (db, min, max) =>
+      (db.select(db.testModels)..where(
+            (row) =>
+                row.testModelFieldZero.isBiggerOrEqualValue(min) &
+                row.testModelFieldZero.isSmallerThanValue(max),
+          ))
+          .get(),
   close: (db) => db.close(),
 );

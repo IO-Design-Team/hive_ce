@@ -25,6 +25,11 @@ class Target {
   final Future<void> Function(Object? db)? flush;
 
   final Future<List<Object?>> Function(Object? db) readAll;
+
+  /// Returns the values with a `testModelFieldZero` of at least `min` and less
+  /// than `max`. Only needed for the query benchmark.
+  final Future<List<Object?>> Function(Object? db, int min, int max)? query;
+
   final Future<void> Function(Object? db) close;
 
   const Target._({
@@ -35,6 +40,7 @@ class Target {
     required this.addAll,
     required this.flush,
     required this.readAll,
+    required this.query,
     required this.close,
   });
 
@@ -48,6 +54,7 @@ class Target {
     required FutureOr<void> Function(T db) close,
     FutureOr<void> Function(T db, TestModel value)? add,
     FutureOr<void> Function(T db)? flush,
+    FutureOr<List<Object?>> Function(T db, int min, int max)? query,
   }) => Target._(
     name: name,
     path: path,
@@ -56,6 +63,9 @@ class Target {
     addAll: (db, values) async => await addAll(db as T, values),
     flush: flush == null ? null : (db) async => await flush(db as T),
     readAll: (db) async => await readAll(db as T),
+    query: query == null
+        ? null
+        : (db, min, max) async => await query(db as T, min, max),
     close: (db) async => await close(db as T),
   );
 }

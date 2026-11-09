@@ -12,6 +12,7 @@ void main() async {
     writes: [hive, isolatedHive],
     batchWrites: [hive, hiveEncrypted, isolatedHive],
     opens: [hive, hiveEncrypted, hiveLazy, isolatedHive],
+    queries: [hive, isolatedHive],
   );
 
   await Hive.close();

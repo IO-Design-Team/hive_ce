@@ -4,6 +4,7 @@ import 'package:storage_benchmark/test_model.dart';
 part 'database.g.dart';
 
 @UseRowClass(TestModel, generateInsertable: true)
+@TableIndex(name: 'test_model_field_zero', columns: {#testModelFieldZero})
 class TestModels extends Table {
   IntColumn get testModelFieldZero => integer()();
   IntColumn get testModelFieldOne => integer()();

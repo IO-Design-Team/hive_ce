@@ -17,6 +17,24 @@ const testModel = TestModel(
   testModelFieldNine: 9,
 );
 
+/// [count] values with `testModelFieldZero` set to their index, so queries on
+/// it can match a subset
+List<TestModel> testModels(int count) => [
+  for (var i = 0; i < count; i++)
+    TestModel(
+      testModelFieldZero: i,
+      testModelFieldOne: testModel.testModelFieldOne,
+      testModelFieldTwo: testModel.testModelFieldTwo,
+      testModelFieldThree: testModel.testModelFieldThree,
+      testModelFieldFour: testModel.testModelFieldFour,
+      testModelFieldFive: testModel.testModelFieldFive,
+      testModelFieldSix: testModel.testModelFieldSix,
+      testModelFieldSeven: testModel.testModelFieldSeven,
+      testModelFieldEight: testModel.testModelFieldEight,
+      testModelFieldNine: testModel.testModelFieldNine,
+    ),
+];
+
 @JsonSerializable()
 @immutable
 class TestModel {

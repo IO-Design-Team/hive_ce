@@ -503,11 +503,18 @@ abstract class _$TestDatabase extends GeneratedDatabase {
   _$TestDatabase(QueryExecutor e) : super(e);
   $TestDatabaseManager get managers => $TestDatabaseManager(this);
   late final $TestModelsTable testModels = $TestModelsTable(this);
+  late final Index testModelFieldZero = Index(
+    'test_model_field_zero',
+    'CREATE INDEX test_model_field_zero ON test_models (test_model_field_zero)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [testModels];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    testModels,
+    testModelFieldZero,
+  ];
 }
 
 typedef $$TestModelsTableCreateCompanionBuilder =

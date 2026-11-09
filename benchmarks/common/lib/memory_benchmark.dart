@@ -76,7 +76,7 @@ Future<void> _measure(List<Target> targets, List<String> args) async {
 
   switch (scenario) {
     case 'write':
-      final values = List.filled(count, testModel);
+      final values = testModels(count);
       final baseline = ProcessInfo.currentRss;
       await createDatabase(target, values);
       print(ProcessInfo.maxRss - baseline);
