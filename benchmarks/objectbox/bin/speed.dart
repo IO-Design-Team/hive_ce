@@ -5,4 +5,5 @@ void main() => runSpeedBenchmarks(
   writes: [objectBox],
   batchWrites: [objectBox],
   opens: [objectBox],
+  queries: [objectBox],
 );

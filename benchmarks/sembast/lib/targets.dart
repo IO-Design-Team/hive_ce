@@ -31,5 +31,17 @@ final sembast = Target.create(
     for (final record in await _store.find(db))
       TestModel.fromJson(record.value),
   ],
+  query: (db, min, max) async => [
+    for (final record in await _store.find(
+      db,
+      finder: Finder(
+        filter: Filter.and([
+          Filter.greaterThanOrEquals('testModelFieldZero', min),
+          Filter.lessThan('testModelFieldZero', max),
+        ]),
+      ),
+    ))
+      TestModel.fromJson(record.value),
+  ],
   close: (db) => db.close(),
 );

@@ -17,7 +17,9 @@
         {
           "id": "2:5608744950144232934",
           "name": "testModelFieldZero",
-          "type": 6
+          "indexId": "1:3911818206991584819",
+          "type": 6,
+          "flags": 8
         },
         {
           "id": "3:7953678736919425945",
@@ -69,7 +71,7 @@
     }
   ],
   "lastEntityId": "1:1002478578580183925",
-  "lastIndexId": "0:0",
+  "lastIndexId": "1:3911818206991584819",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

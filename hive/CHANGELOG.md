@@ -1,3 +1,7 @@
+## 2.23.3
+
+- Adds query benchmarks, indexes the queried field in sqflite, drift, and ObjectBox, and refreshes the benchmark results
+
 ## 2.23.2
 
 - Adds database size and speed benchmarks comparing Hive CE with sqflite, drift, sembast, and ObjectBox

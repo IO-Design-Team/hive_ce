@@ -6,6 +6,7 @@ class TestEntity {
   @Id()
   var id = 0;
 
+  @Index()
   final int testModelFieldZero;
   final int testModelFieldOne;
   final int testModelFieldTwo;

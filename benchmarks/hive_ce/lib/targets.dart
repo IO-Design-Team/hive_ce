@@ -17,10 +17,17 @@ Future<void> initIsolatedHive() async {
   IsolatedHive.registerAdapter(TestModelAdapter());
 }
 
+/// Hive has no query API, so queries filter the values in memory
 final hive = _target(
   'Hive CE',
   () => Hive.openBox<TestModel>(_name),
   readAll: (box) => box.values.toList(),
+  query: (box, min, max) => box.values
+      .where(
+        (value) =>
+            value.testModelFieldZero >= min && value.testModelFieldZero < max,
+      )
+      .toList(),
 );
 
 final hiveEncrypted = _target(
@@ -56,6 +63,12 @@ final isolatedHive = Target.create(
   addAll: (box, values) => box.addAll(values),
   flush: (box) => box.flush(),
   readAll: (box) async => (await box.values).toList(),
+  query: (box, min, max) async => (await box.values)
+      .where(
+        (value) =>
+            value.testModelFieldZero >= min && value.testModelFieldZero < max,
+      )
+      .toList(),
   close: (box) => box.close(),
 );
 
@@ -63,6 +76,7 @@ Target _target<T extends BoxBase<TestModel>>(
   String name,
   Future<T> Function() open, {
   required FutureOr<List<Object?>> Function(T box) readAll,
+  FutureOr<List<Object?>> Function(T box, int min, int max)? query,
 }) => Target.create(
   name: name,
   path: _path,
@@ -71,5 +85,6 @@ Target _target<T extends BoxBase<TestModel>>(
   addAll: (box, values) => box.addAll(values),
   flush: (box) => box.flush(),
   readAll: readAll,
+  query: query,
   close: (box) => box.close(),
 );

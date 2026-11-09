@@ -5,4 +5,5 @@ void main() => runSpeedBenchmarks(
   writes: [sqflite],
   batchWrites: [sqflite],
   opens: [sqflite],
+  queries: [sqflite],
 );

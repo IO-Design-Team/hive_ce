@@ -14,13 +14,16 @@ final sqflite = Target.create(
     _path,
     options: OpenDatabaseOptions(
       version: 1,
-      onCreate: (db, _) {
+      onCreate: (db, _) async {
         final columns = [
           for (final column in testModel.toJson().keys)
             '$column INTEGER NOT NULL',
         ];
-        return db.execute(
+        await db.execute(
           'CREATE TABLE $_table (id INTEGER PRIMARY KEY, ${columns.join(', ')})',
+        );
+        await db.execute(
+          'CREATE INDEX test_model_field_zero ON $_table (testModelFieldZero)',
         );
       },
     ),
@@ -35,5 +38,10 @@ final sqflite = Target.create(
   },
   readAll: (db) async =>
       (await db.query(_table)).map(TestModel.fromJson).toList(),
+  query: (db, min, max) async => (await db.query(
+    _table,
+    where: 'testModelFieldZero >= ? AND testModelFieldZero < ?',
+    whereArgs: [min, max],
+  )).map(TestModel.fromJson).toList(),
   close: (db) => db.close(),
 );

@@ -4,6 +4,11 @@ import 'package:storage_benchmark/speed_benchmark.dart';
 
 void main() async {
   await initHive();
-  await runSpeedBenchmarks(writes: [hive], batchWrites: [hive], opens: [hive]);
+  await runSpeedBenchmarks(
+    writes: [hive],
+    batchWrites: [hive],
+    opens: [hive],
+    queries: [hive],
+  );
   Hive.closeAllBoxes();
 }
