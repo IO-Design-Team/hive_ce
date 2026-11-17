@@ -185,16 +185,68 @@ class StorageBackendJs extends StorageBackend {
     return decodeValue(value);
   }
 
+  /// How long [writeFrames] queues requests before it waits for the last one.
+  ///
+  /// Waiting hands control back to the page, so a large batch does not block
+  /// it for as long as the whole batch takes to queue.
+  @visibleForTesting
+  static var writeSlice = const Duration(milliseconds: 8);
+
   @override
   Future<void> writeFrames(List<Frame> frames, {bool verbatim = false}) async {
+    if (frames.isEmpty) return;
+
+    // The requests of the batch are queued on one transaction in order, and
+    // the write is done when the transaction commits. Awaiting every request
+    // would cost one event-loop task per frame; instead only the last request
+    // of each [writeSlice] is awaited. A request that fails aborts the
+    // transaction, so nothing of a failed batch is kept.
     final store = getStore(true);
-    for (final frame in frames) {
-      if (frame.deleted) {
-        await store.delete(frame.key.jsify()).asFuture();
-      } else {
-        await store.put(encodeValue(frame), frame.key.jsify()).asFuture();
+    final transaction = store.transaction;
+    final committed = Completer<void>();
+
+    transaction.oncomplete = (Event e) {
+      if (!committed.isCompleted) committed.complete();
+    }.toJS;
+    transaction.onabort = (Event e) {
+      if (committed.isCompleted) return;
+      committed.completeError(
+        transaction.error ??
+            HiveError('The IndexedDB transaction was aborted.'),
+      );
+    }.toJS;
+
+    try {
+      final slice = Stopwatch()..start();
+      for (var i = 0; i < frames.length; i++) {
+        final frame = frames[i];
+        final request = frame.deleted
+            ? store.delete(frame.key.jsify())
+            : store.put(encodeValue(frame), frame.key.jsify());
+
+        if (i < frames.length - 1 && slice.elapsed >= writeSlice) {
+          await request.asFuture();
+          slice.reset();
+        }
       }
+    } catch (_) {
+      // Encoding, queueing or an awaited request failed. The error is
+      // rethrown; the abort that follows must not surface as a second one.
+      committed.future.ignore();
+      // A request that failed on its own has aborted the transaction already.
+      // The awaited request then only reports the abort; the cause is the
+      // transaction's error.
+      final cause = transaction.error;
+      try {
+        transaction.abort();
+      } catch (_) {
+        // Already aborted by the failed request.
+      }
+      if (cause != null) throw cause;
+      rethrow;
     }
+
+    await committed.future;
   }
 
   @override
