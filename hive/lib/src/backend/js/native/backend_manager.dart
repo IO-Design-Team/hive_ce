@@ -40,7 +40,9 @@ class BackendManager implements BackendManagerInterface {
       Logger.i(
         'Creating objectStore $objectStoreName in database $databaseName...',
       );
-      final request = indexedDB.open(databaseName, db.version + 1);
+      final nextVersion = db.version + 1;
+      db.close();
+      final request = indexedDB.open(databaseName, nextVersion);
       request.onupgradeneeded = (IDBVersionChangeEvent e) {
         final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
         if (!db.objectStoreNames.contains(objectStoreName)) {
