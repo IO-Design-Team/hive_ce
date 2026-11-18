@@ -38,7 +38,7 @@ class IsolatedHiveImpl extends TypeRegistryImpl
 
   late Future<IsolateConnection> Function() _spawnHiveIsolate =
       () => spawnIsolate(
-            isolateEntryPoint,
+            createIsolateEntryPoint(),
             debugName: hiveIsolateName,
             onConnect: onConnect,
             onExit: onExit,

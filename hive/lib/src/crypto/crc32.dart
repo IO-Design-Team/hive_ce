@@ -1,5 +1,18 @@
 import 'dart:typed_data';
 
+/// Computes the zlib-compatible CRC32 of a valid byte range in [bytes].
+///
+/// [seed] is the previous checksum as an unsigned 32-bit integer. Return the
+/// same checksum as Hive CE's Dart implementation for the [length] bytes
+/// starting at [offset], including returning [seed] for an empty range.
+/// The callback must treat [bytes] as read-only.
+typedef Crc32Accelerator = int Function(
+  Uint8List bytes,
+  int seed,
+  int offset,
+  int length,
+);
+
 /// Slicing-by-8 CRC32 implementation
 class Crc32 {
   static final _tables = _buildTables();
@@ -24,6 +37,9 @@ class Crc32 {
     return tables;
   }
 
+  /// Optional native CRC32 accelerator installed via `installCrc32Accelerator`.
+  static Crc32Accelerator? nativeCompute;
+
   /// Computes the CRC32 checksum of [bytes] using a previous [crc] value.
   static int compute(
     Uint8List bytes, {
@@ -31,6 +47,13 @@ class Crc32 {
     int offset = 0,
     int? length,
   }) {
+    length ??= bytes.length;
+
+    final nativeCompute = Crc32.nativeCompute;
+    if (nativeCompute != null && crc >= 0 && crc <= 0xffffffff) {
+      return nativeCompute(bytes, crc, offset, length);
+    }
+
     final t0 = _tables[0];
     final t1 = _tables[1];
     final t2 = _tables[2];
@@ -41,8 +64,6 @@ class Crc32 {
     final t7 = _tables[7];
 
     crc = crc ^ 0xffffffff;
-
-    length ??= bytes.length;
 
     var i = offset;
     final end = offset + length;

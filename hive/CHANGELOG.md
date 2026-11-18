@@ -1,3 +1,7 @@
+## 2.24.0
+
+- Adds support for CRC32 acceleration
+
 ## 2.23.3
 
 - Adds query benchmarks, indexes the queried field in sqflite, drift, and ObjectBox, and refreshes the benchmark results
