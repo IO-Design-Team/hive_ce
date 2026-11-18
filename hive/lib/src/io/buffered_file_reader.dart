@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -18,6 +18,8 @@ class BufferedFileReader {
   @visibleForTesting
   Uint8List buffer;
 
+  final int _chunkSize;
+
   var _bufferSize = 0;
   var _bufferOffset = 0;
   var _fileOffset = 0;
@@ -30,7 +32,8 @@ class BufferedFileReader {
 
   /// Not part of public API
   BufferedFileReader(this.file, [int bufferSize = defaultChunkSize])
-      : buffer = Uint8List(bufferSize);
+      : buffer = Uint8List(bufferSize),
+        _chunkSize = bufferSize;
 
   /// Not part of public API
   @pragma('vm:prefer-inline')
@@ -38,6 +41,20 @@ class BufferedFileReader {
   void skip(int bytes) {
     assert(bytes >= 0 && remainingInBuffer >= bytes);
     _bufferOffset += bytes;
+  }
+
+  /// Skips [bytes] even if they are not loaded, seeking past them in the file
+  Future<void> skipFile(int bytes) async {
+    final remaining = remainingInBuffer;
+    if (remaining >= bytes) {
+      _bufferOffset += bytes;
+      return;
+    }
+
+    _fileOffset += bytes - remaining;
+    _bufferOffset = 0;
+    _bufferSize = 0;
+    await file.setPosition(_fileOffset);
   }
 
   /// Not part of public API
@@ -73,7 +90,8 @@ class BufferedFileReader {
       buffer.setRange(0, remaining, oldBuffer, _bufferOffset);
 
       _bufferOffset = 0;
-      final readBytes = await file.readInto(buffer, remaining);
+      final readBytes =
+          await file.readInto(buffer, remaining, max(bytes, _chunkSize));
       _bufferSize = remaining + readBytes;
       _fileOffset += readBytes;
 
