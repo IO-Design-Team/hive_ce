@@ -27,18 +27,12 @@ class FrameIoHelper extends FrameHelper {
 
   /// Not part of public API
   ///
-  /// Only the first frame is checksum verified to detect a wrong cipher. The
-  /// remaining frames are verified when their values are read.
-  Future<int> keysFromFile(
-    String path,
-    Keystore keystore,
-    HiveCipher? cipher,
-    int? keyCrc,
-  ) async {
+  /// Frames are not checksum verified until their values are read
+  Future<int> keysFromFile(String path, Keystore keystore) async {
     final raf = await openFile(path);
     try {
       return await _KeyReader(BufferedFileReader(raf), await raf.length())
-          .readKeys(keystore, cipher, keyCrc);
+          .readKeys(keystore);
     } finally {
       await raf.close();
     }
@@ -79,11 +73,7 @@ class _KeyReader {
 
   _KeyReader(this.fileReader, this.fileLength);
 
-  Future<int> readKeys(
-    Keystore keystore,
-    HiveCipher? cipher,
-    int? keyCrc,
-  ) async {
+  Future<int> readKeys(Keystore keystore) async {
     while (true) {
       final frameOffset = fileReader.offset;
       final remaining = fileLength - frameOffset;
@@ -94,15 +84,11 @@ class _KeyReader {
       final frameLength = _reader.peekUint32();
       if (frameLength < 8 || frameLength > remaining) return frameOffset;
 
-      final verify = frameOffset == 0;
-      final headerLength =
-          verify ? frameLength : min(frameLength - 4, _maxHeaderLength);
+      final headerLength = min(frameLength - 4, _maxHeaderLength);
       if (_reader.availableBytes < headerLength) await _load(headerLength);
 
       final frameStart = _reader.usedBytes;
-      final frame = verify
-          ? _reader.readFrame(cipher: cipher, keyCrc: keyCrc, lazy: true)
-          : _readFrameHeader(frameLength);
+      final frame = _readFrameHeader(frameLength);
       if (frame == null) return frameOffset;
 
       keystore.insert(frame..offset = frameOffset, notify: false);

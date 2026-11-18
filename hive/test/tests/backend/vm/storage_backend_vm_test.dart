@@ -135,12 +135,7 @@ void main() {
           ),
         ).thenAnswer((i) => Future.value(recoveryOffset));
         when(
-          () => helper.keysFromFile(
-            any(),
-            any(),
-            any(),
-            any(),
-          ),
+          () => helper.keysFromFile(any(), any()),
         ).thenAnswer((i) => Future.value(recoveryOffset));
         return helper;
       }

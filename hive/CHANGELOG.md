@@ -1,6 +1,7 @@
 ## 2.23.4
 
 - Speeds up opening lazy boxes with large values by only reading keys and verifying values when they are read
+- Opening a lazy box with the wrong encryption cipher no longer throws; reading a value does instead
 
 ## 2.23.3
 

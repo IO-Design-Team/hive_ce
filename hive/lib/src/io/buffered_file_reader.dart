@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:math';
+
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -18,8 +18,6 @@ class BufferedFileReader {
   @visibleForTesting
   Uint8List buffer;
 
-  final int _chunkSize;
-
   var _bufferSize = 0;
   var _bufferOffset = 0;
   var _fileOffset = 0;
@@ -32,8 +30,7 @@ class BufferedFileReader {
 
   /// Not part of public API
   BufferedFileReader(this.file, [int bufferSize = defaultChunkSize])
-      : buffer = Uint8List(bufferSize),
-        _chunkSize = bufferSize;
+      : buffer = Uint8List(bufferSize);
 
   /// Not part of public API
   @pragma('vm:prefer-inline')
@@ -84,8 +81,7 @@ class BufferedFileReader {
       buffer.setRange(0, remaining, oldBuffer, _bufferOffset);
 
       _bufferOffset = 0;
-      final readBytes =
-          await file.readInto(buffer, remaining, max(bytes, _chunkSize));
+      final readBytes = await file.readInto(buffer, remaining);
       _bufferSize = remaining + readBytes;
       _fileOffset += readBytes;
 

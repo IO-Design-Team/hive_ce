@@ -136,8 +136,7 @@ class StorageBackendVm extends StorageBackend {
         verbatim: isolated,
       );
     } else {
-      recoveryOffset =
-          await _frameHelper.keysFromFile(path, keystore, _cipher, _keyCrc);
+      recoveryOffset = await _frameHelper.keysFromFile(path, keystore);
     }
 
     if (recoveryOffset != -1) {
@@ -187,7 +186,8 @@ class StorageBackendVm extends StorageBackend {
 
       if (readFrame == null) {
         throw HiveError(
-          'Could not read value from box. Maybe your box is corrupted.',
+          'Could not read value from box. The encryption cipher may be wrong '
+          'or the box may be corrupted.',
         );
       }
 
