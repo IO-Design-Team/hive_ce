@@ -37,8 +37,7 @@ class FrameIoHelper extends FrameHelper {
   ) async {
     final raf = await openFile(path);
     try {
-      final fileReader = BufferedFileReader(raf);
-      return await _KeyReader(fileReader, await raf.length())
+      return await _KeyReader(BufferedFileReader(raf), await raf.length())
           .readKeys(keystore, cipher, keyCrc);
     } finally {
       await raf.close();
@@ -70,10 +69,13 @@ class _KeyReader {
   /// Frame length + key type + string key length + string key
   static const _maxHeaderLength = 4 + 1 + 1 + 255;
 
+  static final _emptyReader =
+      BinaryReaderImpl(Uint8List(0), TypeRegistryImpl.nullImpl);
+
   final BufferedFileReader fileReader;
   final int fileLength;
 
-  var _reader = BinaryReaderImpl(Uint8List(0), TypeRegistryImpl.nullImpl);
+  var _reader = _emptyReader;
 
   _KeyReader(this.fileReader, this.fileLength);
 
@@ -85,7 +87,7 @@ class _KeyReader {
     while (true) {
       final frameOffset = fileReader.offset;
       final remaining = fileLength - frameOffset;
-      if (remaining == 0) break;
+      if (remaining == 0) return -1;
       if (remaining < 4) return frameOffset;
 
       if (_reader.availableBytes < 4) await _load(4);
@@ -99,32 +101,25 @@ class _KeyReader {
 
       final frameStart = _reader.usedBytes;
       final frame = verify
-          ? _reader.readFrame(
-              cipher: cipher,
-              keyCrc: keyCrc,
-              lazy: true,
-              frameOffset: frameOffset,
-            )
-          : _readFrameHeader(frameLength, frameOffset);
+          ? _reader.readFrame(cipher: cipher, keyCrc: keyCrc, lazy: true)
+          : _readFrameHeader(frameLength);
       if (frame == null) return frameOffset;
 
-      keystore.insert(frame, notify: false);
+      keystore.insert(frame..offset = frameOffset, notify: false);
 
       final unread = frameLength - (_reader.usedBytes - frameStart);
       if (_reader.availableBytes >= unread) {
         _reader.skip(unread);
         fileReader.skip(frameLength);
       } else {
-        await fileReader.skipFile(frameLength);
-        _reader = BinaryReaderImpl(Uint8List(0), TypeRegistryImpl.nullImpl);
+        await fileReader.seek(frameLength);
+        _reader = _emptyReader;
       }
     }
-
-    return -1;
   }
 
-  Frame? _readFrameHeader(int frameLength, int frameOffset) {
-    final keyStart = _reader.usedBytes + 4;
+  Frame? _readFrameHeader(int frameLength) {
+    final frameStart = _reader.usedBytes;
     _reader.skip(4);
 
     final dynamic key;
@@ -134,13 +129,12 @@ class _KeyReader {
       return null;
     }
 
-    final valueLength = frameLength - 8 - (_reader.usedBytes - keyStart);
+    final valueLength = frameLength - 4 - (_reader.usedBytes - frameStart);
     if (valueLength < 0) return null;
 
-    final frame = valueLength == 0
+    return valueLength == 0
         ? Frame.deleted(key, length: frameLength)
         : Frame.lazy(key, length: frameLength);
-    return frame..offset = frameOffset;
   }
 
   Future<void> _load(int bytes) async {

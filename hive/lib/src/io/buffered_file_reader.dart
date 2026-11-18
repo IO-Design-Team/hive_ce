@@ -43,18 +43,12 @@ class BufferedFileReader {
     _bufferOffset += bytes;
   }
 
-  /// Skips [bytes] even if they are not loaded, seeking past them in the file
-  Future<void> skipFile(int bytes) async {
-    final remaining = remainingInBuffer;
-    if (remaining >= bytes) {
-      _bufferOffset += bytes;
-      return;
-    }
-
-    _fileOffset += bytes - remaining;
+  /// Skips [bytes] without loading them and discards the buffer
+  Future<void> seek(int bytes) {
+    _fileOffset = offset + bytes;
     _bufferOffset = 0;
     _bufferSize = 0;
-    await file.setPosition(_fileOffset);
+    return file.setPosition(_fileOffset);
   }
 
   /// Not part of public API
