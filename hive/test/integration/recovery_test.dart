@@ -91,22 +91,12 @@ void main() {
           await box.put('key', 'value');
           await box.close();
 
-          if (lazy) {
-            final wrong = await hive.openLazyBox(
-              boxName,
-              encryptionCipher: keyB,
-            );
-            await expectLater(
-              wrong.get('key'),
-              throwsIsolatedHiveError(['encryption cipher']),
-            );
-            await wrong.close();
-          } else {
-            await expectLater(
-              hive.openBox(boxName, encryptionCipher: keyB),
-              throwsIsolatedHiveError(['encryption cipher']),
-            );
-          }
+          await expectLater(
+            lazy
+                ? hive.openLazyBox(boxName, encryptionCipher: keyB)
+                : hive.openBox(boxName, encryptionCipher: keyB),
+            throwsIsolatedHiveError(['encryption cipher']),
+          );
 
           final reopened = await hive.openBox(boxName, encryptionCipher: keyA);
           expect(await reopened.get('key'), 'value');

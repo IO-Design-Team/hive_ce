@@ -1,9 +1,8 @@
 import 'package:hive_ce/src/box/box_base.dart';
 
 /// [LazyBox]es don't keep the values in memory like normal boxes. Opening a
-/// lazy box reads its keys and does not checksum values. Large values are
-/// skipped on disk. A value is read and checksummed the first time it is
-/// accessed.
+/// lazy box reads its keys. Values are checksummed when they are read, and
+/// large values are skipped on disk until then.
 abstract class LazyBox<E> extends BoxBase<E> {
   /// Returns the value associated with the given [key]. If the key does not
   /// exist, `null` is returned.

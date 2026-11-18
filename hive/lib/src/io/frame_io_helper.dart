@@ -38,9 +38,12 @@ class FrameIoHelper extends FrameHelper {
       final fileReader = length > _bigBoxChunkSize
           ? BufferedFileReader(raf, _bigBoxChunkSize)
           : BufferedFileReader(raf);
-      // [cipher] and [keyCrc] are applied when a value is read. Listing keys
-      // does not checksum value bytes.
-      return await _KeyReader(fileReader).readKeys(keystore, length);
+      return await _KeyReader(fileReader).readKeys(
+        keystore,
+        cipher,
+        keyCrc,
+        length,
+      );
     } finally {
       await raf.close();
     }
@@ -69,10 +72,14 @@ class FrameIoHelper extends FrameHelper {
   }
 }
 
+/// Lists the keys of a lazy box without checksumming its values. Values are
+/// checksummed when they are read.
+///
+/// The first and last frames are the exception. A wrong cipher fails the first
+/// frame, so it is reported at open. A crash can only tear the last write, so
+/// a torn last frame is truncated before it hides the value it replaced.
 class _KeyReader {
-  /// Values larger than this are not read while opening a lazy box. The frame
-  /// length is at the front, so the key can be parsed and the rest skipped.
-  /// No value is checksummed until it is read.
+  /// Values larger than this are seeked past instead of read
   static const _largeFrameBytes = 64 * 1024;
 
   /// Most bytes a key can occupy: type byte, length byte, and 255 UTF-8 bytes.
@@ -86,7 +93,12 @@ class _KeyReader {
 
   _KeyReader(this.fileReader);
 
-  Future<int> readKeys(Keystore keystore, int fileLength) async {
+  Future<int> readKeys(
+    Keystore keystore,
+    HiveCipher? cipher,
+    int? keyCrc,
+    int fileLength,
+  ) async {
     // Read the length only. Filling the buffer here would pull in a large
     // value before its size is known.
     await _load(4, maxRead: 4);
@@ -107,14 +119,46 @@ class _KeyReader {
         return frameOffset;
       }
 
+      final large = frameLength > _largeFrameBytes;
+      final verify =
+          frameOffset == 0 || frameOffset + frameLength == fileLength;
+      if ((verify || !large) && _reader.availableBytes < frameLength) {
+        final available = await _load(
+          frameLength,
+          // Don't prefetch past a large value that is only being checksummed
+          maxRead: large ? frameLength - _reader.availableBytes : null,
+        );
+        if (available < frameLength) return frameOffset;
+      }
+
+      if (verify) {
+        final frame = _reader.readFrame(
+          cipher: cipher,
+          keyCrc: keyCrc,
+          lazy: true,
+          frameOffset: frameOffset,
+        );
+        if (frame == null) return frameOffset;
+        keystore.insert(frame, notify: false);
+        fileReader.skip(frameLength);
+        continue;
+      }
+
+      if (_reader.availableBytes >= frameLength) {
+        final start = _reader.usedBytes;
+        final frame = _readKeyOnly(frameOffset, frameLength);
+        if (frame == null) return frameOffset;
+        keystore.insert(frame, notify: false);
+        _reader.skip(frameLength - (_reader.usedBytes - start));
+        fileReader.skip(frameLength);
+        continue;
+      }
+
       final headerLength = min(frameLength, 4 + _maxKeyBytes);
       if (_reader.availableBytes < headerLength) {
-        final large = frameLength > _largeFrameBytes;
         final available = await _load(
           headerLength,
-          // A large value is seeked past. A small one stays in the read-ahead
-          // buffer so the following frames do not each cost a seek.
-          maxRead: large ? headerLength - _reader.availableBytes : null,
+          maxRead: headerLength - _reader.availableBytes,
         );
         if (available < headerLength) return frameOffset;
       }
@@ -137,7 +181,7 @@ class _KeyReader {
       if (length != frameLength) return null;
       final key = _reader.readKey();
       // The checksum is the last 4 bytes. A body that ends at the key is a
-      // tombstone; anything after the key is a value and is not hashed here.
+      // tombstone. Anything after the key is a value.
       final consumed = _reader.usedBytes - start;
       if (consumed > frameLength - 4) return null;
       if (consumed == frameLength - 4) {

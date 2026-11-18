@@ -85,6 +85,37 @@ Future<void> _recoverTruncatedFrame({required TestType type}) async {
   expect(await file.length(), lessThan(bytes.length));
 }
 
+Future<void> _recoverTornLastFrame({required TestType type}) async {
+  final dir = await getTempDir();
+  final hive = await createHive(type: type, directory: dir);
+  final name = generateBoxName();
+  final original = _largeValue(7);
+
+  var box = await hive.openLazyBox(name);
+  await box.put('small', 'ok');
+  await box.put('key', original);
+  await box.close();
+
+  final file = File(path.join(dir.path, '${name.toLowerCase()}.hive'));
+  final goodLength = await file.length();
+
+  box = await hive.openLazyBox(name);
+  await box.put('key', _largeValue(8));
+  await box.close();
+
+  // The header of the last frame reached disk but the end of its value didn't
+  final bytes = await file.readAsBytes();
+  bytes.fillRange(goodLength + 4096, bytes.length, 0);
+  await file.writeAsBytes(bytes);
+
+  box = await silenceOutput(() => hive.openLazyBox(name));
+  expect(await box.get('key'), original);
+  expect(await box.get('small'), 'ok');
+  await box.close();
+
+  expect(await file.length(), goodLength);
+}
+
 Future<void> _encryptedLargeValue({required TestType type}) async {
   final hive = await createHive(type: type);
   final name = generateBoxName();
@@ -102,16 +133,10 @@ Future<void> _encryptedLargeValue({required TestType type}) async {
   expect(await box.get('after'), 'plain-looking');
   await box.close();
 
-  final wrong = await hive.openLazyBox(
-    name,
-    encryptionCipher: HiveAesCipher(wrongKey),
-  );
-  expect(await wrong.containsKey('secret'), true);
   await expectLater(
-    wrong.get('secret'),
+    hive.openLazyBox(name, encryptionCipher: HiveAesCipher(wrongKey)),
     throwsIsolatedHiveError(['encryption cipher']),
   );
-  await wrong.close();
 
   box = await hive.openLazyBox(name, encryptionCipher: HiveAesCipher(key));
   expect(await box.get('secret'), value);
@@ -129,6 +154,12 @@ void main() {
     test(
       'recovers a truncated large frame ($type)',
       () => silenceOutput(() => _recoverTruncatedFrame(type: type)),
+      timeout: longTimeout,
+    );
+
+    test(
+      'recovers a torn last frame ($type)',
+      () => silenceOutput(() => _recoverTornLastFrame(type: type)),
       timeout: longTimeout,
     );
 
