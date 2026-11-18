@@ -85,9 +85,8 @@ class StorageBackendVm extends StorageBackend {
     this._cipher,
     this._keyCrc,
     this._frameHelper,
-    this._sync, {
-    bool verifyOnOpen = true,
-  }) : _verifyOnOpen = verifyOnOpen;
+    this._sync,
+  ) : _verifyOnOpen = true;
 
   @override
   String get path => _file.path;

@@ -110,11 +110,11 @@ class IsolatedHiveImpl extends TypeRegistryImpl
     KeyComparator? comparator,
     IsolatedCompactionStrategy? compaction,
     bool recovery,
-    bool verifyOnOpen,
     String? path,
     Uint8List? bytes,
-    String? collection,
-  ) async {
+    String? collection, {
+    bool verifyOnOpen = true,
+  }) async {
     final connection = _connection;
     if (connection == null) {
       throw HiveError('IsolatedHive is not initialized');
@@ -208,7 +208,6 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         keyComparator,
         compactionStrategy,
         crashRecovery,
-        true,
         path,
         bytes,
         collection,
@@ -232,10 +231,10 @@ class IsolatedHiveImpl extends TypeRegistryImpl
         keyComparator,
         compactionStrategy,
         crashRecovery,
-        verifyOnOpen,
         path,
         null,
         collection,
+        verifyOnOpen: verifyOnOpen,
       ) as IsolatedLazyBox<E>;
 
   IsolatedBoxBase<E> _getBoxInternal<E>(String name, bool lazy) {

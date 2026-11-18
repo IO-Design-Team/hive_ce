@@ -70,11 +70,11 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     KeyComparator comparator,
     CompactionStrategy compaction,
     bool recovery,
-    bool verifyOnOpen,
     String? path,
     Uint8List? bytes,
-    String? collection,
-  ) async {
+    String? collection, {
+    bool verifyOnOpen = true,
+  }) async {
     assert(path == null || bytes == null);
     assert(
       name.length <= 255 && name.isAscii,
@@ -185,7 +185,6 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       keyComparator,
       compactionStrategy,
       crashRecovery,
-      true,
       path,
       bytes,
       collection,
@@ -216,10 +215,10 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       keyComparator,
       compactionStrategy,
       crashRecovery,
-      verifyOnOpen,
       path,
       null,
       collection,
+      verifyOnOpen: verifyOnOpen,
     ) as LazyBox<E>;
   }
 

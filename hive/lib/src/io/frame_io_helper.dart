@@ -75,13 +75,10 @@ class _KeyReader {
   /// Frame length + key type + string key length + string key
   static const _maxHeaderLength = 4 + 1 + 1 + 255;
 
-  static final _emptyReader =
-      BinaryReaderImpl(Uint8List(0), TypeRegistryImpl.nullImpl);
-
   final BufferedFileReader fileReader;
   final int fileLength;
 
-  var _reader = _emptyReader;
+  late BinaryReaderImpl _reader;
 
   _KeyReader(this.fileReader, this.fileLength);
 
@@ -91,6 +88,7 @@ class _KeyReader {
     int? keyCrc, {
     required bool verify,
   }) async {
+    await _load(4);
     while (true) {
       final frameOffset = fileReader.offset;
       final remaining = fileLength - frameOffset;
@@ -119,7 +117,7 @@ class _KeyReader {
         fileReader.skip(frameLength);
       } else {
         await fileReader.seek(frameLength);
-        _reader = _emptyReader;
+        await _load(4);
       }
     }
   }
@@ -143,11 +141,11 @@ class _KeyReader {
         : Frame.lazy(key, length: frameLength);
   }
 
-  Future<void> _load(int bytes) async {
+  Future<int> _load(int bytes) async {
     final loadedBytes = await fileReader.loadBytes(bytes);
-    _reader = BinaryReaderImpl(
-      fileReader.peekBytes(loadedBytes),
-      TypeRegistryImpl.nullImpl,
-    );
+    final buffer = fileReader.peekBytes(loadedBytes);
+    _reader = BinaryReaderImpl(buffer, TypeRegistryImpl.nullImpl);
+
+    return loadedBytes;
   }
 }
