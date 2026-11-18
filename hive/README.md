@@ -150,7 +150,7 @@ Finding the tenth of the values within a range of an integer field, right after 
 
 #### Encrypted and lazy boxes
 
-Hive v2 → Hive CE. Lazy boxes only load keys when opened. Large values are skipped on disk until they are read.
+Hive v2 → Hive CE. Lazy boxes only load keys when opened. Values are checksummed when read, and large values are skipped on disk until then.
 
 | Values    | Encrypted batch write |  Encrypted open |       Lazy open |
 | --------- | --------------------: | --------------: | --------------: |

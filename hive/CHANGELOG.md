@@ -1,6 +1,6 @@
 ## 2.23.4
 
-- Speeds up opening lazy boxes that hold large values by reading keys and skipping the value bytes. Those checksums are checked when the value is read
+- Speeds up opening lazy boxes by reading keys without checksumming values. A value is checksummed when it is read, and large values are skipped on disk until then. A wrong encryption key is reported on read instead of on open
 
 ## 2.23.3
 

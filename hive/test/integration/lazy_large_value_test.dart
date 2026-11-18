@@ -102,10 +102,16 @@ Future<void> _encryptedLargeValue({required TestType type}) async {
   expect(await box.get('after'), 'plain-looking');
   await box.close();
 
+  final wrong = await hive.openLazyBox(
+    name,
+    encryptionCipher: HiveAesCipher(wrongKey),
+  );
+  expect(await wrong.containsKey('secret'), true);
   await expectLater(
-    hive.openLazyBox(name, encryptionCipher: HiveAesCipher(wrongKey)),
+    wrong.get('secret'),
     throwsIsolatedHiveError(['encryption cipher']),
   );
+  await wrong.close();
 
   box = await hive.openLazyBox(name, encryptionCipher: HiveAesCipher(key));
   expect(await box.get('secret'), value);

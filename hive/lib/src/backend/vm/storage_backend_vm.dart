@@ -187,7 +187,10 @@ class StorageBackendVm extends StorageBackend {
 
       if (readFrame == null) {
         throw HiveError(
-          'Could not read value from box. Maybe your box is corrupted.',
+          _cipher != null || _keyCrc != null
+              ? 'Could not read value from box. The encryption cipher may be '
+                  'wrong or the box may be corrupted.'
+              : 'Could not read value from box. Maybe your box is corrupted.',
         );
       }
 
