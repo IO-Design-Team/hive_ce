@@ -43,6 +43,7 @@ Future<dynamic> handleHiveMethodCall(
           : IsolatedCompactionStrategy.fromJson(compactionStrategyJson)
               .resolve();
       final crashRecovery = call.arguments['crashRecovery'];
+      final verifyOnOpen = call.arguments['verifyOnOpen'];
       final path = call.arguments['path'];
       final bytes = call.arguments['bytes'];
       final collection = call.arguments['collection'];
@@ -55,6 +56,7 @@ Future<dynamic> handleHiveMethodCall(
           keyComparator: keyComparator,
           compactionStrategy: compactionStrategy,
           crashRecovery: crashRecovery,
+          verifyOnOpen: verifyOnOpen,
           path: path,
           collection: collection,
         );

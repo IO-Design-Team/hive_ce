@@ -70,6 +70,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     KeyComparator comparator,
     CompactionStrategy compaction,
     bool recovery,
+    bool verifyOnOpen,
     String? path,
     Uint8List? bytes,
     String? collection,
@@ -114,6 +115,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
             cipher,
             keyCrc,
             collection,
+            verifyOnOpen: verifyOnOpen,
           );
         }
 
@@ -183,6 +185,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       keyComparator,
       compactionStrategy,
       crashRecovery,
+      true,
       path,
       bytes,
       collection,
@@ -197,6 +200,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
+    bool verifyOnOpen = true,
     String? path,
     String? collection,
     @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,
@@ -212,6 +216,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
       keyComparator,
       compactionStrategy,
       crashRecovery,
+      verifyOnOpen,
       path,
       null,
       collection,

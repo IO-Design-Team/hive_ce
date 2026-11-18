@@ -18,8 +18,9 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     int? keyCrc,
-    String? collection,
-  ) {
+    String? collection, {
+    bool verifyOnOpen = true,
+  }) {
     throw UnimplementedError();
   }
 

@@ -24,8 +24,9 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     int? keyCrc,
-    String? collection,
-  ) async {
+    String? collection, {
+    bool verifyOnOpen = true,
+  }) async {
     if (path == null) {
       throw HiveError('You need to initialize Hive or '
           'provide a path to store the box.');
@@ -46,8 +47,14 @@ class BackendManager implements BackendManagerInterface {
     final file = await findHiveFileAndCleanUp(name, path);
     final lockFile = File('$path$_delimiter$name.lock');
 
-    final backend =
-        StorageBackendVm(file, lockFile, crashRecovery, cipher, keyCrc);
+    final backend = StorageBackendVm(
+      file,
+      lockFile,
+      crashRecovery,
+      cipher,
+      keyCrc,
+      verifyOnOpen: verifyOnOpen,
+    );
     await backend.open();
     return backend;
   }

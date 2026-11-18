@@ -31,6 +31,7 @@ class StorageBackendVm extends StorageBackend {
   final bool _crashRecovery;
   final HiveCipher? _cipher;
   final int? _keyCrc;
+  final bool _verifyOnOpen;
   final FrameIoHelper _frameHelper;
 
   final ReadWriteSync _sync;
@@ -70,8 +71,10 @@ class StorageBackendVm extends StorageBackend {
     this._lockFile,
     this._crashRecovery,
     this._cipher,
-    this._keyCrc,
-  )   : _frameHelper = FrameIoHelper(),
+    this._keyCrc, {
+    bool verifyOnOpen = true,
+  })  : _verifyOnOpen = verifyOnOpen,
+        _frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
   /// Not part of public API
@@ -82,8 +85,9 @@ class StorageBackendVm extends StorageBackend {
     this._cipher,
     this._keyCrc,
     this._frameHelper,
-    this._sync,
-  );
+    this._sync, {
+    bool verifyOnOpen = true,
+  }) : _verifyOnOpen = verifyOnOpen;
 
   @override
   String get path => _file.path;
@@ -136,7 +140,13 @@ class StorageBackendVm extends StorageBackend {
         verbatim: isolated,
       );
     } else {
-      recoveryOffset = await _frameHelper.keysFromFile(path, keystore);
+      recoveryOffset = await _frameHelper.keysFromFile(
+        path,
+        keystore,
+        _cipher,
+        _keyCrc,
+        verify: _verifyOnOpen,
+      );
     }
 
     if (recoveryOffset != -1) {

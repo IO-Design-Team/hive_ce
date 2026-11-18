@@ -48,6 +48,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     KeyComparator? keyComparator,
     IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
+    bool verifyOnOpen = true,
     String? path,
     String? collection,
   }) async =>
@@ -59,6 +60,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
           compactionStrategy:
               compactionStrategy?.resolve() ?? defaultCompactionStrategy,
           crashRecovery: crashRecovery,
+          verifyOnOpen: verifyOnOpen,
           path: path,
           collection: collection,
         ),

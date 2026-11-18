@@ -33,6 +33,7 @@ class IsolatedHiveImpl implements IsolatedHiveInterface {
     KeyComparator? keyComparator,
     IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
+    bool verifyOnOpen = true,
     String? path,
     String? collection,
   }) {

@@ -55,8 +55,9 @@ abstract class BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     int? keyCrc,
-    String? collection,
-  );
+    String? collection, {
+    bool verifyOnOpen = true,
+  });
 
   /// Deletes database
   Future<void> deleteBox(String name, String? path, String? collection);

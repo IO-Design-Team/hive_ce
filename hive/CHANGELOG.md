@@ -1,7 +1,6 @@
 ## 2.23.4
 
-- Speeds up opening lazy boxes with large values by only reading keys and verifying values when they are read
-- Opening a lazy box with the wrong encryption cipher no longer throws; reading a value does instead
+- Adds `verifyOnOpen` to `openLazyBox`. Setting it to `false` makes opening lazy boxes with large values much faster by only reading keys and verifying values when they are read.
 
 ## 2.23.3
 

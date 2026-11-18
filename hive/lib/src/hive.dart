@@ -36,12 +36,21 @@ abstract class HiveInterface implements TypeRegistry {
   ///
   /// If the box is already open, the instance is returned and all provided
   /// parameters are being ignored.
+  ///
+  /// {@template verify_on_open}
+  /// If [verifyOnOpen] is false, only keys are read when the box is opened and
+  /// values are verified when they are read. This makes opening boxes with
+  /// large values much faster, but only incomplete frames at the end of the
+  /// box are recovered on open, and a wrong [encryptionCipher] is only
+  /// detected when a value is read.
+  /// {@endtemplate}
   Future<LazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator keyComparator = defaultKeyComparator,
     CompactionStrategy compactionStrategy = defaultCompactionStrategy,
     bool crashRecovery = true,
+    bool verifyOnOpen = true,
     String? path,
     String? collection,
     @Deprecated('Use encryptionCipher instead') List<int>? encryptionKey,

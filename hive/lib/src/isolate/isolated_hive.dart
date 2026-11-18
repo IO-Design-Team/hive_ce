@@ -27,12 +27,15 @@ abstract class IsolatedHiveInterface implements TypeRegistry {
   });
 
   /// Open a lazy box in the isolate
+  ///
+  /// {@macro verify_on_open}
   Future<IsolatedLazyBox<E>> openLazyBox<E>(
     String name, {
     HiveCipher? encryptionCipher,
     KeyComparator? keyComparator,
     IsolatedCompactionStrategy? compactionStrategy,
     bool crashRecovery = true,
+    bool verifyOnOpen = true,
     String? path,
     String? collection,
   });

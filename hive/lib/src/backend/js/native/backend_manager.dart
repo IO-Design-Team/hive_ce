@@ -19,8 +19,9 @@ class BackendManager implements BackendManagerInterface {
     bool crashRecovery,
     HiveCipher? cipher,
     int? keyCrc,
-    String? collection,
-  ) async {
+    String? collection, {
+    bool verifyOnOpen = true,
+  }) async {
     // compatibility for old store format
     final databaseName = collection ?? name;
     final objectStoreName = collection == null ? 'box' : name;
