@@ -1,7 +1,8 @@
 import 'package:hive_ce/src/box/box_base.dart';
 
-/// [LazyBox]es don't keep the values in memory like normal boxes. Each time a
-/// value is read, it is loaded from the backend.
+/// [LazyBox]es don't keep the values in memory like normal boxes. Opening a
+/// lazy box reads its keys. Large values are skipped on disk and loaded the
+/// first time they are read.
 abstract class LazyBox<E> extends BoxBase<E> {
   /// Returns the value associated with the given [key]. If the key does not
   /// exist, `null` is returned.

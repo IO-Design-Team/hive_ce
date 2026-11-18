@@ -57,6 +57,38 @@ void main() {
       });
     });
 
+    group('.skipAhead()', () {
+      test('discards buffered bytes and skips the rest of the file', () async {
+        final reader = await openReader(List.generate(20, (i) => i), 8);
+        expect(await reader.loadBytes(4, maxRead: 4), 4);
+        expect(reader.file.positionSync(), 4);
+
+        await reader.skipAhead(10);
+        expect(reader.offset, 10);
+        expect(reader.remainingInBuffer, 0);
+        expect(reader.file.positionSync(), 10);
+
+        expect(await reader.loadBytes(4, maxRead: 4), 4);
+        expect(reader.viewBytes(4), [10, 11, 12, 13]);
+        expect(reader.file.positionSync(), 14);
+
+        await reader.file.close();
+      });
+
+      test('stays inside the buffer when it already has the bytes', () async {
+        final reader = await openReader(List.generate(10, (i) => i), 8);
+        await reader.loadBytes(8);
+        expect(reader.file.positionSync(), 8);
+
+        await reader.skipAhead(3);
+        expect(reader.offset, 3);
+        expect(reader.file.positionSync(), 8);
+        expect(reader.viewBytes(2), [3, 4]);
+
+        await reader.file.close();
+      });
+    });
+
     group('.viewBytes()', () {
       test('returns a view with the requested size', () async {
         final reader = await openReader([1, 2, 3, 4, 5]);
@@ -115,6 +147,19 @@ void main() {
         expect(reader.viewBytes(2), [2, 3]);
         expect(await reader.loadBytes(5), 4);
         expect(reader.viewBytes(3), [4, 5, 6]);
+
+        await reader.file.close();
+      });
+
+      test('maxRead limits how many new bytes are read', () async {
+        final reader = await openReader(List.generate(20, (i) => i), 10);
+        expect(await reader.loadBytes(4, maxRead: 4), 4);
+        expect(reader.file.positionSync(), 4);
+        expect(reader.viewBytes(4), [0, 1, 2, 3]);
+
+        expect(await reader.loadBytes(6, maxRead: 2), 2);
+        expect(reader.file.positionSync(), 6);
+        expect(reader.viewBytes(2), [4, 5]);
 
         await reader.file.close();
       });
