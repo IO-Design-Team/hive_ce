@@ -1,3 +1,7 @@
+## 2.23.4
+
+- Speeds up opening lazy boxes with large values by only reading keys and verifying values when they are read
+
 ## 2.23.3
 
 - Adds query benchmarks, indexes the queried field in sqflite, drift, and ObjectBox, and refreshes the benchmark results
