@@ -1,0 +1,4 @@
+# Temporary until hive_ce 2.24.0 is published
+dependency_overrides:
+  hive_ce:
+    path: ../hive
