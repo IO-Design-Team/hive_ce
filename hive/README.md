@@ -83,26 +83,20 @@ void example() {
 ## Benchmarks
 
 With 1 MiB values, Hive CE batch writes were **11.8× faster** and reopening was
-**9.2× faster** than Hive v2 in a macOS release build on an Apple M3 Max.
-All results are averages of three runs.
-
-Hive CE and IsolatedHive use zlib for CRC32 in this benchmark. To enable zlib
-where available, import `package:hive_ce_flutter/hive_ce_flutter.dart` and call
-`Hive.initFlutter()` or `IsolatedHive.initFlutter()`. Hive v2 computes CRC32 in Dart.
-
-### Speed
+**9.2× faster** than Hive v2. Hive CE and IsolatedHive use zlib for CRC32,
+enabled by `Hive.initFlutter()` from `package:hive_ce_flutter`. Hive v2
+computes CRC32 in Dart.
 
 ![Standard speed benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/speed.svg)
 
 ![Large binary value benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/large_values.svg)
-
-### Memory and disk
 
 ![Memory and database size benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/memory.svg)
 
 <details>
 <summary>Measurement details</summary>
 
+- macOS release build on an Apple M3 Max. All results are averages of three runs.
 - Batch writes include a flush where needed. Hive v4, sqflite, drift, and
   ObjectBox commit each individual write.
 - The range query returns 100 matches. The disk sizes for sqflite, drift, and
@@ -115,4 +109,4 @@ where available, import `package:hive_ce_flutter/hive_ce_flutter.dart` and call
 
 </details>
 
-The runner generates SVG charts along with Markdown and CSV reports. [Run the benchmarks](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks)
+[Run the benchmarks](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks)
