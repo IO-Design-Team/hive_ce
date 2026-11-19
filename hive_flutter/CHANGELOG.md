@@ -1,3 +1,7 @@
+## 2.6.0
+
+- Updates minimum Dart SDK version to 3.10.0
+
 ## 2.5.0
 
 - `initFlutter` flushes every open box when the app is paused
