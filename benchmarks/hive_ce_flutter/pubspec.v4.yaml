@@ -1,0 +1,14 @@
+name: hive_ce_flutter_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.44.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hive_v4_storage_benchmark:
+    path: ../hive_v4
+  storage_benchmark:
+    path: ../common
