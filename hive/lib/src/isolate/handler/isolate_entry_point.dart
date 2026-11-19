@@ -1,8 +1,19 @@
 import 'dart:isolate';
 
+import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_box_handler.dart';
 import 'package:hive_ce/src/isolate/handler/isolated_hive_handler.dart';
 import 'package:isolate_channel/isolate_channel.dart';
+
+/// Creates an entry point that carries [Crc32.nativeCompute] into the Hive
+/// isolate
+IsolateEntryPoint createIsolateEntryPoint() {
+  final nativeCompute = Crc32.nativeCompute;
+  return (send) {
+    Crc32.nativeCompute = nativeCompute;
+    isolateEntryPoint(send);
+  };
+}
 
 /// The entry point for the Hive isolate
 void isolateEntryPoint(SendPort? send) {

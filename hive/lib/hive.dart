@@ -25,6 +25,7 @@ export 'src/hive_error.dart';
 export 'src/object/hive_collection.dart';
 export 'src/object/hive_list.dart';
 export 'src/object/hive_storage_backend_preference.dart';
+export 'src/platform_integration.dart';
 export 'src/registry/type_adapter.dart';
 export 'src/registry/type_registry.dart';
 
