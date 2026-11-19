@@ -82,107 +82,37 @@ void example() {
 
 ## Benchmarks
 
-Run on an M3 Max MacBook Pro with values of a class with ten `int` fields. See the [benchmark code](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks).
+With 1 MiB values, Hive CE batch writes were **11.8× faster** and reopening was
+**9.2× faster** than Hive v2 in a macOS release build on an Apple M3 Max.
+All results are averages of three runs.
+
+Hive CE and IsolatedHive use zlib for CRC32 in this benchmark. To enable zlib
+where available, import `package:hive_ce_flutter/hive_ce_flutter.dart` and call
+`Hive.initFlutter()` or `IsolatedHive.initFlutter()`. Hive v2 computes CRC32 in Dart.
 
 ### Speed
 
-Times are averaged over several runs. Runs that took longer than 1 minute were stopped.
+![Standard speed benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/speed.svg)
 
-#### Individual writes
+![Large binary value benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/large_values.svg)
 
-Writing values one at a time, then flushing once. Hive v4, sqflite, drift, and ObjectBox commit every write.
+### Memory and disk
 
-| Database     |  1,000 |  10,000 | 100,000 | 1,000,000 |
-| ------------ | -----: | ------: | ------: | --------: |
-| Hive CE      |  16 ms |  167 ms |  1.57 s |   14.89 s |
-| IsolatedHive |  13 ms |  132 ms |  1.25 s |   12.52 s |
-| Hive v2      |  14 ms |  148 ms |  1.51 s |   19.35 s |
-| Hive v4      | 140 ms |  1.62 s | 19.67 s |   > 1 min |
-| sqflite      | 402 ms |  4.04 s | 43.85 s |   > 1 min |
-| drift        | 286 ms |  4.22 s | 44.67 s |   > 1 min |
-| sembast      |  64 ms |  729 ms |  7.77 s |   > 1 min |
-| ObjectBox    | 4.21 s | 43.79 s | > 1 min |   > 1 min |
+![Memory and database size benchmarks](https://raw.githubusercontent.com/IO-Design-Team/hive_ce/9e4271dd80fb9645086320577603c26c60d431db/benchmarks/charts/memory.svg)
 
-#### Batch writes
+<details>
+<summary>Measurement details</summary>
 
-Writing every value with a single `addAll`, then flushing.
+- Batch writes include a flush where needed. Hive v4, sqflite, drift, and
+  ObjectBox commit each individual write.
+- The range query returns 100 matches. The disk sizes for sqflite, drift, and
+  ObjectBox include the index used by the query.
+- The standard open-and-read timing loads keys for lazy boxes and values for
+  other databases. The memory read measures loading values for every database.
+  Batch write memory includes creating the input values.
+- The 1 MiB reopen timer stops before the payloads are read back for validation.
+  Hive v4 stores the values as base64 strings, and Sembast uses its Blob type.
 
-| Database     |  1,000 | 10,000 | 100,000 | 1,000,000 |
-| ------------ | -----: | -----: | ------: | --------: |
-| Hive CE      | 750 µs |   8 ms |  107 ms |    1.10 s |
-| IsolatedHive |   1 ms |  12 ms |  138 ms |    1.46 s |
-| Hive v2      | 867 µs |   9 ms |  105 ms |    3.08 s |
-| Hive v4      |   2 ms |  26 ms |  267 ms |    2.94 s |
-| sqflite      |   5 ms |  59 ms |  623 ms |    6.86 s |
-| drift        |   4 ms |  44 ms |  466 ms |    4.97 s |
-| sembast      |  16 ms | 172 ms |  1.73 s |   17.79 s |
-| ObjectBox    |   5 ms |  10 ms |   47 ms |    461 ms |
+</details>
 
-#### Opening and reading
-
-Opening a database and reading every value.
-
-| Database     |  1,000 | 10,000 | 100,000 | 1,000,000 |
-| ------------ | -----: | -----: | ------: | --------: |
-| Hive CE      |   1 ms |  10 ms |  135 ms |    1.22 s |
-| IsolatedHive |   1 ms |  11 ms |  154 ms |    1.40 s |
-| Hive v2      |   1 ms |  12 ms |  142 ms |    3.71 s |
-| Hive v4      |   1 ms |  14 ms |  159 ms |    1.65 s |
-| sqflite      | 811 µs |   7 ms |   94 ms |    1.06 s |
-| drift        |   1 ms |  13 ms |  174 ms |    1.86 s |
-| sembast      |   2 ms |  29 ms |  347 ms |    3.84 s |
-| ObjectBox    | 326 µs | 882 µs |    9 ms |    108 ms |
-
-#### Queries
-
-Finding the tenth of the values within a range of an integer field, right after opening. sqflite, drift, and ObjectBox index the field. Hive has no query API, so Hive boxes filter their values in Dart, and Hive v4 reads them from disk first.
-
-| Database     |  1,000 | 10,000 | 100,000 | 1,000,000 |
-| ------------ | -----: | -----: | ------: | --------: |
-| Hive CE      |  38 µs |   1 ms |    3 ms |     29 ms |
-| IsolatedHive | 760 µs |   7 ms |   60 ms |    637 ms |
-| Hive v2      |  21 µs | 573 µs |    2 ms |     26 ms |
-| Hive v4      |   1 ms |  13 ms |  158 ms |    1.65 s |
-| sqflite      | 147 µs | 746 µs |    7 ms |     91 ms |
-| drift        | 216 µs |   1 ms |   15 ms |    167 ms |
-| sembast      | 273 µs |   3 ms |   47 ms |    501 ms |
-| ObjectBox    | 272 µs | 341 µs |    4 ms |     42 ms |
-
-#### Encrypted and lazy boxes
-
-Hive v2 → Hive CE. Lazy boxes only load keys when opened.
-
-| Values    | Encrypted batch write |  Encrypted open |       Lazy open |
-| --------- | --------------------: | --------------: | --------------: |
-| 10,000    |         41 ms → 33 ms |   28 ms → 20 ms |     6 ms → 5 ms |
-| 100,000   |       412 ms → 266 ms | 308 ms → 205 ms |   84 ms → 56 ms |
-| 1,000,000 |       6.08 s → 2.59 s | 5.58 s → 2.19 s | 3.06 s → 624 ms |
-
-### Database size
-
-| Database  |   1,000 |  10,000 |  100,000 | 1,000,000 |
-| --------- | ------: | ------: | -------: | --------: |
-| Hive CE   | 0.11 MB | 1.10 MB | 10.97 MB | 109.67 MB |
-| Hive v2   | 0.11 MB | 1.10 MB | 10.97 MB | 109.67 MB |
-| Hive v4   | 1.00 MB | 5.00 MB | 30.00 MB | 295.00 MB |
-| sqflite   | 0.05 MB | 0.38 MB |  4.00 MB |  40.98 MB |
-| drift     | 0.05 MB | 0.37 MB |  3.89 MB |  39.84 MB |
-| sembast   | 0.24 MB | 2.44 MB | 24.58 MB | 247.74 MB |
-| ObjectBox | 0.32 MB | 2.45 MB | 23.74 MB | 236.66 MB |
-
-Hive v4 sizes grow with the length of model field names. sqflite, drift, and ObjectBox sizes include the query index.
-
-### Memory usage
-
-Peak memory with 1,000,000 values, including native memory, averaged over three runs. Regular Hive boxes keep every value in memory while open. Lazy boxes keep only keys and read values with `getAt`.
-
-| Database       | Batch write |     Open | Open and read |
-| -------------- | ----------: | -------: | ------------: |
-| Hive CE        |      579 MB |   476 MB |        492 MB |
-| Hive CE (lazy) |      475 MB |   240 MB |        367 MB |
-| Hive v2        |      577 MB |   470 MB |        485 MB |
-| Hive v4        |      470 MB |     1 MB |      1,400 MB |
-| sqflite        |    1,545 MB |     1 MB |        558 MB |
-| drift          |      534 MB |     1 MB |        789 MB |
-| sembast        |    1,687 MB | 1,128 MB |      1,443 MB |
-| ObjectBox      |      367 MB |     1 MB |        342 MB |
+The runner generates SVG charts along with Markdown and CSV reports. [Run the benchmarks](https://github.com/IO-Design-Team/hive_ce/tree/main/benchmarks)
