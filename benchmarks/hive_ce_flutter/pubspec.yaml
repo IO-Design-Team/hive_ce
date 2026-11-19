@@ -1,0 +1,31 @@
+name: hive_ce_flutter_benchmark
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.44.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hive_ce_flutter:
+    path: ../../hive_flutter
+  hive_ce_storage_benchmark:
+    path: ../hive_ce
+  hive_v2_storage_benchmark:
+    path: ../hive_v2
+  sqflite_storage_benchmark:
+    path: ../sqflite
+  drift_storage_benchmark:
+    path: ../drift
+  sembast_storage_benchmark:
+    path: ../sembast
+  objectbox_storage_benchmark:
+    path: ../objectbox
+  objectbox_flutter_libs: 5.3.2
+  storage_benchmark:
+    path: ../common
+
+dependency_overrides:
+  hive_ce:
+    path: ../../hive

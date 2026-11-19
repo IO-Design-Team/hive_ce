@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:hive/hive.dart';
 import 'package:hive_v2_storage_benchmark/test_model_adapter.dart';
@@ -7,52 +7,31 @@ import 'package:storage_benchmark/test_model.dart';
 
 const _name = 'test_box';
 
-void initHive() => Hive
-  ..init('.')
-  ..registerAdapter(TestModelAdapter());
+void initHive() {
+  Hive.init('.');
+  if (!Hive.isAdapterRegistered(0)) {
+    Hive.registerAdapter(TestModelAdapter());
+  }
+}
 
 /// Hive has no query API, so queries filter the values in memory
-final hive = _target(
-  'Hive v2',
-  () => Hive.openBox<TestModel>(_name),
-  readAll: (box) => box.values.toList(),
-  query: (box, min, max) => box.values
-      .where(
-        (value) =>
-            value.testModelFieldZero >= min && value.testModelFieldZero < max,
-      )
-      .toList(),
-);
-
-final hiveEncrypted = _target(
-  'Hive v2 (encrypted)',
-  () => Hive.openBox<TestModel>(
-    _name,
-    encryptionCipher: HiveAesCipher(List.generate(32, (i) => i)),
-  ),
-  readAll: (box) => box.values.toList(),
-);
-
-/// Opening a lazy box only loads its keys
-final hiveLazy = _target(
-  'Hive v2 (lazy)',
-  () => Hive.openLazyBox<TestModel>(_name),
-  readAll: (box) => box.keys.toList(),
-);
-
-Target _target<T extends BoxBase<TestModel>>(
-  String name,
-  Future<T> Function() open, {
-  required FutureOr<List<Object?>> Function(T box) readAll,
-  FutureOr<List<Object?>> Function(T box, int min, int max)? query,
-}) => Target.create(
-  name: name,
+final hive = Target.create(
+  name: 'Hive v2',
   path: '$_name.hive',
-  open: open,
+  initialize: initHive,
+  closeEngine: Hive.close,
+  openLarge: largeDatabase(
+    open: (path) => Hive.openBox<Uint8List>(_name, path: path),
+    addAll: (box, values) => box.addAll(values),
+    flush: (box) => box.flush(),
+    readAll: (box) => box.values.toList(),
+    close: (box) => box.close(),
+  ),
+  open: () => Hive.openBox<TestModel>(_name),
   add: (box, value) => box.add(value),
   addAll: (box, values) => box.addAll(values),
   flush: (box) => box.flush(),
-  readAll: readAll,
-  query: query,
+  readAll: (box) => box.values.toList(),
+  query: (box, min, max) => modelsInRange(box.values, min, max),
   close: (box) => box.close(),
 );

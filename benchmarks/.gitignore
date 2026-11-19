@@ -3,8 +3,11 @@
 .dart_tool/
 
 build/
+benchmark_results.md
+benchmark_results.csv
 memory_results.md
 speed_results.md
 test_box*
+.hive_v4_flutter/
 objectbox/download/
 objectbox/lib/libobjectbox.*
