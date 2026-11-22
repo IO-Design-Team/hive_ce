@@ -11,6 +11,7 @@ export 'src/box_collection/box_collection_stub.dart'
 export 'src/object/hive_object.dart' show HiveObject, HiveObjectMixin;
 
 export 'src/annotations/generate_adapters.dart';
+export 'src/annotations/hive_converter.dart';
 export 'src/annotations/hive_field.dart';
 export 'src/annotations/hive_type.dart';
 export 'src/binary/binary_reader.dart';

@@ -1,14 +1,19 @@
+// TODO: Remove with Dart 3.11
+// ignore_for_file: unnecessary_ignore, experimental_member_use
+
 import 'dart:io';
 
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
-import 'package:source_gen/source_gen.dart';
-import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
+import 'package:source_gen/source_gen.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
 /// Root of the package being built, defaulting to the working directory
@@ -105,6 +110,104 @@ int readTypeId(ConstantReader annotation) {
   }
 
   return annotation.read('typeId').intValue;
+}
+
+String? _findImportPrefix(
+  LibraryElement library,
+  bool Function(LibraryImport import) matches,
+) {
+  final imports =
+      library.fragments.expand((f) => f.libraryImports).where(matches).toList();
+  if (imports.any((e) => e.prefix == null)) return null;
+  return imports.firstOrNull?.prefix?.element.displayName;
+}
+
+/// Normalizes `asset:` URIs under `lib/` to `package:` URIs and drops any
+/// fragment so URIs from `source_gen` and `analyzer` can be compared directly.
+Uri normalizeSourceUri(Uri uri) {
+  final clean = uri.removeFragment();
+  if (clean.scheme == 'asset' &&
+      clean.pathSegments.length >= 2 &&
+      clean.pathSegments[1] == 'lib') {
+    return clean.replace(
+      scheme: 'package',
+      pathSegments: [clean.pathSegments.first, ...clean.pathSegments.skip(2)],
+    );
+  }
+  return clean;
+}
+
+/// Returns the import prefix used in [currentLibrary] for a symbol named
+/// [topLevelName] declared in [sourceUri], if any.
+String? getImportPrefixForUri(
+  Uri sourceUri,
+  String topLevelName,
+  LibraryElement currentLibrary,
+) {
+  final normalizedSource = normalizeSourceUri(sourceUri);
+  if (normalizedSource == normalizeSourceUri(currentLibrary.uri)) return null;
+
+  return _findImportPrefix(currentLibrary, (import) {
+    final importedElement = import.namespace.definedNames2[topLevelName];
+    if (importedElement == null) return false;
+    final importedLibraryUri = import.importedLibrary?.uri;
+    final elementLibraryUri = importedElement.library?.uri;
+    return (importedLibraryUri != null &&
+            normalizeSourceUri(importedLibraryUri) == normalizedSource) ||
+        (elementLibraryUri != null &&
+            normalizeSourceUri(elementLibraryUri) == normalizedSource);
+  });
+}
+
+/// Import-prefix helpers for [Element].
+extension ElementPrefixExtension on Element {
+  /// Returns [displayName] prefixed with its import prefix in
+  /// [currentLibrary], if any.
+  String prefixedName(LibraryElement currentLibrary) {
+    if (library == null || library == currentLibrary) return displayName;
+    final prefix = _findImportPrefix(
+      currentLibrary,
+      (e) => e.namespace.definedNames2.values.contains(this),
+    );
+    return prefix != null ? '$prefix.$displayName' : displayName;
+  }
+}
+
+/// Prefixed type formatting for [DartType].
+extension PrefixedDartTypeExtension on DartType {
+  /// Formats this type for emission inside [currentLibrary], preserving any
+  /// import prefixes on the outer type and its type arguments.
+  String getPrefixedDisplayString(LibraryElement currentLibrary) {
+    final suffix = nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+    return switch (this) {
+      final InterfaceType type => () {
+          final name = type.element.prefixedName(currentLibrary);
+          final args = type.typeArguments.isEmpty
+              ? ''
+              : '<${type.typeArguments.map((t) => t.getPrefixedDisplayString(currentLibrary)).join(', ')}>';
+          return '$name$args$suffix';
+        }(),
+      final RecordType type => () {
+          final positional = type.positionalFields
+              .map((f) => f.type.getPrefixedDisplayString(currentLibrary))
+              .toList();
+          final named = type.namedFields
+              .map(
+                (f) =>
+                    '${f.type.getPrefixedDisplayString(currentLibrary)} ${f.name}',
+              )
+              .toList();
+          final parts = <String>[
+            ...positional,
+            if (named.isNotEmpty) '{${named.join(', ')}}',
+          ];
+          final trailingComma =
+              positional.length == 1 && named.isEmpty ? ',' : '';
+          return '(${parts.join(', ')}$trailingComma)$suffix';
+        }(),
+      _ => getDisplayString(),
+    };
+  }
 }
 
 /// Convenience extension for [BuildStep]

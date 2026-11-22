@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:hive_ce_generator/src/model/revived_hive_converter.dart';
 import 'package:meta/meta.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -15,6 +16,9 @@ class RevivedGenerateAdapters {
   /// The reserved type ids
   final Set<int> reservedTypeIds;
 
+  /// The revived converters
+  final List<RevivedHiveConverter> converters;
+
   /// Revive a GenerateAdapters annotation
   RevivedGenerateAdapters(ConstantReader annotation)
       : specs = annotation
@@ -28,7 +32,11 @@ class RevivedGenerateAdapters {
             .setValue
             .map((e) => e.toIntValue())
             .whereType<int>()
-            .toSet();
+            .toSet(),
+        converters =
+            (annotation.peek('converters')?.listValue ?? const <DartObject>[])
+                .map(RevivedHiveConverter.fromObject)
+                .toList();
 }
 
 /// A revived adapter spec

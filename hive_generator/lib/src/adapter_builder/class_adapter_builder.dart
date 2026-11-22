@@ -10,9 +10,9 @@ import 'package:collection/collection.dart';
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce_generator/src/adapter_builder/adapter_builder.dart';
 import 'package:hive_ce_generator/src/helper/helper.dart';
-import 'package:source_gen/source_gen.dart';
-
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
+import 'package:hive_ce_generator/src/model/revived_hive_converter.dart';
+import 'package:source_gen/source_gen.dart';
 
 /// TODO: Document this!
 class ClassAdapterBuilder extends AdapterBuilder {
@@ -20,8 +20,18 @@ class ClassAdapterBuilder extends AdapterBuilder {
   const ClassAdapterBuilder(
     super.cls,
     super.getters,
-    super.setters,
-  );
+    super.setters, {
+    LibraryElement? library,
+    this.converters = const [],
+  }) : _library = library;
+
+  final LibraryElement? _library;
+
+  /// The library in which the adapter is being generated.
+  LibraryElement get library => _library ?? cls.library;
+
+  /// Converters from `GenerateAdapters.converters`.
+  final List<RevivedHiveConverter> converters;
 
   /// [TypeChecker] for [HiveList].
   final hiveListChecker =
@@ -49,6 +59,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
   @override
   String buildRead() {
     final constr = getConstructor(cls);
+    final clsName = cls.prefixedName(library);
 
     // The remaining fields to initialize.
     final fields = setters.toList();
@@ -57,7 +68,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     if (constr.formalParameters.isEmpty && fields.isEmpty) {
       return '''
     reader.readByte();
-    return ${cls.displayName}();
+    return $clsName();
     ''';
     }
 
@@ -68,7 +79,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
       for (int i = 0; i < numOfFields; i++)
         reader.readByte(): reader.read(),
     };
-    return ${cls.displayName}(
+    return $clsName(
     ''');
 
     for (final param in constr.formalParameters) {
@@ -101,7 +112,6 @@ class ClassAdapterBuilder extends AdapterBuilder {
 
   String _value(DartType type, AdapterField field) {
     final variable = 'fields[${field.index}]';
-    final value = _cast(type, variable);
 
     final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
     final constructorDefaultIsNull = field.constructorDefault == null;
@@ -115,28 +125,124 @@ class ClassAdapterBuilder extends AdapterBuilder {
       defaultValue = null;
     }
 
-    if (defaultValue == null) return value;
+    if (defaultValue == null) return _cast(type, variable);
 
+    final value = _cast(type, variable, skipNullCheck: true);
     return '$variable == null ? $defaultValue : $value';
   }
 
-  String _cast(DartType type, String variable) {
+  Set<DartType> _withActive(Set<DartType> activeTypes, DartType type) =>
+      {...activeTypes, library.typeSystem.promoteToNonNull(type)};
+
+  MatchedHiveConverter? _matchConverter(
+    DartType type,
+    Set<DartType> activeTypes,
+  ) {
+    final nonNullType = library.typeSystem.promoteToNonNull(type);
+    if (activeTypes.contains(nonNullType)) return null;
+    return RevivedHiveConverter.matchAny(converters, type, library.typeSystem);
+  }
+
+  bool _hasConverter(
+    DartType type, [
+    Set<DartType> activeTypes = const {},
+  ]) {
+    if (_matchConverter(type, activeTypes) != null) return true;
+    if (hiveListChecker.isAssignableFromType(type) ||
+        isUint8List(type) ||
+        !isMapOrIterable(type) ||
+        type is! ParameterizedType ||
+        type.typeArguments.isEmpty) {
+      return false;
+    }
+    final nextActive = _withActive(activeTypes, type);
+    return type.typeArguments.any((t) => _hasConverter(t, nextActive));
+  }
+
+  String _write(
+    DartType type,
+    String value, {
+    Set<DartType> activeTypes = const {},
+    bool isLocalVar = false,
+  }) {
+    final converter = _matchConverter(type, activeTypes);
+    if (converter != null) {
+      final nextActive = _withActive(activeTypes, type);
+      final instance = converter.instanceExpression(library);
+      String convert(String expr) => _write(
+            converter.hiveType,
+            '$instance.toHive($expr)',
+            activeTypes: nextActive,
+          );
+
+      if (type.nullabilitySuffix == NullabilitySuffix.question &&
+          !converter.handlesNull) {
+        if (isLocalVar) {
+          return '$value == null ? null : ${convert(value)}';
+        }
+        final varName =
+            activeTypes.isEmpty ? 'value' : 'value${activeTypes.length}';
+        return 'switch ($value) { final $varName? => ${convert(varName)}, null => null }';
+      }
+      return convert(value);
+    }
+
+    if (!_hasConverter(type, activeTypes)) return value;
+
+    final nextActive = _withActive(activeTypes, type);
+    final suffix = _accessorSuffixFromType(type);
+    final args = (type as ParameterizedType).typeArguments;
+    if (mapChecker.isAssignableFromType(type)) {
+      return '$value$suffix.map((k, v) => MapEntry('
+          '${_write(args[0], 'k', activeTypes: nextActive, isLocalVar: true)}, '
+          '${_write(args[1], 'v', activeTypes: nextActive, isLocalVar: true)}))';
+    }
+    final collection =
+        setChecker.isAssignableFromType(type) ? 'toSet' : 'toList';
+    return '$value$suffix.map((e) => '
+        '${_write(args[0], 'e', activeTypes: nextActive, isLocalVar: true)}'
+        ').$collection()';
+  }
+
+  String _cast(
+    DartType type,
+    String variable, {
+    Set<DartType> activeTypes = const {},
+    bool skipNullCheck = false,
+  }) {
+    final converter = _matchConverter(type, activeTypes);
+    if (converter != null) {
+      final nextActive = _withActive(activeTypes, type);
+      final innerCast =
+          _cast(converter.hiveType, variable, activeTypes: nextActive);
+      final converted =
+          '${converter.instanceExpression(library)}.fromHive($innerCast)';
+      if (type.nullabilitySuffix == NullabilitySuffix.question &&
+          !converter.handlesNull &&
+          !skipNullCheck) {
+        return '$variable == null ? null : $converted';
+      }
+      return converted;
+    }
+
+    if (type is DynamicType) return variable;
+
     final suffix = _suffixFromType(type);
     if (hiveListChecker.isAssignableFromType(type)) {
       return '($variable as HiveList$suffix)$suffix.castHiveList()';
     } else if (setChecker.isAssignableFromType(type)) {
-      return '($variable as Set$suffix)${_castIterable(type)}';
+      return '($variable as Set$suffix)${_castIterable(type, activeTypes)}';
     } else if (iterableChecker.isAssignableFromType(type) &&
         !isUint8List(type)) {
-      return '($variable as List$suffix)${_castIterable(type)}';
+      return '($variable as List$suffix)${_castIterable(type, activeTypes)}';
     } else if (mapChecker.isAssignableFromType(type)) {
-      return '($variable as Map$suffix)${_castMap(type)}';
+      return '($variable as Map$suffix)${_castMap(type, activeTypes)}';
     } else if (type.isDartCoreInt) {
       return '($variable as num$suffix)$suffix.toInt()';
     } else if (type.isDartCoreDouble) {
       return '($variable as num$suffix)$suffix.toDouble()';
     } else {
-      return '$variable as ${type.getPrefixedDisplayString(cls.library)}';
+      return '$variable as ${type.getPrefixedDisplayString(library)}';
     }
   }
 
@@ -151,11 +257,13 @@ class ClassAdapterBuilder extends AdapterBuilder {
     return uint8ListChecker.isExactlyType(type);
   }
 
-  String _castIterable(DartType type) {
+  String _castIterable(DartType type, Set<DartType> activeTypes) {
     final paramType = type as ParameterizedType;
     final arg = paramType.typeArguments.first;
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg) && !isUint8List(arg)) {
+    final nextActive = _withActive(activeTypes, type);
+    if ((isMapOrIterable(arg) && !isUint8List(arg)) ||
+        _hasConverter(arg, nextActive)) {
       var cast = '';
       // Using assignable because Set? is not exactly Set
       if (setChecker.isAssignableFromType(type)) {
@@ -165,23 +273,28 @@ class ClassAdapterBuilder extends AdapterBuilder {
         cast = '.toList()';
       }
 
-      return '$suffix.map((e) => ${_cast(arg, 'e')})$cast';
+      return '$suffix.map((e) => ${_cast(arg, 'e', activeTypes: nextActive)})$cast';
     } else {
-      return '$suffix.cast<${arg.getPrefixedDisplayString(cls.library)}>()';
+      return '$suffix.cast<${arg.getPrefixedDisplayString(library)}>()';
     }
   }
 
-  String _castMap(DartType type) {
+  String _castMap(DartType type, Set<DartType> activeTypes) {
     final paramType = type as ParameterizedType;
     final arg1 = paramType.typeArguments[0];
     final arg2 = paramType.typeArguments[1];
     final suffix = _accessorSuffixFromType(type);
-    if (isMapOrIterable(arg1) || isMapOrIterable(arg2)) {
+    final nextActive = _withActive(activeTypes, type);
+    if (isMapOrIterable(arg1) ||
+        isMapOrIterable(arg2) ||
+        _hasConverter(arg1, nextActive) ||
+        _hasConverter(arg2, nextActive)) {
       return '$suffix.map((dynamic k, dynamic v)=>'
-          'MapEntry(${_cast(arg1, 'k')},${_cast(arg2, 'v')}))';
+          'MapEntry(${_cast(arg1, 'k', activeTypes: nextActive)},'
+          '${_cast(arg2, 'v', activeTypes: nextActive)}))';
     } else {
-      return '$suffix.cast<${arg1.getPrefixedDisplayString(cls.library)}, '
-          '${arg2.getPrefixedDisplayString(cls.library)}>()';
+      return '$suffix.cast<${arg1.getPrefixedDisplayString(library)}, '
+          '${arg2.getPrefixedDisplayString(library)}>()';
     }
   }
 
@@ -195,7 +308,7 @@ class ClassAdapterBuilder extends AdapterBuilder {
     for (final field in getters) {
       code.writeln('''
       ..writeByte(${field.index})
-      ..write(obj.${field.name})''');
+      ..write(${_write(field.type, 'obj.${field.name}')})''');
     }
     code.writeln(';');
 
@@ -222,29 +335,4 @@ String _suffixFromType(DartType type) {
     NullabilitySuffix.question => '?',
     _ => '',
   };
-}
-
-extension on DartType {
-  String getPrefixedDisplayString(LibraryElement currentLibrary) {
-    final element = this.element;
-    if (element == null) return getDisplayString();
-
-    final definingLibrary = element.library;
-    if (definingLibrary == currentLibrary) return getDisplayString();
-
-    final prefix = currentLibrary.fragments
-        .expand((e) => e.libraryImports)
-        .firstWhereOrNull(
-          (e) => e.namespace.definedNames2.values.contains(element),
-        )
-        ?.prefix
-        ?.element
-        .displayName;
-
-    if (prefix != null) {
-      return '$prefix.${getDisplayString()}';
-    }
-
-    return getDisplayString();
-  }
 }

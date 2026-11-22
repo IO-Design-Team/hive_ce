@@ -29,7 +29,7 @@ final _packageRef = RegExp('package:(\\w+)/');
 /// to contain the given string
 ///
 /// Setting [migrate] runs `hive_ce_generator:migrate` instead of the builders
-Future<void> expectGeneration({
+Future<TestBuilderResult?> expectGeneration({
   required Map<String, String> input,
   Map<String, Object> output = const {},
   String? throws,
@@ -51,7 +51,7 @@ Future<void> expectGeneration({
       failed: result.exitCode != 0,
       messages: '${result.stdout}${result.stderr}',
     );
-    return;
+    return null;
   }
 
   final readerWriter = TestReaderWriter(rootPackage: _testPackage);
@@ -59,6 +59,8 @@ Future<void> expectGeneration({
     readerWriter.testing.writeString(makeAssetId(key), value);
   }
 
+  final typeAdapterBuilder = getTypeAdapterBuilder(const BuilderOptions({}));
+  final adaptersBuilder = getAdaptersBuilder(const BuilderOptions({}));
   final registrar = getRegistrarBuilder(const BuilderOptions({}));
   buildPackageRoot = project.path;
   TestBuilderResult? result;
@@ -66,8 +68,8 @@ Future<void> expectGeneration({
   try {
     result = await testBuilders(
       [
-        getTypeAdapterBuilder(const BuilderOptions({})),
-        getAdaptersBuilder(const BuilderOptions({})),
+        typeAdapterBuilder,
+        adaptersBuilder,
         getRegistrarIntermediateBuilder(const BuilderOptions({})),
         registrar,
       ],
@@ -78,7 +80,7 @@ Future<void> expectGeneration({
       rootPackage: _testPackage,
       packageConfig: await _packageConfig(),
       readerWriter: readerWriter,
-      visibleOutputBuilders: {registrar},
+      visibleOutputBuilders: {typeAdapterBuilder, adaptersBuilder, registrar},
     );
   } catch (e) {
     error = e;
@@ -96,6 +98,57 @@ Future<void> expectGeneration({
     failed: result?.succeeded != true,
     messages: messages,
     result: result,
+  );
+  return result;
+}
+
+/// Generates adapters via [expectGeneration], writes the generated part file
+/// at [partTargetPath], analyzes the temp project, and runs [script] to verify
+/// end-to-end runtime behavior.
+Future<void> expectRoundTrip({
+  required Map<String, String> input,
+  required String script,
+  String partOutputPath =
+      'lib/hive/hive_adapters.hive_adapters_generator.g.part',
+  String partTargetPath = 'lib/hive/hive_adapters.g.dart',
+  String partOf = 'hive_adapters.dart',
+  Map<String, Object> output = const {},
+}) async {
+  final result = await expectGeneration(input: input, output: output);
+  final project = _project!;
+  final partContent =
+      result == null ? null : _read(project, partOutputPath, result);
+  if (partContent == null) {
+    fail('Missing generated part output: $partOutputPath');
+  }
+  File(path.join(project.path, partTargetPath))
+    ..createSync(recursive: true)
+    ..writeAsStringSync("part of '$partOf';\n\n$partContent");
+
+  File(path.join(project.path, 'bin/verify.dart'))
+    ..createSync(recursive: true)
+    ..writeAsStringSync(script);
+
+  final analyzeResult = Process.runSync(
+    'dart',
+    ['analyze', '--fatal-infos'],
+    workingDirectory: project.path,
+  );
+  expect(
+    analyzeResult.exitCode,
+    0,
+    reason: '${analyzeResult.stdout}\n${analyzeResult.stderr}',
+  );
+
+  final runResult = Process.runSync(
+    'dart',
+    ['run', 'bin/verify.dart'],
+    workingDirectory: project.path,
+  );
+  expect(
+    runResult.exitCode,
+    0,
+    reason: '${runResult.stdout}\n${runResult.stderr}',
   );
 }
 
@@ -237,9 +290,14 @@ void _expect(
   if (failed) fail(messages);
   for (final MapEntry(:key, :value) in output.entries) {
     final content = _read(project, key, result);
-    expect(content != null, value == true || value is String, reason: key);
-    if (value is! String) continue;
-    expect(content, value);
+    expect(
+      content != null,
+      value == true || value is String || value is Matcher,
+      reason: key,
+    );
+    if (value is String || value is Matcher) {
+      expect(content, value, reason: key);
+    }
   }
 }
 

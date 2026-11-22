@@ -7,6 +7,7 @@ import 'package:hive_ce_generator/src/adapter_builder/enum_adapter_builder.dart'
 import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/helper/type_helper.dart';
 import 'package:hive_ce_generator/src/model/hive_schema.dart';
+import 'package:hive_ce_generator/src/model/revived_hive_converter.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:hive_ce_generator/src/helper/source_helper.dart';
 import 'package:meta/meta.dart';
@@ -38,6 +39,7 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     String? adapterName,
     HiveSchemaType? schema,
     Set<String> ignoredFields = const {},
+    List<RevivedHiveConverter> converters = const [],
   }) {
     final cls = getClass(element);
     final getAccessorsResult = getAccessors(
@@ -55,22 +57,29 @@ class TypeAdapterGenerator extends GeneratorForAnnotation<HiveType> {
     _verifyFieldIndices(setters);
 
     adapterName ??= generateAdapterName(cls.displayName);
+    final clsName = cls.prefixedName(library);
     final builder = cls.thisType.isEnum
         ? EnumAdapterBuilder(cls, getters)
-        : ClassAdapterBuilder(cls, getters, setters);
+        : ClassAdapterBuilder(
+            cls,
+            getters,
+            setters,
+            library: library,
+            converters: converters,
+          );
 
     final content = '''
-    class $adapterName extends TypeAdapter<${cls.displayName}> {
+    class $adapterName extends TypeAdapter<$clsName> {
       @override
       final typeId = $typeId;
 
       @override
-      ${cls.displayName} read(BinaryReader reader) {
+      $clsName read(BinaryReader reader) {
         ${builder.buildRead()}
       }
 
       @override
-      void write(BinaryWriter writer, ${cls.displayName} obj) {
+      void write(BinaryWriter writer, $clsName obj) {
         ${builder.buildWrite()}
       }
 

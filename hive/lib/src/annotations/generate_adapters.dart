@@ -1,3 +1,4 @@
+import 'package:hive_ce/src/annotations/hive_converter.dart';
 import 'package:meta/meta.dart';
 
 /// Annotation to generate TypeAdapters for the given [specs]
@@ -9,6 +10,7 @@ class GenerateAdapters {
     this.specs, {
     this.firstTypeId = 0,
     this.reservedTypeIds = const {},
+    this.converters = const [],
   });
   // coverage:ignore-end
 
@@ -22,6 +24,9 @@ class GenerateAdapters {
   ///
   /// These type ids will be skipped during generation
   final Set<int> reservedTypeIds;
+
+  /// Converters to use for fields in the generated TypeAdapters
+  final List<HiveConverter> converters;
 }
 
 /// Configuration that specifies the generation of a TypeAdapter

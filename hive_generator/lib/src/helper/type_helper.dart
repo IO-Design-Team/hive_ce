@@ -1,7 +1,9 @@
 import 'package:analyzer/dart/constant/value.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:source_gen/source_gen.dart';
+import 'package:hive_ce_generator/src/helper/helper.dart';
 import 'package:hive_ce_generator/src/helper/source_helper.dart';
+import 'package:source_gen/source_gen.dart';
 
 /// TODO: Document this!
 const kConstConstructors = true;
@@ -10,42 +12,71 @@ const kConstConstructors = true;
 String constantToString(
   DartObject? object, [
   List<String> typeInformation = const [],
+  LibraryElement? library,
 ]) {
   if (object == null || object.isNull) return 'null';
   final reader = ConstantReader(object);
   return reader.isLiteral
-      ? literalToString(object, typeInformation)
-      : revivableToString(object, typeInformation);
+      ? literalToString(object, typeInformation, library)
+      : revivableToString(object, typeInformation, library);
 }
 
 /// TODO: Document this!
-String revivableToString(DartObject? object, List<String> typeInformation) {
-  final reader = ConstantReader(object);
-  final revivable = reader.revive();
+String revivableToString(
+  DartObject? object,
+  List<String> typeInformation, [
+  LibraryElement? library,
+]) =>
+    reviveToString(
+      ConstantReader(object).revive(),
+      type: object?.type,
+      library: library,
+      typeInformation: [...typeInformation, '$object'],
+    );
 
+/// Formats a [Revivable] back into Dart source code inside [library].
+String reviveToString(
+  Revivable revivable, {
+  DartType? type,
+  LibraryElement? library,
+  List<String> typeInformation = const [],
+}) {
   if (revivable.source.fragment.isEmpty) {
-    // Enums
+    if (library != null) {
+      final topLevelName = revivable.accessor.split('.').first;
+      final prefix = getImportPrefixForUri(
+        revivable.source,
+        topLevelName,
+        library,
+      );
+      if (prefix != null) return '$prefix.${revivable.accessor}';
+    }
     return revivable.accessor;
-  } else {
-    // Classes
-    final nextTypeInformation = [...typeInformation, '$object'];
-    final prefix = kConstConstructors ? 'const ' : '';
-    final ctor = revivable.accessor.isEmpty ? '' : '.${revivable.accessor}';
-    final arguments = <String>[
-      for (final arg in revivable.positionalArguments)
-        constantToString(arg, nextTypeInformation),
-      for (final kv in revivable.namedArguments.entries)
-        '${kv.key}: ${constantToString(kv.value, nextTypeInformation)}',
-    ];
-
-    return '$prefix${revivable.source.fragment}$ctor(${arguments.join(', ')})';
   }
+
+  final prefix = kConstConstructors ? 'const ' : '';
+  final ctor = revivable.accessor.isEmpty ? '' : '.${revivable.accessor}';
+  final typeName = library != null && type != null
+      ? type.getPrefixedDisplayString(library)
+      : revivable.source.fragment;
+  final arguments = <String>[
+    for (final arg in revivable.positionalArguments)
+      constantToString(arg, typeInformation, library),
+    for (final kv in revivable.namedArguments.entries)
+      '${kv.key}: ${constantToString(kv.value, typeInformation, library)}',
+  ];
+
+  return '$prefix$typeName$ctor(${arguments.join(', ')})';
 }
 
 // The code below is based on code from https://github.com/google/json_serializable.dart/blob/df60c2a95c4c0054d6ab785849937d7f5ade39fe/json_serializable/lib/src/json_key_utils.dart#L43
 
 /// TODO: Document this!
-String literalToString(DartObject object, List<String> typeInformation) {
+String literalToString(
+  DartObject object,
+  List<String> typeInformation, [
+  LibraryElement? library,
+]) {
   final reader = ConstantReader(object);
 
   String? badType;
@@ -90,7 +121,7 @@ String literalToString(DartObject object, List<String> typeInformation) {
   if (reader.isList) {
     final listTypeInformation = [...typeInformation, 'List'];
     final listItems = reader.listValue
-        .map((it) => constantToString(it, listTypeInformation))
+        .map((it) => constantToString(it, listTypeInformation, library))
         .join(', ');
     return '[$listItems]';
   }
@@ -98,7 +129,7 @@ String literalToString(DartObject object, List<String> typeInformation) {
   if (reader.isSet) {
     final setTypeInformation = [...typeInformation, 'Set'];
     final setItems = reader.setValue
-        .map((it) => constantToString(it, setTypeInformation))
+        .map((it) => constantToString(it, setTypeInformation, library))
         .join(', ');
     return '{$setItems}';
   }
@@ -117,9 +148,9 @@ String literalToString(DartObject object, List<String> typeInformation) {
       }
 
       buffer
-        ..write(constantToString(key, mapTypeInformation))
+        ..write(constantToString(key, mapTypeInformation, library))
         ..write(': ')
-        ..write(constantToString(value, mapTypeInformation));
+        ..write(constantToString(value, mapTypeInformation, library));
     });
 
     buffer.write('}');
