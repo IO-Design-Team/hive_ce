@@ -53,54 +53,56 @@ class ClassAdapterBuilder extends AdapterBuilder {
     // The remaining fields to initialize.
     final fields = setters.toList();
 
-    // Empty classes
-    if (constr.formalParameters.isEmpty && fields.isEmpty) {
-      return '''
-    reader.readByte();
-    return ${cls.displayName}();
-    ''';
-    }
-
-    final code = StringBuffer();
-    code.writeln('''
-    final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++)
-        reader.readByte(): reader.read(),
-    };
-    return ${cls.displayName}(
-    ''');
+    final returnCode = StringBuffer('return ${cls.displayName}(\n');
+    final fieldIndices = <int>{};
 
     for (final param in constr.formalParameters) {
       var field = fields.firstWhereOrNull((it) => it.name == param.displayName);
       // Final fields
       field ??= getters.firstWhereOrNull((it) => it.name == param.displayName);
       if (field != null) {
+        fieldIndices.add(field.index);
         if (param.isNamed) {
-          code.write('${param.displayName}: ');
+          returnCode.write('${param.displayName}: ');
         }
-        code.write(_value(param.type, field));
-        code.writeln(',');
+        returnCode.write(_value(param.type, field));
+        returnCode.writeln(',');
         fields.remove(field);
       }
     }
 
-    code.writeln(')');
+    returnCode.writeln(')');
 
     // There may still be fields to initialize that were not in the constructor
     // as initializing formals. We do so using cascades.
     for (final field in fields) {
-      code.write('..${field.name} = ');
-      code.writeln(_value(field.type, field));
+      fieldIndices.add(field.index);
+      returnCode.write('..${field.name} = ');
+      returnCode.writeln(_value(field.type, field));
     }
 
-    code.writeln(';');
+    returnCode.writeln(';');
 
-    return code.toString();
+    if (fieldIndices.isEmpty) {
+      return 'reader.readByte();\n$returnCode';
+    }
+
+    final sorted = fieldIndices.toList()..sort();
+    return '''
+    final numOfFields = reader.readByte();
+    dynamic ${sorted.map((i) => 'field$i').join(', ')};
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        ${sorted.map((i) => 'case $i: field$i = reader.read();').join('\n')}
+        default:
+          reader.read();
+      }
+    }
+    $returnCode''';
   }
 
   String _value(DartType type, AdapterField field) {
-    final variable = 'fields[${field.index}]';
+    final variable = 'field${field.index}';
     final value = _cast(type, variable);
 
     final annotationDefaultIsNull = field.annotationDefault?.isNull ?? true;
