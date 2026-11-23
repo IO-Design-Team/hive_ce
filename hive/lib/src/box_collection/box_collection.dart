@@ -222,7 +222,7 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   @override
   Future<void> clear() async {
     final box = await _getBox();
-    await box.deleteAll(box.keys);
+    await box.clear();
     await _flushOrMark();
   }
 
