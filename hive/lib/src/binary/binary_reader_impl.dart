@@ -328,7 +328,7 @@ class BinaryReaderImpl extends BinaryReader {
     } else if (lazy) {
       frame = Frame.lazy(key);
     } else if (verbatim) {
-      frame = Frame(key, viewBytes(availableBytes));
+      frame = Frame(key, readBytes(availableBytes));
     } else if (cipher == null) {
       frame = Frame(key, read());
     } else {

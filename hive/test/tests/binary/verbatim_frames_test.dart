@@ -20,13 +20,20 @@ void main() {
       final verbatimWriter = BinaryWriterImpl(testRegistry);
       verbatimWriter.writeFrame(encodedFrame, verbatim: true);
 
-      final verbatimReader =
-          BinaryReaderImpl(verbatimWriter.toBytes(), testRegistry);
+      final verbatimBytes = verbatimWriter.toBytes();
+      final verbatimReader = BinaryReaderImpl(verbatimBytes, testRegistry);
       final decodedFrame =
           expectNotNull(verbatimReader.readFrame(verbatim: true));
 
       expect(decodedFrame.key, encodedFrame.key);
       expect(decodedFrame.value, encodedFrame.value);
+      expect(
+        identical(
+          (decodedFrame.value as Uint8List).buffer,
+          verbatimBytes.buffer,
+        ),
+        isFalse,
+      );
 
       final reader =
           BinaryReaderImpl(decodedFrame.value as Uint8List, testRegistry);

@@ -1,5 +1,6 @@
 ## NEXT
 
+- Reduces peak memory usage when opening large boxes (> 1 MiB) by streaming frames instead of reading the entire file into memory
 - Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
 - Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
