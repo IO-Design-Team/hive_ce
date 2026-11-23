@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up binary serialization by eliminating per-write closures, inlining primitive writers, and reusing an encryption scratch writer
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
