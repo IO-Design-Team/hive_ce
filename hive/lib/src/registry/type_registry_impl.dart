@@ -26,51 +26,15 @@ class ResolvedAdapter<T> {
   /// The Dart [Type] handled by [adapter]
   Type get type => T;
 
-  /// Checks if the given value's [runtimeType] is of type [T]
-  bool matchesRuntimeType(dynamic value) => value.runtimeType == T;
-
   /// Checks if the given value is of type [T]
   bool matchesType(dynamic value) => value is T;
-
-  /// Checks if the given type is of type [T]
-  bool isForType<U>() => T == U;
 }
 
 class _NullTypeRegistry implements TypeRegistryImpl {
   const _NullTypeRegistry();
 
   @override
-  Never get _typeAdapters => throw UnimplementedError();
-
-  @override
-  Never get _typeAdaptersByType => throw UnimplementedError();
-
-  @override
-  Never findAdapterForTypeId(int typeId) => throw UnimplementedError();
-
-  @override
-  Never findAdapterForValue(value) => throw UnimplementedError();
-
-  @override
-  ResolvedAdapter? findAdapterForType<T>() => throw UnimplementedError();
-
-  @override
-  Never ignoreTypeId<T>(int typeId) => throw UnimplementedError();
-
-  @override
-  Never isAdapterRegistered(int typeId, {bool internal = false}) =>
-      throw UnimplementedError();
-
-  @override
-  Never registerAdapter<T>(
-    TypeAdapter<T> adapter, {
-    bool internal = false,
-    bool override = false,
-  }) =>
-      throw UnimplementedError();
-
-  @override
-  Never resetAdapters() => throw UnimplementedError();
+  Never noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 /// Not part of public API
@@ -165,9 +129,8 @@ class TypeRegistryImpl implements TypeRegistry {
       );
     }
     final typeId = calculateTypeId(adapter.typeId, internal: internal);
-    final oldResolved = findAdapterForTypeId(typeId);
     if (!internal) {
-      final oldAdapter = oldResolved?.adapter;
+      final oldAdapter = findAdapterForTypeId(typeId)?.adapter;
       if (oldAdapter != null) {
         if (override) {
           final oldAdapterType = oldAdapter.runtimeType;
@@ -217,27 +180,10 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
 
-    final resolved = ResolvedAdapter<T>(adapter, typeId);
-    _typeAdapters[typeId] = resolved;
-
-    if (oldResolved != null &&
-        oldResolved.type != T &&
-        identical(_typeAdaptersByType[oldResolved.type], oldResolved)) {
-      _typeAdaptersByType.remove(oldResolved.type);
-      for (final remaining in _typeAdapters.values) {
-        if (remaining.type == oldResolved.type) {
-          _typeAdaptersByType[oldResolved.type] = remaining;
-          break;
-        }
-      }
-    }
-
-    if (override ||
-        (oldResolved != null &&
-            identical(_typeAdaptersByType[T], oldResolved))) {
-      _typeAdaptersByType[T] = resolved;
-    } else {
-      _typeAdaptersByType.putIfAbsent(T, () => resolved);
+    _typeAdapters[typeId] = ResolvedAdapter<T>(adapter, typeId);
+    _typeAdaptersByType.clear();
+    for (final resolved in _typeAdapters.values) {
+      _typeAdaptersByType.putIfAbsent(resolved.type, () => resolved);
     }
   }
 
