@@ -23,6 +23,9 @@ class ResolvedAdapter<T> {
   /// A wrapper for a [TypeAdapter] and its [typeId]
   const ResolvedAdapter(this.adapter, this.typeId);
 
+  /// The Dart [Type] handled by [adapter]
+  Type get type => T;
+
   /// Checks if the given value's [runtimeType] is of type [T]
   bool matchesRuntimeType(dynamic value) => value.runtimeType == T;
 
@@ -38,6 +41,9 @@ class _NullTypeRegistry implements TypeRegistryImpl {
 
   @override
   Never get _typeAdapters => throw UnimplementedError();
+
+  @override
+  Never get _typeAdaptersByType => throw UnimplementedError();
 
   @override
   Never findAdapterForTypeId(int typeId) => throw UnimplementedError();
@@ -103,6 +109,7 @@ class TypeRegistryImpl implements TypeRegistry {
       maxExtendedTypeId - maxInternalTypeId - 1;
 
   final _typeAdapters = <int, ResolvedAdapter>{};
+  final _typeAdaptersByType = <Type, ResolvedAdapter>{};
 
   /// Constructor
   TypeRegistryImpl() {
@@ -121,16 +128,14 @@ class TypeRegistryImpl implements TypeRegistry {
 
   /// Not part of public API
   ResolvedAdapter? findAdapterForValue(dynamic value) {
-    ResolvedAdapter? match;
+    final exact = _typeAdaptersByType[value.runtimeType];
+    if (exact != null) return exact;
     for (final adapter in _typeAdapters.values) {
-      if (adapter.matchesRuntimeType(value)) {
+      if (adapter.matchesType(value)) {
         return adapter;
       }
-      if (adapter.matchesType(value) && match == null) {
-        match = adapter;
-      }
     }
-    return match;
+    return null;
   }
 
   /// Not part of public API
@@ -140,12 +145,7 @@ class TypeRegistryImpl implements TypeRegistry {
 
   /// Not part of public API
   ResolvedAdapter? findAdapterForType<T>() {
-    for (final adapter in _typeAdapters.values) {
-      if (adapter.isForType<T>()) {
-        return adapter;
-      }
-    }
-    return null;
+    return _typeAdaptersByType[T];
   }
 
   @override
@@ -165,8 +165,9 @@ class TypeRegistryImpl implements TypeRegistry {
       );
     }
     final typeId = calculateTypeId(adapter.typeId, internal: internal);
+    final oldResolved = findAdapterForTypeId(typeId);
     if (!internal) {
-      final oldAdapter = findAdapterForTypeId(typeId)?.adapter;
+      final oldAdapter = oldResolved?.adapter;
       if (oldAdapter != null) {
         if (override) {
           final oldAdapterType = oldAdapter.runtimeType;
@@ -216,7 +217,28 @@ class TypeRegistryImpl implements TypeRegistry {
       }
     }
 
-    _typeAdapters[typeId] = ResolvedAdapter<T>(adapter, typeId);
+    final resolved = ResolvedAdapter<T>(adapter, typeId);
+    _typeAdapters[typeId] = resolved;
+
+    if (oldResolved != null &&
+        oldResolved.type != T &&
+        identical(_typeAdaptersByType[oldResolved.type], oldResolved)) {
+      _typeAdaptersByType.remove(oldResolved.type);
+      for (final remaining in _typeAdapters.values) {
+        if (remaining.type == oldResolved.type) {
+          _typeAdaptersByType[oldResolved.type] = remaining;
+          break;
+        }
+      }
+    }
+
+    if (override ||
+        (oldResolved != null &&
+            identical(_typeAdaptersByType[T], oldResolved))) {
+      _typeAdaptersByType[T] = resolved;
+    } else {
+      _typeAdaptersByType.putIfAbsent(T, () => resolved);
+    }
   }
 
   @override
@@ -228,6 +250,7 @@ class TypeRegistryImpl implements TypeRegistry {
   /// TODO: Document this!
   void resetAdapters() {
     _typeAdapters.clear();
+    _typeAdaptersByType.clear();
   }
 
   @override

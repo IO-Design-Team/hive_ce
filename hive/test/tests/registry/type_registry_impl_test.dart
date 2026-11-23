@@ -38,6 +38,8 @@ class Parent {}
 
 class Child extends Parent {}
 
+class GrandChild extends Child {}
+
 class ParentAdapter extends TypeAdapter<Parent> {
   const ParentAdapter([this.typeId = 0]);
 
@@ -125,10 +127,12 @@ void main() {
       group('override', () {
         test('by typeId', () async {
           final registry = TypeRegistryImpl();
-          registry.registerAdapter(TestAdapter());
+          final adapter1 = TestAdapter();
+          final adapter2 = TestAdapter();
+          registry.registerAdapter(adapter1);
 
           final output = await captureOutput(
-            () => registry.registerAdapter(TestAdapter(), override: true),
+            () => registry.registerAdapter(adapter2, override: true),
           ).toList();
           expect(
             output,
@@ -142,19 +146,25 @@ void main() {
               ),
             ),
           );
+
+          expect(registry.findAdapterForType<int>()?.adapter, adapter2);
+          expect(registry.findAdapterForValue(123)?.adapter, adapter2);
+          expect(registry.findAdapterForTypeId(32)?.adapter, adapter2);
         });
 
         group('by type', () {
           test('external', () async {
             final registry = TypeRegistryImpl();
-            registry.registerAdapter(TestAdapter(100));
+            final adapter1 = TestAdapter(100);
+            final adapter2 = TestAdapter(200);
+            registry.registerAdapter(adapter1);
 
             final foundAdapter1 =
                 expectNotNull(registry.findAdapterForType<int>());
             expect(foundAdapter1.adapter.typeId, 100);
 
             final output = await captureOutput(
-              () => registry.registerAdapter(TestAdapter(200), override: true),
+              () => registry.registerAdapter(adapter2, override: true),
             ).toList();
             expect(
               output,
@@ -163,7 +173,11 @@ void main() {
 
             final foundAdapter2 =
                 expectNotNull(registry.findAdapterForType<int>());
+            expect(foundAdapter2.adapter, adapter2);
             expect(foundAdapter2.adapter.typeId, 200);
+            expect(registry.findAdapterForValue(123)?.adapter, adapter2);
+            expect(registry.findAdapterForTypeId(132), null);
+            expect(registry.findAdapterForTypeId(232)?.adapter, adapter2);
           });
 
           test('internal', () async {
@@ -193,6 +207,86 @@ void main() {
                 expectNotNull(registry.findAdapterForType<Duration>());
             expect(foundAdapter2.adapter.typeId, 60);
           });
+        });
+
+        test('by typeId with different type', () {
+          final registry = TypeRegistryImpl();
+          final parentAdapter = ParentAdapter(0);
+          final childAdapter = ChildAdapter(0);
+          registry.registerAdapter(parentAdapter);
+          registry.registerAdapter(childAdapter, override: true);
+
+          expect(registry.findAdapterForType<Parent>(), null);
+          expect(registry.findAdapterForValue(Parent()), null);
+
+          final resolvedChildByType =
+              expectNotNull(registry.findAdapterForType<Child>());
+          expect(resolvedChildByType.typeId, 32);
+          expect(resolvedChildByType.adapter, childAdapter);
+
+          final resolvedChildByValue =
+              expectNotNull(registry.findAdapterForValue(Child()));
+          expect(resolvedChildByValue.typeId, 32);
+          expect(resolvedChildByValue.adapter, childAdapter);
+
+          expect(registry.findAdapterForTypeId(32)?.adapter, childAdapter);
+        });
+
+        test('by typeId with different type restores remaining adapter', () {
+          final registry = TypeRegistryImpl();
+          final parentAdapter1 = ParentAdapter(0);
+          final parentAdapter2 = ParentAdapter(1);
+          final childAdapter = ChildAdapter(0);
+          registry.registerAdapter(parentAdapter1);
+          registry.registerAdapter(parentAdapter2);
+          registry.registerAdapter(childAdapter, override: true);
+
+          final resolvedParentByType =
+              expectNotNull(registry.findAdapterForType<Parent>());
+          expect(resolvedParentByType.typeId, 33);
+          expect(resolvedParentByType.adapter, parentAdapter2);
+
+          final resolvedParentByValue =
+              expectNotNull(registry.findAdapterForValue(Parent()));
+          expect(resolvedParentByValue.typeId, 33);
+          expect(resolvedParentByValue.adapter, parentAdapter2);
+
+          final resolvedChildByType =
+              expectNotNull(registry.findAdapterForType<Child>());
+          expect(resolvedChildByType.typeId, 32);
+          expect(resolvedChildByType.adapter, childAdapter);
+
+          final resolvedChildByValue =
+              expectNotNull(registry.findAdapterForValue(Child()));
+          expect(resolvedChildByValue.typeId, 32);
+          expect(resolvedChildByValue.adapter, childAdapter);
+        });
+
+        test(
+            'by typeId with different type preserves primary adapter when '
+            'non-primary is overridden', () {
+          final registry = TypeRegistryImpl();
+          final parentAdapter1 = ParentAdapter(0);
+          final parentAdapter2 = ParentAdapter(1);
+          final childAdapter = ChildAdapter(1);
+          registry.registerAdapter(parentAdapter1);
+          registry.registerAdapter(parentAdapter2);
+          registry.registerAdapter(childAdapter, override: true);
+
+          final resolvedParentByType =
+              expectNotNull(registry.findAdapterForType<Parent>());
+          expect(resolvedParentByType.typeId, 32);
+          expect(resolvedParentByType.adapter, parentAdapter1);
+
+          final resolvedParentByValue =
+              expectNotNull(registry.findAdapterForValue(Parent()));
+          expect(resolvedParentByValue.typeId, 32);
+          expect(resolvedParentByValue.adapter, parentAdapter1);
+
+          final resolvedChildByType =
+              expectNotNull(registry.findAdapterForType<Child>());
+          expect(resolvedChildByType.typeId, 33);
+          expect(resolvedChildByType.adapter, childAdapter);
         });
       });
 
@@ -255,10 +349,19 @@ void main() {
         registry.registerAdapter(adapter1);
         registry.registerAdapter(adapter2);
 
-        final resolvedAdapter =
+        final resolvedByValue =
             expectNotNull(registry.findAdapterForValue(123));
-        expect(resolvedAdapter.typeId, 32);
-        expect(resolvedAdapter.adapter, adapter1);
+        expect(resolvedByValue.typeId, 32);
+        expect(resolvedByValue.adapter, adapter1);
+
+        final resolvedByType =
+            expectNotNull(registry.findAdapterForType<int>());
+        expect(resolvedByType.typeId, 32);
+        expect(resolvedByType.adapter, adapter1);
+
+        final resolvedByTypeId =
+            expectNotNull(registry.findAdapterForTypeId(33));
+        expect(resolvedByTypeId.adapter, adapter2);
       });
 
       test(
@@ -278,11 +381,17 @@ void main() {
       test('returns super type adapter for subtype', () {
         final registry = TypeRegistryImpl();
         final parentAdapter = ParentAdapter(0);
+        final childAdapter = ChildAdapter(1);
         registry.registerAdapter(parentAdapter);
+        registry.registerAdapter(childAdapter);
 
-        final resolvedAdapter = registry.findAdapterForValue(Child());
-        expect(resolvedAdapter?.typeId, 32);
-        expect(resolvedAdapter?.adapter, parentAdapter);
+        expect(registry.findAdapterForValue(Parent())?.adapter, parentAdapter);
+        expect(registry.findAdapterForValue(Child())?.adapter, childAdapter);
+
+        final resolvedGrandChild =
+            expectNotNull(registry.findAdapterForValue(GrandChild()));
+        expect(resolvedGrandChild.typeId, 32);
+        expect(resolvedGrandChild.adapter, parentAdapter);
       });
     });
 
@@ -291,8 +400,19 @@ void main() {
       final adapter = TestAdapter();
       registry.registerAdapter(adapter);
 
+      expect(registry.findAdapterForType<int>()?.adapter, adapter);
+      expect(registry.findAdapterForType<Duration>(), isNotNull);
+
       registry.resetAdapters();
       expect(registry.findAdapterForValue(123), null);
+      expect(registry.findAdapterForType<int>(), null);
+      expect(registry.findAdapterForTypeId(32), null);
+      expect(registry.findAdapterForType<Duration>(), null);
+      expect(registry.findAdapterForValue(Duration.zero), null);
+
+      registry.registerAdapter(adapter);
+      expect(registry.findAdapterForType<int>()?.adapter, adapter);
+      expect(registry.findAdapterForValue(123)?.adapter, adapter);
     });
 
     group('.isAdapterRegistered()', () {
