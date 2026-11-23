@@ -32,35 +32,6 @@ final class _LeafNode<K, V> {
     count = newCount;
   }
 
-  void borrowFromLeft(_LeafNode<K, V> left) {
-    final leftLast = left.count - 1;
-    for (var i = count; i > 0; i--) {
-      keys[i] = keys[i - 1];
-      values[i] = values[i - 1];
-    }
-    keys[0] = left.keys[leftLast];
-    values[0] = left.values[leftLast];
-    left.keys[leftLast] = null;
-    left.values[leftLast] = null;
-    left.count = leftLast;
-    count++;
-  }
-
-  void borrowFromRight(_LeafNode<K, V> right) {
-    keys[count] = right.keys[0];
-    values[count] = right.values[0];
-    count++;
-
-    final newRightCount = right.count - 1;
-    for (var i = 0; i < newRightCount; i++) {
-      right.keys[i] = right.keys[i + 1];
-      right.values[i] = right.values[i + 1];
-    }
-    right.keys[newRightCount] = null;
-    right.values[newRightCount] = null;
-    right.count = newRightCount;
-  }
-
   void mergeWithRight(_LeafNode<K, V> right) {
     final rCount = right.count;
     final offset = count;
@@ -451,38 +422,7 @@ class BPlusTree<K, V> {
       }
 
       // Internal node transiently has _capacity (64) children; split 32 + 32.
-      final promoted = keys[_minFill - 1] as K;
-      keys[_minFill - 1] = null;
-
-      final newRight = _InternalNode<K>();
-      final rKeys = newRight.keys;
-      final rChildren = newRight.children;
-      final rCounts = newRight.counts;
-
-      for (var i = _minFill; i < _capacity - 1; i++) {
-        rKeys[i - _minFill] = keys[i];
-        keys[i] = null;
-      }
-
-      var rightTotal = 0;
-      for (var i = _minFill; i < _capacity; i++) {
-        final dst = i - _minFill;
-        rChildren[dst] = children[i];
-        final childCount = counts[i];
-        rCounts[dst] = childCount;
-        rightTotal += childCount;
-        children[i] = null;
-        counts[i] = 0;
-      }
-
-      var leftTotal = 0;
-      for (var i = 0; i < _minFill; i++) {
-        leftTotal += counts[i];
-      }
-
-      node.count = _minFill;
-      newRight.count = _minFill;
-
+      final (promoted, newRight, leftTotal, rightTotal) = _splitInternal(node);
       currentSep = promoted;
       currentRight = newRight;
       currentLeftCount = leftTotal;
@@ -499,6 +439,67 @@ class BPlusTree<K, V> {
     _root = newRoot;
     _height++;
     _clearPath(depth);
+  }
+
+  (K, _InternalNode<K>, int, int) _splitInternal(_InternalNode<K> left) {
+    final keys = left.keys;
+    final children = left.children;
+    final counts = left.counts;
+
+    final promoted = keys[_minFill - 1] as K;
+    keys[_minFill - 1] = null;
+
+    final newRight = _InternalNode<K>();
+    final rKeys = newRight.keys;
+    final rChildren = newRight.children;
+    final rCounts = newRight.counts;
+
+    for (var i = _minFill; i < _capacity - 1; i++) {
+      rKeys[i - _minFill] = keys[i];
+      keys[i] = null;
+    }
+
+    var rightTotal = 0;
+    for (var i = _minFill; i < _capacity; i++) {
+      final dst = i - _minFill;
+      rChildren[dst] = children[i];
+      final childCount = counts[i];
+      rCounts[dst] = childCount;
+      rightTotal += childCount;
+      children[i] = null;
+      counts[i] = 0;
+    }
+
+    var leftTotal = 0;
+    for (var i = 0; i < _minFill; i++) {
+      leftTotal += counts[i];
+    }
+
+    left.count = _minFill;
+    newRight.count = _minFill;
+    return (promoted, newRight, leftTotal, rightTotal);
+  }
+
+  void _appendInternal(
+    _InternalNode<K> left,
+    K sepKey,
+    _InternalNode<K> right,
+  ) {
+    final leftCount = left.count;
+    final rightCount = right.count;
+    left.keys[leftCount - 1] = sepKey;
+    for (var i = 0; i < rightCount - 1; i++) {
+      left.keys[leftCount + i] = right.keys[i];
+      right.keys[i] = null;
+    }
+    for (var i = 0; i < rightCount; i++) {
+      left.children[leftCount + i] = right.children[i];
+      left.counts[leftCount + i] = right.counts[i];
+      right.children[i] = null;
+      right.counts[i] = 0;
+    }
+    left.count = leftCount + rightCount;
+    right.count = 0;
   }
 
   void _removeChildAt(_InternalNode<K> parent, int removedChildIdx) {
@@ -523,41 +524,27 @@ class BPlusTree<K, V> {
     final parent = _pathNodes[depth - 1] as _InternalNode<K>;
     final childIdx = _pathIndices[depth - 1];
 
-    if (childIdx > 0) {
-      final left = parent.children[childIdx - 1] as _LeafNode<K, V>;
-      if (left.count > _minFill) {
-        leaf.borrowFromLeft(left);
-        parent.keys[childIdx - 1] = leaf.keys[0];
-        parent.counts[childIdx - 1]--;
-        parent.counts[childIdx]++;
-        return;
-      }
-
-      left.mergeWithRight(leaf);
-      if (identical(leaf, _tail)) {
-        _tail = left;
-      }
-      parent.counts[childIdx - 1] += parent.counts[childIdx];
-      _removeChildAt(parent, childIdx);
-      _rebalanceInternal(depth - 1);
+    final int leftIdx;
+    if (childIdx > 0 &&
+        (parent.children[childIdx - 1] as _LeafNode<K, V>).count + leaf.count <=
+            _maxEntries) {
+      leftIdx = childIdx - 1;
+    } else if (childIdx + 1 < parent.count &&
+        leaf.count + (parent.children[childIdx + 1] as _LeafNode<K, V>).count <=
+            _maxEntries) {
+      leftIdx = childIdx;
+    } else {
       return;
     }
 
-    final right = parent.children[1] as _LeafNode<K, V>;
-    if (right.count > _minFill) {
-      leaf.borrowFromRight(right);
-      parent.keys[0] = right.keys[0];
-      parent.counts[0]++;
-      parent.counts[1]--;
-      return;
+    final leftLeaf = parent.children[leftIdx] as _LeafNode<K, V>;
+    final rightLeaf = parent.children[leftIdx + 1] as _LeafNode<K, V>;
+    leftLeaf.mergeWithRight(rightLeaf);
+    if (identical(rightLeaf, _tail)) {
+      _tail = leftLeaf;
     }
-
-    leaf.mergeWithRight(right);
-    if (identical(right, _tail)) {
-      _tail = leaf;
-    }
-    parent.counts[0] += parent.counts[1];
-    _removeChildAt(parent, 1);
+    parent.counts[leftIdx] += parent.counts[leftIdx + 1];
+    _removeChildAt(parent, leftIdx + 1);
     _rebalanceInternal(depth - 1);
   }
 
@@ -581,254 +568,92 @@ class BPlusTree<K, V> {
       final parent = _pathNodes[level - 1] as _InternalNode<K>;
       final childIdx = _pathIndices[level - 1];
 
-      if (childIdx > 0) {
-        final left = parent.children[childIdx - 1] as _InternalNode<K>;
-        if (left.count > _minFill) {
-          final leftLast = left.count - 1;
-          final movedChild = left.children[leftLast] as Object;
-          final movedCount = left.counts[leftLast];
-          final movedKey = left.keys[leftLast - 1] as K;
+      int? leftIdx;
+      if (childIdx > 0 &&
+          (parent.children[childIdx - 1] as _InternalNode<K>).count +
+                  node.count <=
+              _maxEntries) {
+        leftIdx = childIdx - 1;
+      } else if (childIdx + 1 < parent.count &&
+          node.count +
+                  (parent.children[childIdx + 1] as _InternalNode<K>).count <=
+              _maxEntries) {
+        leftIdx = childIdx;
+      }
 
-          for (var i = node.count - 1; i > 0; i--) {
-            node.keys[i] = node.keys[i - 1];
-          }
-          for (var i = node.count; i > 0; i--) {
-            node.children[i] = node.children[i - 1];
-            node.counts[i] = node.counts[i - 1];
-          }
-          node.keys[0] = parent.keys[childIdx - 1];
-          node.children[0] = movedChild;
-          node.counts[0] = movedCount;
-          node.count++;
-
-          parent.keys[childIdx - 1] = movedKey;
-          parent.counts[childIdx - 1] -= movedCount;
-          parent.counts[childIdx] += movedCount;
-
-          left.keys[leftLast - 1] = null;
-          left.children[leftLast] = null;
-          left.counts[leftLast] = 0;
-          left.count = leftLast;
-          return;
-        }
-
-        final leftCount = left.count;
-        final nodeCount = node.count;
-        left.keys[leftCount - 1] = parent.keys[childIdx - 1];
-        for (var i = 0; i < nodeCount - 1; i++) {
-          left.keys[leftCount + i] = node.keys[i];
-          node.keys[i] = null;
-        }
-        for (var i = 0; i < nodeCount; i++) {
-          left.children[leftCount + i] = node.children[i];
-          left.counts[leftCount + i] = node.counts[i];
-          node.children[i] = null;
-          node.counts[i] = 0;
-        }
-        left.count = leftCount + nodeCount;
-        node.count = 0;
-
-        parent.counts[childIdx - 1] += parent.counts[childIdx];
-        _removeChildAt(parent, childIdx);
+      if (leftIdx != null) {
+        final left = parent.children[leftIdx] as _InternalNode<K>;
+        final right = parent.children[leftIdx + 1] as _InternalNode<K>;
+        _appendInternal(left, parent.keys[leftIdx] as K, right);
+        parent.counts[leftIdx] += parent.counts[leftIdx + 1];
+        _removeChildAt(parent, leftIdx + 1);
         continue;
       }
 
-      final right = parent.children[1] as _InternalNode<K>;
-      if (right.count > _minFill) {
-        final movedChild = right.children[0] as Object;
-        final movedCount = right.counts[0];
-        final movedKey = right.keys[0] as K;
-
-        node.keys[node.count - 1] = parent.keys[0];
-        node.children[node.count] = movedChild;
-        node.counts[node.count] = movedCount;
-        node.count++;
-
-        parent.keys[0] = movedKey;
-        parent.counts[0] += movedCount;
-        parent.counts[1] -= movedCount;
-
-        final newRightCount = right.count - 1;
-        for (var i = 0; i < newRightCount - 1; i++) {
-          right.keys[i] = right.keys[i + 1];
-        }
-        for (var i = 0; i < newRightCount; i++) {
-          right.children[i] = right.children[i + 1];
-          right.counts[i] = right.counts[i + 1];
-        }
-        right.keys[newRightCount - 1] = null;
-        right.children[newRightCount] = null;
-        right.counts[newRightCount] = 0;
-        right.count = newRightCount;
-        return;
-      }
-
-      final nodeCount = node.count;
-      final rightCount = right.count;
-      node.keys[nodeCount - 1] = parent.keys[0];
-      for (var i = 0; i < rightCount - 1; i++) {
-        node.keys[nodeCount + i] = right.keys[i];
-        right.keys[i] = null;
-      }
-      for (var i = 0; i < rightCount; i++) {
-        node.children[nodeCount + i] = right.children[i];
-        node.counts[nodeCount + i] = right.counts[i];
-        right.children[i] = null;
-        right.counts[i] = 0;
-      }
-      node.count = nodeCount + rightCount;
-      right.count = 0;
-
-      parent.counts[0] += parent.counts[1];
-      _removeChildAt(parent, 1);
-    }
-  }
-
-  // coverage:ignore-start
-  /// Verifies all B+ tree structural, ordering, link, and count invariants.
-  @visibleForTesting
-  void debugVerifyInvariants() {
-    if (_length == 0) {
-      if (_height != 1) {
-        throw StateError('Empty tree must have height 1, got $_height');
-      }
-      if (!identical(_root, _head) || !identical(_root, _tail)) {
-        throw StateError('Empty tree root/head/tail mismatch');
-      }
-      if (_head.count != 0 || _head.next != null) {
-        throw StateError('Empty root leaf is not clean');
-      }
-      for (var i = 0; i < _capacity; i++) {
-        if (_head.keys[i] != null || _head.values[i] != null) {
-          throw StateError('Unclean empty root slot at $i');
-        }
+      if (node.count == 1) {
+        final idx = childIdx > 0 ? childIdx - 1 : 0;
+        final left = parent.children[idx] as _InternalNode<K>;
+        final right = parent.children[idx + 1] as _InternalNode<K>;
+        _appendInternal(left, parent.keys[idx] as K, right);
+        final (promoted, newRight, leftTotal, rightTotal) =
+            _splitInternal(left);
+        parent.keys[idx] = promoted;
+        parent.children[idx + 1] = newRight;
+        parent.counts[idx] = leftTotal;
+        parent.counts[idx + 1] = rightTotal;
       }
       return;
     }
-
-    final visitedLeaves = <_LeafNode<K, V>>[];
-    final (total, _, _) = _verifySubtree(_root, 1, visitedLeaves);
-    if (total != _length) {
-      throw StateError('Length mismatch: tree has $total, _length=$_length');
-    }
-    if (visitedLeaves.isEmpty ||
-        !identical(visitedLeaves.first, _head) ||
-        !identical(visitedLeaves.last, _tail)) {
-      throw StateError('Head/tail pointers do not match tree edges');
-    }
-
-    _LeafNode<K, V>? cursor = _head;
-    var index = 0;
-    var hasPrev = false;
-    K? prevKey;
-    while (cursor != null) {
-      if (index >= visitedLeaves.length ||
-          !identical(cursor, visitedLeaves[index])) {
-        throw StateError('Leaf chain mismatch at leaf $index');
-      }
-      for (var i = 0; i < cursor.count; i++) {
-        final key = cursor.keys[i] as K;
-        if (hasPrev && _comparator(prevKey as K, key) >= 0) {
-          throw StateError('Out-of-order keys in leaves: $prevKey >= $key');
-        }
-        prevKey = key;
-        hasPrev = true;
-      }
-      index++;
-      final nextLeaf = cursor.next;
-      if (nextLeaf == null) {
-        if (!identical(cursor, _tail)) {
-          throw StateError('Tail pointer does not match end of leaf chain');
-        }
-        break;
-      }
-      cursor = nextLeaf;
-    }
-    if (index != visitedLeaves.length) {
-      throw StateError(
-        'Visited ${visitedLeaves.length} leaves in tree, $index in chain',
-      );
-    }
   }
 
-  (int, K?, K?) _verifySubtree(
-    Object node,
-    int depth,
-    List<_LeafNode<K, V>> leaves,
-  ) {
-    if (node is _InternalNode<K>) {
-      if (depth >= _height) {
-        throw StateError('Internal node found at leaf depth $depth/$_height');
-      }
-      final minChildren = depth == 1 ? 2 : _minFill;
-      if (node.count < minChildren || node.count > _maxEntries) {
-        throw StateError(
-          'Internal node count ${node.count} out of [$minChildren, $_maxEntries]',
-        );
-      }
-      for (var i = node.count - 1; i < _capacity - 1; i++) {
-        if (node.keys[i] != null) {
-          throw StateError('Unclean separator key at $i');
-        }
-      }
-      for (var i = node.count; i < _capacity; i++) {
-        if (node.children[i] != null || node.counts[i] != 0) {
-          throw StateError('Unclean child slot at $i');
-        }
-      }
-
-      var total = 0;
-      K? firstMin;
-      K? prevMax;
-      for (var i = 0; i < node.count; i++) {
-        final child = node.children[i];
-        if (child == null) {
-          throw StateError('Null child at $i');
-        }
-        final (cCount, cMin, cMax) = _verifySubtree(child, depth + 1, leaves);
-        if (cCount != node.counts[i]) {
-          throw StateError(
-            'Subtree count mismatch at $i: ${node.counts[i]} != $cCount',
+  /// Not part of public API
+  @visibleForTesting
+  ({
+    int height,
+    int length,
+    Object root,
+    Object head,
+    Object tail,
+    ({
+      bool isLeaf,
+      int count,
+      List<K?> keys,
+      List<Object?>? children,
+      List<int>? counts,
+      List<V?>? values,
+      Object? next,
+    })
+        Function(Object node) inspect,
+  }) debugSnapshot() => (
+        height: _height,
+        length: _length,
+        root: _root,
+        head: _head,
+        tail: _tail,
+        inspect: (node) {
+          if (node is _InternalNode<K>) {
+            return (
+              isLeaf: false,
+              count: node.count,
+              keys: node.keys,
+              children: node.children,
+              counts: node.counts,
+              values: null,
+              next: null,
+            );
+          }
+          final leaf = node as _LeafNode<K, V>;
+          return (
+            isLeaf: true,
+            count: leaf.count,
+            keys: leaf.keys,
+            children: null,
+            counts: null,
+            values: leaf.values,
+            next: leaf.next,
           );
-        }
-        if (i == 0) {
-          firstMin = cMin;
-        } else {
-          final sep = node.keys[i - 1] as K;
-          if (_comparator(prevMax as K, sep) >= 0) {
-            throw StateError('Left max $prevMax >= separator $sep');
-          }
-          if (_comparator(sep, cMin as K) > 0) {
-            throw StateError('Separator $sep > right min $cMin');
-          }
-        }
-        total += cCount;
-        prevMax = cMax;
-      }
-      return (total, firstMin, prevMax);
-    }
-
-    if (depth != _height) {
-      throw StateError('Leaf depth $depth != height $_height');
-    }
-    final leaf = node as _LeafNode<K, V>;
-    final isRoot = _height == 1;
-    final isTail = identical(leaf, _tail);
-    final minEntries = isRoot || isTail ? 1 : _minFill;
-    if (leaf.count < minEntries || leaf.count > _maxEntries) {
-      throw StateError(
-        'Leaf count ${leaf.count} out of [$minEntries, $_maxEntries]',
+        },
       );
-    }
-    for (var i = leaf.count; i < _capacity; i++) {
-      if (leaf.keys[i] != null || leaf.values[i] != null) {
-        throw StateError('Unclean leaf slot at $i');
-      }
-    }
-    leaves.add(leaf);
-    return (leaf.count, leaf.keys[0] as K, leaf.keys[leaf.count - 1] as K);
-  }
-  // coverage:ignore-end
 }
 
 abstract class _LeafIterator<K, V, E> implements Iterator<E> {
