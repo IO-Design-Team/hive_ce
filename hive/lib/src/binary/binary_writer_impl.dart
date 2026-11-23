@@ -115,12 +115,42 @@ class BinaryWriterImpl extends BinaryWriter {
     writeByte(value ? 1 : 0);
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  void _writeUtf8String(String value, {bool writeByteCount = true}) {
+    final len = value.length;
+    final headerLen = writeByteCount ? 4 : 0;
+    _reserveBytes(headerLen + len);
+    final buffer = _buffer;
+    final dataStart = _offset + headerLen;
+    for (var i = 0; i < len; i++) {
+      final cu = value.codeUnitAt(i);
+      if (cu > 0x7F) {
+        final bytes = BinaryWriter.utf8Encoder.convert(value);
+        if (writeByteCount) {
+          writeUint32(bytes.length);
+        }
+        _addBytes(bytes);
+        return;
+      }
+      buffer[dataStart + i] = cu;
+    }
+    if (writeByteCount) {
+      buffer.writeUint32(_offset, len);
+    }
+    _offset = dataStart + len;
+  }
+
   @override
   void writeString(
     String value, {
     bool writeByteCount = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
+    if (identical(encoder, BinaryWriter.utf8Encoder)) {
+      _writeUtf8String(value, writeByteCount: writeByteCount);
+      return;
+    }
     final bytes = encoder.convert(value);
     if (writeByteCount) {
       writeUint32(bytes.length);
@@ -182,13 +212,20 @@ class BinaryWriterImpl extends BinaryWriter {
     bool writeLength = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
+    final length = list.length;
     if (writeLength) {
-      writeUint32(list.length);
+      writeUint32(length);
     }
-    for (final str in list) {
-      final strBytes = encoder.convert(str);
-      writeUint32(strBytes.length);
-      _addBytes(strBytes);
+    if (identical(encoder, BinaryWriter.utf8Encoder)) {
+      for (var i = 0; i < length; i++) {
+        _writeUtf8String(list[i]);
+      }
+    } else {
+      for (var i = 0; i < length; i++) {
+        final strBytes = encoder.convert(list[i]);
+        writeUint32(strBytes.length);
+        _addBytes(strBytes);
+      }
     }
   }
 
@@ -218,13 +255,31 @@ class BinaryWriterImpl extends BinaryWriter {
     ArgumentError.checkNotNull(key);
 
     if (key is String) {
-      writeByte(FrameKeyType.utf8StringT);
-      final bytes = BinaryWriter.utf8Encoder.convert(key);
-      writeByte(bytes.length);
-      _addBytes(bytes);
+      final len = key.length;
+      _reserveBytes(2 + len);
+      final buffer = _buffer;
+      final start = _offset;
+      buffer[start] = FrameKeyType.utf8StringT;
+      final dataStart = start + 2;
+      for (var i = 0; i < len; i++) {
+        final cu = key.codeUnitAt(i);
+        if (cu > 0x7F) {
+          _offset = start + 1;
+          final bytes = BinaryWriter.utf8Encoder.convert(key);
+          writeByte(bytes.length);
+          _addBytes(bytes);
+          return;
+        }
+        buffer[dataStart + i] = cu;
+      }
+      buffer[start + 1] = len;
+      _offset = dataStart + len;
     } else {
-      writeByte(FrameKeyType.uintT);
-      writeUint32(key as int);
+      final intKey = key as int;
+      _reserveBytes(5);
+      _buffer[_offset++] = FrameKeyType.uintT;
+      _buffer.writeUint32(_offset, intKey);
+      _offset += 4;
     }
   }
 

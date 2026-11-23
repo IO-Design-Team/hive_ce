@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up writing ASCII strings and keys and reduces allocations with a direct UTF-8 fast path in `BinaryWriterImpl`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

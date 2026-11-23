@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -242,6 +243,78 @@ void main() {
         0xe2, 0x80, 0x8d, 0xf0, 0x9f, 0x91, 0xa7, 0xe2, 0x80, 0x8d, 0xf0, //
         0x9f, 0x91, 0xa6, //
       ]);
+
+      final allAscii = String.fromCharCodes(List<int>.generate(128, (i) => i));
+      bw = getWriter();
+      bw.writeString(allAscii);
+      expect(
+        bw.toBytes(),
+        [128, 0, 0, 0, ...List<int>.generate(128, (i) => i)],
+      );
+
+      bw = getWriter();
+      bw.writeString('hello world', writeByteCount: false);
+      expect(bw.toBytes(), utf8.encode('hello world'));
+
+      bw = getWriter();
+      bw.writeString('hello ö');
+      final mixedBytes1 = utf8.encode('hello ö');
+      expect(bw.toBytes(), [mixedBytes1.length, 0, 0, 0, ...mixedBytes1]);
+
+      bw = getWriter();
+      bw.writeString('prefix 🧙‍♂️', writeByteCount: false);
+      expect(bw.toBytes(), utf8.encode('prefix 🧙‍♂️'));
+
+      final exactBoundaryAscii = 'c' * 4092;
+      bw = getWriter();
+      bw.writeString(exactBoundaryAscii);
+      expect(fromBytes(bw.toBytes()).readString(), exactBoundaryAscii);
+
+      final longAscii = 'a' * 5000;
+      bw = getWriter();
+      bw.writeString(longAscii);
+      expect(fromBytes(bw.toBytes()).readString(), longAscii);
+
+      final longMixed = '${'a' * 4500}ö🧙‍♂️';
+      bw = getWriter();
+      bw.writeString(longMixed);
+      expect(fromBytes(bw.toBytes()).readString(), longMixed);
+
+      // Trigger buffer growth on initial reserve near 4096 cap with non-ASCII
+      bw = getWriter();
+      bw.writeByteList(Uint8List(4090), writeLength: false);
+      bw.writeString('abcdefö🧙‍♂️');
+      final nearBoundaryReader = fromBytes(bw.toBytes());
+      nearBoundaryReader.skip(4090);
+      expect(nearBoundaryReader.readString(), 'abcdefö🧙‍♂️');
+
+      // Initial reserve (4 + 7 = 11) fits in remaining 12 bytes, while UTF-8
+      // fallback (4 + 15 = 19) grows the buffer mid-fallback.
+      bw = getWriter();
+      bw.writeByteList(Uint8List(4084), writeLength: false);
+      bw.writeString('ab🧙‍♂️');
+      final midFallbackReader = fromBytes(bw.toBytes());
+      midFallbackReader.skip(4084);
+      expect(midFallbackReader.readString(), 'ab🧙‍♂️');
+      expect(midFallbackReader.availableBytes, 0);
+
+      // Same mid-fallback growth with writeByteCount: false (7 <= 8 < 15).
+      bw = getWriter();
+      bw.writeByteList(Uint8List(4088), writeLength: false);
+      bw.writeString('ab🧙‍♂️', writeByteCount: false);
+      expect(bw.toBytes().sublist(4088), utf8.encode('ab🧙‍♂️'));
+
+      bw = getWriter();
+      bw.writeString('éñ', encoder: latin1.encoder);
+      expect(bw.toBytes(), [2, 0, 0, 0, 0xE9, 0xF1]);
+
+      bw = getWriter();
+      bw.writeString(
+        'abc',
+        writeByteCount: false,
+        encoder: const _ReverseAsciiEncoder(),
+      );
+      expect(bw.toBytes(), [99, 98, 97]);
     });
 
     test('.writeByteList()', () {
@@ -341,6 +414,30 @@ void main() {
       bw = getWriter();
       bw.writeStringList(['a', 'ab'], writeLength: false);
       expect(bw.toBytes(), [1, 0, 0, 0, 97, 2, 0, 0, 0, 97, 98]);
+
+      final mixedList = ['', 'hello', 'hellö', '🧙‍♂️', 'a' * 5000];
+      bw = getWriter();
+      bw.writeStringList(mixedList);
+      expect(fromBytes(bw.toBytes()).readStringList(), mixedList);
+
+      bw = getWriter();
+      bw.writeStringList(['éñ', 'ä'], encoder: latin1.encoder);
+      expect(bw.toBytes(), [
+        2, 0, 0, 0, //
+        2, 0, 0, 0, 0xE9, 0xF1, //
+        1, 0, 0, 0, 0xE4, //
+      ]);
+
+      bw = getWriter();
+      bw.writeStringList(
+        ['', 'abc'],
+        writeLength: false,
+        encoder: const _ReverseAsciiEncoder(),
+      );
+      expect(bw.toBytes(), [
+        0, 0, 0, 0, //
+        3, 0, 0, 0, 99, 98, 97, //
+      ]);
     });
 
     test('.writeList()', () {
@@ -679,5 +776,71 @@ void main() {
         }
       }
     });
+
+    group('.writeKey()', () {
+      test('null throws ArgumentError', () {
+        final bw = getWriter();
+        expect(() => bw.writeKey(null), throwsArgumentError);
+      });
+
+      test('int keys round-trip', () {
+        final bw = getWriter()
+          ..writeKey(0)
+          ..writeKey(123)
+          ..writeKey(0xFFFFFFFF);
+        final br = fromBytes(bw.toBytes());
+        expect(br.readKey(), 0);
+        expect(br.readKey(), 123);
+        expect(br.readKey(), 0xFFFFFFFF);
+        expect(br.availableBytes, 0);
+      });
+
+      test('string keys round-trip including ASCII, max length, and UTF-8', () {
+        final maxAsciiKey = 'a' * 255;
+        final bw = getWriter()
+          ..writeKey('')
+          ..writeKey('hello')
+          ..writeKey(maxAsciiKey)
+          ..writeKey('hellö')
+          ..writeKey('🔑')
+          ..writeKey('abc🔑def');
+
+        final br = fromBytes(bw.toBytes());
+        expect(br.readKey(), '');
+        expect(br.readKey(), 'hello');
+        expect(br.readKey(), maxAsciiKey);
+        expect(br.readKey(), 'hellö');
+        expect(br.readKey(), '🔑');
+        expect(br.readKey(), 'abc🔑def');
+        expect(br.availableBytes, 0);
+      });
+
+      test('non-ASCII key near buffer growth boundary round-trips', () {
+        final bw1 = getWriter()
+          ..writeByteList(Uint8List(4090), writeLength: false)
+          ..writeKey('abc🔑def');
+        final br1 = fromBytes(bw1.toBytes())..skip(4090);
+        expect(br1.readKey(), 'abc🔑def');
+        expect(br1.availableBytes, 0);
+
+        // Initial reserve (2 + 8 = 10) fits in remaining 10 bytes, while
+        // UTF-8 fallback (1 + 1 + 10 = 12) grows buffer mid-fallback.
+        final bw2 = getWriter()
+          ..writeByteList(Uint8List(4086), writeLength: false)
+          ..writeKey('abc🔑def');
+        final br2 = fromBytes(bw2.toBytes())..skip(4086);
+        expect(br2.readKey(), 'abc🔑def');
+        expect(br2.availableBytes, 0);
+      });
+    });
   });
+}
+
+class _ReverseAsciiEncoder extends Converter<String, List<int>> {
+  const _ReverseAsciiEncoder();
+
+  @override
+  List<int> convert(String input) {
+    return input.codeUnits.reversed.toList();
+  }
 }
