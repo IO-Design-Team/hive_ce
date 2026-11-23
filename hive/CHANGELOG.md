@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up string, `Set`, and `Map` serialization and reduces memory usage with direct UTF-8/ASCII coding and lazy `ByteData`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
