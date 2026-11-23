@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

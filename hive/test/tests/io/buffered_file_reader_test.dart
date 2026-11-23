@@ -119,5 +119,50 @@ void main() {
         await reader.file.close();
       });
     });
+
+    group('.seekTo()', () {
+      test('seeks forward past buffer without growing buffer', () async {
+        final reader = await openReader(List.generate(100, (i) => i), 10);
+        await reader.loadBytes(5);
+        expect(reader.viewBytes(3), [0, 1, 2]);
+
+        await reader.seekTo(80);
+        expect(reader.offset, 80);
+        expect(reader.remainingInBuffer, 0);
+        expect(reader.buffer.length, 10);
+
+        expect(await reader.loadBytes(5), 10);
+        expect(reader.viewBytes(5), [80, 81, 82, 83, 84]);
+        expect(reader.buffer.length, 10);
+
+        await reader.file.close();
+      });
+
+      test('seeks backward to earlier offset', () async {
+        final reader = await openReader([10, 20, 30, 40, 50], 3);
+        await reader.loadBytes(3);
+        reader.skip(3);
+
+        await reader.seekTo(1);
+        expect(reader.offset, 1);
+        expect(reader.remainingInBuffer, 0);
+
+        expect(await reader.loadBytes(2), 3);
+        expect(reader.viewBytes(2), [20, 30]);
+
+        await reader.file.close();
+      });
+
+      test('seeks past EOF and returns 0 on loadBytes', () async {
+        final reader = await openReader([1, 2, 3, 4], 4);
+        await reader.seekTo(50);
+        expect(reader.offset, 50);
+        expect(reader.remainingInBuffer, 0);
+
+        expect(await reader.loadBytes(4), 0);
+
+        await reader.file.close();
+      });
+    });
   });
 }
