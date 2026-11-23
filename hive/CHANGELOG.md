@@ -1,6 +1,7 @@
 ## NEXT
 
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
+- Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
 - Speeds up binary serialization by eliminating per-write closure allocations in `BinaryWriterImpl`
 - Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
 - Speeds up `Set` serialization by writing sets directly without intermediate `.toList()` copies
