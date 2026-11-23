@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 /// Not part of public API
 class BinaryWriterImpl extends BinaryWriter {
   static const _initBufferSize = 4096;
+  static const _maxScratchBufferSize = 65536;
 
   /// The maximum integer that can be stored in a 64 bit float (2^53)
   static const maxInt = 9007199254740992;
@@ -22,6 +23,7 @@ class BinaryWriterImpl extends BinaryWriter {
   var _buffer = Uint8List(_initBufferSize);
 
   ByteData? _byteDataInstance;
+  BinaryWriterImpl? _valueWriter;
 
   var _offset = 0;
 
@@ -54,6 +56,15 @@ class BinaryWriterImpl extends BinaryWriter {
     _byteDataInstance = null;
   }
 
+  void _reset() {
+    _offset = 0;
+    _valueWriter = null;
+    if (_buffer.length > _maxScratchBufferSize) {
+      _buffer = Uint8List(_initBufferSize);
+      _byteDataInstance = null;
+    }
+  }
+
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void _addBytes(List<int> bytes) {
@@ -71,6 +82,8 @@ class BinaryWriterImpl extends BinaryWriter {
     _buffer[_offset++] = byte;
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   @override
   void writeWord(int value) {
     _reserveBytes(2);
@@ -78,6 +91,8 @@ class BinaryWriterImpl extends BinaryWriter {
     _buffer[_offset++] = value >> 8;
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   @override
   void writeInt32(int value) {
     _reserveBytes(4);
@@ -94,6 +109,8 @@ class BinaryWriterImpl extends BinaryWriter {
     _offset += 4;
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   @override
   void writeInt(int value) {
     // Web truncates values greater than 2^53 to 2^53
@@ -103,6 +120,8 @@ class BinaryWriterImpl extends BinaryWriter {
     writeDouble(value.toDouble());
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   @override
   void writeDouble(double value) {
     _reserveBytes(8);
@@ -110,6 +129,8 @@ class BinaryWriterImpl extends BinaryWriter {
     _offset += 8;
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   @override
   void writeBool(bool value) {
     writeByte(value ? 1 : 0);
@@ -144,10 +165,12 @@ class BinaryWriterImpl extends BinaryWriter {
     }
     _reserveBytes(length * 8);
     final byteData = _byteData;
+    var offset = _offset;
     for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i].toDouble(), Endian.little);
-      _offset += 8;
+      byteData.setFloat64(offset, list[i].toDouble(), Endian.little);
+      offset += 8;
     }
+    _offset = offset;
   }
 
   @override
@@ -158,10 +181,12 @@ class BinaryWriterImpl extends BinaryWriter {
     }
     _reserveBytes(length * 8);
     final byteData = _byteData;
+    var offset = _offset;
     for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i], Endian.little);
-      _offset += 8;
+      byteData.setFloat64(offset, list[i], Endian.little);
+      offset += 8;
     }
+    _offset = offset;
   }
 
   @override
@@ -171,9 +196,12 @@ class BinaryWriterImpl extends BinaryWriter {
       writeUint32(length);
     }
     _reserveBytes(length);
+    final buffer = _buffer;
+    var offset = _offset;
     for (var i = 0; i < length; i++) {
-      _buffer[_offset++] = list[i] ? 1 : 0;
+      buffer[offset++] = list[i] ? 1 : 0;
     }
+    _offset = offset;
   }
 
   @override
@@ -214,6 +242,8 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   /// Not part of public API
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
   void writeKey(dynamic key) {
     ArgumentError.checkNotNull(key);
 
@@ -306,87 +336,77 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void write<T>(T value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value == null) {
-      typeId = FrameValueType.nullT;
-      write = () {};
+      if (withTypeId) writeTypeId(FrameValueType.nullT);
     } else if (value is int) {
-      typeId = FrameValueType.intT;
-      write = () => writeInt(value);
+      if (withTypeId) writeTypeId(FrameValueType.intT);
+      writeInt(value);
     } else if (value is double) {
-      typeId = FrameValueType.doubleT;
-      write = () => writeDouble(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleT);
+      writeDouble(value);
     } else if (value is bool) {
-      typeId = FrameValueType.boolT;
-      write = () => writeBool(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolT);
+      writeBool(value);
     } else if (value is String) {
-      typeId = FrameValueType.stringT;
-      write = () => writeString(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringT);
+      writeString(value);
     } else if (value is List || value is Set) {
       _writeList(value as Iterable, withTypeId: withTypeId);
-      return;
     } else if (value is Map) {
-      typeId = FrameValueType.mapT;
-      write = () => writeMap(value);
+      if (withTypeId) writeTypeId(FrameValueType.mapT);
+      writeMap(value);
     } else {
       final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
-        throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
-            'Did you forget to register an adapter?');
+        throw HiveError(
+          'Cannot write, unknown type: ${value.runtimeType}. '
+          'Did you forget to register an adapter?',
+        );
       }
-      typeId = resolved.typeId;
-      write = () => resolved.adapter.write(this, value);
+      if (withTypeId) writeTypeId(resolved.typeId);
+      resolved.adapter.write(this, value);
     }
-
-    if (withTypeId) writeTypeId(typeId);
-    write();
   }
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void _writeList(Iterable value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value is HiveList) {
-      typeId = FrameValueType.hiveListT;
-      write = () => writeHiveList(value);
+      if (withTypeId) writeTypeId(FrameValueType.hiveListT);
+      writeHiveList(value);
     } else if (value is Uint8List) {
-      typeId = FrameValueType.byteListT;
-      write = () => writeByteList(value);
+      if (withTypeId) writeTypeId(FrameValueType.byteListT);
+      writeByteList(value);
     } else if (value is List<int>) {
-      typeId = FrameValueType.intListT;
-      write = () => writeIntList(value);
+      if (withTypeId) writeTypeId(FrameValueType.intListT);
+      writeIntList(value);
     } else if (value is List<double>) {
-      typeId = FrameValueType.doubleListT;
-      write = () => writeDoubleList(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleListT);
+      writeDoubleList(value);
     } else if (value is List<bool>) {
-      typeId = FrameValueType.boolListT;
-      write = () => writeBoolList(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolListT);
+      writeBoolList(value);
     } else if (value is List<String>) {
-      typeId = FrameValueType.stringListT;
-      write = () => writeStringList(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringListT);
+      writeStringList(value);
     } else if (value is List) {
-      typeId = FrameValueType.listT;
-      write = () => writeList(value);
+      if (withTypeId) writeTypeId(FrameValueType.listT);
+      writeList(value);
     } else if (value is Set<int>) {
-      typeId = FrameValueType.intSetT;
-      write = () => writeIntList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.intSetT);
+      writeIntList(value.toList());
     } else if (value is Set<double>) {
-      typeId = FrameValueType.doubleSetT;
-      write = () => writeDoubleList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.doubleSetT);
+      writeDoubleList(value.toList());
     } else if (value is Set<String>) {
-      typeId = FrameValueType.stringSetT;
-      write = () => writeStringList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.stringSetT);
+      writeStringList(value.toList());
     } else if (value is Set) {
-      typeId = FrameValueType.setT;
-      write = () => writeList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.setT);
+      writeList(value.toList());
     } else {
       throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
-
-    if (withTypeId) writeTypeId(typeId);
-    write();
   }
 
   /// Not part of public API
@@ -397,15 +417,21 @@ class BinaryWriterImpl extends BinaryWriter {
     HiveCipher cipher, {
     bool withTypeId = true,
   }) {
-    final valueWriter = BinaryWriterImpl(typeRegistry)
-      ..write(value, withTypeId: withTypeId);
-    final inp = valueWriter.toBytes();
+    final valueWriter = _valueWriter ?? BinaryWriterImpl(typeRegistry);
+    _valueWriter = null;
+    try {
+      valueWriter.write(value, withTypeId: withTypeId);
+      final inp = valueWriter.toBytes();
 
-    _reserveBytes(cipher.maxEncryptedSize(inp));
+      _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
+      final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
 
-    _offset += len;
+      _offset += len;
+    } finally {
+      valueWriter._reset();
+      _valueWriter ??= valueWriter;
+    }
   }
 
   /// Not part of public API
