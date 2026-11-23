@@ -1,6 +1,14 @@
 ## NEXT
 
 - Speeds up sequential lazy box reads with an adaptive 16 KB read-ahead buffer
+- Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
+- Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
+- Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
+- Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
+- Speeds up binary serialization by eliminating per-write closure allocations in `BinaryWriterImpl`
+- Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
+- Speeds up `Set` serialization by writing sets directly without intermediate `.toList()` copies
+- Speeds up `CollectionBox.clear()` on VM by delegating directly to `box.clear()`
 
 ## 2.24.0
 

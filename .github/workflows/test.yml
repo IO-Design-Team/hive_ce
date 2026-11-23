@@ -8,37 +8,194 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  code-quality:
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      hive: ${{ github.event_name != 'pull_request' || steps.filter.outputs.hive == 'true' }}
+      hive_flutter: ${{ github.event_name != 'pull_request' || steps.filter.outputs.hive_flutter == 'true' }}
+      hive_generator: ${{ github.event_name != 'pull_request' || steps.filter.outputs.hive_generator == 'true' }}
+      hive_ce_inspector: ${{ github.event_name != 'pull_request' || steps.filter.outputs.hive_ce_inspector == 'true' }}
+      integration_flutter: ${{ github.event_name != 'pull_request' || steps.filter.outputs.integration_flutter == 'true' }}
+      codegen: ${{ github.event_name != 'pull_request' || steps.filter.outputs.codegen == 'true' }}
+      codegen_drift: ${{ github.event_name != 'pull_request' || steps.filter.outputs.codegen_drift == 'true' }}
+      embedme: ${{ github.event_name != 'pull_request' || steps.filter.outputs.embedme == 'true' }}
+    steps:
+      - uses: dorny/paths-filter@v4
+        id: filter
+        if: github.event_name == 'pull_request'
+        with:
+          filters: |
+            hive:
+              - 'hive/**'
+              - '.github/workflows/test.yml'
+            hive_flutter:
+              - 'hive_flutter/**'
+              - '.github/workflows/test.yml'
+            hive_generator:
+              - 'hive_generator/**'
+              - '.github/workflows/test.yml'
+            hive_ce_inspector:
+              - 'hive_ce_inspector/**'
+              - 'hive/**'
+              - '.github/workflows/test.yml'
+            integration_flutter:
+              - 'hive/**'
+              - 'hive_flutter/**'
+              - '.github/workflows/test.yml'
+            codegen:
+              - 'hive/**'
+              - 'hive_flutter/**'
+              - 'hive_generator/**'
+              - '.github/workflows/test.yml'
+            codegen_drift:
+              - 'benchmarks/drift/**'
+              - '.github/workflows/test.yml'
+            embedme:
+              - '**/*.md'
+              - 'hive/readme/**'
+              - '.github/workflows/test.yml'
+
+  dart-checks:
+    needs: changes
+    if: needs.changes.outputs.hive == 'true' || needs.changes.outputs.hive_generator == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        package:
-          - hive
-          - hive_ce_inspector
-          - hive_flutter
-          - hive_generator
+        dart-channel:
+          - stable
+          - beta
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.dart-channel }}
+      - uses: actions/cache@v5
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-${{ matrix.dart-channel }}-pub-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-${{ matrix.dart-channel }}-pub-
+      - name: Check hive
+        if: needs.changes.outputs.hive == 'true'
+        working-directory: hive
+        run: |
+          dart pub get
+          dart format . --set-exit-if-changed
+          dart analyze --fatal-infos
+      - name: Check hive_generator/example against local hive
+        if: needs.changes.outputs.hive == 'true' && needs.changes.outputs.hive_generator != 'true'
+        working-directory: hive_generator/example
+        run: |
+          dart pub get
+          dart analyze --fatal-infos
+      - name: Check and test hive_generator
+        if: needs.changes.outputs.hive_generator == 'true'
+        working-directory: hive_generator
+        run: |
+          dart pub get
+          dart format . --set-exit-if-changed
+          dart analyze --fatal-infos
+          dart test -j $(nproc)
+      - name: Activate pana
+        if: matrix.dart-channel == 'stable'
+        run: dart pub global activate pana
+      - name: Check pub score (hive)
+        if: matrix.dart-channel == 'stable' && needs.changes.outputs.hive == 'true'
+        working-directory: hive
+        run: dart pub global run pana --no-warning --exit-code-threshold 0
+      - name: Check pub score (hive_generator)
+        if: matrix.dart-channel == 'stable' && needs.changes.outputs.hive_generator == 'true'
+        working-directory: hive_generator
+        run: dart pub global run pana --no-warning --exit-code-threshold 0
+
+  test-hive_generator-windows:
+    needs: changes
+    if: needs.changes.outputs.hive_generator == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: hive_generator
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v5
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('hive_generator/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-stable-pub-
+      - name: Install dependencies
+        run: dart pub get --no-example
+      - name: Run tests
+        run: dart test
+
+  flutter-checks:
+    needs: changes
+    if: needs.changes.outputs.hive_flutter == 'true' || needs.changes.outputs.hive_ce_inspector == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
         flutter-channel:
           - stable
           - beta
-    defaults:
-      run:
-        working-directory: ${{ matrix.package }}
     steps:
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ matrix.flutter-channel }}
-      - run: |
-          dart pub get
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('hive_flutter/pubspec.yaml', 'hive_flutter/example/pubspec.yaml', 'hive_ce_inspector/pubspec.yaml') }}
+      - name: Check and test hive_flutter
+        if: needs.changes.outputs.hive_flutter == 'true'
+        working-directory: hive_flutter
+        run: |
+          flutter pub get
+          (cd example && flutter pub get)
           dart format . --set-exit-if-changed
           dart analyze --fatal-infos
+          flutter test
+      - name: Check hive_flutter/example against local hive
+        if: needs.changes.outputs.hive == 'true' && needs.changes.outputs.hive_flutter != 'true'
+        working-directory: hive_flutter/example
+        run: |
+          flutter pub get
+          dart analyze --fatal-infos
+      - name: Check hive_ce_inspector
+        if: needs.changes.outputs.hive_ce_inspector == 'true'
+        working-directory: hive_ce_inspector
+        run: |
+          flutter pub get
+          dart format . --set-exit-if-changed
+          dart analyze --fatal-infos
+      - name: Test hive_ce_inspector
+        if: matrix.flutter-channel == 'stable' && needs.changes.outputs.hive_ce_inspector == 'true'
+        working-directory: hive_ce_inspector
+        run: flutter test
+      - name: Check pub score (hive_flutter)
+        if: matrix.flutter-channel == 'stable' && needs.changes.outputs.hive_flutter == 'true'
+        working-directory: hive_flutter
+        run: |
+          dart pub global activate pana
+          dart pub global run pana --no-warning --exit-code-threshold 0
 
   test-hive:
+    needs: changes
+    if: needs.changes.outputs.hive == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
         include:
           - test-platform: vm
@@ -57,6 +214,12 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: 3.4.0
+      - uses: actions/cache@v5
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-3.4.0-pub-${{ hashFiles('hive/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-3.4.0-pub-
       # These dev dependencies require a newer SDK, but are not needed for testing
       - name: Remove rexios_lints
         run: |
@@ -67,41 +230,119 @@ jobs:
       - name: Install dependencies
         run: dart pub get --no-example
       - name: Run tests
-        run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }}
+        run: dart test -p ${{ matrix.test-platform }} -c ${{ matrix.compiler }} -j $(nproc)
 
-  test-hive_ce_inspector:
+  coverage-hive:
+    needs: changes
+    if: needs.changes.outputs.hive == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
-        working-directory: hive_ce_inspector
+        working-directory: hive
     steps:
       - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Run tests
-        run: flutter test
-
-  test-hive_flutter:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        flutter-channel: [stable, beta]
-    defaults:
-      run:
-        working-directory: hive_flutter
-    steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
+      - uses: dart-lang/setup-dart@v1
+      - uses: actions/cache@v5
         with:
-          channel: ${{ matrix.flutter-channel }}
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Run tests
-        run: flutter test
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('hive/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-stable-pub-
+      - name: Collect coverage
+        run: |
+          dart pub get --no-example
+          dart test --coverage=coverage
+          dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --package=. --report-on=lib
+      - uses: codecov/codecov-action@v7
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: hive/coverage/lcov.info
+          disable_search: true
+
+  ensure-codegen:
+    needs: changes
+    if: needs.changes.outputs.codegen == 'true' || needs.changes.outputs.codegen_drift == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        if: needs.changes.outputs.hive_flutter == 'true'
+        with:
+          cache: true
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-codegen-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_flutter/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml', 'benchmarks/drift/pubspec.yaml') }}
+      - uses: dart-lang/setup-dart@v1
+        if: needs.changes.outputs.hive_flutter != 'true'
+      - uses: actions/cache@v5
+        if: needs.changes.outputs.hive_flutter != 'true'
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-dart-stable-codegen-pub-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml', 'benchmarks/drift/pubspec.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-dart-stable-codegen-pub-
+            ${{ runner.os }}-dart-stable-pub-
+      - name: Run codegen
+        env:
+          HIVE: ${{ needs.changes.outputs.hive }}
+          HIVE_FLUTTER: ${{ needs.changes.outputs.hive_flutter }}
+          HIVE_GENERATOR: ${{ needs.changes.outputs.hive_generator }}
+          CODEGEN_DRIFT: ${{ needs.changes.outputs.codegen_drift }}
+        run: |
+          pkgs=()
+          if [[ "$HIVE" == "true" || "$HIVE_GENERATOR" == "true" ]]; then
+            pkgs+=(hive hive/example hive_generator/example)
+          fi
+          if [[ "$HIVE_FLUTTER" == "true" ]]; then
+            pkgs+=(hive_flutter)
+          fi
+          if [[ "$CODEGEN_DRIFT" == "true" ]]; then
+            pkgs+=(benchmarks/drift)
+          fi
+
+          for pkg in "${pkgs[@]}"; do
+            if [[ "$pkg" == "hive_flutter" ]]; then
+              (cd "$pkg" && flutter pub get)
+            elif [[ "$pkg" == "hive" ]]; then
+              (cd "$pkg" && dart pub get --no-example)
+            else
+              (cd "$pkg" && dart pub get)
+            fi
+          done
+
+          run_build_parallel() {
+            local pids=()
+            for pkg in "${pkgs[@]}"; do
+              (cd "$pkg" && dart run build_runner build) &
+              pids+=($!)
+            done
+            for pid in "${pids[@]}"; do
+              wait "$pid"
+            done
+          }
+
+          # TODO: Figure out why build_runner needs to run twice
+          run_build_parallel
+          run_build_parallel
+          dart format "${pkgs[@]}"
+          git diff --exit-code
+
+  ensure-embedme:
+    needs: changes
+    if: needs.changes.outputs.embedme == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - run: |
+          npx --yes embedme **/*.md
+          git diff --exit-code
 
   integration-test-hive_flutter:
-    timeout-minutes: 20
+    needs: changes
+    if: needs.changes.outputs.integration_flutter == 'true'
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -109,15 +350,12 @@ jobs:
           - platform: android
             os: ubuntu-latest
             device: emulator-5554
-          - platform: ios
+          - platform: apple
             os: macos-latest
-            device: iPhone
+            device: macos
           - platform: linux
             os: ubuntu-latest
             device: linux
-          - platform: macos
-            os: macos-latest
-            device: macos
           - platform: windows
             os: windows-latest
             device: windows
@@ -127,95 +365,203 @@ jobs:
         working-directory: hive_flutter/example
     steps:
       - uses: actions/checkout@v7
+      - name: Start iOS simulator
+        if: matrix.platform == 'apple'
+        run: |
+          xcrun simctl shutdown all || true
+          udid=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
+          test -n "$udid" && test "$udid" != "null"
+          xcrun simctl boot "$udid" || true
+          echo "IOS_DEVICE=$udid" >> "$GITHUB_ENV"
       - uses: subosito/flutter-action@v2
+        with:
+          # Work around flutter/flutter#181771 (iOS simulator VM service discovery
+          # race in Flutter 3.50 stable), fixed by flutter/flutter#193142 in 3.51+.
+          channel: ${{ matrix.platform == 'apple' && 'beta' || 'stable' }}
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ matrix.platform }}
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ matrix.platform }}-${{ hashFiles('hive/pubspec.yaml', 'hive_flutter/pubspec.yaml', 'hive_flutter/example/pubspec.yaml') }}
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Precache iOS artifacts
+        if: matrix.platform == 'apple'
+        run: flutter precache --ios
       - name: Set up Linux
         if: matrix.platform == 'linux'
         run: |
-          sudo apt-get update && sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ninja-build libgtk-3-dev
           Xvfb :99 &
           echo DISPLAY=:99 >> $GITHUB_ENV
-      - name: Set up iOS
-        if: matrix.platform == 'ios'
-        run: |
-          udid=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name | startswith("iPhone"))][0].udid')
-          xcrun simctl boot "$udid" || true
-          xcrun simctl bootstatus "$udid" -b
-          echo "IOS_DEVICE=$udid" >> "$GITHUB_ENV"
       - name: Set up Android
         if: matrix.platform == 'android'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run tests
+      - name: Setup Gradle
+        if: matrix.platform == 'android'
+        uses: gradle/actions/setup-gradle@v6
+      - name: Cache AVD
+        if: matrix.platform == 'android'
+        id: avd-cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api-35-x86_64
+      - name: Create AVD snapshot for caching
+        if: matrix.platform == 'android' && steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+      - name: Run tests (${{ matrix.device }})
         if: matrix.platform != 'android'
-        run: flutter test integration_test -d ${{ env.IOS_DEVICE || matrix.device }}
-      - name: Run tests
+        run: flutter test integration_test -d ${{ matrix.device }}
+      - name: Wait for iOS simulator
+        if: matrix.platform == 'apple'
+        run: xcrun simctl bootstatus "$IOS_DEVICE" -b
+      - name: Run tests (iOS)
+        if: matrix.platform == 'apple'
+        run: |
+          python3 - <<'EOF'
+          import os, queue, signal, subprocess, sys, threading, time
+
+          cmd = ["flutter", "test", "integration_test", "-d", os.environ["IOS_DEVICE"]]
+          build_timeout = 600
+          post_build_timeout = 180
+
+          def kill_proc(proc):
+              try:
+                  os.killpg(proc.pid, signal.SIGTERM)
+              except ProcessLookupError:
+                  pass
+              try:
+                  proc.wait(timeout=10)
+              except subprocess.TimeoutExpired:
+                  try:
+                      os.killpg(proc.pid, signal.SIGKILL)
+                  except ProcessLookupError:
+                      pass
+                  proc.wait()
+
+          def run_once():
+              proc = subprocess.Popen(
+                  cmd,
+                  stdout=subprocess.PIPE,
+                  stderr=subprocess.STDOUT,
+                  text=True,
+                  errors="replace",
+                  bufsize=1,
+                  start_new_session=True,
+              )
+              q = queue.Queue()
+
+              def reader():
+                  try:
+                      for line in proc.stdout:
+                          q.put(line)
+                  finally:
+                      q.put(None)
+
+              t = threading.Thread(target=reader, daemon=True)
+              t.start()
+
+              build_done = False
+              phase_start = time.monotonic()
+              try:
+                  while True:
+                      limit = post_build_timeout if build_done else build_timeout
+                      remaining = limit - (time.monotonic() - phase_start)
+                      if remaining <= 0:
+                          kill_proc(proc)
+                          return 124
+                      try:
+                          line = q.get(timeout=min(remaining, 1.0))
+                      except queue.Empty:
+                          if proc.poll() is not None:
+                              t.join(timeout=5)
+                              while not q.empty():
+                                  item = q.get_nowait()
+                                  if item is None:
+                                      break
+                                  sys.stdout.write(item)
+                              sys.stdout.flush()
+                              return proc.wait()
+                          continue
+                      if line is None:
+                          break
+                      sys.stdout.write(line)
+                      sys.stdout.flush()
+                      if not build_done and "Xcode build done." in line:
+                          build_done = True
+                          phase_start = time.monotonic()
+                  return proc.wait()
+              finally:
+                  if proc.stdout is not None:
+                      try:
+                          proc.stdout.close()
+                      except OSError:
+                          pass
+                  t.join(timeout=2)
+
+          rc = run_once()
+          if rc == 124:
+              print("::warning::iOS integration test timed out; rebooting simulator and retrying once.", flush=True)
+              udid = os.environ["IOS_DEVICE"]
+              subprocess.run(["xcrun", "simctl", "shutdown", udid], check=False)
+              subprocess.run(["xcrun", "simctl", "boot", udid], check=False)
+              subprocess.run(["xcrun", "simctl", "bootstatus", udid, "-b"], check=True)
+              rc = run_once()
+          sys.exit(rc)
+          EOF
+      - name: Run tests (Android)
         if: matrix.platform == 'android'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
           working-directory: hive_flutter/example
           script: flutter test integration_test -d ${{ matrix.device }}
 
-  test-hive_generator:
-    strategy:
-      matrix:
-        include:
-          - flutter-channel: stable
-            os: ubuntu-latest
-          - flutter-channel: stable
-            # Test on windows since the generator directly accesses the file system
-            os: windows-latest
-          - flutter-channel: beta
-            os: ubuntu-latest
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: hive_generator
-    steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: ${{ matrix.flutter-channel }}
-      - name: Install dependencies
-        run: dart pub get
-      - name: Run tests
-        run: dart test
-
-  ensure-codegen:
+  ci:
+    name: CI
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs:
+      - changes
+      - dart-checks
+      - flutter-checks
+      - test-hive
+      - test-hive_generator-windows
+      - coverage-hive
+      - ensure-codegen
+      - ensure-embedme
+      - integration-test-hive_flutter
     steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
-      # TODO: Figure out why puby gen needs to run twice
-      - run: |
-          dart pub global activate puby
-          puby link
-          puby gen
-          puby gen
-          dart format .
-          git diff --exit-code
+      - name: Verify required checks
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, sys
 
-  ensure-embedme:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - run: |
-          npx embedme **/*.md
-          git diff --exit-code
-
-  check-score:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: [hive, hive_flutter, hive_generator]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: subosito/flutter-action@v2
-      - run: |
-          cd ${{ matrix.package }}
-          flutter pub get
-          dart pub global activate pana
-          pana --no-warning --exit-code-threshold 0
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          bad = {
+              k: v.get("result")
+              for k, v in needs.items()
+              if v.get("result") not in ("success", "skipped")
+          }
+          if bad:
+              print(f"::error::Required checks failed: {bad}")
+              sys.exit(1)
+          EOF

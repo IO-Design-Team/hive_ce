@@ -131,12 +131,24 @@ class BinaryReaderImpl extends BinaryReader {
     return readByte() > 0;
   }
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  String _readUtf8String(int byteCount, Utf8Decoder decoder) {
+    _requireBytes(byteCount);
+    final start = _offset;
+    _offset += byteCount;
+    return decoder.convert(_buffer, start, start + byteCount);
+  }
+
   @override
   String readString([
     int? byteCount,
     Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
   ]) {
     byteCount ??= readUint32();
+    if (decoder is Utf8Decoder) {
+      return _readUtf8String(byteCount, decoder);
+    }
     final view = viewBytes(byteCount);
     return decoder.convert(view);
   }
@@ -226,8 +238,7 @@ class BinaryReaderImpl extends BinaryReader {
     if (keyType == FrameKeyType.uintT) {
       return readUint32();
     } else if (keyType == FrameKeyType.utf8StringT) {
-      final byteCount = readByte();
-      return BinaryReader.utf8Decoder.convert(viewBytes(byteCount));
+      return _readUtf8String(readByte(), BinaryReader.utf8Decoder);
     } else {
       throw HiveError('Unsupported key type. Frame might be corrupted.');
     }

@@ -15,11 +15,17 @@ class Class1Adapter extends TypeAdapter<Class1> {
   @override
   Class1 read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return Class1(
-      fields[0] == null
+      field0 == null
           ? const Class2(4, 'param', {
               5: {
                 'magic': [
@@ -31,7 +37,7 @@ class Class1Adapter extends TypeAdapter<Class1> {
                 'hold': [const Class1(const Class2(42, 'meaning of life'))],
               },
             })
-          : fields[0] as Class2,
+          : field0 as Class2,
     );
   }
 
@@ -61,13 +67,23 @@ class Class2Adapter extends TypeAdapter<Class2> {
   @override
   Class2 read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field6;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 6:
+          field6 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return Class2(
-      fields[0] == null ? 0 : (fields[0] as num).toInt(),
-      fields[1] as String,
-      (fields[6] as Map?)?.map(
+      field0 == null ? 0 : (field0 as num).toInt(),
+      field1 as String,
+      (field6 as Map?)?.map(
         (dynamic k, dynamic v) => MapEntry(
           (k as num).toInt(),
           (v as Map).map(
@@ -135,14 +151,26 @@ class IterableClassAdapter extends TypeAdapter<IterableClass> {
   @override
   IterableClass read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2, field3;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        case 3:
+          field3 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return IterableClass(
-      (fields[0] as List).cast<String>(),
-      (fields[1] as Set).cast<String>(),
-      (fields[2] as List).map((e) => (e as Set).cast<String>()).toList(),
-      (fields[3] as Set).map((e) => (e as List).cast<String>()).toSet(),
+      (field0 as List).cast<String>(),
+      (field1 as Set).cast<String>(),
+      (field2 as List).map((e) => (e as Set).cast<String>()).toList(),
+      (field3 as Set).map((e) => (e as List).cast<String>()).toSet(),
     );
   }
 
@@ -178,14 +206,26 @@ class ConstructorDefaultsAdapter extends TypeAdapter<ConstructorDefaults> {
   @override
   ConstructorDefaults read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2, field3;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        case 3:
+          field3 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return ConstructorDefaults(
-      a: fields[0] == null ? 42 : (fields[0] as num).toInt(),
-      b: fields[1] == null ? '6 * 7' : fields[1] as String,
-      c: fields[2] == null ? true : fields[2] as bool,
-      d: fields[3] as DateTime?,
+      a: field0 == null ? 42 : (field0 as num).toInt(),
+      b: field1 == null ? '6 * 7' : field1 as String,
+      c: field2 == null ? true : field2 as bool,
+      d: field3 as DateTime?,
     );
   }
 
@@ -221,13 +261,23 @@ class NullableTypesAdapter extends TypeAdapter<NullableTypes> {
   @override
   NullableTypes read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return NullableTypes(
-      a: (fields[0] as num?)?.toInt(),
-      b: fields[1] as String?,
-      c: fields[2] as bool?,
+      a: (field0 as num?)?.toInt(),
+      b: field1 as String?,
+      c: field2 as bool?,
     );
   }
 
@@ -261,14 +311,26 @@ class NamedImportsAdapter extends TypeAdapter<NamedImports> {
   @override
   NamedImports read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2, field3;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        case 3:
+          field3 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return NamedImports(
-      fields[0] as named.NamedImportType,
-      (fields[1] as List).cast<named.NamedImportType>(),
-      fields[2] as named.NamedImportType?,
-      (fields[3] as Map).cast<named.NamedImportType, named.NamedImportType>(),
+      field0 as named.NamedImportType,
+      (field1 as List).cast<named.NamedImportType>(),
+      field2 as named.NamedImportType?,
+      (field3 as Map).cast<named.NamedImportType, named.NamedImportType>(),
     );
   }
 
