@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
-
 /// Not part of public API
-@immutable
 class BufferedFileWriter {
   static const _defaultMaxBufferSize = 64000;
 
@@ -12,26 +9,51 @@ class BufferedFileWriter {
 
   final int _maxBufferSize;
 
-  final _buffer = BytesBuilder(copy: true);
+  final Uint8List _buffer;
+
+  var _offset = 0;
 
   /// Not part of public API
-  BufferedFileWriter(this._file, [this._maxBufferSize = _defaultMaxBufferSize]);
+  BufferedFileWriter(
+    this._file, [
+    int maxBufferSize = _defaultMaxBufferSize,
+  ])  : _maxBufferSize = maxBufferSize,
+        _buffer = Uint8List(maxBufferSize);
 
   /// Not part of public API
   Future<void> write(List<int> bytes) {
-    _buffer.add(bytes);
-    if (_buffer.length >= _maxBufferSize) {
-      return flush();
+    final length = bytes.length;
+    if (_offset + length < _maxBufferSize) {
+      _buffer.setRange(_offset, _offset + length, bytes);
+      _offset += length;
+      return Future.value();
     }
-    return Future.value();
+    return _writeAndFlush(bytes);
+  }
+
+  Future<void> _writeAndFlush(List<int> bytes) async {
+    final length = bytes.length;
+    if (_offset > 0 && _offset + length > _maxBufferSize) {
+      await flush();
+    }
+    if (length >= _maxBufferSize) {
+      await _file.writeFrom(bytes);
+      return;
+    }
+    _buffer.setRange(_offset, _offset + length, bytes);
+    _offset += length;
+    if (_offset == _maxBufferSize) {
+      await flush();
+    }
   }
 
   /// Not part of public API
   Future<void> flush() {
-    if (_buffer.isNotEmpty) {
-      return _file.writeFrom(_buffer.takeBytes());
-    } else {
-      return Future.value();
+    if (_offset > 0) {
+      final length = _offset;
+      _offset = 0;
+      return _file.writeFrom(Uint8List.sublistView(_buffer, 0, length));
     }
+    return Future.value();
   }
 }
