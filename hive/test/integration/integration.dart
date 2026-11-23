@@ -82,6 +82,7 @@ class BoxBaseWrapper<E> {
   Future<void> putAll(Map<dynamic, E> entries) => box.putAll(entries);
   Future<int> add(E value) => box.add(value);
   Future<void> deleteAll(Iterable keys) => box.deleteAll(keys);
+  Future<int> clear() => box.clear();
   Future<void> compact() => box.compact();
   Future<void> close() => box.close();
   FutureOr<E?> get(dynamic key, {E? defaultValue}) =>

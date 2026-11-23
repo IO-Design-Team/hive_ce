@@ -9,9 +9,11 @@ import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
+import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/frame_io_helper.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import '../../common.dart';
@@ -33,6 +35,72 @@ Uint8List getFrameBytes(Iterable<Frame> frames) {
     writer.writeFrame(frame);
   }
   return writer.toBytes();
+}
+
+Uint8List _encodeFrames(List<Frame> frames) {
+  final writer = BinaryWriterImpl(TypeRegistryImpl.nullImpl);
+  var offset = 0;
+  for (final frame in frames) {
+    final length = writer.writeFrame(frame);
+    frame
+      ..offset = offset
+      ..length = length;
+    offset += length;
+  }
+  return writer.toBytes();
+}
+
+class _CountingRandomAccessFile extends Fake implements RandomAccessFile {
+  final RandomAccessFile _inner;
+
+  var setPositionCalls = 0;
+  var setPositionSyncCalls = 0;
+  var readCalls = 0;
+  var readSyncCalls = 0;
+  var readIntoCalls = 0;
+  var readIntoSyncCalls = 0;
+
+  _CountingRandomAccessFile(this._inner);
+
+  @override
+  Future<RandomAccessFile> setPosition(int position) async {
+    setPositionCalls++;
+    await _inner.setPosition(position);
+    return this;
+  }
+
+  @override
+  void setPositionSync(int position) {
+    setPositionSyncCalls++;
+    _inner.setPositionSync(position);
+  }
+
+  @override
+  Future<Uint8List> read(int count) {
+    readCalls++;
+    return _inner.read(count);
+  }
+
+  @override
+  Uint8List readSync(int count) {
+    readSyncCalls++;
+    return _inner.readSync(count);
+  }
+
+  @override
+  Future<int> readInto(List<int> buffer, [int start = 0, int? end]) {
+    readIntoCalls++;
+    return _inner.readInto(buffer, start, end);
+  }
+
+  @override
+  int readIntoSync(List<int> buffer, [int start = 0, int? end]) {
+    readIntoSyncCalls++;
+    return _inner.readIntoSync(buffer, start, end);
+  }
+
+  @override
+  Future<void> close() => _inner.close();
 }
 
 StorageBackendVm _getBackend({
@@ -125,23 +193,10 @@ void main() {
 
       FrameIoHelper getFrameIoHelper(int recoveryOffset) {
         final helper = MockFrameIoHelper();
-        when(
-          () => helper.framesFromFile(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-          ),
-        ).thenAnswer((i) => Future.value(recoveryOffset));
-        when(
-          () => helper.keysFromFile(
-            any(),
-            any(),
-            any(),
-            any(),
-          ),
-        ).thenAnswer((i) => Future.value(recoveryOffset));
+        when(() => helper.framesFromFile(any(), any(), any(), any(), any()))
+            .thenAnswer((i) => Future.value(recoveryOffset));
+        when(() => helper.keysFromFile(any(), any(), any(), any()))
+            .thenAnswer((i) => Future.value(recoveryOffset));
         return helper;
       }
 
@@ -263,6 +318,381 @@ void main() {
         );
 
         await readRaf.close();
+      });
+
+      test('activates 16 KB read-ahead after 2 sequential reads', () async {
+        final frames = [for (var i = 0; i < 10; i++) Frame('k$i', 'val_$i')];
+        final bytes = _encodeFrames(frames);
+        final countingRaf = _CountingRandomAccessFile(await getTempRaf(bytes));
+
+        final backend = _getBackend(readRaf: countingRaf)
+          ..registry = TypeRegistryImpl.nullImpl;
+
+        expect(await backend.readValue(frames[0]), 'val_0');
+        expect(countingRaf.readCalls, 1);
+        expect(countingRaf.readIntoCalls, 0);
+        expect(countingRaf.setPositionCalls, 1);
+
+        expect(await backend.readValue(frames[1]), 'val_1');
+        expect(countingRaf.readCalls, 2);
+        expect(countingRaf.readIntoCalls, 0);
+        expect(countingRaf.setPositionCalls, 2);
+
+        expect(await backend.readValue(frames[2]), 'val_2');
+        expect(countingRaf.readCalls, 2);
+        expect(countingRaf.readIntoCalls, 1);
+        expect(countingRaf.setPositionCalls, 3);
+
+        for (var i = 3; i < frames.length; i++) {
+          expect(await backend.readValue(frames[i]), 'val_$i');
+        }
+        expect(countingRaf.readCalls, 2);
+        expect(countingRaf.readIntoCalls, 1);
+        expect(countingRaf.setPositionCalls, 3);
+
+        await countingRaf.close();
+      });
+
+      test(
+        'refills read-ahead buffer cleanly across multiple 16 KB windows',
+        () async {
+          final frames = [
+            for (var i = 0; i < 550; i++)
+              Frame('k$i', 'value_${i}_${'a' * 40}'),
+          ];
+          final bytes = _encodeFrames(frames);
+          expect(bytes.length, greaterThan(16384 * 2));
+          final countingRaf = _CountingRandomAccessFile(
+            await getTempRaf(bytes),
+          );
+
+          final backend = _getBackend(readRaf: countingRaf)
+            ..registry = TypeRegistryImpl.nullImpl;
+
+          for (var i = 0; i < frames.length; i++) {
+            expect(
+              await backend.readValue(frames[i]),
+              'value_${i}_${'a' * 40}',
+            );
+          }
+
+          expect(countingRaf.readCalls, 2);
+          expect(countingRaf.readIntoCalls, inInclusiveRange(2, 4));
+          expect(countingRaf.setPositionCalls, 2 + countingRaf.readIntoCalls);
+
+          await countingRaf.close();
+        },
+      );
+
+      test(
+          'uses sync IO in isolated mode and detaches verbatim bytes across refills',
+          () async {
+        final frames = [
+          for (var i = 0; i < 400; i++) Frame('k$i', 'iso_${i}_${'b' * 50}'),
+        ];
+        final bytes = _encodeFrames(frames);
+        expect(bytes.length, greaterThan(16384));
+        final countingRaf = _CountingRandomAccessFile(await getTempRaf(bytes));
+
+        final file = MockFile();
+        when(() => file.path).thenReturn('nullPath');
+        final lockFile = MockFile();
+        final lockRaf = MockRandomAccessFile();
+        when(() => lockFile.open(mode: FileMode.write))
+            .thenAnswer((_) => Future.value(lockRaf));
+        when(lockRaf.lock).thenAnswer((_) => Future.value(lockRaf));
+        final ioHelper = MockFrameIoHelper();
+        when(() => ioHelper.keysFromFile(any(), any(), any(), any()))
+            .thenAnswer((_) => Future.value(-1));
+
+        final backend = _getBackend(
+          file: file,
+          lockFile: lockFile,
+          ioHelper: ioHelper,
+          readRaf: countingRaf,
+        );
+        await backend.initialize(
+          TypeRegistryImpl.nullImpl,
+          MockKeystore(),
+          true,
+          isolated: true,
+        );
+
+        await backend.readValue(frames[0], verbatim: true);
+        await backend.readValue(frames[1], verbatim: true);
+        final frame2Bytes =
+            await backend.readValue(frames[2], verbatim: true) as Uint8List;
+        final frame2Snapshot = Uint8List.fromList(frame2Bytes);
+
+        for (var i = 3; i < frames.length; i++) {
+          final raw =
+              await backend.readValue(frames[i], verbatim: true) as Uint8List;
+          expect(raw, isNotEmpty);
+        }
+
+        expect(frame2Bytes, frame2Snapshot);
+        expect(countingRaf.readSyncCalls, 2);
+        expect(countingRaf.readCalls, 0);
+        expect(countingRaf.readIntoSyncCalls, greaterThanOrEqualTo(2));
+        expect(countingRaf.readIntoCalls, 0);
+        expect(
+          countingRaf.setPositionSyncCalls,
+          2 + countingRaf.readIntoSyncCalls,
+        );
+
+        await countingRaf.close();
+      });
+
+      test(
+          'does not activate read-ahead for random reads and resets streak on out-of-window jump',
+          () async {
+        final frames = [
+          for (var i = 0; i < 500; i++) Frame('k$i', 'rand_${i}_${'c' * 45}'),
+        ];
+        final bytes = _encodeFrames(frames);
+        final countingRaf = _CountingRandomAccessFile(await getTempRaf(bytes));
+
+        final backend = _getBackend(readRaf: countingRaf)
+          ..registry = TypeRegistryImpl.nullImpl;
+
+        const randomOrder = [0, 5, 2, 8, 1, 9, 3, 7, 4, 6];
+        for (final idx in randomOrder) {
+          expect(
+            await backend.readValue(frames[idx]),
+            'rand_${idx}_${'c' * 45}',
+          );
+        }
+        expect(countingRaf.readIntoCalls, 0);
+        expect(countingRaf.readCalls, randomOrder.length);
+
+        // Activate read-ahead with 3 sequential reads, then jump out of window.
+        final baseReadCalls = countingRaf.readCalls;
+        expect(await backend.readValue(frames[0]), 'rand_0_${'c' * 45}');
+        expect(await backend.readValue(frames[1]), 'rand_1_${'c' * 45}');
+        expect(await backend.readValue(frames[2]), 'rand_2_${'c' * 45}');
+        expect(countingRaf.readCalls, baseReadCalls + 2);
+        expect(countingRaf.readIntoCalls, 1);
+
+        // Jumping past the 16 KB window must reset streak and avoid readInto.
+        expect(await backend.readValue(frames[499]), 'rand_499_${'c' * 45}');
+        expect(await backend.readValue(frames[350]), 'rand_350_${'c' * 45}');
+        expect(countingRaf.readIntoCalls, 1);
+        expect(countingRaf.readCalls, baseReadCalls + 4);
+
+        await countingRaf.close();
+      });
+
+      test('bypasses read-ahead for frames larger than 16 KB', () async {
+        final largePayload = 'L' * 20000;
+        final frames = [
+          Frame('k0', 'small_0'),
+          Frame('k1', 'small_1'),
+          Frame('k2', largePayload),
+          Frame('k3', 'small_3'),
+          Frame('k4', 'small_4'),
+          Frame('k5', 'small_5'),
+        ];
+        final bytes = _encodeFrames(frames);
+        final countingRaf = _CountingRandomAccessFile(await getTempRaf(bytes));
+
+        final backend = _getBackend(readRaf: countingRaf)
+          ..registry = TypeRegistryImpl.nullImpl;
+
+        expect(await backend.readValue(frames[0]), 'small_0');
+        expect(await backend.readValue(frames[1]), 'small_1');
+        expect(await backend.readValue(frames[2]), largePayload);
+        expect(countingRaf.readCalls, 3);
+        expect(countingRaf.readIntoCalls, 0);
+
+        expect(await backend.readValue(frames[3]), 'small_3');
+        expect(countingRaf.readCalls, 3);
+        expect(countingRaf.readIntoCalls, 1);
+
+        expect(await backend.readValue(frames[4]), 'small_4');
+        expect(await backend.readValue(frames[5]), 'small_5');
+        expect(countingRaf.readCalls, 3);
+        expect(countingRaf.readIntoCalls, 1);
+
+        await countingRaf.close();
+      });
+
+      test(
+        'throws HiveError when frame is truncated during read-ahead refill',
+        () async {
+          final frames = [
+            Frame('k0', 'v0'),
+            Frame('k1', 'v1'),
+            Frame('k2', 'v2_longer_payload'),
+          ];
+          final fullBytes = _encodeFrames(frames);
+          final truncatedBytes = fullBytes.sublist(0, fullBytes.length - 3);
+          final countingRaf = _CountingRandomAccessFile(
+            await getTempRaf(truncatedBytes),
+          );
+
+          final backend = _getBackend(readRaf: countingRaf)
+            ..registry = TypeRegistryImpl.nullImpl;
+
+          expect(await backend.readValue(frames[0]), 'v0');
+          expect(await backend.readValue(frames[1]), 'v1');
+          await expectLater(
+            () => backend.readValue(frames[2]),
+            throwsHiveError(['corrupted']),
+          );
+          expect(await backend.readValue(frames[0]), 'v0');
+
+          await countingRaf.close();
+        },
+      );
+
+      test('clear() invalidates read-ahead cache', () async {
+        final dir = await getTempDir();
+        final file = File(path.join(dir.path, 'clear_test.hive'));
+        final lockFile = File(path.join(dir.path, 'clear_test.lock'));
+        await file.create(recursive: true);
+
+        final backend = StorageBackendVm(file, lockFile, false, null, null);
+        var closed = false;
+        addTearDown(() async {
+          if (!closed) {
+            await backend.close();
+          }
+          if (await dir.exists()) {
+            await dir.delete(recursive: true);
+          }
+        });
+
+        await backend.open();
+        await backend.initialize(
+          TypeRegistryImpl.nullImpl,
+          Keystore.debug(),
+          true,
+        );
+        final countingRaf = _CountingRandomAccessFile(backend.readRaf);
+        backend.readRaf = countingRaf;
+
+        final oldFrames = [for (var i = 0; i < 5; i++) Frame('k$i', 'old_$i')];
+        await backend.writeFrames(oldFrames);
+        expect(await backend.readValue(oldFrames[0]), 'old_0');
+        expect(await backend.readValue(oldFrames[1]), 'old_1');
+        expect(await backend.readValue(oldFrames[2]), 'old_2');
+        expect(countingRaf.readCalls, 2);
+        expect(countingRaf.readIntoCalls, 1);
+
+        await backend.clear();
+
+        final newFrames = [for (var i = 0; i < 5; i++) Frame('k$i', 'new_$i')];
+        await backend.writeFrames(newFrames);
+        expect(await backend.readValue(newFrames[0]), 'new_0');
+        expect(await backend.readValue(newFrames[1]), 'new_1');
+        expect(countingRaf.readCalls, 4);
+        expect(countingRaf.readIntoCalls, 1);
+
+        expect(await backend.readValue(newFrames[2]), 'new_2');
+        expect(await backend.readValue(newFrames[3]), 'new_3');
+        expect(await backend.readValue(newFrames[4]), 'new_4');
+        expect(countingRaf.readCalls, 4);
+        expect(countingRaf.readIntoCalls, 2);
+
+        await backend.close();
+        closed = true;
+      });
+
+      test('compact() invalidates read-ahead cache', () async {
+        final dir = await getTempDir();
+        final file = File(path.join(dir.path, 'compact_test.hive'));
+        final lockFile = File(path.join(dir.path, 'compact_test.lock'));
+        await file.create(recursive: true);
+
+        final backend = StorageBackendVm(file, lockFile, false, null, null);
+        var closed = false;
+        addTearDown(() async {
+          if (!closed) {
+            await backend.close();
+          }
+          if (await dir.exists()) {
+            await dir.delete(recursive: true);
+          }
+        });
+
+        await backend.open();
+        await backend.initialize(
+          TypeRegistryImpl.nullImpl,
+          Keystore.debug(),
+          true,
+        );
+
+        final f0 = Frame('k0', 'keep_0');
+        final f1 = Frame('k1', 'drop_medium_key');
+        final f2 = Frame(
+          'k2',
+          'keep_2_with_longer_payload_so_f3_shifts_inside_old_window',
+        );
+        final f3 = Frame('k3', 'keep_3');
+        final f4 = Frame('k4', 'keep_4');
+        await backend.writeFrames([f0, f1, f2, f3, f4]);
+
+        // Warm read-ahead starting at f2.offset so old window spans f2..f4.
+        expect(await backend.readValue(f0), 'keep_0');
+        expect(await backend.readValue(f1), 'drop_medium_key');
+        expect(
+          await backend.readValue(f2),
+          'keep_2_with_longer_payload_so_f3_shifts_inside_old_window',
+        );
+
+        await backend.compact([f0, f2, f3, f4]);
+
+        expect(await backend.readValue(f0), 'keep_0');
+        expect(
+          await backend.readValue(f2),
+          'keep_2_with_longer_payload_so_f3_shifts_inside_old_window',
+        );
+        expect(await backend.readValue(f3), 'keep_3');
+        expect(await backend.readValue(f4), 'keep_4');
+
+        await backend.close();
+        closed = true;
+      });
+
+      test('close() invalidates read-ahead cache', () async {
+        final frames1 = [for (var i = 0; i < 4; i++) Frame('k$i', 'first_$i')];
+        final frames2 = [for (var i = 0; i < 4; i++) Frame('k$i', 'second_$i')];
+
+        final readRaf1 = _CountingRandomAccessFile(
+          await getTempRaf(_encodeFrames(frames1)),
+        );
+        final writeRaf = MockRandomAccessFile();
+        final lockRaf = MockRandomAccessFile();
+        final lockFile = MockFile();
+        returnFutureVoid(when(writeRaf.close));
+        returnFutureVoid(when(lockRaf.close));
+        when(lockFile.delete).thenAnswer((_) => Future.value(lockFile));
+
+        final backend = _getBackend(
+          lockFile: lockFile,
+          readRaf: readRaf1,
+          writeRaf: writeRaf,
+        )
+          ..registry = TypeRegistryImpl.nullImpl
+          ..lockRaf = lockRaf;
+
+        expect(await backend.readValue(frames1[0]), 'first_0');
+        expect(await backend.readValue(frames1[1]), 'first_1');
+        expect(await backend.readValue(frames1[2]), 'first_2');
+        expect(readRaf1.readIntoCalls, 1);
+
+        await backend.close();
+
+        final readRaf2 = _CountingRandomAccessFile(
+          await getTempRaf(_encodeFrames(frames2)),
+        );
+        backend.readRaf = readRaf2;
+
+        expect(await backend.readValue(frames2[3]), 'second_3');
+        expect(readRaf2.readCalls, 1);
+        expect(readRaf2.readIntoCalls, 0);
+
+        await readRaf2.close();
       });
     });
 
