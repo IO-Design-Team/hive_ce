@@ -31,7 +31,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   /// Not part of public API
   BinaryWriterImpl(TypeRegistry typeRegistry)
-      : typeRegistry = typeRegistry as TypeRegistryImpl;
+    : typeRegistry = typeRegistry as TypeRegistryImpl;
 
   /// Not part of public API
   @visibleForTesting
@@ -46,7 +46,7 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   void _increaseBufferSize(int count) {
-// We will create a list in the range of 2-4 times larger than required.
+    // We will create a list in the range of 2-4 times larger than required.
     final newSize = _pow2roundup((_offset + count) * 2);
     final newBuffer = Uint8List(newSize);
     newBuffer.setRange(0, _offset, _buffer);
@@ -137,30 +137,45 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   @override
-  void writeIntList(List<int> list, {bool writeLength = true}) {
-    final length = list.length;
+  void writeIntList(Iterable<int> values, {bool writeLength = true}) {
+    final length = values.length;
     if (writeLength) {
       writeUint32(length);
     }
     _reserveBytes(length * 8);
     final byteData = _byteData;
-    for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i].toDouble(), Endian.little);
-      _offset += 8;
+    // Indexed loops are much faster for lists. Sets are not indexable.
+    if (values is List<int>) {
+      for (var i = 0; i < length; i++) {
+        byteData.setFloat64(_offset, values[i].toDouble(), Endian.little);
+        _offset += 8;
+      }
+    } else {
+      for (final value in values) {
+        byteData.setFloat64(_offset, value.toDouble(), Endian.little);
+        _offset += 8;
+      }
     }
   }
 
   @override
-  void writeDoubleList(List<double> list, {bool writeLength = true}) {
-    final length = list.length;
+  void writeDoubleList(Iterable<double> values, {bool writeLength = true}) {
+    final length = values.length;
     if (writeLength) {
       writeUint32(length);
     }
     _reserveBytes(length * 8);
     final byteData = _byteData;
-    for (var i = 0; i < length; i++) {
-      byteData.setFloat64(_offset, list[i], Endian.little);
-      _offset += 8;
+    if (values is List<double>) {
+      for (var i = 0; i < length; i++) {
+        byteData.setFloat64(_offset, values[i], Endian.little);
+        _offset += 8;
+      }
+    } else {
+      for (final value in values) {
+        byteData.setFloat64(_offset, value, Endian.little);
+        _offset += 8;
+      }
     }
   }
 
@@ -178,14 +193,14 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeStringList(
-    List<String> list, {
+    Iterable<String> values, {
     bool writeLength = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
     if (writeLength) {
-      writeUint32(list.length);
+      writeUint32(values.length);
     }
-    for (final str in list) {
+    for (final str in values) {
       final strBytes = encoder.convert(str);
       writeUint32(strBytes.length);
       _addBytes(strBytes);
@@ -193,12 +208,19 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   @override
-  void writeList(List list, {bool writeLength = true}) {
+  void writeList(Iterable<dynamic> values, {bool writeLength = true}) {
+    final length = values.length;
     if (writeLength) {
-      writeUint32(list.length);
+      writeUint32(length);
     }
-    for (var i = 0; i < list.length; i++) {
-      write(list[i]);
+    if (values is List) {
+      for (var i = 0; i < length; i++) {
+        write(values[i]);
+      }
+    } else {
+      for (final value in values) {
+        write(value);
+      }
     }
   }
 
@@ -332,8 +354,10 @@ class BinaryWriterImpl extends BinaryWriter {
     } else {
       final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
-        throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
-            'Did you forget to register an adapter?');
+        throw HiveError(
+          'Cannot write, unknown type: ${value.runtimeType}. '
+          'Did you forget to register an adapter?',
+        );
       }
       typeId = resolved.typeId;
       write = () => resolved.adapter.write(this, value);
@@ -371,16 +395,16 @@ class BinaryWriterImpl extends BinaryWriter {
       write = () => writeList(value);
     } else if (value is Set<int>) {
       typeId = FrameValueType.intSetT;
-      write = () => writeIntList(value.toList());
+      write = () => writeIntList(value);
     } else if (value is Set<double>) {
       typeId = FrameValueType.doubleSetT;
-      write = () => writeDoubleList(value.toList());
+      write = () => writeDoubleList(value);
     } else if (value is Set<String>) {
       typeId = FrameValueType.stringSetT;
-      write = () => writeStringList(value.toList());
+      write = () => writeStringList(value);
     } else if (value is Set) {
       typeId = FrameValueType.setT;
-      write = () => writeList(value.toList());
+      write = () => writeList(value);
     } else {
       throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
