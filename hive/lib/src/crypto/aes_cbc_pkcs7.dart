@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 @immutable
 class AesCbcPkcs7 {
   static final _lastInputBlockBuffer = Uint8List(16);
+  static final _cbcVBuffer = Uint8List(16);
 
   final Uint8List _keyBytes;
 
@@ -25,9 +26,11 @@ class AesCbcPkcs7 {
     int inpOff,
     int inpLength,
     Uint8List out,
-    int outOff,
-  ) {
-    final cbcV = Uint8List.fromList(iv);
+    int outOff, {
+    int ivOff = 0,
+  }) {
+    final cbcV = _cbcVBuffer;
+    cbcV.setRange(0, aesBlockSize, iv, ivOff);
 
     final inputBlocks = (inpLength + aesBlockSize) ~/ aesBlockSize;
     final remaining = inpLength % aesBlockSize;
@@ -65,15 +68,20 @@ class AesCbcPkcs7 {
     int inpOff,
     int inpLength,
     Uint8List out,
-    int outOff,
-  ) {
-    final inputBlocks = (inpLength + aesBlockSize - 1) ~/ aesBlockSize;
+    int outOff, {
+    int ivOff = 0,
+  }) {
+    if (inpLength < aesBlockSize || inpLength % aesBlockSize != 0) {
+      throw ArgumentError('Invalid or corrupted pad block');
+    }
+
+    final inputBlocks = inpLength ~/ aesBlockSize;
 
     var offset = 0;
 
     AesEngine.decryptBlock(_decryptionKey, inp, inpOff, out, outOff);
     for (var i = 0; i < aesBlockSize; i++) {
-      out[outOff + i] ^= iv[i];
+      out[outOff + i] ^= iv[ivOff + i];
     }
     offset += aesBlockSize;
 
@@ -92,10 +100,10 @@ class AesCbcPkcs7 {
     }
 
     final lastDecryptedByte = out[outOff + offset - 1];
-    if (lastDecryptedByte > aesBlockSize) {
+    if (lastDecryptedByte == 0 || lastDecryptedByte > aesBlockSize) {
       throw ArgumentError('Invalid or corrupted pad block');
     }
-    for (var i = 0; i < lastDecryptedByte; i++) {
+    for (var i = 1; i < lastDecryptedByte; i++) {
       if (out[outOff + offset - i - 1] != lastDecryptedByte) {
         throw ArgumentError('Invalid or corrupted pad block');
       }
