@@ -13,7 +13,7 @@ import 'package:meta/meta.dart';
 /// Not part of public API
 class BinaryReaderImpl extends BinaryReader {
   final Uint8List _buffer;
-  final ByteData _byteData;
+  ByteData? _byteDataInstance;
   final int _bufferLength;
   final TypeRegistryImpl _typeRegistry;
 
@@ -22,10 +22,20 @@ class BinaryReaderImpl extends BinaryReader {
 
   var _crcRecomputeWarningPrinted = false;
 
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  ByteData get _byteData => _byteDataInstance ??= ByteData.view(
+        _buffer.buffer,
+        _buffer.offsetInBytes,
+      );
+
+  /// Not part of public API
+  @visibleForTesting
+  bool get hasByteData => _byteDataInstance != null;
+
   /// Not part of public API
   BinaryReaderImpl(this._buffer, TypeRegistry typeRegistry, [int? bufferLength])
-      : _byteData = ByteData.view(_buffer.buffer, _buffer.offsetInBytes),
-        _bufferLength = bufferLength ?? _buffer.length,
+      : _bufferLength = bufferLength ?? _buffer.length,
         _bufferLimit = bufferLength ?? _buffer.length,
         _typeRegistry = typeRegistry as TypeRegistryImpl;
 
@@ -137,6 +147,12 @@ class BinaryReaderImpl extends BinaryReader {
     Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
   ]) {
     byteCount ??= readUint32();
+    if (decoder is Utf8Decoder) {
+      _requireBytes(byteCount);
+      final start = _offset;
+      _offset += byteCount;
+      return decoder.convert(_buffer, start, start + byteCount);
+    }
     final view = viewBytes(byteCount);
     return decoder.convert(view);
   }
@@ -227,7 +243,14 @@ class BinaryReaderImpl extends BinaryReader {
       return readUint32();
     } else if (keyType == FrameKeyType.utf8StringT) {
       final byteCount = readByte();
-      return BinaryReader.utf8Decoder.convert(viewBytes(byteCount));
+      _requireBytes(byteCount);
+      final start = _offset;
+      _offset += byteCount;
+      return BinaryReader.utf8Decoder.convert(
+        _buffer,
+        start,
+        start + byteCount,
+      );
     } else {
       throw HiveError('Unsupported key type. Frame might be corrupted.');
     }

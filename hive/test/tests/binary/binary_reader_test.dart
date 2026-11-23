@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
@@ -181,6 +183,41 @@ void main() {
       ]);
       expect(br.readString(25), '👨‍👨‍👧‍👦');
 
+      final asciiBytes = utf8.encode('hello world');
+      br = fromBytes([asciiBytes.length, 0, 0, 0, ...asciiBytes]);
+      expect(br.readString(), 'hello world');
+
+      br = fromBytes([0x00, 0x7f]);
+      expect(br.readString(2), '\x00\x7f');
+
+      final utf8Bytes = utf8.encode('hellö 日本語');
+      br = fromBytes([utf8Bytes.length, 0, 0, 0, ...utf8Bytes]);
+      expect(br.readString(), 'hellö 日本語');
+
+      final backing = Uint8List.fromList([
+        99, 99, 99, //
+        5, 0, 0, 0, 104, 101, 108, 108, 111, //
+        ...utf8.encode('hellö'), //
+        88, 88, //
+      ]);
+      final subView = Uint8List.view(backing.buffer, 3, backing.length - 5);
+      br = BinaryReaderImpl(subView, TypeRegistryImpl());
+      expect(br.readString(), 'hello');
+      expect(br.readString(6), 'hellö');
+      expect(br.availableBytes, 0);
+
+      br = fromBytes([2, 0, 0, 0, 0xFF, 0xFE]);
+      expect(
+        br.readString(null, const Utf8Decoder(allowMalformed: true)),
+        '\uFFFD\uFFFD',
+      );
+
+      br = fromBytes([2, 0, 0, 0, 0xE9, 0xF1]);
+      expect(br.readString(null, latin1.decoder), 'éñ');
+
+      br = fromBytes([3, 0, 0, 0, 97, 98, 99]);
+      expect(br.readString(null, const _ReverseAsciiDecoder()), 'cba');
+
       expect(() => br.readString(), throwsRangeError);
     });
 
@@ -267,6 +304,23 @@ void main() {
       br = fromBytes([1, 0, 0, 0, 97, 2, 0, 0, 0, 97, 98]);
       expect(br.readStringList(2), ['a', 'ab']);
 
+      br = fromBytes([
+        2, 0, 0, 0, //
+        0, 0, 0, 0, //
+        3, 0, 0, 0, 97, 98, 99, //
+      ]);
+      expect(
+        br.readStringList(null, const _ReverseAsciiDecoder()),
+        ['', 'cba'],
+      );
+
+      br = fromBytes([
+        2, 0, 0, 0, //
+        2, 0, 0, 0, 0xE9, 0xF1, //
+        1, 0, 0, 0, 0xE4, //
+      ]);
+      expect(br.readStringList(null, latin1.decoder), ['éñ', 'ä']);
+
       expect(() => br.readStringList(), throwsRangeError);
     });
 
@@ -316,6 +370,47 @@ void main() {
       test('string key', () {
         final br = fromBytes([1, 2, 104, 105]);
         expect(br.readKey(), 'hi');
+      });
+
+      test('empty string key', () {
+        final br = fromBytes([1, 0]);
+        expect(br.readKey(), '');
+      });
+
+      test('ascii string key', () {
+        final br = fromBytes([1, 5, 104, 101, 108, 108, 111]);
+        expect(br.readKey(), 'hello');
+      });
+
+      test('multi-byte utf8 and emoji key', () {
+        final umlautBytes = utf8.encode('hellö');
+        final emojiBytes = utf8.encode('🔑');
+        final br = fromBytes([
+          1, umlautBytes.length, ...umlautBytes, //
+          1, emojiBytes.length, ...emojiBytes, //
+        ]);
+        expect(br.readKey(), 'hellö');
+        expect(br.readKey(), '🔑');
+      });
+
+      test('sub-view string key', () {
+        final emojiBytes = utf8.encode('🔑');
+        final backing = Uint8List.fromList([
+          77, 77, 77, 77, //
+          1, 5, 104, 101, 108, 108, 111, //
+          1, emojiBytes.length, ...emojiBytes, //
+          66, //
+        ]);
+        final view = Uint8List.view(backing.buffer, 4, backing.length - 5);
+        final br = BinaryReaderImpl(view, TypeRegistryImpl());
+        expect(br.readKey(), 'hello');
+        expect(br.readKey(), '🔑');
+        expect(br.availableBytes, 0);
+      });
+
+      test('truncated string key throws RangeError', () {
+        final br = fromBytes([1, 5, 104, 105]);
+        expect(br.readKey, throwsRangeError);
       });
 
       test('wrong key type', () {
@@ -614,6 +709,116 @@ void main() {
     });
   });
 
+  group('lazy ByteData', () {
+    test('not initialized for non-float/int32 reads', () {
+      final bw = BinaryWriterImpl(testRegistry)
+        ..writeByte(42)
+        ..writeWord(513)
+        ..writeUint32(123456)
+        ..writeBool(true)
+        ..writeString('hello ascii')
+        ..writeString('hellö 🧙‍♂️')
+        ..writeStringList(['a', 'b', 'ö'])
+        ..writeBoolList([true, false])
+        ..writeByteList([1, 2, 3])
+        ..writeKey(99)
+        ..writeKey('stringKey');
+
+      final br = BinaryReaderImpl(bw.toBytes(), testRegistry);
+      expect(br.hasByteData, false);
+
+      expect(br.readByte(), 42);
+      expect(br.readWord(), 513);
+      expect(br.readUint32(), 123456);
+      expect(br.readBool(), true);
+      expect(br.readString(), 'hello ascii');
+      expect(br.readString(), 'hellö 🧙‍♂️');
+      expect(br.readStringList(), ['a', 'b', 'ö']);
+      expect(br.readBoolList(), [true, false]);
+      expect(br.readByteList(), [1, 2, 3]);
+      expect(br.readKey(), 99);
+      expect(br.readKey(), 'stringKey');
+      expect(br.hasByteData, false);
+
+      final frameWriter = BinaryWriterImpl(testRegistry)
+        ..writeFrame(Frame('strKey', 'strVal'))
+        ..writeFrame(Frame('boolKey', true))
+        ..writeFrame(Frame('nullKey', null))
+        ..writeFrame(Frame.deleted('delKey'));
+
+      final frameBytes = frameWriter.toBytes();
+      final frameReader = BinaryReaderImpl(frameBytes, testRegistry);
+      expect(frameReader.hasByteData, false);
+      expect(frameReader.readFrame()?.value, 'strVal');
+      expect(frameReader.readFrame()?.value, true);
+      expect(frameReader.readFrame()?.value, null);
+      expect(frameReader.readFrame()?.deleted, true);
+      expect(frameReader.hasByteData, false);
+
+      final lazyReader = BinaryReaderImpl(frameBytes, testRegistry);
+      expect(lazyReader.readFrame(lazy: true)?.lazy, true);
+      expect(lazyReader.hasByteData, false);
+    });
+
+    test('initialized on demand for int32, int, double, and numeric lists', () {
+      final int32Writer = BinaryWriterImpl(testRegistry)..writeInt32(-42);
+      final int32Reader = BinaryReaderImpl(int32Writer.toBytes(), testRegistry);
+      expect(int32Reader.hasByteData, false);
+      expect(int32Reader.readInt32(), -42);
+      expect(int32Reader.hasByteData, true);
+
+      final doubleWriter = BinaryWriterImpl(testRegistry)..writeDouble(3.14);
+      final doubleReader = BinaryReaderImpl(
+        doubleWriter.toBytes(),
+        testRegistry,
+      );
+      expect(doubleReader.hasByteData, false);
+      expect(doubleReader.readDouble(), 3.14);
+      expect(doubleReader.hasByteData, true);
+
+      final intWriter = BinaryWriterImpl(testRegistry)..writeInt(9001);
+      final intReader = BinaryReaderImpl(intWriter.toBytes(), testRegistry);
+      expect(intReader.hasByteData, false);
+      expect(intReader.readInt(), 9001);
+      expect(intReader.hasByteData, true);
+
+      final intListWriter = BinaryWriterImpl(testRegistry)
+        ..writeIntList([10, 20]);
+      final intListReader = BinaryReaderImpl(
+        intListWriter.toBytes(),
+        testRegistry,
+      );
+      expect(intListReader.hasByteData, false);
+      expect(intListReader.readIntList(), [10, 20]);
+      expect(intListReader.hasByteData, true);
+
+      final doubleListWriter = BinaryWriterImpl(testRegistry)
+        ..writeDoubleList([1.5, 2.5]);
+      final doubleListReader = BinaryReaderImpl(
+        doubleListWriter.toBytes(),
+        testRegistry,
+      );
+      expect(doubleListReader.hasByteData, false);
+      expect(doubleListReader.readDoubleList(), [1.5, 2.5]);
+      expect(doubleListReader.hasByteData, true);
+
+      // Verify sub-view with non-zero offsetInBytes
+      final rawBytes = (BinaryWriterImpl(testRegistry)
+            ..writeString('pad')
+            ..writeDouble(42.5)
+            ..writeInt32(-7))
+          .toBytes();
+      final padded = Uint8List.fromList([0xAA, 0xBB, 0xCC, ...rawBytes]);
+      final subView = Uint8List.view(padded.buffer, 3, rawBytes.length);
+      final subReader = BinaryReaderImpl(subView, testRegistry);
+      expect(subReader.readString(), 'pad');
+      expect(subReader.hasByteData, false);
+      expect(subReader.readDouble(), 42.5);
+      expect(subReader.hasByteData, true);
+      expect(subReader.readInt32(), -7);
+    });
+  });
+
   test('.readTypeId()', () {
     for (var i = 0; i <= TypeRegistryImpl.maxExtendedTypeId; i++) {
       // Skip the type ID extension value
@@ -630,4 +835,13 @@ void main() {
       }
     }
   });
+}
+
+class _ReverseAsciiDecoder extends Converter<List<int>, String> {
+  const _ReverseAsciiDecoder();
+
+  @override
+  String convert(List<int> input) {
+    return String.fromCharCodes(input.reversed);
+  }
 }

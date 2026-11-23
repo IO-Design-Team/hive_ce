@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -242,6 +243,62 @@ void main() {
         0xe2, 0x80, 0x8d, 0xf0, 0x9f, 0x91, 0xa7, 0xe2, 0x80, 0x8d, 0xf0, //
         0x9f, 0x91, 0xa6, //
       ]);
+
+      final allAscii = String.fromCharCodes(List<int>.generate(128, (i) => i));
+      bw = getWriter();
+      bw.writeString(allAscii);
+      expect(
+        bw.toBytes(),
+        [128, 0, 0, 0, ...List<int>.generate(128, (i) => i)],
+      );
+
+      bw = getWriter();
+      bw.writeString('hello world', writeByteCount: false);
+      expect(bw.toBytes(), utf8.encode('hello world'));
+
+      bw = getWriter();
+      bw.writeString('hello ö');
+      final mixedBytes1 = utf8.encode('hello ö');
+      expect(bw.toBytes(), [mixedBytes1.length, 0, 0, 0, ...mixedBytes1]);
+
+      bw = getWriter();
+      bw.writeString('prefix 🧙‍♂️', writeByteCount: false);
+      expect(bw.toBytes(), utf8.encode('prefix 🧙‍♂️'));
+
+      final exactBoundaryAscii = 'c' * 4092;
+      bw = getWriter();
+      bw.writeString(exactBoundaryAscii);
+      expect(fromBytes(bw.toBytes()).readString(), exactBoundaryAscii);
+
+      final longAscii = 'a' * 5000;
+      bw = getWriter();
+      bw.writeString(longAscii);
+      expect(fromBytes(bw.toBytes()).readString(), longAscii);
+
+      final longMixed = '${'a' * 4500}ö🧙‍♂️';
+      bw = getWriter();
+      bw.writeString(longMixed);
+      expect(fromBytes(bw.toBytes()).readString(), longMixed);
+
+      // Trigger buffer growth during non-ASCII fallback near initial 4096 cap
+      bw = getWriter();
+      bw.writeByteList(Uint8List(4090), writeLength: false);
+      bw.writeString('abcdefö🧙‍♂️');
+      final nearBoundaryReader = fromBytes(bw.toBytes());
+      nearBoundaryReader.skip(4090);
+      expect(nearBoundaryReader.readString(), 'abcdefö🧙‍♂️');
+
+      bw = getWriter();
+      bw.writeString('éñ', encoder: latin1.encoder);
+      expect(bw.toBytes(), [2, 0, 0, 0, 0xE9, 0xF1]);
+
+      bw = getWriter();
+      bw.writeString(
+        'abc',
+        writeByteCount: false,
+        encoder: const _ReverseAsciiEncoder(),
+      );
+      expect(bw.toBytes(), [99, 98, 97]);
     });
 
     test('.writeByteList()', () {
@@ -341,6 +398,30 @@ void main() {
       bw = getWriter();
       bw.writeStringList(['a', 'ab'], writeLength: false);
       expect(bw.toBytes(), [1, 0, 0, 0, 97, 2, 0, 0, 0, 97, 98]);
+
+      final mixedList = ['', 'hello', 'hellö', '🧙‍♂️', 'a' * 5000];
+      bw = getWriter();
+      bw.writeStringList(mixedList);
+      expect(fromBytes(bw.toBytes()).readStringList(), mixedList);
+
+      bw = getWriter();
+      bw.writeStringList(['éñ', 'ä'], encoder: latin1.encoder);
+      expect(bw.toBytes(), [
+        2, 0, 0, 0, //
+        2, 0, 0, 0, 0xE9, 0xF1, //
+        1, 0, 0, 0, 0xE4, //
+      ]);
+
+      bw = getWriter();
+      bw.writeStringList(
+        ['', 'abc'],
+        writeLength: false,
+        encoder: const _ReverseAsciiEncoder(),
+      );
+      expect(bw.toBytes(), [
+        0, 0, 0, 0, //
+        3, 0, 0, 0, 99, 98, 97, //
+      ]);
     });
 
     test('.writeList()', () {
@@ -679,5 +760,183 @@ void main() {
         }
       }
     });
+
+    group('.writeKey()', () {
+      test('null throws ArgumentError', () {
+        final bw = getWriter();
+        expect(() => bw.writeKey(null), throwsArgumentError);
+      });
+
+      test('int keys round-trip', () {
+        final bw = getWriter()
+          ..writeKey(0)
+          ..writeKey(123)
+          ..writeKey(0xFFFFFFFF);
+        final br = fromBytes(bw.toBytes());
+        expect(br.readKey(), 0);
+        expect(br.readKey(), 123);
+        expect(br.readKey(), 0xFFFFFFFF);
+        expect(br.availableBytes, 0);
+      });
+
+      test('string keys round-trip including ASCII, max length, and UTF-8', () {
+        final maxAsciiKey = 'a' * 255;
+        final bw = getWriter()
+          ..writeKey('')
+          ..writeKey('hello')
+          ..writeKey(maxAsciiKey)
+          ..writeKey('hellö')
+          ..writeKey('🔑')
+          ..writeKey('abc🔑def');
+
+        final br = fromBytes(bw.toBytes());
+        expect(br.readKey(), '');
+        expect(br.readKey(), 'hello');
+        expect(br.readKey(), maxAsciiKey);
+        expect(br.readKey(), 'hellö');
+        expect(br.readKey(), '🔑');
+        expect(br.readKey(), 'abc🔑def');
+        expect(br.availableBytes, 0);
+      });
+
+      test('non-ASCII key near buffer growth boundary round-trips', () {
+        final bw = getWriter()
+          ..writeByteList(Uint8List(4090), writeLength: false)
+          ..writeKey('abc🔑def');
+        final br = fromBytes(bw.toBytes())..skip(4090);
+        expect(br.readKey(), 'abc🔑def');
+        expect(br.availableBytes, 0);
+      });
+    });
+
+    group('Set and Map round-trips', () {
+      test('Set<int> round-trips', () {
+        final empty = <int>{};
+        final small = {1, 2, -5, 42};
+        final large = {for (var i = 0; i < 1000; i++) i};
+
+        final bw = getWriter()
+          ..write(empty)
+          ..write(small)
+          ..write(large);
+
+        final br = fromBytes(bw.toBytes());
+        final readEmpty = br.read();
+        final readSmall = br.read();
+        final readLarge = br.read();
+
+        expect(readEmpty, isA<Set<int>>());
+        expect(readEmpty, empty);
+        expect(readSmall, isA<Set<int>>());
+        expect(readSmall, small);
+        expect(readLarge, isA<Set<int>>());
+        expect(readLarge, large);
+        expect(br.availableBytes, 0);
+      });
+
+      test('Set<double> round-trips', () {
+        final empty = <double>{};
+        final values = {0.0, 1.5, -3.25, double.infinity};
+
+        final bw = getWriter()
+          ..write(empty)
+          ..write(values);
+
+        final br = fromBytes(bw.toBytes());
+        final readEmpty = br.read();
+        final readValues = br.read();
+
+        expect(readEmpty, isA<Set<double>>());
+        expect(readEmpty, empty);
+        expect(readValues, isA<Set<double>>());
+        expect(readValues, values);
+        expect(br.availableBytes, 0);
+      });
+
+      test('Set<String> round-trips', () {
+        final empty = <String>{};
+        final values = {'', 'ascii', 'hellö', '🧙‍♂️', 'world'};
+        final large = {for (var i = 0; i < 500; i++) 'item_$i'};
+
+        final bw = getWriter()
+          ..write(empty)
+          ..write(values)
+          ..write(large);
+
+        final br = fromBytes(bw.toBytes());
+        final readEmpty = br.read();
+        final readValues = br.read();
+        final readLarge = br.read();
+
+        expect(readEmpty, isA<Set<String>>());
+        expect(readEmpty, empty);
+        expect(readValues, isA<Set<String>>());
+        expect(readValues, values);
+        expect(readLarge, isA<Set<String>>());
+        expect(readLarge, large);
+        expect(br.availableBytes, 0);
+      });
+
+      test('Set<dynamic> and Set<bool> round-trips', () {
+        final empty = <dynamic>{};
+        final mixed = <dynamic>{1, 'hi', 'ö', true, null, 2.5};
+        final boolSet = {true, false};
+
+        final bw = getWriter()
+          ..write(empty)
+          ..write(mixed)
+          ..write(boolSet);
+
+        final br = fromBytes(bw.toBytes());
+        final readEmpty = br.read();
+        final readMixed = br.read();
+        final readBoolSet = br.read();
+
+        expect(readEmpty, isA<Set<dynamic>>());
+        expect(readEmpty, empty);
+        expect(readMixed, isA<Set<dynamic>>());
+        expect(readMixed, mixed);
+        expect(readBoolSet, isA<Set<dynamic>>());
+        expect(readBoolSet, boolSet);
+        expect(br.availableBytes, 0);
+      });
+
+      test('Map round-trips', () {
+        final empty = <dynamic, dynamic>{};
+        final mixed = <dynamic, dynamic>{
+          null: 'nullKey',
+          'nullVal': null,
+          'emoji🔑': 'val🧙‍♂️',
+          42: [1, 2, 3],
+          true: {
+            'nestedSet': {'a', 'b'},
+            'nestedMap': {'k': 1.5},
+          },
+        };
+
+        final bw = getWriter()
+          ..write(empty)
+          ..write(mixed);
+
+        final br = fromBytes(bw.toBytes());
+        expect(br.read(), empty);
+        expect(br.read(), mixed);
+        expect(br.availableBytes, 0);
+
+        final bwNoLen = getWriter()..writeMap(mixed, writeLength: false);
+        final brNoLen = fromBytes(bwNoLen.toBytes());
+        expect(brNoLen.readMap(mixed.length), mixed);
+        expect(brNoLen.availableBytes, 0);
+      });
+    });
   });
+}
+
+class _ReverseAsciiEncoder extends Converter<String, List<int>> {
+  const _ReverseAsciiEncoder();
+
+  @override
+  List<int> convert(String input) {
+    return input.codeUnits.reversed.toList();
+  }
 }
