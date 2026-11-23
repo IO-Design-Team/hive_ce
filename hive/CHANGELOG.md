@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up `Set` serialization by writing sets directly without intermediate `.toList()` copies
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

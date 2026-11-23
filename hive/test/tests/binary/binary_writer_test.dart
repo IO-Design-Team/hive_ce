@@ -663,6 +663,167 @@ void main() {
         bw.write({123, 45, null}, withTypeId: true);
         expect(bw.toBytes(), [FrameValueType.setT, ...bytes(bd)]);
       });
+
+      group('set round-trips', () {
+        test('Set<int>', () {
+          final cases = <Set<int>>[
+            <int>{},
+            {0, 1, -1, 42, -999999},
+            {for (var i = 0; i < 1000; i++) i - 500},
+          ];
+
+          for (final set in cases) {
+            final bwWithId = getWriter()..write(set);
+            final encodedWithId = bwWithId.toBytes();
+            expect(encodedWithId.first, FrameValueType.intSetT);
+
+            final brWithId = fromBytes(encodedWithId);
+            final decodedWithId = brWithId.read();
+            expect(decodedWithId, isA<Set<int>>());
+            expect(decodedWithId, set);
+            expect(brWithId.availableBytes, 0);
+
+            final bwWithoutId = getWriter()..write(set, withTypeId: false);
+            final brWithoutId = fromBytes(bwWithoutId.toBytes());
+            final decodedWithoutId = brWithoutId.read(FrameValueType.intSetT);
+            expect(decodedWithoutId, isA<Set<int>>());
+            expect(decodedWithoutId, set);
+            expect(brWithoutId.availableBytes, 0);
+          }
+        });
+
+        test('Set<double>', () {
+          final cases = <Set<double>>[
+            <double>{},
+            {
+              -0.5,
+              0.0,
+              1.5,
+              123.456,
+              -9876.54321,
+              double.infinity,
+              double.negativeInfinity,
+            },
+            {for (var i = 0; i < 1000; i++) i + 0.25},
+          ];
+
+          for (final set in cases) {
+            final bwWithId = getWriter()..write(set);
+            final encodedWithId = bwWithId.toBytes();
+            expect(encodedWithId.first, FrameValueType.doubleSetT);
+
+            final brWithId = fromBytes(encodedWithId);
+            final decodedWithId = brWithId.read();
+            expect(decodedWithId, isA<Set<double>>());
+            expect(decodedWithId, set);
+            expect(brWithId.availableBytes, 0);
+
+            final bwWithoutId = getWriter()..write(set, withTypeId: false);
+            final brWithoutId = fromBytes(bwWithoutId.toBytes());
+            final decodedWithoutId =
+                brWithoutId.read(FrameValueType.doubleSetT);
+            expect(decodedWithoutId, isA<Set<double>>());
+            expect(decodedWithoutId, set);
+            expect(brWithoutId.availableBytes, 0);
+          }
+        });
+
+        test('Set<String>', () {
+          final cases = <Set<String>>[
+            <String>{},
+            {'', 'hello', 'café', '日本語', '🎉🚀👨‍👩‍👧‍👦', 'hive_ce'},
+            {for (var i = 0; i < 500; i++) 'item_$i-🚀-é'},
+          ];
+
+          for (final set in cases) {
+            final bwWithId = getWriter()..write(set);
+            final encodedWithId = bwWithId.toBytes();
+            expect(encodedWithId.first, FrameValueType.stringSetT);
+
+            final brWithId = fromBytes(encodedWithId);
+            final decodedWithId = brWithId.read();
+            expect(decodedWithId, isA<Set<String>>());
+            expect(decodedWithId, set);
+            expect(brWithId.availableBytes, 0);
+
+            final bwWithoutId = getWriter()..write(set, withTypeId: false);
+            final brWithoutId = fromBytes(bwWithoutId.toBytes());
+            final decodedWithoutId =
+                brWithoutId.read(FrameValueType.stringSetT);
+            expect(decodedWithoutId, isA<Set<String>>());
+            expect(decodedWithoutId, set);
+            expect(brWithoutId.availableBytes, 0);
+          }
+        });
+
+        test('Set<dynamic>', () {
+          final cases = <Set<dynamic>>[
+            <dynamic>{},
+            <dynamic>{1, 2.5, true, false, 'hello 🌍', 'café', null},
+            <dynamic>{
+              for (var i = 0; i < 300; i++) i,
+              for (var i = 0; i < 300; i++) 'str_$i-🎉',
+              null,
+              true,
+            },
+          ];
+
+          for (final set in cases) {
+            final bwWithId = getWriter()..write(set);
+            final encodedWithId = bwWithId.toBytes();
+            expect(encodedWithId.first, FrameValueType.setT);
+
+            final brWithId = fromBytes(encodedWithId);
+            final decodedWithId = brWithId.read();
+            expect(decodedWithId, isA<Set<dynamic>>());
+            expect(decodedWithId, isNot(isA<Set<int>>()));
+            expect(decodedWithId, isNot(isA<Set<double>>()));
+            expect(decodedWithId, isNot(isA<Set<String>>()));
+            expect(decodedWithId, set);
+            expect(brWithId.availableBytes, 0);
+
+            final bwWithoutId = getWriter()..write(set, withTypeId: false);
+            final brWithoutId = fromBytes(bwWithoutId.toBytes());
+            final decodedWithoutId = brWithoutId.read(FrameValueType.setT);
+            expect(decodedWithoutId, isA<Set<dynamic>>());
+            expect(decodedWithoutId, isNot(isA<Set<int>>()));
+            expect(decodedWithoutId, isNot(isA<Set<double>>()));
+            expect(decodedWithoutId, isNot(isA<Set<String>>()));
+            expect(decodedWithoutId, set);
+            expect(brWithoutId.availableBytes, 0);
+          }
+        });
+
+        test('Set<bool>', () {
+          final cases = <Set<bool>>[
+            <bool>{},
+            {true},
+            {false},
+            {false, true},
+          ];
+
+          for (final set in cases) {
+            final bwWithId = getWriter()..write(set);
+            final encodedWithId = bwWithId.toBytes();
+            expect(encodedWithId.first, FrameValueType.setT);
+
+            final brWithId = fromBytes(encodedWithId);
+            final decodedWithId = brWithId.read();
+            expect(decodedWithId, isA<Set<dynamic>>());
+            expect(decodedWithId, isNot(isA<Set<bool>>()));
+            expect(decodedWithId, set);
+            expect(brWithId.availableBytes, 0);
+
+            final bwWithoutId = getWriter()..write(set, withTypeId: false);
+            final brWithoutId = fromBytes(bwWithoutId.toBytes());
+            final decodedWithoutId = brWithoutId.read(FrameValueType.setT);
+            expect(decodedWithoutId, isA<Set<dynamic>>());
+            expect(decodedWithoutId, isNot(isA<Set<bool>>()));
+            expect(decodedWithoutId, set);
+            expect(brWithoutId.availableBytes, 0);
+          }
+        });
+      });
     });
 
     test('.writeTypeId()', () {
