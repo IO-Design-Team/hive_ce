@@ -32,13 +32,42 @@ class FrameIoHelper extends FrameHelper {
   ) async {
     final raf = await openFile(path);
     try {
-      final fileReader = await raf.length() > _bigBoxChunkSize
-          ? BufferedFileReader(raf, _bigBoxChunkSize)
-          : BufferedFileReader(raf);
-      return await _KeyReader(fileReader).readKeys(keystore, cipher, keyCrc);
+      return await _readKeysFromRaf(
+        raf,
+        await raf.length(),
+        keystore,
+        cipher,
+        keyCrc,
+      );
     } finally {
       await raf.close();
     }
+  }
+
+  /// Not part of public API
+  Future<int> keysFromRaf(
+    RandomAccessFile raf,
+    int fileLength,
+    Keystore keystore,
+    HiveCipher? cipher,
+    int? keyCrc,
+  ) async {
+    if (fileLength <= 0) return -1;
+    await raf.setPosition(0);
+    return await _readKeysFromRaf(raf, fileLength, keystore, cipher, keyCrc);
+  }
+
+  Future<int> _readKeysFromRaf(
+    RandomAccessFile raf,
+    int fileLength,
+    Keystore keystore,
+    HiveCipher? cipher,
+    int? keyCrc,
+  ) {
+    final fileReader = fileLength > _bigBoxChunkSize
+        ? BufferedFileReader(raf, _bigBoxChunkSize)
+        : BufferedFileReader(raf);
+    return _KeyReader(fileReader).readKeys(keystore, cipher, keyCrc);
   }
 
   static const _bigBoxChunkSize = 1 << 20;
@@ -55,6 +84,37 @@ class FrameIoHelper extends FrameHelper {
     final bytes = await readFile(path);
     return framesFromBytes(
       bytes as Uint8List,
+      keystore,
+      registry,
+      cipher,
+      keyCrc,
+      verbatim: verbatim,
+    );
+  }
+
+  /// Not part of public API
+  Future<int> framesFromRaf(
+    RandomAccessFile raf,
+    int fileLength,
+    Keystore keystore,
+    TypeRegistry registry,
+    HiveCipher? cipher,
+    int? keyCrc, {
+    bool verbatim = false,
+  }) async {
+    if (fileLength <= 0) return -1;
+    await raf.setPosition(0);
+    final bytes = Uint8List(fileLength);
+    var offset = 0;
+    while (offset < fileLength) {
+      final read = await raf.readInto(bytes, offset, fileLength);
+      if (read == 0) break;
+      offset += read;
+    }
+    final data =
+        offset == fileLength ? bytes : Uint8List.sublistView(bytes, 0, offset);
+    return framesFromBytes(
+      data,
       keystore,
       registry,
       cipher,

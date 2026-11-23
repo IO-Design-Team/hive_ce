@@ -26,6 +26,9 @@ extension on Frame {
 
 /// Storage backend for the Dart VM
 class StorageBackendVm extends StorageBackend {
+  static const _isolatedLockJson = '{"isolated":true}';
+  static const _defaultLockJson = '{"isolated":false}';
+
   final File _file;
   final File _lockFile;
   final bool _crashRecovery;
@@ -64,6 +67,8 @@ class StorageBackendVm extends StorageBackend {
   /// Blocking IO is fine in the Hive isolate and avoids async IO overhead
   var _isolated = false;
 
+  var _opened = false;
+
   /// Not part of public API
   StorageBackendVm(
     this._file,
@@ -96,6 +101,7 @@ class StorageBackendVm extends StorageBackend {
     readRaf = await _file.open();
     writeRaf = await _file.open(mode: FileMode.writeOnlyAppend);
     writeOffset = await writeRaf.length();
+    _opened = true;
   }
 
   @override
@@ -121,12 +127,33 @@ class StorageBackendVm extends StorageBackend {
     }
 
     lockRaf = await _lockFile.open(mode: FileMode.write);
-    lockRaf.writeStringSync(jsonEncode(LockProps(isolated: isolated)));
-    lockRaf.flushSync();
+    lockRaf.writeStringSync(isolated ? _isolatedLockJson : _defaultLockJson);
     await lockRaf.lock();
 
-    int recoveryOffset;
-    if (!lazy) {
+    final int recoveryOffset;
+    if (_opened) {
+      if (writeOffset == 0) {
+        recoveryOffset = -1;
+      } else if (!lazy) {
+        recoveryOffset = await _frameHelper.framesFromRaf(
+          readRaf,
+          writeOffset,
+          keystore,
+          registry,
+          _cipher,
+          _keyCrc,
+          verbatim: isolated,
+        );
+      } else {
+        recoveryOffset = await _frameHelper.keysFromRaf(
+          readRaf,
+          writeOffset,
+          keystore,
+          _cipher,
+          _keyCrc,
+        );
+      }
+    } else if (!lazy) {
       recoveryOffset = await _frameHelper.framesFromFile(
         path,
         keystore,
@@ -136,8 +163,12 @@ class StorageBackendVm extends StorageBackend {
         verbatim: isolated,
       );
     } else {
-      recoveryOffset =
-          await _frameHelper.keysFromFile(path, keystore, _cipher, _keyCrc);
+      recoveryOffset = await _frameHelper.keysFromFile(
+        path,
+        keystore,
+        _cipher,
+        _keyCrc,
+      );
     }
 
     if (recoveryOffset != -1) {

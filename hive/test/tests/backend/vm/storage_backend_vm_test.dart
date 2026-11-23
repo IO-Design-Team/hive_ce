@@ -1,10 +1,12 @@
 @TestOn('vm')
 library;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/backend/lock_props.dart';
 import 'package:hive_ce/src/backend/vm/read_write_sync.dart';
 import 'package:hive_ce/src/backend/vm/storage_backend_vm.dart';
 import 'package:hive_ce/src/binary/binary_writer_impl.dart';
@@ -68,6 +70,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(KeystoreFake());
     registerFallbackValue(TypeRegistryFake());
+    registerFallbackValue(MockRandomAccessFile());
   });
 
   group('StorageBackendVm', () {
@@ -125,23 +128,10 @@ void main() {
 
       FrameIoHelper getFrameIoHelper(int recoveryOffset) {
         final helper = MockFrameIoHelper();
-        when(
-          () => helper.framesFromFile(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-          ),
-        ).thenAnswer((i) => Future.value(recoveryOffset));
-        when(
-          () => helper.keysFromFile(
-            any(),
-            any(),
-            any(),
-            any(),
-          ),
-        ).thenAnswer((i) => Future.value(recoveryOffset));
+        when(() => helper.framesFromFile(any(), any(), any(), any(), any()))
+            .thenAnswer((i) => Future.value(recoveryOffset));
+        when(() => helper.keysFromFile(any(), any(), any(), any()))
+            .thenAnswer((i) => Future.value(recoveryOffset));
         return helper;
       }
 
@@ -219,6 +209,131 @@ void main() {
             throwsHiveError(['corrupted']),
           );
         });
+
+        test('skips reading when opened and writeOffset == 0', () async {
+          final file = MockFile();
+          final lockFile = MockFile();
+          final readRaf = MockRandomAccessFile();
+          final writeRaf = MockRandomAccessFile();
+          final lockRaf = MockRandomAccessFile();
+          final ioHelper = MockFrameIoHelper();
+
+          when(file.open).thenAnswer((_) => Future.value(readRaf));
+          when(() => file.open(mode: FileMode.writeOnlyAppend))
+              .thenAnswer((_) => Future.value(writeRaf));
+          when(writeRaf.length).thenAnswer((_) => Future.value(0));
+          when(() => lockFile.open(mode: FileMode.write))
+              .thenAnswer((_) => Future.value(lockRaf));
+          when(lockRaf.lock).thenAnswer((_) => Future.value(lockRaf));
+
+          final backend = _getBackend(
+            file: file,
+            lockFile: lockFile,
+            ioHelper: ioHelper,
+          );
+          await backend.open();
+          await backend.initialize(
+            TypeRegistryImpl.nullImpl,
+            MockKeystore(),
+            lazy,
+          );
+
+          verifyNever(
+            () => ioHelper.framesFromRaf(
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              verbatim: any(named: 'verbatim'),
+            ),
+          );
+          verifyNever(
+            () => ioHelper.keysFromRaf(any(), any(), any(), any(), any()),
+          );
+          verifyNever(
+            () => ioHelper.framesFromFile(
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              verbatim: any(named: 'verbatim'),
+            ),
+          );
+          verifyNever(() => ioHelper.keysFromFile(any(), any(), any(), any()));
+        });
+
+        test('reuses readRaf when opened and writeOffset > 0', () async {
+          final file = MockFile();
+          final lockFile = MockFile();
+          final readRaf = MockRandomAccessFile();
+          final writeRaf = MockRandomAccessFile();
+          final lockRaf = MockRandomAccessFile();
+          final ioHelper = MockFrameIoHelper();
+          final keystore = MockKeystore();
+
+          when(file.open).thenAnswer((_) => Future.value(readRaf));
+          when(() => file.open(mode: FileMode.writeOnlyAppend))
+              .thenAnswer((_) => Future.value(writeRaf));
+          when(writeRaf.length).thenAnswer((_) => Future.value(123));
+          when(() => lockFile.open(mode: FileMode.write))
+              .thenAnswer((_) => Future.value(lockRaf));
+          when(lockRaf.lock).thenAnswer((_) => Future.value(lockRaf));
+          when(
+            () => ioHelper.framesFromRaf(
+              readRaf,
+              123,
+              keystore,
+              TypeRegistryImpl.nullImpl,
+              null,
+              null,
+              verbatim: false,
+            ),
+          ).thenAnswer((_) => Future.value(-1));
+          when(() => ioHelper.keysFromRaf(readRaf, 123, keystore, null, null))
+              .thenAnswer((_) => Future.value(-1));
+
+          final backend = _getBackend(
+            file: file,
+            lockFile: lockFile,
+            ioHelper: ioHelper,
+          );
+          await backend.open();
+          await backend.initialize(TypeRegistryImpl.nullImpl, keystore, lazy);
+
+          if (!lazy) {
+            verify(
+              () => ioHelper.framesFromRaf(
+                readRaf,
+                123,
+                keystore,
+                TypeRegistryImpl.nullImpl,
+                null,
+                null,
+                verbatim: false,
+              ),
+            ).called(1);
+            verifyNever(
+              () => ioHelper.framesFromFile(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                verbatim: any(named: 'verbatim'),
+              ),
+            );
+          } else {
+            verify(
+              () => ioHelper.keysFromRaf(readRaf, 123, keystore, null, null),
+            ).called(1);
+            verifyNever(
+              () => ioHelper.keysFromFile(any(), any(), any(), any()),
+            );
+          }
+        });
       }
 
       group('(not lazy)', () {
@@ -228,6 +343,105 @@ void main() {
       group('(lazy)', () {
         runTests(true);
       });
+
+      test(
+        'writes static lock JSON matching LockProps.toJson() without flushing',
+        () async {
+          for (final isolated in [false, true]) {
+            final file = MockFile();
+            final lockFile = MockFile();
+            final readRaf = MockRandomAccessFile();
+            final writeRaf = MockRandomAccessFile();
+            final lockRaf = MockRandomAccessFile();
+
+            when(file.open).thenAnswer((_) => Future.value(readRaf));
+            when(() => file.open(mode: FileMode.writeOnlyAppend))
+                .thenAnswer((_) => Future.value(writeRaf));
+            when(writeRaf.length).thenAnswer((_) => Future.value(0));
+            when(() => lockFile.open(mode: FileMode.write))
+                .thenAnswer((_) => Future.value(lockRaf));
+            when(lockRaf.lock).thenAnswer((_) => Future.value(lockRaf));
+
+            final backend = _getBackend(file: file, lockFile: lockFile);
+            await backend.open();
+            await backend.initialize(
+              TypeRegistryImpl.nullImpl,
+              MockKeystore(),
+              false,
+              isolated: isolated,
+            );
+
+            final expectedJson = jsonEncode(
+              LockProps(isolated: isolated).toJson(),
+            );
+            verify(() => lockRaf.writeStringSync(expectedJson)).called(1);
+            verifyNever(lockRaf.flushSync);
+            expect(
+              LockProps.fromJson(
+                jsonDecode(expectedJson) as Map<String, dynamic>,
+              ).isolated,
+              isolated,
+            );
+          }
+        },
+      );
+
+      test(
+        'forwards isolated as verbatim to framesFromRaf when opened',
+        () async {
+          final file = MockFile();
+          final lockFile = MockFile();
+          final readRaf = MockRandomAccessFile();
+          final writeRaf = MockRandomAccessFile();
+          final lockRaf = MockRandomAccessFile();
+          final ioHelper = MockFrameIoHelper();
+          final keystore = MockKeystore();
+
+          when(file.open).thenAnswer((_) => Future.value(readRaf));
+          when(() => file.open(mode: FileMode.writeOnlyAppend))
+              .thenAnswer((_) => Future.value(writeRaf));
+          when(writeRaf.length).thenAnswer((_) => Future.value(42));
+          when(() => lockFile.open(mode: FileMode.write))
+              .thenAnswer((_) => Future.value(lockRaf));
+          when(lockRaf.lock).thenAnswer((_) => Future.value(lockRaf));
+          when(
+            () => ioHelper.framesFromRaf(
+              readRaf,
+              42,
+              keystore,
+              TypeRegistryImpl.nullImpl,
+              null,
+              null,
+              verbatim: true,
+            ),
+          ).thenAnswer((_) => Future.value(-1));
+
+          final backend = _getBackend(
+            file: file,
+            lockFile: lockFile,
+            ioHelper: ioHelper,
+          );
+          await backend.open();
+          await backend.initialize(
+            TypeRegistryImpl.nullImpl,
+            keystore,
+            false,
+            isolated: true,
+          );
+
+          verify(
+            () => ioHelper.framesFromRaf(
+              readRaf,
+              42,
+              keystore,
+              TypeRegistryImpl.nullImpl,
+              null,
+              null,
+              verbatim: true,
+            ),
+          ).called(1);
+        },
+      );
     });
 
     group('.readValue()', () {
