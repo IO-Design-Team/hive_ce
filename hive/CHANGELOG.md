@@ -1,6 +1,7 @@
 ## NEXT
 
 - Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
+- Speeds up `CollectionBox.clear()` on VM by delegating directly to `box.clear()`
 
 ## 2.24.0
 
