@@ -1,19 +1,20 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/src/crypto/aes_engine.dart';
+import 'package:hive_ce/src/util/extensions.dart';
 import 'package:meta/meta.dart';
 
 /// AES CBC implementation with PKCS7 padding
 @immutable
 class AesCbcPkcs7 {
-  static final _lastInputBlockBuffer = Uint8List(16);
-
   final Uint8List _keyBytes;
 
-  late final List<Uint32List> _encryptionKey =
-      AesEngine.generateWorkingKey(_keyBytes, true);
-  late final List<Uint32List> _decryptionKey =
-      AesEngine.generateWorkingKey(_keyBytes, false);
+  late final Uint32List _encryptionKey = AesEngine.flattenWorkingKey(
+    AesEngine.generateWorkingKey(_keyBytes, true),
+  );
+  late final Uint32List _decryptionKey = AesEngine.flattenWorkingKey(
+    AesEngine.generateWorkingKey(_keyBytes, false),
+  );
 
   /// Not part of public API
   AesCbcPkcs7(this._keyBytes);
@@ -25,37 +26,46 @@ class AesCbcPkcs7 {
     int inpOff,
     int inpLength,
     Uint8List out,
+    int outOff, {
+    int ivOff = 0,
+  }) {
+    return encryptWithIvWords(
+      iv.readUint32(ivOff),
+      iv.readUint32(ivOff + 4),
+      iv.readUint32(ivOff + 8),
+      iv.readUint32(ivOff + 12),
+      inp,
+      inpOff,
+      inpLength,
+      out,
+      outOff,
+    );
+  }
+
+  /// Not part of public API
+  int encryptWithIvWords(
+    int iv0,
+    int iv1,
+    int iv2,
+    int iv3,
+    Uint8List inp,
+    int inpOff,
+    int inpLength,
+    Uint8List out,
     int outOff,
   ) {
-    final cbcV = Uint8List.fromList(iv);
-
-    final inputBlocks = (inpLength + aesBlockSize) ~/ aesBlockSize;
-    final remaining = inpLength % aesBlockSize;
-
-    var offset = 0;
-    for (var i = 0; i < inputBlocks - 1; i++) {
-      // XOR the cbcV and the input, then encrypt the cbcV
-      for (var i = 0; i < aesBlockSize; i++) {
-        cbcV[i] ^= inp[inpOff + offset + i];
-      }
-
-      AesEngine.encryptBlock(_encryptionKey, cbcV, 0, out, outOff + offset);
-
-      // copy ciphertext to cbcV
-      cbcV.setRange(0, aesBlockSize, out, outOff + offset);
-      offset += aesBlockSize;
-    }
-
-    final lastInputBlock = _lastInputBlockBuffer;
-    lastInputBlock.setRange(0, remaining, inp, inpOff + offset);
-    lastInputBlock.fillRange(remaining, aesBlockSize, aesBlockSize - remaining);
-
-    for (var i = 0; i < aesBlockSize; i++) {
-      cbcV[i] ^= lastInputBlock[i];
-    }
-    AesEngine.encryptBlock(_encryptionKey, cbcV, 0, out, outOff + offset);
-
-    return offset + aesBlockSize;
+    return AesEngine.encryptCbc(
+      _encryptionKey,
+      iv0,
+      iv1,
+      iv2,
+      iv3,
+      inp,
+      inpOff,
+      inpLength,
+      out,
+      outOff,
+    );
   }
 
   /// Not part of public API
@@ -65,42 +75,24 @@ class AesCbcPkcs7 {
     int inpOff,
     int inpLength,
     Uint8List out,
-    int outOff,
-  ) {
-    final inputBlocks = (inpLength + aesBlockSize - 1) ~/ aesBlockSize;
-
-    var offset = 0;
-
-    AesEngine.decryptBlock(_decryptionKey, inp, inpOff, out, outOff);
-    for (var i = 0; i < aesBlockSize; i++) {
-      out[outOff + i] ^= iv[i];
-    }
-    offset += aesBlockSize;
-
-    for (var i = 0; i < inputBlocks - 1; i++) {
-      AesEngine.decryptBlock(
-        _decryptionKey,
-        inp,
-        inpOff + offset,
-        out,
-        outOff + offset,
-      );
-      for (var i = 0; i < aesBlockSize; i++) {
-        out[outOff + offset + i] ^= inp[inpOff - aesBlockSize + offset + i];
-      }
-      offset += aesBlockSize;
-    }
-
-    final lastDecryptedByte = out[outOff + offset - 1];
-    if (lastDecryptedByte > aesBlockSize) {
+    int outOff, {
+    int ivOff = 0,
+  }) {
+    if (inpLength < aesBlockSize || (inpLength & (aesBlockSize - 1)) != 0) {
       throw ArgumentError('Invalid or corrupted pad block');
     }
-    for (var i = 0; i < lastDecryptedByte; i++) {
-      if (out[outOff + offset - i - 1] != lastDecryptedByte) {
-        throw ArgumentError('Invalid or corrupted pad block');
-      }
-    }
 
-    return offset - lastDecryptedByte;
+    return AesEngine.decryptCbc(
+      _decryptionKey,
+      iv.readUint32(ivOff),
+      iv.readUint32(ivOff + 4),
+      iv.readUint32(ivOff + 8),
+      iv.readUint32(ivOff + 12),
+      inp,
+      inpOff,
+      inpLength,
+      out,
+      outOff,
+    );
   }
 }

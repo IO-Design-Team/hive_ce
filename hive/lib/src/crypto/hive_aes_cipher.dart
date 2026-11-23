@@ -41,19 +41,25 @@ class HiveAesCipher implements HiveCipher {
     Uint8List out,
     int outOff,
   ) {
-    final iv = inp.view(inpOff, 16);
-
-    return _cipher.decrypt(iv, inp, inpOff + 16, inpLength - 16, out, 0);
+    return _cipher.decrypt(
+      inp,
+      inp,
+      inpOff + 16,
+      inpLength - 16,
+      out,
+      outOff,
+      ivOff: inpOff,
+    );
   }
 
   /// Generates a random initialization vector (internal)
   @visibleForTesting
   Uint8List generateIv() {
     final iv = Uint8List(16);
-    final words = iv.buffer.asUint32List();
-    for (var i = 0; i < words.length; i++) {
-      words[i] = _ivRandom.nextInt(0x100000000);
-    }
+    iv.writeUint32(0, _ivRandom.nextInt(0x100000000));
+    iv.writeUint32(4, _ivRandom.nextInt(0x100000000));
+    iv.writeUint32(8, _ivRandom.nextInt(0x100000000));
+    iv.writeUint32(12, _ivRandom.nextInt(0x100000000));
     return iv;
   }
 
@@ -65,10 +71,35 @@ class HiveAesCipher implements HiveCipher {
     Uint8List out,
     int outOff,
   ) {
-    final iv = generateIv();
-    out.setAll(outOff, iv);
+    if (runtimeType == HiveAesCipher) {
+      final iv0 = _ivRandom.nextInt(0x100000000);
+      final iv1 = _ivRandom.nextInt(0x100000000);
+      final iv2 = _ivRandom.nextInt(0x100000000);
+      final iv3 = _ivRandom.nextInt(0x100000000);
+      out.writeUint32(outOff, iv0);
+      out.writeUint32(outOff + 4, iv1);
+      out.writeUint32(outOff + 8, iv2);
+      out.writeUint32(outOff + 12, iv3);
 
-    final len = _cipher.encrypt(iv, inp, 0, inpLength, out, outOff + 16);
+      final len = _cipher.encryptWithIvWords(
+        iv0,
+        iv1,
+        iv2,
+        iv3,
+        inp,
+        inpOff,
+        inpLength,
+        out,
+        outOff + 16,
+      );
+
+      return len + 16;
+    }
+
+    final iv = generateIv();
+    out.setRange(outOff, outOff + 16, iv);
+
+    final len = _cipher.encrypt(iv, inp, inpOff, inpLength, out, outOff + 16);
 
     return len + 16;
   }

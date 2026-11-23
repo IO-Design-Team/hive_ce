@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up pure-Dart AES-CBC encryption and decryption with scratch buffer reuse and register-fused CBC loops
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
