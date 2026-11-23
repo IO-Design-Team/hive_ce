@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up generated `TypeAdapter.read` methods by using a `switch` statement instead of allocating a temporary field map
+
 ## 1.12.1
 
 - Upgrades `build` to `5.0.0`
