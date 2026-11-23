@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up box indexing with an order-64 B+ tree
 - Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
 - Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
