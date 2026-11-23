@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up pure-Dart AES-CBC encryption and decryption with flattened working keys and register-fused 32-bit CBC loops
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
 - Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
 - Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
