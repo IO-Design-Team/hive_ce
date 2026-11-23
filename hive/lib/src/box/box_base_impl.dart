@@ -37,6 +37,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
   final bool isolated;
 
   var _open = true;
+  var _compacting = false;
 
   /// Not part of public API
   BoxBaseImpl(
@@ -47,7 +48,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
     this.backend, {
     this.isolated = false,
   }) {
-    keystore = Keystore(this, ChangeNotifier(), keyComparator);
+    keystore = Keystore(this, ChangeNotifier(), keyComparator, lazy: lazy);
   }
 
   /// Not part of public API
@@ -160,9 +161,21 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
 
     if (!backend.supportsCompaction) return;
     if (keystore.deletedEntries == 0) return;
+    if (_compacting) return;
 
-    await backend.compact(keystore.frames);
-    keystore.resetDeletedEntries();
+    _compacting = true;
+    try {
+      if (lazy) {
+        final frames = keystore.frames.toList();
+        await backend.compact(frames);
+        keystore.updatePackedOffsets(frames);
+      } else {
+        await backend.compact(keystore.frames);
+      }
+      keystore.resetDeletedEntries();
+    } finally {
+      _compacting = false;
+    }
   }
 
   /// Not part of public API

@@ -73,7 +73,9 @@ class BoxBaseWrapper<E> {
   String get name => box.name;
   String? get path => box.path;
   bool get lazy => box.lazy;
+  FutureOr<int> get length => box.length;
   FutureOr<Iterable> get keys => box.keys;
+  FutureOr<dynamic> keyAt(int index) => box.keyAt(index);
   Stream<BoxEvent> watch({dynamic key}) => box.watch(key: key);
   FutureOr<bool> containsKey(dynamic key) => box.containsKey(key);
   Future<void> put(dynamic key, E value) => box.put(key, value);
@@ -86,6 +88,7 @@ class BoxBaseWrapper<E> {
   Future<void> close() => box.close();
   FutureOr<E?> get(dynamic key, {E? defaultValue}) =>
       box.get(key, defaultValue: defaultValue);
+  FutureOr<E?> getAt(int index) => box.getAt(index);
 }
 
 class LazyBoxWrapper<E> extends BoxBaseWrapper<E> {

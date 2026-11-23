@@ -1,9 +1,9 @@
+import 'dart:async';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/storage_backend.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/box_base_impl.dart';
-
-import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/hive_impl.dart';
 import 'package:mocktail/mocktail.dart';
@@ -14,15 +14,16 @@ import '../mocks.dart';
 
 class _BoxBaseMock<E> extends BoxBaseImpl<E> with Mock {
   @override
-  final lazy = false;
+  final bool lazy;
 
   _BoxBaseMock(
     super.hive,
     super.name,
     super.keyComparator,
     super.compactionStrategy,
-    super.backend,
-  );
+    super.backend, {
+    this.lazy = false,
+  });
 }
 
 _BoxBaseMock _openBoxBaseMock({
@@ -31,6 +32,7 @@ _BoxBaseMock _openBoxBaseMock({
   Keystore? keystore,
   CompactionStrategy? cStrategy,
   StorageBackend? backend,
+  bool lazy = false,
 }) {
   hive ??= HiveImpl();
   name ??= 'testBox';
@@ -41,8 +43,11 @@ _BoxBaseMock _openBoxBaseMock({
     null,
     cStrategy ?? (_, __) => false,
     backend,
+    lazy: lazy,
   );
-  mock.keystore = keystore ?? Keystore(mock, ChangeNotifier(), null);
+  if (keystore != null) {
+    mock.keystore = keystore;
+  }
   return mock;
 }
 
@@ -50,6 +55,7 @@ void main() {
   setUpAll(() {
     registerFallbackValue(KeystoreFake());
     registerFallbackValue(TypeRegistryFake());
+    registerFallbackValue(<Frame>[]);
   });
 
   group('BoxBase', () {
@@ -363,6 +369,127 @@ void main() {
           () => backend.compact([Frame('key', 1, length: 22, offset: 33)]),
         );
         verify(keystore.resetDeletedEntries);
+        verifyNever(() => keystore.updatePackedOffsets(any()));
+      });
+
+      test('lazy compact materializes frames and updates packed offsets',
+          () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final frames = [Frame.lazy('key', length: 22, offset: 33)];
+
+        when(() => keystore.frames).thenReturn(frames.map((f) => f));
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.deletedEntries).thenReturn(1);
+        when(() => backend.compact(any())).thenAnswer((invocation) async {
+          final passedFrames =
+              invocation.positionalArguments.first as List<Frame>;
+          expect(passedFrames, frames);
+          passedFrames.first.offset = 0;
+        });
+
+        final box = _openBoxBaseMock(
+          backend: backend,
+          keystore: keystore,
+          lazy: true,
+        );
+
+        await box.compact();
+        final captured =
+            verify(() => backend.compact(captureAny())).captured.single;
+        expect(captured, isA<List<Frame>>());
+        verifyInOrder([
+          () => keystore.updatePackedOffsets(captured as List<Frame>),
+          keystore.resetDeletedEntries,
+        ]);
+      });
+
+      test('lazy compact resyncs real packed lazy keystore offsets', () async {
+        final backend = MockStorageBackend();
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => backend.compact(any())).thenAnswer((invocation) async {
+          final passedFrames =
+              invocation.positionalArguments.first as List<Frame>;
+          var offset = 0;
+          for (final frame in passedFrames) {
+            frame.offset = offset;
+            offset += frame.length ?? 0;
+          }
+        });
+
+        final box = _openBoxBaseMock(backend: backend, lazy: true);
+        box.keystore
+          ..insert(Frame.lazy('a', offset: 100, length: 12))
+          ..insert(Frame.lazy('b', offset: 200, length: 18))
+          ..insert(Frame.deleted('b'));
+
+        expect(expectNotNull(box.keystore.get('a')).offset, 100);
+        await box.compact();
+        expect(expectNotNull(box.keystore.get('a')).offset, 0);
+        expect(expectNotNull(box.keystore.get('a')).length, 12);
+        expect(box.keystore.deletedEntries, 0);
+      });
+
+      test('guards against overlapping compact calls', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final completer = Completer<void>();
+
+        when(() => keystore.frames)
+            .thenReturn([Frame.lazy('key', length: 22, offset: 33)]);
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.deletedEntries).thenReturn(1);
+        when(() => backend.compact(any())).thenAnswer((_) => completer.future);
+
+        final box = _openBoxBaseMock(
+          backend: backend,
+          keystore: keystore,
+          lazy: true,
+        );
+
+        final first = box.compact();
+        final second = box.compact();
+
+        verify(() => backend.compact(any())).called(1);
+        verifyNever(() => keystore.updatePackedOffsets(any()));
+        verifyNever(keystore.resetDeletedEntries);
+
+        completer.complete();
+        await Future.wait([first, second]);
+
+        verify(() => keystore.updatePackedOffsets(any())).called(1);
+        verify(keystore.resetDeletedEntries).called(1);
+      });
+
+      test('resets compacting guard when backend compact throws', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        var shouldThrow = true;
+
+        when(() => keystore.frames)
+            .thenReturn([Frame.lazy('key', length: 22, offset: 33)]);
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.deletedEntries).thenReturn(1);
+        when(() => backend.compact(any())).thenAnswer((_) async {
+          if (shouldThrow) {
+            throw StateError('compaction failed');
+          }
+        });
+
+        final box = _openBoxBaseMock(
+          backend: backend,
+          keystore: keystore,
+          lazy: true,
+        );
+
+        await expectLater(box.compact, throwsStateError);
+        verifyNever(keystore.resetDeletedEntries);
+
+        shouldThrow = false;
+        await box.compact();
+        verify(() => backend.compact(any())).called(2);
+        verify(() => keystore.updatePackedOffsets(any())).called(1);
+        verify(keystore.resetDeletedEntries).called(1);
       });
 
       test('throws if box is closed', () async {

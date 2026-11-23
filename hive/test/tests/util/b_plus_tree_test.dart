@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/util/b_plus_tree.dart';
 import 'package:test/test.dart';
 
@@ -8,15 +9,22 @@ const _capacity = 64;
 const _maxEntries = 63;
 const _minFill = 32;
 
+T _expectNotNull<T extends Object>(T? value) =>
+    value ?? fail('Expected a non-null $T');
+
 int _intCompare(int a, int b) => a.compareTo(b);
 
 int _reverseIntCompare(int a, int b) => b.compareTo(a);
 
 void verifyInvariants<K>(
-  BPlusTree<K, Object?> tree,
+  Object tree,
   Comparator<K> comparator,
 ) {
-  final snapshot = tree.debugSnapshot();
+  final snapshot = switch (tree) {
+    BPlusTree<K, Object?>() => tree.debugSnapshot(),
+    PackedLazyBPlusTree<K>() => tree.debugSnapshot(),
+    _ => throw ArgumentError.value(tree, 'tree', 'Unsupported tree type'),
+  };
   if (snapshot.length == 0) {
     if (snapshot.height != 1) {
       throw StateError('Empty tree must have height 1, got ${snapshot.height}');
@@ -30,8 +38,13 @@ void verifyInvariants<K>(
       throw StateError('Empty root leaf is not clean');
     }
     final values = headInfo.values;
+    final offsets = headInfo.offsets;
+    final lengths = headInfo.lengths;
     for (var i = 0; i < _capacity; i++) {
-      if (headInfo.keys[i] != null || (values != null && values[i] != null)) {
+      if (headInfo.keys[i] != null ||
+          (values != null && values[i] != null) ||
+          (offsets != null && offsets[i] != 0) ||
+          (lengths != null && lengths[i] != 0)) {
         throw StateError('Unclean empty root slot at $i');
       }
     }
@@ -125,8 +138,13 @@ void verifyInvariants<K>(
       );
     }
     final values = info.values;
+    final offsets = info.offsets;
+    final lengths = info.lengths;
     for (var i = info.count; i < _capacity; i++) {
-      if (info.keys[i] != null || (values != null && values[i] != null)) {
+      if (info.keys[i] != null ||
+          (values != null && values[i] != null) ||
+          (offsets != null && offsets[i] != 0) ||
+          (lengths != null && lengths[i] != 0)) {
         throw StateError('Unclean leaf slot at $i');
       }
     }
@@ -618,6 +636,421 @@ void main() {
           verifyInvariants(tree, _intCompare);
           expect(tree.keys.toList(), ref.keys.toList());
           expect(tree.values.toList(), ref.values.toList());
+        }
+      }
+    });
+  });
+
+  group('PackedLazyBPlusTree', () {
+    test('empty tree behavior', () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 0);
+      expect(tree.isEmpty, true);
+      expect(tree.isNotEmpty, false);
+      expect(tree.keys, isEmpty);
+      expect(tree.frames, isEmpty);
+      expect(tree.get(1), null);
+      expect(tree.containsKey(1), false);
+      expect(tree.deleteLazy(1), null);
+      expect(tree.updateOffsetAndLength(1, 10, 20), false);
+      tree.updateOffsets([Frame.lazy(1, offset: 10, length: 20)]);
+      expect(tree.framesFromKey(1), isEmpty);
+      expect(() => tree.getAt(0), throwsRangeError);
+      expect(() => tree.getAt(-1), throwsRangeError);
+      expect(() => tree.getKeyAt(0), throwsRangeError);
+      expect(() => tree.getKeyAt(-1), throwsRangeError);
+    });
+
+    test('iterator throws StateError before moveNext and after completion', () {
+      final empty = PackedLazyBPlusTree<int>(_intCompare);
+      final emptyKeyIt = empty.keys.iterator;
+      expect(() => emptyKeyIt.current, throwsStateError);
+      expect(emptyKeyIt.moveNext(), false);
+      expect(() => emptyKeyIt.current, throwsStateError);
+
+      final emptyFrameIt = empty.frames.iterator;
+      expect(() => emptyFrameIt.current, throwsStateError);
+      expect(emptyFrameIt.moveNext(), false);
+      expect(() => emptyFrameIt.current, throwsStateError);
+
+      final tree = PackedLazyBPlusTree<int>(_intCompare)
+        ..insertLazy(1, 1099511627776, 42);
+      final frameIt = tree.frames.iterator;
+      expect(() => frameIt.current, throwsStateError);
+      expect(frameIt.moveNext(), true);
+      expect(frameIt.current.key, 1);
+      expect(frameIt.current.lazy, true);
+      expect(frameIt.current.offset, 1099511627776);
+      expect(frameIt.current.length, 42);
+      expect(frameIt.moveNext(), false);
+      expect(() => frameIt.current, throwsStateError);
+    });
+
+    test(
+      'stores 53-bit offsets, -1 offset, and nullable lengths across heights',
+      () {
+        const baseOffset = 1099511627776;
+        const count = 4500;
+        final tree = PackedLazyBPlusTree<int>(_intCompare);
+        for (var i = 0; i < count; i++) {
+          final offset = i == 0 ? -1 : baseOffset + i * 17;
+          final length = i % 5 == 0 ? null : i % 256;
+          expect(tree.insertLazy(i, offset, length), null);
+          if (i < 300 || i % 250 == 0 || i == count - 1) {
+            verifyInvariants(tree, _intCompare);
+          }
+        }
+
+        expect(tree.length, count);
+        for (var i = 0; i < count; i++) {
+          final expectedOffset = i == 0 ? -1 : baseOffset + i * 17;
+          final expectedLength = i % 5 == 0 ? null : i % 256;
+          expect(tree.containsKey(i), true);
+          expect(tree.getKeyAt(i), i);
+          final byKey = _expectNotNull(tree.get(i));
+          expect(byKey.lazy, true);
+          expect(byKey.key, i);
+          expect(byKey.offset, expectedOffset);
+          expect(byKey.length, expectedLength);
+
+          final byIndex = tree.getAt(i);
+          expect(byIndex.lazy, true);
+          expect(byIndex.key, i);
+          expect(byIndex.offset, expectedOffset);
+          expect(byIndex.length, expectedLength);
+        }
+
+        final descTree = PackedLazyBPlusTree<int>(_intCompare);
+        for (var i = 299; i >= 0; i--) {
+          expect(
+            descTree.insertLazy(i, 5000000000 + i, i.isEven ? null : i),
+            null,
+          );
+        }
+        verifyInvariants(descTree, _intCompare);
+        expect(descTree.length, 300);
+        expect(descTree.getAt(0).offset, 5000000000);
+        expect(descTree.getAt(0).length, null);
+        expect(descTree.getAt(1).offset, 5000000001);
+        expect(descTree.getAt(1).length, 1);
+      },
+    );
+
+    test('overwrites return old Frame with exact offset and length', () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < 200; i++) {
+        expect(
+          tree.insertLazy(
+            i,
+            i == 0 ? -1 : 1099511627776 + i,
+            i.isEven ? null : i,
+          ),
+          null,
+        );
+      }
+
+      final prev0 = _expectNotNull(tree.insertLazy(0, 5000000000, 64));
+      expect(prev0.lazy, true);
+      expect(prev0.key, 0);
+      expect(prev0.offset, -1);
+      expect(prev0.length, null);
+
+      final prev15 = _expectNotNull(tree.insertLazy(15, 4096, null));
+      expect(prev15.lazy, true);
+      expect(prev15.key, 15);
+      expect(prev15.offset, 1099511627776 + 15);
+      expect(prev15.length, 15);
+
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 200);
+      expect(_expectNotNull(tree.get(0)).offset, 5000000000);
+      expect(_expectNotNull(tree.get(0)).length, 64);
+      expect(_expectNotNull(tree.get(15)).offset, 4096);
+      expect(_expectNotNull(tree.get(15)).length, null);
+    });
+
+    test('updateOffsetAndLength updates existing and ignores missing keys', () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < 150; i++) {
+        tree.insertLazy(i, i * 10, i + 1);
+      }
+
+      expect(tree.updateOffsetAndLength(50, 1099511627776, null), true);
+      expect(tree.updateOffsetAndLength(100, -1, 0), true);
+      expect(tree.updateOffsetAndLength(999, 10, 20), false);
+
+      final f50 = _expectNotNull(tree.get(50));
+      expect(f50.offset, 1099511627776);
+      expect(f50.length, null);
+
+      final f100 = _expectNotNull(tree.get(100));
+      expect(f100.offset, -1);
+      expect(f100.length, 0);
+    });
+
+    test('updateOffsets handles in-order, sparse, out-of-order, and missing',
+        () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 2; i <= 400; i += 2) {
+        tree.insertLazy(i, i * 100, i);
+      }
+
+      // Full in-order scan across multiple leaves.
+      final fullUpdate = [
+        for (var i = 2; i <= 400; i += 2)
+          Frame.lazy(
+            i,
+            offset: 1099511627776 + i,
+            length: i % 4 == 0 ? null : i + 1,
+          ),
+      ];
+      tree.updateOffsets(fullUpdate);
+      for (var i = 2; i <= 400; i += 2) {
+        final frame = _expectNotNull(tree.get(i));
+        expect(frame.offset, 1099511627776 + i);
+        expect(frame.length, i % 4 == 0 ? null : i + 1);
+      }
+
+      // Sparse in-order with missing keys before start, between keys, and past end.
+      tree.updateOffsets([
+        Frame.lazy(0, offset: 999, length: 9),
+        Frame.lazy(4, offset: 40, length: 44),
+        Frame.lazy(129, offset: 999, length: 9),
+        Frame.lazy(130, offset: 1300, length: null),
+        Frame.lazy(260, offset: 2600, length: 26),
+        Frame.lazy(999, offset: 9999, length: 99),
+        Frame.lazy(6, offset: 60, length: 66),
+      ]);
+      expect(_expectNotNull(tree.get(4)).offset, 40);
+      expect(_expectNotNull(tree.get(4)).length, 44);
+      expect(_expectNotNull(tree.get(6)).offset, 60);
+      expect(_expectNotNull(tree.get(6)).length, 66);
+      expect(_expectNotNull(tree.get(130)).offset, 1300);
+      expect(_expectNotNull(tree.get(130)).length, null);
+      expect(_expectNotNull(tree.get(260)).offset, 2600);
+      expect(_expectNotNull(tree.get(260)).length, 26);
+      expect(tree.containsKey(0), false);
+      expect(tree.containsKey(129), false);
+      expect(tree.containsKey(999), false);
+
+      // Reversed & duplicate fallback path (includes tail key duplicate).
+      tree.updateOffsets([
+        Frame.lazy(400, offset: 5000000000, length: 12),
+        Frame.lazy(400, offset: 5000000001, length: 13),
+        Frame.lazy(200, offset: 5000000200, length: null),
+        Frame.lazy(2, offset: -1, length: 22),
+      ]);
+      expect(_expectNotNull(tree.get(400)).offset, 5000000001);
+      expect(_expectNotNull(tree.get(400)).length, 13);
+      expect(_expectNotNull(tree.get(200)).offset, 5000000200);
+      expect(_expectNotNull(tree.get(200)).length, null);
+      expect(_expectNotNull(tree.get(2)).offset, -1);
+      expect(_expectNotNull(tree.get(2)).length, 22);
+    });
+
+    test('frames and framesFromKey across leaf boundaries and double iteration',
+        () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < 200; i += 2) {
+        tree.insertLazy(i, 1000 + i, i % 6 == 0 ? null : i + 10);
+      }
+
+      expect(tree.framesFromKey(1), isEmpty);
+      expect(tree.framesFromKey(-2), isEmpty);
+      expect(tree.framesFromKey(500), isEmpty);
+
+      final slice = tree.framesFromKey(120);
+      final expectedKeys = [for (var i = 120; i < 200; i += 2) i];
+      expect(slice.map((f) => f.key).toList(), expectedKeys);
+      expect(slice.map((f) => f.key).toList(), expectedKeys);
+      for (final frame in slice) {
+        final k = frame.key as int;
+        expect(frame.lazy, true);
+        expect(frame.offset, 1000 + k);
+        expect(frame.length, k % 6 == 0 ? null : k + 10);
+      }
+
+      expect(tree.framesFromKey(198).map((f) => f.key).toList(), [198]);
+      expect(
+        tree.framesFromKey(0).map((f) => f.key).toList(),
+        [for (var i = 0; i < 200; i += 2) i],
+      );
+      expect(tree.frames.length, 100);
+    });
+
+    test('deleteLazy down to zero and sparse tail edge cases', () {
+      const count = 1500;
+      final asc = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < count; i++) {
+        asc.insertLazy(i, 1099511627776 + i, i);
+      }
+      for (var i = 0; i < count; i++) {
+        final deleted = _expectNotNull(asc.deleteLazy(i));
+        expect(deleted.key, i);
+        expect(deleted.lazy, true);
+        expect(deleted.offset, 1099511627776 + i);
+        expect(deleted.length, i);
+        expect(asc.deleteLazy(i), null);
+        if (i < 150 || i > count - 150 || i % 200 == 0) {
+          verifyInvariants(asc, _intCompare);
+        }
+      }
+      expect(asc.length, 0);
+      expect(asc.frames, isEmpty);
+
+      // Sparse tail merge and root collapse.
+      final tailMerge = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < 64; i++) {
+        tailMerge.insertLazy(i, i * 8, i);
+      }
+      for (var i = 0; i < 31; i++) {
+        expect(_expectNotNull(tailMerge.deleteLazy(i)).key, i);
+      }
+      expect(_expectNotNull(tailMerge.deleteLazy(63)).offset, 63 * 8);
+      verifyInvariants(tailMerge, _intCompare);
+      expect(tailMerge.length, 32);
+      tailMerge.insertLazy(100, 5000000000, null);
+      verifyInvariants(tailMerge, _intCompare);
+      expect(_expectNotNull(tailMerge.get(100)).offset, 5000000000);
+    });
+
+    test('clear and reuse', () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      for (var i = 0; i < 300; i++) {
+        tree.insertLazy(i, 100 + i, i);
+      }
+      tree.clear();
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 0);
+      expect(tree.keys, isEmpty);
+      expect(tree.frames, isEmpty);
+      expect(tree.get(0), null);
+      expect(() => tree.getAt(0), throwsRangeError);
+
+      for (var i = 500; i < 650; i++) {
+        tree.insertLazy(i, 5000000000 + i, i - 500);
+      }
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 150);
+      expect(_expectNotNull(tree.get(550)).offset, 5000000550);
+      expect(tree.getAt(50).length, 50);
+    });
+
+    test('differential stress test against SplayTreeMap (5000 ops)', () {
+      final tree = PackedLazyBPlusTree<int>(_intCompare);
+      final ref = SplayTreeMap<int, (int, int?)>(_intCompare);
+      final rng = Random(54321);
+      var tailSeq = 100000;
+
+      for (var step = 0; step < 5000; step++) {
+        final op = rng.nextInt(100);
+        if (op < 15) {
+          final key = tailSeq++;
+          final offset = rng.nextBool()
+              ? 1099511627776 + rng.nextInt(100000)
+              : rng.nextInt(100000);
+          final length = rng.nextInt(5) == 0 ? null : rng.nextInt(10000);
+          final prev = ref[key];
+          ref[key] = (offset, length);
+          final actualPrev = tree.insertLazy(key, offset, length);
+          if (prev == null) {
+            expect(actualPrev, null);
+          } else {
+            final frame = _expectNotNull(actualPrev);
+            expect(frame.offset, prev.$1);
+            expect(frame.length, prev.$2);
+          }
+        } else if (op < 55) {
+          final key = rng.nextInt(2500);
+          final offset = op % 10 == 0
+              ? -1
+              : (rng.nextBool()
+                  ? 1099511627776 + rng.nextInt(100000)
+                  : rng.nextInt(100000));
+          final length = rng.nextInt(4) == 0 ? null : rng.nextInt(10000);
+          final prev = ref[key];
+          ref[key] = (offset, length);
+          final actualPrev = tree.insertLazy(key, offset, length);
+          if (prev == null) {
+            expect(actualPrev, null);
+          } else {
+            final frame = _expectNotNull(actualPrev);
+            expect(frame.lazy, true);
+            expect(frame.offset, prev.$1);
+            expect(frame.length, prev.$2);
+          }
+        } else if (op < 80) {
+          final key = rng.nextInt(2500);
+          final prev = ref.remove(key);
+          final actual = tree.deleteLazy(key);
+          if (prev == null) {
+            expect(actual, null);
+          } else {
+            final frame = _expectNotNull(actual);
+            expect(frame.key, key);
+            expect(frame.lazy, true);
+            expect(frame.offset, prev.$1);
+            expect(frame.length, prev.$2);
+          }
+        } else if (op < 90) {
+          final key = rng.nextInt(2500);
+          final newOffset = 1099511627776 + rng.nextInt(100000);
+          final newLength = rng.nextBool() ? null : rng.nextInt(5000);
+          final exists = ref.containsKey(key);
+          if (exists) {
+            ref[key] = (newOffset, newLength);
+          }
+          expect(tree.updateOffsetAndLength(key, newOffset, newLength), exists);
+        } else if (op < 94 && ref.isNotEmpty) {
+          final idx = rng.nextInt(ref.length);
+          final expectedKey = ref.keys.elementAt(idx);
+          final expectedMeta = _expectNotNull(ref[expectedKey]);
+          expect(tree.getKeyAt(idx), expectedKey);
+          final atFrame = tree.getAt(idx);
+          expect(atFrame.key, expectedKey);
+          expect(atFrame.offset, expectedMeta.$1);
+          expect(atFrame.length, expectedMeta.$2);
+          final keyFrame = _expectNotNull(tree.get(expectedKey));
+          expect(keyFrame.offset, expectedMeta.$1);
+          expect(keyFrame.length, expectedMeta.$2);
+        } else if (op < 97 && ref.isNotEmpty) {
+          final updates = <Frame>[];
+          for (final entry in ref.entries) {
+            if (rng.nextInt(4) == 0) {
+              final newOffset = 5000000000 + rng.nextInt(50000);
+              final newLength = rng.nextBool() ? null : rng.nextInt(2000);
+              ref[entry.key] = (newOffset, newLength);
+              updates.add(
+                Frame.lazy(entry.key, offset: newOffset, length: newLength),
+              );
+            }
+          }
+          updates.add(Frame.lazy(9999999, offset: 1, length: 1));
+          if (rng.nextBool()) {
+            updates.shuffle(rng);
+          }
+          tree.updateOffsets(updates);
+        } else {
+          final key = 50000 + rng.nextInt(1000);
+          expect(tree.containsKey(key), false);
+          expect(tree.get(key), null);
+        }
+
+        expect(tree.length, ref.length);
+        if (step % 400 == 0 || step == 4999) {
+          verifyInvariants(tree, _intCompare);
+          expect(tree.keys.toList(), ref.keys.toList());
+          final frames = tree.frames.toList();
+          expect(frames.length, ref.length);
+          var i = 0;
+          for (final entry in ref.entries) {
+            final f = frames[i++];
+            expect(f.lazy, true);
+            expect(f.key, entry.key);
+            expect(f.offset, entry.value.$1);
+            expect(f.length, entry.value.$2);
+          }
         }
       }
     });
