@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up opening boxes on VM by removing lock file `flushSync`, skipping empty files, and reusing the open read handle
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
