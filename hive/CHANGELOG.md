@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
