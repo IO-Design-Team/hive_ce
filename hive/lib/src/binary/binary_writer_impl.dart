@@ -207,9 +207,9 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(map.length);
     }
-    for (final key in map.keys) {
-      write(key);
-      write(map[key]);
+    for (final entry in map.entries) {
+      write(entry.key);
+      write(entry.value);
     }
   }
 

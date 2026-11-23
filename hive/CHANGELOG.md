@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
