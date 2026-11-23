@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
