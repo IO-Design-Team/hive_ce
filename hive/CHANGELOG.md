@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up `IsolatedHive` writes with a reusable writer, packed batch transfers, and selective `TransferableTypedData`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

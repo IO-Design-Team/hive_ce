@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -17,11 +18,13 @@ abstract class IsolatedBoxBaseImpl<E>
     implements IsolatedBoxBase<E>, InspectableBox {
   /// Value to inform the get method to return the default value
   static const defaultValuePlaceholder = '_hive_ce.defaultValue';
+  static const _transferThreshold = 65536;
 
   final IsolatedHiveImpl _hive;
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
+  final BinaryWriterImpl _writer;
   Stream<BoxEvent>? _stream;
 
   var _open = true;
@@ -33,7 +36,8 @@ abstract class IsolatedBoxBaseImpl<E>
     this._cipher,
     IsolateConnection connection,
     this._channel,
-  ) : _eventChannel = IsolateEventChannel('box_$name', connection);
+  )   : _writer = BinaryWriterImpl(_hive),
+        _eventChannel = IsolateEventChannel('box_$name', connection);
 
   /// Not part of public API
   Type get valueType => E;
@@ -94,24 +98,74 @@ abstract class IsolatedBoxBaseImpl<E>
       );
 
   @override
-  Future<void> putAll(Map<dynamic, E> entries) => _channel.invokeMethod(
-        'putAll',
-        {
-          'name': name,
-          'entries':
-              entries.map((key, value) => MapEntry(key, _writeValue(value))),
-        },
-      );
+  Future<void> putAll(Map<dynamic, E> entries) {
+    final count = entries.length;
+    final keys = List<dynamic>.filled(count, null);
+    final lengths = Int32List(count);
+    final Object packedBytes;
+    try {
+      var i = 0;
+      entries.forEach((key, value) {
+        keys[i] = key;
+        final start = _writer.offset;
+        _writeToWriter(_writer, value);
+        lengths[i] = _writer.offset - start;
+        i++;
+      });
+      packedBytes = _wrapBytes(_writer.toBytes());
+    } finally {
+      _writer.reset();
+    }
+    return _channel.invokeMethod(
+      'putAll',
+      {
+        'name': name,
+        'keys': keys,
+        'packedBytes': packedBytes,
+        'lengths': lengths,
+      },
+    );
+  }
 
   @override
   Future<int> add(E value) =>
       _channel.invokeMethod('add', {'name': name, 'value': _writeValue(value)});
 
   @override
-  Future<List<int>> addAll(Iterable<E> values) => _channel.invokeMethod(
-        'addAll',
-        {'name': name, 'values': values.map(_writeValue).toList()},
-      );
+  Future<List<int>> addAll(Iterable<E> values) {
+    final Int32List lengths;
+    final Object packedBytes;
+    try {
+      if (values is List<E>) {
+        final count = values.length;
+        lengths = Int32List(count);
+        for (var i = 0; i < count; i++) {
+          final start = _writer.offset;
+          _writeToWriter(_writer, values[i]);
+          lengths[i] = _writer.offset - start;
+        }
+      } else {
+        final lengthsList = <int>[];
+        for (final value in values) {
+          final start = _writer.offset;
+          _writeToWriter(_writer, value);
+          lengthsList.add(_writer.offset - start);
+        }
+        lengths = Int32List.fromList(lengthsList);
+      }
+      packedBytes = _wrapBytes(_writer.toBytes());
+    } finally {
+      _writer.reset();
+    }
+    return _channel.invokeMethod(
+      'addAll',
+      {
+        'name': name,
+        'packedBytes': packedBytes,
+        'lengths': lengths,
+      },
+    );
+  }
 
   @override
   Future<void> delete(dynamic key) =>
@@ -166,14 +220,28 @@ abstract class IsolatedBoxBaseImpl<E>
     return _readValue(bytes);
   }
 
-  Uint8List _writeValue(E value) {
-    final writer = BinaryWriterImpl(_hive);
+  void _writeToWriter(BinaryWriterImpl writer, E value) {
     if (_cipher != null) {
       writer.writeEncrypted(value, _cipher);
     } else {
       writer.write(value);
     }
-    return Uint8List.fromList(writer.toBytes());
+  }
+
+  Object _wrapBytes(Uint8List bytes) {
+    if (bytes.length >= _transferThreshold) {
+      return TransferableTypedData.fromList([bytes]);
+    }
+    return Uint8List.fromList(bytes);
+  }
+
+  Object _writeValue(E value) {
+    try {
+      _writeToWriter(_writer, value);
+      return _wrapBytes(_writer.toBytes());
+    } finally {
+      _writer.reset();
+    }
   }
 
   E? _readValue(Uint8List? bytes) {

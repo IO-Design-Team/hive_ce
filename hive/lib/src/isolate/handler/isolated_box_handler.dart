@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
@@ -46,6 +48,20 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
     _subscriptions.remove(id)?.cancel();
   }
 
+  static dynamic _unwrapValue(dynamic value) {
+    if (value is TransferableTypedData) {
+      return value.materialize().asUint8List();
+    }
+    return value;
+  }
+
+  static Uint8List _unwrapBytes(dynamic value) {
+    if (value is TransferableTypedData) {
+      return value.materialize().asUint8List();
+    }
+    return value as Uint8List;
+  }
+
   void _close() {
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
@@ -71,15 +87,56 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'containsKey':
         return box.containsKey(call.arguments['key']);
       case 'put':
-        await box.put(call.arguments['key'], call.arguments['value']);
+        await box.put(
+          call.arguments['key'],
+          _unwrapValue(call.arguments['value']),
+        );
       case 'putAt':
-        await box.putAt(call.arguments['index'], call.arguments['value']);
+        await box.putAt(
+          call.arguments['index'],
+          _unwrapValue(call.arguments['value']),
+        );
       case 'putAll':
-        await box.putAll(call.arguments['entries']);
+        final packedBytes = call.arguments['packedBytes'];
+        if (packedBytes != null) {
+          final keys = call.arguments['keys'] as List;
+          final lengths = call.arguments['lengths'] as Int32List;
+          final packed = _unwrapBytes(packedBytes);
+          final entries = <dynamic, Uint8List>{};
+          var offset = 0;
+          for (var i = 0; i < keys.length; i++) {
+            final len = lengths[i];
+            entries[keys[i]] =
+                Uint8List.sublistView(packed, offset, offset + len);
+            offset += len;
+          }
+          await box.putAll(entries);
+        } else {
+          await box.putAll(call.arguments['entries']);
+        }
       case 'add':
-        return await box.add(call.arguments['value']);
+        return await box.add(_unwrapValue(call.arguments['value']));
       case 'addAll':
-        final keys = await box.addAll(call.arguments['values']);
+        final packedBytes = call.arguments['packedBytes'];
+        final Iterable<int> keys;
+        if (packedBytes != null) {
+          final lengths = call.arguments['lengths'] as Int32List;
+          final packed = _unwrapBytes(packedBytes);
+          var offset = 0;
+          final values = List<Uint8List>.generate(
+            lengths.length,
+            (i) {
+              final len = lengths[i];
+              final slice = Uint8List.sublistView(packed, offset, offset + len);
+              offset += len;
+              return slice;
+            },
+            growable: false,
+          );
+          keys = await box.addAll(values);
+        } else {
+          keys = await box.addAll(call.arguments['values']);
+        }
         return keys.toList();
       case 'delete':
         await box.delete(call.arguments['key']);

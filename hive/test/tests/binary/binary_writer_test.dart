@@ -679,5 +679,72 @@ void main() {
         }
       }
     });
+
+    group('.reset()', () {
+      test('resets offset and writes fresh bytes', () {
+        final bw = getWriter();
+        bw.writeByteList([1, 2, 3], writeLength: false);
+        expect(bw.offset, 3);
+        expect(bw.toBytes(), [1, 2, 3]);
+
+        bw.reset();
+        expect(bw.offset, 0);
+        expect(bw.toBytes(), isEmpty);
+
+        bw.writeByteList([4, 5], writeLength: false);
+        expect(bw.offset, 2);
+        expect(bw.toBytes(), [4, 5]);
+      });
+
+      test('retains buffers up to 65536 bytes', () {
+        final bwMid = getWriter();
+        bwMid.writeByteList(Uint8List(5000));
+        expect(bwMid.toBytes().buffer.lengthInBytes, 16384);
+
+        bwMid.reset();
+        expect(bwMid.offset, 0);
+        expect(bwMid.toBytes(), isEmpty);
+        expect(bwMid.toBytes().buffer.lengthInBytes, 16384);
+
+        final bwBoundary = getWriter();
+        bwBoundary.writeByteList(Uint8List(20000));
+        expect(bwBoundary.toBytes().buffer.lengthInBytes, 65536);
+
+        bwBoundary.reset();
+        expect(bwBoundary.offset, 0);
+        expect(bwBoundary.toBytes(), isEmpty);
+        expect(bwBoundary.toBytes().buffer.lengthInBytes, 65536);
+      });
+
+      test('shrinks buffers larger than 65536 bytes back to 4096', () {
+        final bw = getWriter();
+        bw.writeByteList(Uint8List(40000));
+        expect(bw.toBytes().buffer.lengthInBytes, 131072);
+
+        bw.reset();
+        expect(bw.offset, 0);
+        expect(bw.toBytes(), isEmpty);
+        expect(bw.toBytes().buffer.lengthInBytes, 4096);
+
+        bw.writeByteList(Uint8List(70000));
+        expect(bw.toBytes().buffer.lengthInBytes, 262144);
+
+        bw.reset();
+        expect(bw.offset, 0);
+        expect(bw.toBytes(), isEmpty);
+        expect(bw.toBytes().buffer.lengthInBytes, 4096);
+      });
+
+      test('clears cached ByteData when shrinking buffer', () {
+        final bw = getWriter();
+        bw.writeDouble(1.23);
+        bw.writeByteList(Uint8List(40000));
+        bw.writeDouble(4.56);
+
+        bw.reset();
+        bw.writeDouble(9.87);
+        expect(fromBytes(bw.toBytes()).readDouble(), 9.87);
+      });
+    });
   });
 }

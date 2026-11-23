@@ -13,6 +13,7 @@ import 'package:meta/meta.dart';
 /// Not part of public API
 class BinaryWriterImpl extends BinaryWriter {
   static const _initBufferSize = 4096;
+  static const _maxRetainedBufferSize = 65536;
 
   /// The maximum integer that can be stored in a 64 bit float (2^53)
   static const maxInt = 9007199254740992;
@@ -36,6 +37,9 @@ class BinaryWriterImpl extends BinaryWriter {
   /// Not part of public API
   @visibleForTesting
   BinaryWriterImpl.withBuffer(this._buffer, this.typeRegistry);
+
+  /// Not part of public API
+  int get offset => _offset;
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
@@ -411,6 +415,15 @@ class BinaryWriterImpl extends BinaryWriter {
   /// Not part of public API
   Uint8List toBytes() {
     return Uint8List.view(_buffer.buffer, 0, _offset);
+  }
+
+  /// Not part of public API
+  void reset() {
+    _offset = 0;
+    if (_buffer.length > _maxRetainedBufferSize) {
+      _buffer = Uint8List(_initBufferSize);
+      _byteDataInstance = null;
+    }
   }
 
   @pragma('vm:prefer-inline')
