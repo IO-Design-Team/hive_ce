@@ -129,7 +129,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
       - uses: actions/cache@v5
         with:
-          path: ~/AppData/Local/Pub/Cache
+          path: ~/.pub-cache
           key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('hive_generator/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dart-stable-pub-
@@ -252,7 +252,7 @@ jobs:
       - name: Collect coverage
         run: |
           dart pub get --no-example
-          dart test -j $(nproc) --coverage=coverage
+          dart test --coverage=coverage
           dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --package=. --report-on=lib
       - uses: codecov/codecov-action@v7
         with:
@@ -370,6 +370,9 @@ jobs:
       - uses: actions/checkout@v7
       - uses: subosito/flutter-action@v2
         with:
+          # Work around flutter/flutter#181771 (iOS simulator VM service discovery
+          # race in Flutter 3.50 stable), fixed by flutter/flutter#193142 in 3.51+.
+          channel: ${{ matrix.platform == 'ios' && 'beta' || 'stable' }}
           cache: true
           pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-integration-${{ hashFiles('hive/pubspec.yaml', 'hive_flutter/pubspec.yaml', 'hive_flutter/example/pubspec.yaml') }}
       - name: Set up Linux

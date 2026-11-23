@@ -41,6 +41,15 @@ class BufferedFileReader {
   }
 
   /// Not part of public API
+  Future<void> seekTo(int offset) async {
+    assert(offset >= 0);
+    await file.setPosition(offset);
+    _bufferOffset = 0;
+    _bufferSize = 0;
+    _fileOffset = offset;
+  }
+
+  /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Uint8List viewBytes(int bytes) {
