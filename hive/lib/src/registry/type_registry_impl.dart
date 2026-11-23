@@ -181,10 +181,11 @@ class TypeRegistryImpl implements TypeRegistry {
     }
 
     _typeAdapters[typeId] = ResolvedAdapter<T>(adapter, typeId);
-    // Rebuild from _typeAdapters so overrides and duplicate-type precedence
-    // stay in sync without incremental eviction logic.
+    // Rebuild from _typeAdapters so overrides stay in sync without
+    // incremental eviction logic.
     _typeAdaptersByType.clear();
     for (final resolved in _typeAdapters.values) {
+      // Use putIfAbsent so the first registered adapter for a type wins.
       _typeAdaptersByType.putIfAbsent(resolved.type, () => resolved);
     }
   }
