@@ -1,5 +1,6 @@
 ## NEXT
 
+- Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
 - Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
 - Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
 - Speeds up binary serialization by eliminating per-write closure allocations in `BinaryWriterImpl`
