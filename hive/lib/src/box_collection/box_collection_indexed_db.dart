@@ -149,20 +149,19 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   Future<Map<String, V>> getAllValues([IDBTransaction? txn]) async {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
+    final map = <String, V>{};
     if (store.has('getAllKeys') && store.has('getAll')) {
       final keysFuture = store.getAllKeys(null).asFuture<JSArray>();
       final valuesFuture = store.getAll(null).asFuture<JSArray>();
       final results = await Future.wait([keysFuture, valuesFuture]);
       final keys = results[0].toDart;
       final values = results[1].toDart;
-      final map = <String, V>{};
       for (var i = 0; i < keys.length; i++) {
         map[(keys[i] as JSString).toDart] = _decodeValue(values[i]) as V;
       }
       return map;
     }
 
-    final map = <String, V>{};
     await for (final entry in store.iterate()) {
       map[(entry.key as JSString).toDart] = _decodeValue(entry.value) as V;
     }
