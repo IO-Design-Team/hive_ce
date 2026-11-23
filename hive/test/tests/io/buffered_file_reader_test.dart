@@ -119,5 +119,24 @@ void main() {
         await reader.file.close();
       });
     });
+
+    group('.seekTo()', () {
+      test('seeks forward past buffer without growing buffer', () async {
+        final reader = await openReader(List.generate(100, (i) => i), 10);
+        await reader.loadBytes(5);
+        expect(reader.viewBytes(3), [0, 1, 2]);
+
+        await reader.seekTo(80);
+        expect(reader.offset, 80);
+        expect(reader.remainingInBuffer, 0);
+        expect(reader.buffer.length, 10);
+
+        expect(await reader.loadBytes(5), 10);
+        expect(reader.viewBytes(5), [80, 81, 82, 83, 84]);
+        expect(reader.buffer.length, 10);
+
+        await reader.file.close();
+      });
+    });
   });
 }
