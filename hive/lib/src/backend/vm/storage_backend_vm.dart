@@ -65,19 +65,13 @@ class StorageBackendVm extends StorageBackend {
   var _isolated = false;
 
   static const _readAheadSize = 16384;
-  var _lastReadEndOffset = -1;
-  var _sequentialReadStreak = 0;
   Uint8List? _readAheadBuffer;
   var _readAheadStart = 0;
-  var _readAheadEnd = 0;
+  var _lastReadEndOffset = -1;
 
-  void _invalidateReadAhead({bool resetStreak = true}) {
-    _readAheadStart = 0;
-    _readAheadEnd = 0;
-    if (resetStreak) {
-      _lastReadEndOffset = -1;
-      _sequentialReadStreak = 0;
-    }
+  void _invalidateReadAhead() {
+    _readAheadBuffer = null;
+    _lastReadEndOffset = -1;
   }
 
   /// Not part of public API
@@ -172,7 +166,6 @@ class StorageBackendVm extends StorageBackend {
 
       if (_crashRecovery) {
         Logger.i('Recovering corrupted box.');
-        _invalidateReadAhead();
         await writeRaf.truncate(recoveryOffset);
         await writeRaf.setPosition(recoveryOffset);
         writeOffset = recoveryOffset;
@@ -187,64 +180,33 @@ class StorageBackendVm extends StorageBackend {
     return _sync.syncRead(() async {
       final len = frame.requireLength;
       final offset = frame.offset;
+      final end = offset + len;
+      final isSequential = offset == _lastReadEndOffset;
+      _lastReadEndOffset = end;
 
-      final Uint8List bytes;
-      var usedReadAhead = false;
-      final readAheadBuffer = _readAheadBuffer;
-      if (readAheadBuffer != null &&
-          len > 0 &&
+      Uint8List bytes;
+      final buffer = _readAheadBuffer;
+      if (buffer != null &&
           offset >= _readAheadStart &&
-          offset + len <= _readAheadEnd) {
-        if (offset == _lastReadEndOffset) {
-          _sequentialReadStreak++;
-        } else {
-          _sequentialReadStreak = 0;
-        }
-        _lastReadEndOffset = offset + len;
-
-        final start = offset - _readAheadStart;
-        bytes = Uint8List.sublistView(readAheadBuffer, start, start + len);
-        usedReadAhead = true;
+          end <= _readAheadStart + buffer.length) {
+        bytes = buffer.view(offset - _readAheadStart, len);
       } else {
-        if (offset == _lastReadEndOffset) {
-          _sequentialReadStreak++;
+        _readAheadBuffer = null;
+        final readAhead = isSequential && len <= _readAheadSize;
+        final readLen = readAhead ? _readAheadSize : len;
+
+        if (_isolated) {
+          readRaf.setPositionSync(offset);
+          bytes = readRaf.readSync(readLen);
         } else {
-          _sequentialReadStreak = 0;
+          await readRaf.setPosition(offset);
+          bytes = await readRaf.read(readLen);
         }
-        _lastReadEndOffset = offset + len;
-        _readAheadStart = 0;
-        _readAheadEnd = 0;
 
-        if (_sequentialReadStreak >= 2 && len <= _readAheadSize) {
-          final buffer = _readAheadBuffer ??= Uint8List(_readAheadSize);
-          final int bytesRead;
-          if (_isolated) {
-            readRaf.setPositionSync(offset);
-            bytesRead = readRaf.readIntoSync(buffer);
-          } else {
-            await readRaf.setPosition(offset);
-            bytesRead = await readRaf.readInto(buffer);
-          }
-
-          if (bytesRead < len) {
-            _invalidateReadAhead();
-            throw HiveError(
-              'Could not read value from box. Maybe your box is corrupted.',
-            );
-          }
-
+        if (readAhead && bytes.length >= len) {
+          _readAheadBuffer = bytes;
           _readAheadStart = offset;
-          _readAheadEnd = offset + bytesRead;
-          bytes = Uint8List.sublistView(buffer, 0, len);
-          usedReadAhead = true;
-        } else {
-          if (_isolated) {
-            readRaf.setPositionSync(offset);
-            bytes = readRaf.readSync(len);
-          } else {
-            await readRaf.setPosition(offset);
-            bytes = await readRaf.read(len);
-          }
+          bytes = bytes.view(0, len);
         }
       }
 
@@ -257,13 +219,14 @@ class StorageBackendVm extends StorageBackend {
       );
 
       if (readFrame == null) {
+        _invalidateReadAhead();
         throw HiveError(
           'Could not read value from box. Maybe your box is corrupted.',
         );
       }
 
       final value = readFrame.value;
-      if (verbatim && usedReadAhead && value is Uint8List) {
+      if (verbatim && _readAheadBuffer != null && value is Uint8List) {
         return value.sublist(0);
       }
       return value;
@@ -293,10 +256,6 @@ class StorageBackendVm extends StorageBackend {
       } catch (e) {
         await writeRaf.setPosition(writeOffset);
         rethrow;
-      }
-
-      if (_readAheadEnd > writeOffset) {
-        _invalidateReadAhead();
       }
 
       for (final frame in frames) {
@@ -383,7 +342,6 @@ class StorageBackendVm extends StorageBackend {
 
   Future _closeInternal() async {
     _invalidateReadAhead();
-    _readAheadBuffer = null;
 
     await readRaf.close();
     await writeRaf.close();
