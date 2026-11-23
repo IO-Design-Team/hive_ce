@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up `CollectionBox.clear()` on VM by delegating directly to `box.clear()`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
