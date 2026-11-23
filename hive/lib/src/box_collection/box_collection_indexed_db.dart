@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
@@ -149,6 +150,18 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
     final map = <String, V>{};
+    if (store.has('getAllKeys') && store.has('getAll')) {
+      final keysFuture = store.getAllKeys(null).asFuture<JSArray>();
+      final valuesFuture = store.getAll(null).asFuture<JSArray>();
+      final results = await Future.wait([keysFuture, valuesFuture]);
+      final keys = results[0].toDart;
+      final values = results[1].toDart;
+      for (var i = 0; i < keys.length; i++) {
+        map[(keys[i] as JSString).toDart] = _decodeValue(values[i]) as V;
+      }
+      return map;
+    }
+
     await for (final entry in store.iterate()) {
       map[(entry.key as JSString).toDart] = _decodeValue(entry.value) as V;
     }
