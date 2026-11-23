@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up web box open, batch writes, and `BoxCollection` bulk operations by batching IndexedDB transactions
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

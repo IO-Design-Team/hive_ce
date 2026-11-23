@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/backend/js/native/utils.dart';
@@ -148,6 +149,19 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
   Future<Map<String, V>> getAllValues([IDBTransaction? txn]) async {
     txn ??= boxCollection._db.transaction(name.toJS, 'readonly');
     final store = txn.objectStore(name);
+    if (store.has('getAllKeys') && store.has('getAll')) {
+      final keysFuture = store.getAllKeys(null).asFuture<JSArray>();
+      final valuesFuture = store.getAll(null).asFuture<JSArray>();
+      final results = await Future.wait([keysFuture, valuesFuture]);
+      final keys = results[0].toDart;
+      final values = results[1].toDart;
+      final map = <String, V>{};
+      for (var i = 0; i < keys.length; i++) {
+        map[(keys[i] as JSString).toDart] = _decodeValue(values[i]) as V;
+      }
+      return map;
+    }
+
     final map = <String, V>{};
     await for (final entry in store.iterate()) {
       map[(entry.key as JSString).toDart] = _decodeValue(entry.value) as V;
@@ -265,6 +279,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
   @override
   Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
+    if (keys.isEmpty) return;
+
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => deleteAll(keys, txn));
@@ -275,14 +291,34 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
-    final store = txn.objectStore(name);
-    for (final key in keys) {
-      await store.delete(key.toJS).asFuture();
-      _cache[key] = null;
-      _cachedKeys?.removeAll(keys);
+    final ownsTxn = txn == null;
+    final activeTxn =
+        txn ?? boxCollection._db.transaction(name.toJS, 'readwrite');
+    final store = activeTxn.objectStore(name);
+    if (ownsTxn) {
+      try {
+        for (final key in keys) {
+          store.delete(key.toJS);
+        }
+      } on Object {
+        try {
+          activeTxn.abort();
+        } on Object {
+          // Keep the original error if aborting fails.
+        }
+        rethrow;
+      }
+      await activeTxn.asFuture();
+    } else {
+      final requests = [
+        for (final key in keys) store.delete(key.toJS).asFuture(),
+      ];
+      await Future.wait(requests);
     }
-    return;
+    for (final key in keys) {
+      _cache[key] = null;
+    }
+    _cachedKeys?.removeAll(keys);
   }
 
   @override

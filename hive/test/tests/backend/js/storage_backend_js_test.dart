@@ -229,6 +229,35 @@ void main() async {
         ]);
       });
 
+      test('not lazy decodes encoded values and int/string keys', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
+        await backend.writeFrames([
+          Frame(0, 42),
+          Frame(1, ['a', 'b']),
+          Frame('key1', {'nested': 1}),
+          Frame('key2', null),
+        ]);
+
+        final keystore = Keystore.debug(notifier: ChangeNotifier());
+        expect(
+          await backend.initialize(
+            TypeRegistryImpl.nullImpl,
+            keystore,
+            false,
+          ),
+          0,
+        );
+        expect(keystore.getKeys(), [0, 1, 'key1', 'key2']);
+        expect(keystore.get(0)?.value, 42);
+        expect(keystore.get(0)?.value, isA<int>());
+        expect(keystore.get(1)?.value, ['a', 'b']);
+        expect(keystore.get(1)?.value, isA<List<String>>());
+        expect(keystore.get('key1')?.value, {'nested': 1});
+        expect(keystore.get('key2')?.value, null);
+        expect(keystore.frames.every((f) => !f.lazy), isTrue);
+      });
+
       test('lazy', () async {
         final db = await _getDbWith({'key1': 1, 'key2': null, 'key3': 3});
         final backend = _getBackend(db: db);
@@ -254,17 +283,57 @@ void main() async {
       expect(await backend.readValue(Frame('key2', null)), null);
     });
 
-    test('.writeFrames()', () async {
-      final db = await _getDbWith({});
-      final backend = _getBackend(db: db);
+    group('.writeFrames()', () {
+      test('puts and deletes', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
 
-      final frames = [Frame('key1', 123), Frame('key2', null)];
-      await backend.writeFrames(frames);
-      expect(frames, [Frame('key1', 123), Frame('key2', null)]);
-      expect(await backend.getKeys(), ['key1', 'key2']);
+        final frames = [Frame('key1', 123), Frame('key2', null)];
+        await backend.writeFrames(frames);
+        expect(frames, [Frame('key1', 123), Frame('key2', null)]);
+        expect(await backend.getKeys(), ['key1', 'key2']);
 
-      await backend.writeFrames([Frame.deleted('key1')]);
-      expect(await backend.getKeys(), ['key2']);
+        await backend.writeFrames([Frame.deleted('key1')]);
+        expect(await backend.getKeys(), ['key2']);
+      });
+
+      test('empty list is a no-op', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
+        await backend.writeFrames([Frame('key1', 1)]);
+
+        await backend.writeFrames([]);
+        expect(await backend.getKeys(), ['key1']);
+        expect(await backend.getValues(), [1]);
+      });
+
+      test('batched mixed puts and deletes', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
+
+        await backend.writeFrames([
+          Frame('a', 1),
+          Frame('b', 'two'),
+          Frame('c', [3]),
+          Frame('d', true),
+        ]);
+
+        await backend.writeFrames([
+          Frame.deleted('a'),
+          Frame('b', 'updated'),
+          Frame.deleted('c'),
+          Frame('e', {'k': 5}),
+          Frame(10, 100),
+        ]);
+
+        final keystore = Keystore.debug(notifier: ChangeNotifier());
+        await backend.initialize(TypeRegistryImpl.nullImpl, keystore, false);
+        expect(keystore.getKeys(), [10, 'b', 'd', 'e']);
+        expect(keystore.get(10)?.value, 100);
+        expect(keystore.get('b')?.value, 'updated');
+        expect(keystore.get('d')?.value, true);
+        expect(keystore.get('e')?.value, {'k': 5});
+      });
     });
 
     test('.compact()', () async {

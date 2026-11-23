@@ -109,6 +109,20 @@ void main() {
       });
     });
 
+    test('.getAllValues() with multiple entries', () async {
+      final collection = await _openCollection();
+      final box = await collection.openBox<Map>('cats');
+      await box.clear();
+      final expected = <String, Map>{};
+      for (var i = 0; i < 10; i++) {
+        final key = 'cat_$i';
+        final value = {'name': 'Cat $i', 'age': i};
+        expected[key] = value;
+        await box.put(key, value);
+      }
+      expect(await box.getAllValues(), expected);
+    });
+
     test('.get()', () async {
       final collection = await _openCollection(withData: true);
       final box = await collection.openBox('cats');
@@ -151,6 +165,48 @@ void main() {
       final box = await collection.openBox('cats');
       await box.deleteAll(['fluffy', 'loki']);
       expect(await box.getAllKeys(), []);
+    });
+
+    test('.deleteAll() updates cache and cached keys', () async {
+      final collection = await _openCollection(withData: true);
+      final box = await collection.openBox('cats');
+      await box.put('whiskers', {'name': 'Whiskers', 'age': 5});
+      expect(await box.getAllKeys(), ['fluffy', 'loki', 'whiskers']);
+      expect(await box.get('fluffy'), {'name': 'Fluffy', 'age': 4});
+      expect(await box.get('loki'), {'name': 'Loki', 'age': 2});
+
+      await box.deleteAll([]);
+      expect(await box.getAllKeys(), ['fluffy', 'loki', 'whiskers']);
+
+      await box.deleteAll(['fluffy', 'whiskers']);
+      expect(await box.getAllKeys(), ['loki']);
+      expect(await box.get('fluffy'), null);
+      expect(await box.get('whiskers'), null);
+      expect(await box.get('loki'), {'name': 'Loki', 'age': 2});
+      expect(await box.getAllValues(), {
+        'loki': {'name': 'Loki', 'age': 2},
+      });
+    });
+
+    test('.deleteAll() inside transaction', () async {
+      final collection = await _openCollection(withData: true);
+      final box = await collection.openBox('cats');
+      await box.put('whiskers', {'name': 'Whiskers', 'age': 5});
+      expect(await box.getAllKeys(), ['fluffy', 'loki', 'whiskers']);
+      expect(await box.get('fluffy'), {'name': 'Fluffy', 'age': 4});
+
+      await collection.transaction(() async {
+        await box.deleteAll([]);
+        await box.deleteAll(['fluffy', 'whiskers']);
+      });
+
+      expect(await box.getAllKeys(), ['loki']);
+      expect(await box.get('fluffy'), null);
+      expect(await box.get('whiskers'), null);
+      expect(await box.get('loki'), {'name': 'Loki', 'age': 2});
+      expect(await box.getAllValues(), {
+        'loki': {'name': 'Loki', 'age': 2},
+      });
     });
 
     test('.clear()', () async {

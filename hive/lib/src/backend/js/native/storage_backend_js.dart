@@ -112,25 +112,25 @@ class StorageBackendJs extends StorageBackend {
         .objectStore(objectStoreName);
   }
 
+  Object? _decodeKey(JSAny? key) {
+    if (key.isA<JSNumber>()) {
+      key as JSNumber;
+      return key.toDartInt;
+    } else if (key.isA<JSString>()) {
+      key as JSString;
+      return key.toDart;
+    }
+    return null;
+  }
+
   /// Not part of public API
   @visibleForTesting
   Future<List<Object>> getKeys({bool cursor = false}) async {
     final store = getStore(false);
 
     if (store.has('getAllKeys') && !cursor) {
-      final result = await getStore(false).getAllKeys(null).asFuture<JSArray>();
-      return result.toDart
-          .map((e) {
-            if (e.isA<JSNumber>()) {
-              e as JSNumber;
-              return e.toDartInt;
-            } else if (e.isA<JSString>()) {
-              e as JSString;
-              return e.toDart;
-            }
-          })
-          .whereType<Object>()
-          .toList();
+      final result = await store.getAllKeys(null).asFuture<JSArray>();
+      return result.toDart.map(_decodeKey).whereType<Object>().toList();
     } else {
       return await store
           .iterate()
@@ -162,17 +162,50 @@ class StorageBackendJs extends StorageBackend {
     bool isolated = false,
   }) async {
     _registry = registry;
-    final keys = await getKeys();
+    final store = getStore(false);
+    final hasGetAllKeys = store.has('getAllKeys');
+
     if (!lazy) {
-      var i = 0;
-      final values = await getValues();
-      for (final value in values) {
-        final key = keys[i++];
-        keystore.insert(Frame(key, value), notify: false);
+      if (hasGetAllKeys && store.has('getAll')) {
+        final keysFuture = store.getAllKeys(null).asFuture<JSArray>();
+        final valuesFuture = store.getAll(null).asFuture<JSArray>();
+        final results = await Future.wait([keysFuture, valuesFuture]);
+        final keys = results[0].toDart;
+        final values = results[1].toDart;
+        for (var i = 0; i < keys.length; i++) {
+          final key = _decodeKey(keys[i]);
+          if (key != null) {
+            keystore.insert(
+              Frame(key, decodeValue(values[i])),
+              notify: false,
+            );
+          }
+        }
+      } else {
+        await for (final entry in store.iterate()) {
+          final key = _decodeKey(entry.key);
+          if (key != null) {
+            keystore.insert(
+              Frame(key, decodeValue(entry.value)),
+              notify: false,
+            );
+          }
+        }
+      }
+    } else if (hasGetAllKeys) {
+      final keysResult = await store.getAllKeys(null).asFuture<JSArray>();
+      for (final rawKey in keysResult.toDart) {
+        final key = _decodeKey(rawKey);
+        if (key != null) {
+          keystore.insert(Frame.lazy(key), notify: false);
+        }
       }
     } else {
-      for (final key in keys) {
-        keystore.insert(Frame.lazy(key), notify: false);
+      await for (final entry in store.iterate()) {
+        final key = _decodeKey(entry.key);
+        if (key != null) {
+          keystore.insert(Frame.lazy(key), notify: false);
+        }
       }
     }
 
@@ -187,14 +220,27 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<void> writeFrames(List<Frame> frames, {bool verbatim = false}) async {
-    final store = getStore(true);
-    for (final frame in frames) {
-      if (frame.deleted) {
-        await store.delete(frame.key.jsify()).asFuture();
-      } else {
-        await store.put(encodeValue(frame), frame.key.jsify()).asFuture();
+    if (frames.isEmpty) return;
+
+    final txn = _db.transaction(objectStoreName.toJS, 'readwrite');
+    final store = txn.objectStore(objectStoreName);
+    try {
+      for (final frame in frames) {
+        if (frame.deleted) {
+          store.delete(frame.key.jsify());
+        } else {
+          store.put(encodeValue(frame), frame.key.jsify());
+        }
       }
+    } on Object {
+      try {
+        txn.abort();
+      } on Object {
+        // Keep the original error if aborting fails.
+      }
+      rethrow;
     }
+    await txn.asFuture();
   }
 
   @override
