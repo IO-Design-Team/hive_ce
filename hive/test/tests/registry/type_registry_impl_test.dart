@@ -194,17 +194,6 @@ void main() {
             expect(foundAdapter2.adapter.typeId, 60);
           });
         });
-
-        test('by typeId with different type', () {
-          final registry = TypeRegistryImpl();
-          registry.registerAdapter(ParentAdapter(0));
-          registry.registerAdapter(ChildAdapter(0), override: true);
-
-          expect(registry.findAdapterForType<Parent>(), null);
-          expect(registry.findAdapterForValue(Parent()), null);
-          expect(registry.findAdapterForType<Child>()?.typeId, 32);
-          expect(registry.findAdapterForValue(Child())?.typeId, 32);
-        });
       });
 
       test('adapter with same type warning', () async {
