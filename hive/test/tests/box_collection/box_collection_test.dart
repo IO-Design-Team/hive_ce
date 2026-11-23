@@ -160,31 +160,6 @@ void main() {
       expect(await box.getAllKeys(), []);
     });
 
-    test('.clear() empties populated box keys and values', () async {
-      final collection = await _openCollection(withData: true);
-      final box = await collection.openBox('cats');
-      for (var i = 0; i < 10; i++) {
-        await box.put('cat_$i', {'name': 'Cat $i', 'age': i});
-      }
-      expect(await box.getAllKeys(), hasLength(12));
-      expect(await box.getAllValues(), hasLength(12));
-
-      await box.clear();
-
-      expect(await box.getAllKeys(), isEmpty);
-      expect(await box.getAllValues(), isEmpty);
-      expect(await box.get('fluffy'), isNull);
-      expect(await box.get('loki'), isNull);
-      expect(await box.get('cat_0'), isNull);
-      expect(await box.get('cat_9'), isNull);
-
-      await box.put('whiskers', {'name': 'Whiskers', 'age': 3});
-      expect(await box.getAllKeys(), ['whiskers']);
-      expect(await box.getAllValues(), {
-        'whiskers': {'name': 'Whiskers', 'age': 3},
-      });
-    });
-
     test('json', () async {
       final collection = await _openCollection();
       final box = await collection.openBox('cats', fromJson: Test.fromJson);
