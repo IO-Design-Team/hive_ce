@@ -371,22 +371,58 @@ class BinaryWriterImpl extends BinaryWriter {
       write = () => writeList(value);
     } else if (value is Set<int>) {
       typeId = FrameValueType.intSetT;
-      write = () => writeIntList(value.toList());
+      write = () => _writeIntSet(value);
     } else if (value is Set<double>) {
       typeId = FrameValueType.doubleSetT;
-      write = () => writeDoubleList(value.toList());
+      write = () => _writeDoubleSet(value);
     } else if (value is Set<String>) {
       typeId = FrameValueType.stringSetT;
-      write = () => writeStringList(value.toList());
+      write = () => _writeStringSet(value);
     } else if (value is Set) {
       typeId = FrameValueType.setT;
-      write = () => writeList(value.toList());
+      write = () => _writeSet(value);
     } else {
       throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
 
     if (withTypeId) writeTypeId(typeId);
     write();
+  }
+
+  void _writeIntSet(Set<int> set) {
+    final length = set.length;
+    writeUint32(length);
+    _reserveBytes(length * 8);
+    final byteData = _byteData;
+    for (final value in set) {
+      byteData.setFloat64(_offset, value.toDouble(), Endian.little);
+      _offset += 8;
+    }
+  }
+
+  void _writeDoubleSet(Set<double> set) {
+    final length = set.length;
+    writeUint32(length);
+    _reserveBytes(length * 8);
+    final byteData = _byteData;
+    for (final value in set) {
+      byteData.setFloat64(_offset, value, Endian.little);
+      _offset += 8;
+    }
+  }
+
+  void _writeStringSet(Set<String> set) {
+    writeUint32(set.length);
+    for (final str in set) {
+      writeString(str);
+    }
+  }
+
+  void _writeSet(Set<dynamic> set) {
+    writeUint32(set.length);
+    for (final value in set) {
+      write(value);
+    }
   }
 
   /// Not part of public API
