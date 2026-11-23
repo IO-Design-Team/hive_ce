@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up watched box writes by routing key-specific `watch(key: ...)` listeners through per-key streams
 - Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
 - Speeds up binary serialization by eliminating per-write closure allocations in `BinaryWriterImpl`
 - Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
