@@ -161,7 +161,9 @@ abstract class BoxBaseImpl<E> implements BoxBase<E>, InspectableBox {
     if (!backend.supportsCompaction) return;
     if (keystore.deletedEntries == 0) return;
 
-    await backend.compact(keystore.frames);
+    final frames = keystore.frames.toList();
+    await backend.compact(frames);
+    keystore.updatePackedOffsets(frames);
     keystore.resetDeletedEntries();
   }
 

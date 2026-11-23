@@ -653,5 +653,133 @@ void main() {
         );
       });
     });
+
+    group('packed lazy storage', () {
+      test('inserts, reads, updates, deletes, and clears packed lazy frames',
+          () {
+        final notifier = MockChangeNotifier();
+        final keystore = Keystore.debug(notifier: notifier);
+
+        // 5000000000 exceeds 32-bit signed int; verifies Float64List 53-bit offsets.
+        expect(
+          keystore.insert(
+            Frame('k2', 'v2', offset: 5000000000, length: 64),
+            lazy: true,
+          ),
+          null,
+        );
+        expect(
+          keystore.insert(
+            Frame.lazy(1, offset: 10, length: null),
+            notify: false,
+          ),
+          null,
+        );
+        expect(
+          keystore.insert(
+            Frame(3, 'v3', offset: 100, length: 32),
+            lazy: true,
+          ),
+          null,
+        );
+
+        expect(keystore.length, 3);
+        expect(keystore.containsKey('k2'), true);
+        expect(keystore.containsKey('missing'), false);
+        expect(keystore.autoIncrement(), 4);
+        expect(keystore.keyAt(0), 1);
+        expect(keystore.keyAt(1), 3);
+        expect(keystore.keyAt(2), 'k2');
+
+        final f0 = keystore.getAt(0)!;
+        expect(f0.lazy, true);
+        expect(f0.key, 1);
+        expect(f0.offset, 10);
+        expect(f0.length, null);
+
+        final f2 = keystore.get('k2')!;
+        expect(f2.lazy, true);
+        expect(f2.key, 'k2');
+        expect(f2.offset, 5000000000);
+        expect(f2.length, 64);
+
+        expect(keystore.getKeys(), [1, 3, 'k2']);
+        expect(keystore.getValues(), [null, null, null]);
+        expect(keystore.getValuesBetween(3, 'k2'), [null, null]);
+        expect(keystore.frames.length, 3);
+
+        // Overwrite existing lazy key.
+        final prev = keystore.insert(
+          Frame('k2', 'v2-new', offset: 6000000000, length: 96),
+          lazy: true,
+        )!;
+        expect(prev.key, 'k2');
+        expect(prev.lazy, true);
+        expect(prev.offset, 5000000000);
+        expect(prev.length, 64);
+        expect(keystore.deletedEntries, 1);
+        expect(keystore.get('k2')!.offset, 6000000000);
+        expect(keystore.get('k2')!.length, 96);
+        verify(
+          () => notifier.notify(
+            Frame('k2', 'v2-new', offset: 6000000000, length: 96),
+          ),
+        );
+
+        // Update packed offsets (e.g. after compaction).
+        keystore.updatePackedOffsets([
+          Frame.lazy(1, offset: 0, length: 12),
+          Frame.lazy('k2', offset: 12, length: 96),
+          Frame.lazy('not-present', offset: 999, length: 10),
+        ]);
+        expect(keystore.length, 3);
+        expect(keystore.get(1)!.offset, 0);
+        expect(keystore.get(1)!.length, 12);
+        expect(keystore.get('k2')!.offset, 12);
+        expect(keystore.get('k2')!.length, 96);
+        expect(keystore.get('not-present'), null);
+
+        // Delete lazy key.
+        reset(notifier);
+        final deleted = keystore.insert(Frame.deleted(3))!;
+        expect(deleted.key, 3);
+        expect(deleted.lazy, true);
+        expect(deleted.offset, 100);
+        expect(deleted.length, 32);
+        expect(keystore.length, 2);
+        expect(keystore.deletedEntries, 2);
+        expect(keystore.containsKey(3), false);
+        expect(keystore.insert(Frame.deleted(3)), null);
+        verify(() => notifier.notify(Frame.deleted(3)));
+
+        // Clear packed lazy store.
+        reset(notifier);
+        expect(keystore.clear(), 2);
+        expect(keystore.length, 0);
+        expect(keystore.deletedEntries, 0);
+        expect(keystore.autoIncrement(), 0);
+        expect(keystore.frames, isEmpty);
+        verify(() => notifier.notify(Frame.deleted(1)));
+        verify(() => notifier.notify(Frame.deleted('k2')));
+      });
+
+      test('updatePackedOffsets is a no-op on eager keystore', () {
+        final keystore = Keystore.debug(frames: [Frame('a', 1, offset: 10)]);
+        keystore.updatePackedOffsets([Frame('a', 1, offset: 99, length: 10)]);
+        expect(keystore.get('a')!.offset, 10);
+      });
+
+      test('promotes packed lazy entries if eager frame is inserted', () {
+        final keystore = Keystore.debug();
+        keystore.insert(Frame.lazy('a', offset: 12, length: 34));
+        keystore.insert(Frame('b', 'eager'));
+
+        expect(keystore.length, 2);
+        expect(keystore.get('a')!.lazy, true);
+        expect(keystore.get('a')!.offset, 12);
+        expect(keystore.get('a')!.length, 34);
+        expect(keystore.get('b'), Frame('b', 'eager'));
+      });
+    });
   });
 }

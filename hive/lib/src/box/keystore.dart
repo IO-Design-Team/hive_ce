@@ -5,7 +5,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
-import 'package:hive_ce/src/util/indexable_skip_list.dart';
+import 'package:hive_ce/src/util/b_plus_tree.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/box/box_base_impl.dart';
@@ -29,7 +29,11 @@ class Keystore<E> {
 
   final ChangeNotifier _notifier;
 
-  final IndexableSkipList<dynamic, Frame> _store;
+  final KeyComparator _keyComparator;
+
+  BPlusTree<dynamic, Frame>? _store;
+
+  PackedLazyBPlusTree<dynamic>? _lazyStore;
 
   /// Not part of public API
   @visibleForTesting
@@ -40,7 +44,7 @@ class Keystore<E> {
 
   /// Not part of public API
   Keystore(this._box, this._notifier, KeyComparator? keyComparator)
-      : _store = IndexableSkipList(keyComparator ?? defaultKeyComparator);
+      : _keyComparator = keyComparator ?? defaultKeyComparator;
 
   /// Not part of public API
   factory Keystore.debug({
@@ -60,18 +64,44 @@ class Keystore<E> {
     return keystore;
   }
 
+  BPlusTree<dynamic, Frame> _ensureEagerStore() {
+    var store = _store;
+    if (store != null) return store;
+
+    store = BPlusTree<dynamic, Frame>(_keyComparator);
+    final lazyStore = _lazyStore;
+    if (lazyStore != null) {
+      for (final frame in lazyStore.frames) {
+        store.insert(frame.key, frame);
+      }
+      _lazyStore = null;
+    }
+    _store = store;
+    return store;
+  }
+
   /// Not part of public API
   int get deletedEntries => _deletedEntries;
 
   /// Not part of public API
-  int get length => _store.length;
+  int get length => _store?.length ?? _lazyStore?.length ?? 0;
 
   /// Not part of public API
-  Iterable<Frame> get frames => _store.values;
+  Iterable<Frame> get frames =>
+      _store?.values ?? _lazyStore?.frames ?? const Iterable<Frame>.empty();
 
   /// Not part of public API
   void resetDeletedEntries() {
     _deletedEntries = 0;
+  }
+
+  /// Not part of public API
+  void updatePackedOffsets(Iterable<Frame> frames) {
+    final lazyStore = _lazyStore;
+    if (lazyStore == null) return;
+    for (final frame in frames) {
+      lazyStore.updateOffsetAndLength(frame.key, frame.offset, frame.length);
+    }
   }
 
   /// Not part of public API
@@ -90,47 +120,61 @@ class Keystore<E> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool containsKey(dynamic key) {
-    return _store.get(key) != null;
+    if (_store case final store?) return store.containsKey(key);
+    if (_lazyStore case final lazyStore?) return lazyStore.containsKey(key);
+    return false;
   }
 
   /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   dynamic keyAt(int index) {
-    return _store.getKeyAt(index);
+    if (_store case final store?) return store.getKeyAt(index);
+    if (_lazyStore case final lazyStore?) return lazyStore.getKeyAt(index);
+    RangeError.checkValidIndex(index, this, 'index', 0);
+    return null;
   }
 
   /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Frame? get(dynamic key) {
-    return _store.get(key);
+    return _store?.get(key) ?? _lazyStore?.get(key);
   }
 
   /// Not part of public API
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   Frame? getAt(int index) {
-    return _store.getAt(index);
+    if (_store case final store?) return store.getAt(index);
+    if (_lazyStore case final lazyStore?) return lazyStore.getAt(index);
+    RangeError.checkValidIndex(index, this, 'index', 0);
+    return null;
   }
 
   /// Not part of public API
   Iterable<dynamic> getKeys() {
-    return _store.keys;
+    return _store?.keys ?? _lazyStore?.keys ?? const Iterable<dynamic>.empty();
   }
 
   /// Not part of public API
   Iterable<E> getValues() {
-    return _store.values.map((e) => e.value as E);
+    return frames.map((e) => e.value as E);
   }
 
   /// Not part of public API
   Iterable<E> getValuesBetween([dynamic startKey, dynamic endKey]) sync* {
     Iterable<Frame> iterable;
     if (startKey != null) {
-      iterable = _store.valuesFromKey(startKey);
+      if (_store case final store?) {
+        iterable = store.valuesFromKey(startKey);
+      } else if (_lazyStore case final lazyStore?) {
+        iterable = lazyStore.framesFromKey(startKey);
+      } else {
+        iterable = const Iterable<Frame>.empty();
+      }
     } else {
-      iterable = _store.values;
+      iterable = frames;
     }
 
     for (final frame in iterable) {
@@ -160,9 +204,21 @@ class Keystore<E> {
         value.init(key, _box);
       }
 
-      deletedFrame = _store.insert(key, lazy ? frame.toLazy() : frame);
+      if (_store == null && (lazy || frame.lazy)) {
+        final lazyStore =
+            _lazyStore ??= PackedLazyBPlusTree<dynamic>(_keyComparator);
+        deletedFrame = lazyStore.insertLazy(key, frame.offset, frame.length);
+      } else {
+        deletedFrame =
+            _ensureEagerStore().insert(key, lazy ? frame.toLazy() : frame);
+      }
     } else {
-      deletedFrame = _store.delete(frame.key);
+      final key = frame.key;
+      if (_store case final store?) {
+        deletedFrame = store.delete(key);
+      } else if (_lazyStore case final lazyStore?) {
+        deletedFrame = lazyStore.deleteLazy(key);
+      }
     }
 
     if (deletedFrame != null) {
@@ -226,7 +282,12 @@ class Keystore<E> {
         }
       }
 
-      _store.insert(key, deletedFrame);
+      if (_store == null && deletedFrame.lazy) {
+        (_lazyStore ??= PackedLazyBPlusTree<dynamic>(_keyComparator))
+            .insertLazy(key, deletedFrame.offset, deletedFrame.length);
+      } else {
+        _ensureEagerStore().insert(key, deletedFrame);
+      }
       _notifier.notify(deletedFrame);
     }
 
@@ -245,7 +306,7 @@ class Keystore<E> {
         }
       }
       if (!isOverride) {
-        final deletedFrame = _store.delete(key);
+        final deletedFrame = _store?.delete(key) ?? _lazyStore?.deleteLazy(key);
         _notifier.notify(Frame.deleted(key), deletedValue: deletedFrame?.value);
       }
     }
@@ -253,20 +314,33 @@ class Keystore<E> {
 
   /// Not part of public API
   int clear() {
-    final frameList = frames.toList();
+    final int clearedCount;
+    if (_store case final store?) {
+      final frameList = store.values.toList();
+      store.clear();
 
-    _store.clear();
-
-    for (final frame in frameList) {
-      if (frame.value is HiveObjectMixin) {
-        (frame.value as HiveObjectMixin).dispose();
+      for (final frame in frameList) {
+        if (frame.value is HiveObjectMixin) {
+          (frame.value as HiveObjectMixin).dispose();
+        }
+        _notifier.notify(Frame.deleted(frame.key), deletedValue: frame.value);
       }
-      _notifier.notify(Frame.deleted(frame.key), deletedValue: frame.value);
+      clearedCount = frameList.length;
+    } else if (_lazyStore case final lazyStore?) {
+      final keys = lazyStore.keys.toList();
+      lazyStore.clear();
+
+      for (final key in keys) {
+        _notifier.notify(Frame.deleted(key as Object));
+      }
+      clearedCount = keys.length;
+    } else {
+      clearedCount = 0;
     }
 
     _deletedEntries = 0;
     _autoIncrement = -1;
-    return frameList.length;
+    return clearedCount;
   }
 
   /// Not part of public API

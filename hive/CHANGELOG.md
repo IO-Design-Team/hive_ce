@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up box indexing and cuts lazy box memory usage with an order-64 B+ tree and packed lazy frame metadata
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
