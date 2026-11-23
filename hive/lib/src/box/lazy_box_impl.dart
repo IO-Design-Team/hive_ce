@@ -44,12 +44,32 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   }
 
   @override
+  Future<void> put(dynamic key, E value) async {
+    checkOpen();
+
+    final frame = Frame(key, value);
+    if (key is int) {
+      keystore.updateAutoIncrement(key);
+    }
+
+    await backend.writeFrames([frame], verbatim: isolated);
+
+    if (value is HiveObjectMixin) {
+      value.init(key, this);
+    }
+    keystore.insert(frame, lazy: true);
+
+    await performCompactionIfNeeded();
+  }
+
+  @override
   Future<void> putAll(Map<dynamic, dynamic> kvPairs) async {
     checkOpen();
 
     final frames = <Frame>[];
-    for (final key in kvPairs.keys) {
-      frames.add(Frame(key, kvPairs[key]));
+    for (final entry in kvPairs.entries) {
+      final key = entry.key;
+      frames.add(Frame(key, entry.value));
       if (key is int) {
         keystore.updateAutoIncrement(key);
       }
@@ -64,6 +84,20 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
       }
       keystore.insert(frame, lazy: true);
     }
+
+    await performCompactionIfNeeded();
+  }
+
+  @override
+  Future<void> delete(dynamic key) async {
+    checkOpen();
+
+    if (!keystore.containsKey(key)) return;
+
+    final frame = Frame.deleted(key);
+    await backend.writeFrames([frame], verbatim: isolated);
+
+    keystore.insert(frame);
 
     await performCompactionIfNeeded();
   }

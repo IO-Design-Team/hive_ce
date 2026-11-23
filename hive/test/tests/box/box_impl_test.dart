@@ -94,6 +94,71 @@ void main() {
       expect(box.getAt(1), 'A');
     });
 
+    group('.put()', () {
+      test('value', () async {
+        final frames = <Frame>[Frame('key1', 'value1')];
+        final keystoreFrames = <Frame>[Frame('keystoreFrames', 123)];
+
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        when(() => keystore.frames).thenReturn(keystoreFrames);
+        when(() => keystore.beginTransaction(any())).thenReturn(true);
+        returnFutureVoid(when(() => backend.writeFrames(frames)));
+        returnFutureVoid(when(() => backend.compact(keystoreFrames)));
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.length).thenReturn(-1);
+        when(() => keystore.deletedEntries).thenReturn(-1);
+
+        final box = _getBox(
+          keystore: keystore,
+          backend: backend,
+          cStrategy: (a, b) => true,
+        );
+
+        await box.put('key1', 'value1');
+        verifyInOrder([
+          () => keystore.beginTransaction(frames),
+          () => backend.writeFrames(frames),
+          keystore.commitTransaction,
+          () => backend.compact([Frame('keystoreFrames', 123)]),
+        ]);
+      });
+
+      test('handles exceptions', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+
+        when(() => backend.writeFrames(any())).thenThrow('Some error');
+        when(() => keystore.beginTransaction(any())).thenReturn(true);
+
+        final box = _getBox(backend: backend, keystore: keystore);
+
+        await expectLater(
+          () async => await box.put('key1', 'value1'),
+          throwsA(anything),
+        );
+        final frames = [Frame('key1', 'value1')];
+        verifyInOrder([
+          () => keystore.beginTransaction(frames),
+          () => backend.writeFrames(frames),
+          keystore.cancelTransaction,
+        ]);
+      });
+
+      test('throws if box is closed', () async {
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
+
+        final box = _getBox(backend: backend);
+        await box.close();
+
+        await expectLater(
+          box.put('key1', 'value1'),
+          throwsHiveError(['closed']),
+        );
+      });
+    });
+
     group('.putAll()', () {
       test('values', () async {
         final frames = <Frame>[
@@ -158,6 +223,86 @@ void main() {
           () => backend.writeFrames(frames),
           keystore.cancelTransaction,
         ]);
+      });
+    });
+
+    group('.delete()', () {
+      test('does nothing when deleting non existing key', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final box = _getBox(backend: backend, keystore: keystore);
+        when(() => keystore.containsKey('key1')).thenReturn(false);
+
+        await box.delete('key1');
+        verify(() => keystore.containsKey('key1'));
+        verifyZeroInteractions(backend);
+        verifyNever(() => keystore.beginTransaction(any()));
+      });
+
+      test('deletes existing key', () async {
+        final frames = [Frame.deleted('key1')];
+
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.beginTransaction(any())).thenReturn(true);
+        returnFutureVoid(when(() => backend.writeFrames(frames)));
+        when(() => keystore.containsKey('key1')).thenReturn(true);
+        when(() => keystore.length).thenReturn(-1);
+        when(() => keystore.deletedEntries).thenReturn(-1);
+        when(() => keystore.frames).thenReturn(frames);
+        returnFutureVoid(when(() => backend.compact(frames)));
+
+        final box = _getBox(
+          backend: backend,
+          keystore: keystore,
+          cStrategy: (a, b) => true,
+        );
+
+        await box.delete('key1');
+        verifyInOrder([
+          () => keystore.containsKey('key1'),
+          () => keystore.beginTransaction(frames),
+          () => backend.writeFrames(frames),
+          keystore.commitTransaction,
+          () => backend.compact(any()),
+        ]);
+      });
+
+      test('handles exceptions', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final frames = [Frame.deleted('key1')];
+
+        when(() => keystore.containsKey('key1')).thenReturn(true);
+        when(() => keystore.beginTransaction(any())).thenReturn(true);
+        when(() => backend.writeFrames(any())).thenThrow('Some error');
+
+        final box = _getBox(backend: backend, keystore: keystore);
+
+        await expectLater(
+          () async => await box.delete('key1'),
+          throwsA(anything),
+        );
+        verifyInOrder([
+          () => keystore.containsKey('key1'),
+          () => keystore.beginTransaction(frames),
+          () => backend.writeFrames(frames),
+          keystore.cancelTransaction,
+        ]);
+      });
+
+      test('throws if box is closed', () async {
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
+
+        final box = _getBox(backend: backend);
+        await box.close();
+
+        await expectLater(
+          box.delete('key1'),
+          throwsHiveError(['closed']),
+        );
       });
     });
 

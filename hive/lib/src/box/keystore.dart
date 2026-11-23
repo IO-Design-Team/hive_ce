@@ -15,8 +15,13 @@ class KeyTransaction<E> {
   /// The values that have been added
   final List<dynamic> added = [];
 
+  Map<dynamic, Frame>? _deleted;
+
   /// The frames that have been deleted
-  final Map<dynamic, Frame> deleted = HashMap();
+  Map<dynamic, Frame> get deleted => _deleted ??= HashMap();
+
+  /// Whether any frames have been deleted
+  bool get hasDeleted => _deleted?.isNotEmpty ?? false;
 
   /// Not part of public API
   @visibleForTesting
@@ -194,7 +199,7 @@ class Keystore<E> {
       }
     }
 
-    if (transaction.added.isNotEmpty || transaction.deleted.isNotEmpty) {
+    if (transaction.added.isNotEmpty || transaction.hasDeleted) {
       transactions.add(transaction);
       return true;
     } else {
@@ -211,32 +216,38 @@ class Keystore<E> {
   void cancelTransaction() {
     final canceled = transactions.removeFirst();
 
-    deleted_loop:
-    for (final entry in canceled.deleted.entries) {
-      final key = entry.key;
-      final deletedFrame = entry.value;
-      for (final t in transactions) {
-        if (t.deleted.containsKey(key)) {
-          t.deleted[key] = deletedFrame;
-          continue deleted_loop;
+    final canceledDeleted = canceled._deleted;
+    if (canceledDeleted != null && canceledDeleted.isNotEmpty) {
+      deleted_loop:
+      for (final entry in canceledDeleted.entries) {
+        final key = entry.key;
+        final deletedFrame = entry.value;
+        for (final t in transactions) {
+          final tDeleted = t._deleted;
+          if (tDeleted != null && tDeleted.containsKey(key)) {
+            tDeleted[key] = deletedFrame;
+            continue deleted_loop;
+          }
+          if (t.added.contains(key)) {
+            t.deleted[key] = deletedFrame;
+            continue deleted_loop;
+          }
         }
-        if (t.added.contains(key)) {
-          t.deleted[key] = deletedFrame;
-          continue deleted_loop;
-        }
-      }
 
-      _store.insert(key, deletedFrame);
-      _notifier.notify(deletedFrame);
+        _store.insert(key, deletedFrame);
+        _notifier.notify(deletedFrame);
+      }
     }
 
     added_loop:
     for (final key in canceled.added) {
-      final isOverride = canceled.deleted.containsKey(key);
+      final isOverride =
+          canceledDeleted != null && canceledDeleted.containsKey(key);
       for (final t in transactions) {
-        if (t.deleted.containsKey(key)) {
+        final tDeleted = t._deleted;
+        if (tDeleted != null && tDeleted.containsKey(key)) {
           if (!isOverride) {
-            t.deleted.remove(key);
+            tDeleted.remove(key);
           }
           continue added_loop;
         }

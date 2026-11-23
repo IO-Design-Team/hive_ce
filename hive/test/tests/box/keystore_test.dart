@@ -16,6 +16,18 @@ void main() {
     }
   }
 
+  group('KeyTransaction', () {
+    test('lazily allocates deleted map and tracks hasDeleted', () {
+      final tx = KeyTransaction<dynamic>();
+      expect(tx.hasDeleted, false);
+      expect(tx.deleted, isEmpty);
+      expect(tx.hasDeleted, false);
+
+      tx.deleted['k'] = Frame('k', 'v');
+      expect(tx.hasDeleted, true);
+    });
+  });
+
   group('Keystore', () {
     test('.length returns the number of frames in the store', () {
       final keystore = Keystore.debug(frames: [Frame('a', 1), Frame(1, 'a')]);
@@ -347,6 +359,7 @@ void main() {
 
         expect(created, true);
         expect(keystore.transactions.first.added, ['key1', 'key2']);
+        expect(keystore.transactions.first.hasDeleted, false);
         expect(keystore.frames, [Frame('key1', 'val1'), Frame('key2', 'val2')]);
         verify(() => notifier.notify(Frame('key1', 'val1')));
         verify(() => notifier.notify(Frame('key2', 'val2')));
@@ -366,6 +379,7 @@ void main() {
         ]);
 
         expect(created, true);
+        expect(keystore.transactions.first.hasDeleted, true);
         expect(keystore.transactions.first.deleted, {
           'key1': Frame('key1', 'val1'),
         });
@@ -408,6 +422,7 @@ void main() {
         ]);
 
         expect(created, true);
+        expect(keystore.transactions.first.hasDeleted, true);
         expect(keystore.transactions.first.deleted, {
           'key1': Frame('key1', 'val1'),
         });

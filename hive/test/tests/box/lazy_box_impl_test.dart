@@ -74,6 +74,72 @@ void main() {
       expect(await box.getAt(1), 'A');
     });
 
+    group('.put()', () {
+      test(
+          'writes single entry, updates autoIncrement, and initializes HiveObject',
+          () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final keystoreFrames = <Frame>[Frame('keystoreFrames', 123)];
+        final obj = TestHiveObject();
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.frames).thenReturn(keystoreFrames);
+        when(() => keystore.length).thenReturn(-1);
+        when(() => keystore.deletedEntries).thenReturn(-1);
+        returnFutureVoid(when(() => backend.compact(keystoreFrames)));
+
+        final box = _getBox(
+          backend: backend,
+          keystore: keystore,
+          cStrategy: (a, b) => true,
+        );
+
+        await box.put(5, obj);
+        expect(obj.key, 5);
+        expect(obj.box, box);
+        verifyInOrder([
+          () => keystore.updateAutoIncrement(5),
+          () => backend.writeFrames([Frame(5, obj)]),
+          () => keystore.insert(Frame(5, obj), lazy: true),
+          () => backend.compact(keystoreFrames),
+        ]);
+      });
+
+      test('handles exceptions', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        const theError = 'Some error';
+
+        when(() => backend.writeFrames(any())).thenThrow(theError);
+
+        final box = _getBox(
+          backend: backend,
+          keystore: keystore,
+        );
+
+        await expectLater(
+          () async => await box.put('key1', 'value1'),
+          throwsA(theError),
+        );
+        verify(() => backend.writeFrames([Frame('key1', 'value1')]));
+        verifyNoMoreInteractions(keystore);
+      });
+
+      test('throws if box is closed', () async {
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
+
+        final box = _getBox(backend: backend);
+        await box.close();
+
+        await expectLater(
+          box.put('key1', 'value1'),
+          throwsHiveError(['closed']),
+        );
+      });
+    });
+
     group('.putAll()', () {
       test('values', () async {
         final backend = MockStorageBackend();
@@ -125,6 +191,62 @@ void main() {
           ]),
         );
         verifyNoMoreInteractions(keystore);
+      });
+    });
+
+    group('.delete()', () {
+      test('does nothing when deleting non existing key', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        when(() => keystore.containsKey('key1')).thenReturn(false);
+        final box = _getBox(
+          backend: backend,
+          keystore: keystore,
+        );
+
+        await box.delete('key1');
+        verify(() => keystore.containsKey('key1'));
+        verifyZeroInteractions(backend);
+      });
+
+      test('deletes existing key', () async {
+        final backend = MockStorageBackend();
+        final keystore = MockKeystore();
+        final keystoreFrames = <Frame>[Frame('keystoreFrames', 123)];
+        when(() => keystore.containsKey('key1')).thenReturn(true);
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        when(() => backend.supportsCompaction).thenReturn(true);
+        when(() => keystore.frames).thenReturn(keystoreFrames);
+        when(() => keystore.length).thenReturn(-1);
+        when(() => keystore.deletedEntries).thenReturn(-1);
+        returnFutureVoid(when(() => backend.compact(keystoreFrames)));
+
+        final box = _getBox(
+          backend: backend,
+          keystore: keystore,
+          cStrategy: (a, b) => true,
+        );
+
+        await box.delete('key1');
+        verifyInOrder([
+          () => keystore.containsKey('key1'),
+          () => backend.writeFrames([Frame.deleted('key1')]),
+          () => keystore.insert(Frame.deleted('key1')),
+          () => backend.compact(keystoreFrames),
+        ]);
+      });
+
+      test('throws if box is closed', () async {
+        final backend = MockStorageBackend();
+        returnFutureVoid(when(backend.close));
+
+        final box = _getBox(backend: backend);
+        await box.close();
+
+        await expectLater(
+          box.delete('key1'),
+          throwsHiveError(['closed']),
+        );
       });
     });
 

@@ -57,13 +57,26 @@ class BoxImpl<E> extends BoxBaseImpl<E> implements Box<E> {
   }
 
   @override
+  Future<void> put(dynamic key, E value) {
+    return _writeFrames([Frame(key, value)]);
+  }
+
+  @override
   Future<void> putAll(Map<dynamic, E> kvPairs) {
     final frames = <Frame>[];
-    for (final key in kvPairs.keys) {
-      frames.add(Frame(key, kvPairs[key]));
+    for (final entry in kvPairs.entries) {
+      frames.add(Frame(entry.key, entry.value));
     }
 
     return _writeFrames(frames);
+  }
+
+  @override
+  Future<void> delete(dynamic key) {
+    if (!isOpen) return _writeFrames(const []);
+    if (!keystore.containsKey(key)) return Future.value();
+
+    return _writeFrames([Frame.deleted(key)]);
   }
 
   @override
