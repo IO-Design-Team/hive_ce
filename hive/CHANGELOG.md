@@ -1,3 +1,7 @@
+## NEXT
+
+- Speeds up watched writes and single-entry box operations with per-key change streams, fast single-entry `put`/`delete`, and lazy transaction maps
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration
