@@ -137,6 +137,12 @@ class BinaryReaderImpl extends BinaryReader {
     Converter<List<int>, String> decoder = BinaryReader.utf8Decoder,
   ]) {
     byteCount ??= readUint32();
+    if (decoder is Utf8Decoder) {
+      _requireBytes(byteCount);
+      final start = _offset;
+      _offset += byteCount;
+      return decoder.convert(_buffer, start, start + byteCount);
+    }
     final view = viewBytes(byteCount);
     return decoder.convert(view);
   }
@@ -227,7 +233,14 @@ class BinaryReaderImpl extends BinaryReader {
       return readUint32();
     } else if (keyType == FrameKeyType.utf8StringT) {
       final byteCount = readByte();
-      return BinaryReader.utf8Decoder.convert(viewBytes(byteCount));
+      _requireBytes(byteCount);
+      final start = _offset;
+      _offset += byteCount;
+      return BinaryReader.utf8Decoder.convert(
+        _buffer,
+        start,
+        start + byteCount,
+      );
     } else {
       throw HiveError('Unsupported key type. Frame might be corrupted.');
     }

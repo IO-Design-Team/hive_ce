@@ -1,3 +1,7 @@
+## NEXT
+
+- Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
+
 ## 2.24.0
 
 - Adds support for CRC32 acceleration

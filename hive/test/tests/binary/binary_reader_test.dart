@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
@@ -8,6 +10,23 @@ import 'package:test/test.dart';
 
 import '../common.dart';
 import '../frames.dart';
+
+class _RecordingDecoder extends Converter<List<int>, String> {
+  final inputs = <List<int>>[];
+
+  @override
+  String convert(List<int> input) {
+    inputs.add(List<int>.of(input));
+    return input.join(',');
+  }
+}
+
+Uint8List _subViewWithSentinels(List<int> payload, {int offset = 4}) {
+  final backing = Uint8List(offset + payload.length + 4)
+    ..fillRange(0, offset + payload.length + 4, 0xff);
+  backing.setRange(offset, offset + payload.length, payload);
+  return Uint8List.sublistView(backing, offset, offset + payload.length);
+}
 
 BinaryReaderImpl fromByteData(ByteData byteData) {
   return BinaryReaderImpl(byteData.buffer.asUint8List(), TypeRegistryImpl());
@@ -168,6 +187,23 @@ void main() {
       br = fromBytes([]);
       expect(br.readString(0), '');
 
+      br = fromBytes([5, 0, 0, 0, 104, 101, 108, 108, 111]);
+      expect(br.readString(), 'hello');
+      expect(br.availableBytes, 0);
+
+      final multiByte = utf8.encode('héllo 世界 🚀');
+      br = fromBytes([
+        multiByte.length,
+        0,
+        0,
+        0,
+        ...multiByte,
+        ...utf8.encode('abc'),
+      ]);
+      expect(br.readString(), 'héllo 世界 🚀');
+      expect(br.readString(3), 'abc');
+      expect(br.availableBytes, 0);
+
       br = fromBytes([
         12, 0, 0, 0, 0xf0, 0xa0, 0x81, 0xa0, 0xf0, //
         0x9f, 0x87, 0xac, 0xf0, 0x9f, 0x87, 0xb5, //
@@ -182,6 +218,62 @@ void main() {
       expect(br.readString(25), '👨‍👨‍👧‍👦');
 
       expect(() => br.readString(), throwsRangeError);
+
+      br = fromBytes([5, 0, 0, 0, 104, 105]);
+      expect(() => br.readString(), throwsRangeError);
+      expect(br.availableBytes, 2);
+
+      // Sub-view buffer (offsetInBytes > 0)
+      final emojiBytes = utf8.encode('👨‍👨‍👧‍👦');
+      final subView = _subViewWithSentinels([
+        0, 0, 0, 0, // ''
+        5, 0, 0, 0, 104, 101, 108, 108, 111, // 'hello'
+        multiByte.length, 0, 0, 0, ...multiByte, // 'héllo 世界 🚀'
+        ...emojiBytes, // explicit byteCount emoji
+      ]);
+      expect(subView.offsetInBytes, greaterThan(0));
+      br = BinaryReaderImpl(subView, TypeRegistryImpl());
+      expect(br.readString(), '');
+      expect(br.readString(), 'hello');
+      expect(br.readString(), 'héllo 世界 🚀');
+      expect(br.readString(emojiBytes.length), '👨‍👨‍👧‍👦');
+      expect(br.availableBytes, 0);
+
+      // Utf8Decoder(allowMalformed: true) vs strict default decoder
+      br = fromBytes([3, 0, 0, 0, 0x68, 0xff, 0x69]);
+      expect(
+        br.readString(null, const Utf8Decoder(allowMalformed: true)),
+        'h\uFFFDi',
+      );
+      br = fromBytes([0x68, 0xff, 0x69]);
+      expect(
+        br.readString(3, const Utf8Decoder(allowMalformed: true)),
+        'h\uFFFDi',
+      );
+      br = fromBytes([3, 0, 0, 0, 0x68, 0xff, 0x69]);
+      expect(() => br.readString(), throwsFormatException);
+      br = fromBytes([3, 0, 0, 0, 0x68, 0xff, 0x69]);
+      expect(
+        () => br.readString(null, BinaryReader.utf8Decoder),
+        throwsFormatException,
+      );
+
+      // latin1.decoder
+      br = fromBytes([4, 0, 0, 0, 0x63, 0x61, 0x66, 0xe9]);
+      expect(br.readString(null, latin1.decoder), 'café');
+      br = fromBytes([0x63, 0x61, 0x66, 0xe9]);
+      expect(br.readString(4, latin1.decoder), 'café');
+
+      // Custom Converter fallback receives sliced bytes only
+      final decoder = _RecordingDecoder();
+      br = fromBytes([2, 0, 0, 0, 10, 20, 30, 40, 50, 99]);
+      expect(br.readString(null, decoder), '10,20');
+      expect(br.readString(3, decoder), '30,40,50');
+      expect(br.availableBytes, 1);
+      expect(decoder.inputs, [
+        [10, 20],
+        [30, 40, 50],
+      ]);
     });
 
     test('.readByteList()', () {
@@ -268,6 +360,34 @@ void main() {
       expect(br.readStringList(2), ['a', 'ab']);
 
       expect(() => br.readStringList(), throwsRangeError);
+
+      // Sub-view buffer (offsetInBytes > 0)
+      final subView = _subViewWithSentinels([
+        2, 0, 0, 0, 1, 0, 0, 0, 97, 13, 0, 0, 0, 0xf0, 0x9f, 0xa7, 0x99, //
+        0xe2, 0x80, 0x8d, 0xe2, 0x99, 0x82, 0xef, 0xb8, 0x8f, //
+      ]);
+      expect(subView.offsetInBytes, greaterThan(0));
+      br = BinaryReaderImpl(subView, TypeRegistryImpl());
+      expect(br.readStringList(), ['a', '🧙‍♂️']);
+      expect(br.availableBytes, 0);
+
+      // latin1.decoder
+      br = fromBytes([
+        2, 0, 0, 0, //
+        4, 0, 0, 0, 0x63, 0x61, 0x66, 0xe9, // 'café'
+        5, 0, 0, 0, 0x6e, 0x61, 0xef, 0x76, 0x65, // 'naïve'
+      ]);
+      expect(br.readStringList(null, latin1.decoder), ['café', 'naïve']);
+
+      // Custom Converter fallback
+      final decoder = _RecordingDecoder();
+      br = fromBytes([2, 0, 0, 0, 2, 0, 0, 0, 1, 2, 1, 0, 0, 0, 3, 99]);
+      expect(br.readStringList(null, decoder), ['1,2', '3']);
+      expect(br.availableBytes, 1);
+      expect(decoder.inputs, [
+        [1, 2],
+        [3],
+      ]);
     });
 
     test('.readList()', () {
@@ -316,6 +436,47 @@ void main() {
       test('string key', () {
         final br = fromBytes([1, 2, 104, 105]);
         expect(br.readKey(), 'hi');
+      });
+
+      test('empty, ASCII, multi-byte UTF-8, and emoji string keys', () {
+        final utf8Key = utf8.encode('héllo 世界');
+        final emojiKey = utf8.encode('🚀👨‍👨‍👧‍👦');
+        final br = fromBytes([
+          FrameKeyType.utf8StringT, 0, // ''
+          FrameKeyType.utf8StringT, 11, ...utf8.encode('hello_world'),
+          FrameKeyType.utf8StringT, utf8Key.length, ...utf8Key,
+          FrameKeyType.utf8StringT, emojiKey.length, ...emojiKey,
+        ]);
+
+        expect(br.readKey(), '');
+        expect(br.readKey(), 'hello_world');
+        expect(br.readKey(), 'héllo 世界');
+        expect(br.readKey(), '🚀👨‍👨‍👧‍👦');
+        expect(br.availableBytes, 0);
+      });
+
+      test('string keys from sub-view buffer (offsetInBytes > 0)', () {
+        final utf8Key = utf8.encode('héllo 世界');
+        final emojiKey = utf8.encode('🚀👨‍👨‍👧‍👦');
+        final subView = _subViewWithSentinels([
+          FrameKeyType.utf8StringT, 0, //
+          FrameKeyType.utf8StringT, 2, 104, 105, //
+          FrameKeyType.utf8StringT, utf8Key.length, ...utf8Key, //
+          FrameKeyType.utf8StringT, emojiKey.length, ...emojiKey, //
+        ]);
+        expect(subView.offsetInBytes, greaterThan(0));
+
+        final br = BinaryReaderImpl(subView, TypeRegistryImpl());
+        expect(br.readKey(), '');
+        expect(br.readKey(), 'hi');
+        expect(br.readKey(), 'héllo 世界');
+        expect(br.readKey(), '🚀👨‍👨‍👧‍👦');
+        expect(br.availableBytes, 0);
+      });
+
+      test('truncated string key throws RangeError', () {
+        final br = fromBytes([FrameKeyType.utf8StringT, 5, 104, 105]);
+        expect(br.readKey, throwsRangeError);
       });
 
       test('wrong key type', () {
@@ -389,8 +550,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          final readFrame =
-              expectNotNull(reader.readFrame(lazy: false, frameOffset: offset));
+          final readFrame = expectNotNull(
+            reader.readFrame(lazy: false, frameOffset: offset),
+          );
           expectFrame(readFrame, frame);
           offset += frameBytes[i].length;
         }
@@ -402,8 +564,9 @@ void main() {
         for (var i = 0; i < frames.length; i++) {
           final frame = frames[i];
           final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
-          final readFrame =
-              expectNotNull(reader.readFrame(lazy: true, frameOffset: offset));
+          final readFrame = expectNotNull(
+            reader.readFrame(lazy: true, frameOffset: offset),
+          );
           expectFrame(readFrame, frame.toLazy());
           offset += frameBytes[i].length;
         }
