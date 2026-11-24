@@ -22,6 +22,7 @@ abstract class IsolatedBoxBaseImpl<E>
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
+  late final _writer = ReusableBinaryWriter(_hive);
   Stream<BoxEvent>? _stream;
 
   var _open = true;
@@ -167,13 +168,17 @@ abstract class IsolatedBoxBaseImpl<E>
   }
 
   Uint8List _writeValue(E value) {
-    final writer = BinaryWriterImpl(_hive);
-    if (_cipher != null) {
-      writer.writeEncrypted(value, _cipher);
-    } else {
-      writer.write(value);
+    final writer = _writer.acquire();
+    try {
+      if (_cipher != null) {
+        writer.writeEncrypted(value, _cipher);
+      } else {
+        writer.write(value);
+      }
+      return Uint8List.fromList(writer.toBytes());
+    } finally {
+      _writer.release(writer);
     }
-    return Uint8List.fromList(writer.toBytes());
   }
 
   E? _readValue(Uint8List? bytes) {
