@@ -1,6 +1,8 @@
 ## NEXT
 
-- Speeds up pure-Dart AES-CBC encryption and decryption with flattened working keys and register-fused 32-bit CBC loops
+- Speeds up AES-CBC encryption and decryption with flattened working keys and fused 32-bit CBC loops
+- Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
+- Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
 - Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
 - Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key

@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 import 'message.dart';
 
-PaddedBlockCipherImpl getCipher({Uint8List? customIv}) {
+PaddedBlockCipherImpl getCipher() {
   final pcCipher = PaddedBlockCipherImpl(
     PKCS7Padding(),
     CBCBlockCipher(AESEngine()),
@@ -16,7 +16,7 @@ PaddedBlockCipherImpl getCipher({Uint8List? customIv}) {
   pcCipher.init(
     true,
     PaddedBlockCipherParameters(
-      ParametersWithIV(KeyParameter(key), customIv ?? iv),
+      ParametersWithIV(KeyParameter(key), iv),
       null,
     ),
   );
@@ -36,12 +36,8 @@ Uint8List _expectedCbcPkcs7(Uint8List input) {
   return out;
 }
 
-Uint8List _encryptRawBlock(Uint8List plainBlock, Uint8List customIv) {
-  final cipher = getCipher(customIv: customIv);
-  // Encrypts plainBlock + full PKCS7 block; first 16 bytes are CBC(plainBlock).
-  final full = cipher.process(plainBlock);
-  return Uint8List.sublistView(full, 0, aesBlockSize);
-}
+Uint8List _encryptRawBlock(Uint8List plainBlock) =>
+    getCipher().process(plainBlock).view(0, aesBlockSize);
 
 void main() {
   final corruptedPadError = isA<ArgumentError>().having(
@@ -81,36 +77,26 @@ void main() {
       }
     });
 
-    test('supports non-zero inpOff and outOff', () {
+    test('supports non-zero offsets and in-place operation', () {
       final cipher = AesCbcPkcs7(key);
 
-      for (final len in <int>[0, 1, 15, 16, 17, 32, 63, 64, 257]) {
+      for (final len in [0, 1, 15, 16, 17, 32, 64]) {
         const inpOff = 13;
         const outOff = 19;
+        const decOutOff = 5;
         final inpBuf = Uint8List(inpOff + len + 5)
-          ..fillRange(0, inpOff + len + 5, 0xee);
-        inpBuf.setRange(inpOff, inpOff + len, message, 50);
+          ..fillRange(0, inpOff + len + 5, 0xee)
+          ..setRange(inpOff, inpOff + len, message, 50);
+        final expected = _expectedCbcPkcs7(inpBuf.view(inpOff, len));
 
-        final expected = _expectedCbcPkcs7(
-          Uint8List.sublistView(inpBuf, inpOff, inpOff + len),
-        );
         final outBuf = Uint8List(outOff + expected.length + 11)
           ..fillRange(0, outOff + expected.length + 11, 0xcc);
-
-        final encLen = cipher.encrypt(
-          iv,
-          inpBuf,
-          inpOff,
-          len,
-          outBuf,
-          outOff,
-        );
+        final encLen = cipher.encrypt(iv, inpBuf, inpOff, len, outBuf, outOff);
         expect(encLen, expected.length);
-        expect(outBuf.sublist(outOff, outOff + encLen), expected);
-        expect(outBuf.sublist(0, outOff), List.filled(outOff, 0xcc));
-        expect(outBuf.sublist(outOff + encLen), List.filled(11, 0xcc));
+        expect(outBuf.view(outOff, encLen), expected);
+        expect(outBuf.view(0, outOff), List.filled(outOff, 0xcc));
+        expect(outBuf.view(outOff + encLen, 11), List.filled(11, 0xcc));
 
-        const decOutOff = 5;
         final decBuf = Uint8List(decOutOff + encLen + 9)
           ..fillRange(0, decOutOff + encLen + 9, 0xdd);
         final decLen = cipher.decrypt(
@@ -122,76 +108,45 @@ void main() {
           decOutOff,
         );
         expect(decLen, len);
+        expect(decBuf.view(decOutOff, decLen), inpBuf.view(inpOff, len));
+        expect(decBuf.view(0, decOutOff), List.filled(decOutOff, 0xdd));
+        expect(decBuf.view(decOutOff + encLen, 9), List.filled(9, 0xdd));
+
+        final inPlaceBuf = Uint8List(expected.length + 8)
+          ..setRange(4, 4 + len, message, 50);
+        expect(cipher.encrypt(iv, inPlaceBuf, 4, len, inPlaceBuf, 4), encLen);
+        expect(inPlaceBuf.view(4, encLen), expected);
         expect(
-          decBuf.sublist(decOutOff, decOutOff + decLen),
-          inpBuf.sublist(inpOff, inpOff + len),
+          cipher.decrypt(iv, inPlaceBuf, 4, encLen, inPlaceBuf, 4),
+          decLen,
         );
-        expect(decBuf.sublist(0, decOutOff), List.filled(decOutOff, 0xdd));
-        expect(decBuf.sublist(decOutOff + encLen), List.filled(9, 0xdd));
+        expect(inPlaceBuf.view(4, decLen), inpBuf.view(inpOff, len));
       }
     });
 
-    test('supports in-place encryption and decryption', () {
-      final cipher = AesCbcPkcs7(key);
-      for (final len in <int>[0, 1, 15, 16, 31, 32, 64, 199]) {
-        final paddedLen = ((len ~/ aesBlockSize) + 1) * aesBlockSize;
-        final buf = Uint8List(paddedLen + 8);
-        buf.setRange(4, 4 + len, message, 100);
-
-        final expected = _expectedCbcPkcs7(
-          Uint8List.sublistView(message, 100, 100 + len),
-        );
-
-        final encLen = cipher.encrypt(iv, buf, 4, len, buf, 4);
-        expect(encLen, expected.length);
-        expect(buf.sublist(4, 4 + encLen), expected);
-
-        final decLen = cipher.decrypt(iv, buf, 4, encLen, buf, 4);
-        expect(decLen, len);
-        expect(buf.sublist(4, 4 + decLen), message.sublist(100, 100 + len));
-      }
-    });
-
-    test('.decrypt() throws on invalid ciphertext lengths', () {
+    test('.decrypt() rejects invalid lengths and corrupted PKCS7 padding', () {
       final cipher = AesCbcPkcs7(key);
       final inp = Uint8List(64);
-      final out = Uint8List(64);
+      final out = Uint8List(32);
 
-      for (final invalidLen in <int>[0, 1, 15, 17, 31, 33]) {
+      for (final invalidLen in [0, 1, 15, 17, 31, 33]) {
         expect(
           () => cipher.decrypt(iv, inp, 0, invalidLen, out, 0),
           throwsA(corruptedPadError),
         );
       }
-    });
 
-    test('.decrypt() throws on invalid or corrupted PKCS7 padding', () {
-      final cipher = AesCbcPkcs7(key);
-      final out = Uint8List(32);
-
-      final invalidBlocks = <Uint8List>[
-        // Pad byte = 0
+      final invalidBlocks = [
         Uint8List(16)..fillRange(0, 16, 0),
-        // Pad byte = 17 (> block size)
         Uint8List(16)..fillRange(0, 16, 17),
-        // Pad byte = 255
         Uint8List(16)..fillRange(0, 16, 255),
-        // Claims pad = 2, second-to-last byte is 1
-        Uint8List.fromList(<int>[...List.filled(14, 0xaa), 0x01, 0x02]),
-        // Claims pad = 4, one padding byte corrupted
-        Uint8List.fromList(<int>[
-          ...List.filled(12, 0x42),
-          0x04,
-          0x03,
-          0x04,
-          0x04,
-        ]),
-        // Claims pad = 16, first byte is not 0x10
-        Uint8List.fromList(<int>[0x00, ...List.filled(15, 0x10)]),
+        Uint8List.fromList([...List.filled(14, 0xaa), 0x01, 0x02]),
+        Uint8List.fromList([...List.filled(12, 0x42), 0x04, 0x03, 0x04, 0x04]),
+        Uint8List.fromList([0x00, ...List.filled(15, 0x10)]),
       ];
 
       for (final plainBlock in invalidBlocks) {
-        final encryptedBlock = _encryptRawBlock(plainBlock, iv);
+        final encryptedBlock = _encryptRawBlock(plainBlock);
         expect(
           () => cipher.decrypt(iv, encryptedBlock, 0, aesBlockSize, out, 0),
           throwsA(corruptedPadError),

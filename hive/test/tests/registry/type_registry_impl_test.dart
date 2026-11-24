@@ -384,5 +384,12 @@ void main() {
         expect(TypeRegistryImpl.isInternalTypeId(320), false);
       });
     });
+
+    test('nullImpl', () {
+      expect(
+        () => TypeRegistryImpl.nullImpl.findAdapterForTypeId(0),
+        throwsUnimplementedError,
+      );
+    });
   });
 }
