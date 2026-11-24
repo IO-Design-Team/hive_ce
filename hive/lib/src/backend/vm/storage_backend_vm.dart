@@ -248,12 +248,11 @@ class StorageBackendVm extends StorageBackend {
           if (frame.offset == -1) continue; // Frame has not been written yet
           if (frame.offset != reader.offset) {
             final skip = frame.offset - reader.offset;
-            if (reader.remainingInBuffer < skip) {
-              if (await reader.loadBytes(skip) < skip) {
-                throw HiveError('Could not compact box: Unexpected EOF.');
-              }
+            if (skip > 0 && reader.remainingInBuffer >= skip) {
+              reader.skip(skip);
+            } else {
+              await reader.seekTo(frame.offset);
             }
-            reader.skip(skip);
           }
 
           final length = frame.requireLength;

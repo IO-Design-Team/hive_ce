@@ -13,17 +13,29 @@ class PersonAdapter extends TypeAdapter<Person> {
   @override
   Person read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2, field3, field4;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        case 3:
+          field3 = reader.read();
+        case 4:
+          field4 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return Person(
-      name: fields[0] as String,
-      age: (fields[1] as num).toInt(),
-      bestFriend: fields[2] as Person?,
-      friends: fields[3] == null
-          ? const []
-          : (fields[3] as List).cast<Person>(),
-      job: fields[4] == null ? Job.unemployed : fields[4] as Job,
+      name: field0 as String,
+      age: (field1 as num).toInt(),
+      bestFriend: field2 as Person?,
+      friends: field3 == null ? const [] : (field3 as List).cast<Person>(),
+      job: field4 == null ? Job.unemployed : field4 as Job,
     );
   }
 
