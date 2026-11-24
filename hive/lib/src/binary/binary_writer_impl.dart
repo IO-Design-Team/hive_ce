@@ -25,6 +25,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   var _offset = 0;
 
+  late final _valueWriter = ReusableBinaryWriter(typeRegistry);
+
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   ByteData get _byteData => _byteDataInstance ??= ByteData.view(_buffer.buffer);
@@ -421,15 +423,19 @@ class BinaryWriterImpl extends BinaryWriter {
     HiveCipher cipher, {
     bool withTypeId = true,
   }) {
-    final valueWriter = BinaryWriterImpl(typeRegistry)
-      ..write(value, withTypeId: withTypeId);
-    final inp = valueWriter.toBytes();
+    final valueWriter = _valueWriter.acquire();
+    try {
+      valueWriter.write(value, withTypeId: withTypeId);
+      final inp = valueWriter.toBytes();
 
-    _reserveBytes(cipher.maxEncryptedSize(inp));
+      _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
+      final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
 
-    _offset += len;
+      _offset += len;
+    } finally {
+      _valueWriter.release(valueWriter);
+    }
   }
 
   /// Not part of public API
