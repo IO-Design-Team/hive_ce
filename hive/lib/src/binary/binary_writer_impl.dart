@@ -450,3 +450,36 @@ class BinaryWriterImpl extends BinaryWriter {
     return x + 1;
   }
 }
+
+/// Not part of public API
+class ReusableBinaryWriter {
+  static const _maxRetainedBufferSize = 65536;
+
+  final TypeRegistry _typeRegistry;
+  BinaryWriterImpl? _writer;
+
+  /// Not part of public API
+  ReusableBinaryWriter(this._typeRegistry);
+
+  /// Not part of public API
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  BinaryWriterImpl acquire() {
+    final writer = _writer;
+    if (writer != null) {
+      _writer = null;
+      return writer;
+    }
+    return BinaryWriterImpl(_typeRegistry);
+  }
+
+  /// Not part of public API
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  void release(BinaryWriterImpl writer) {
+    if (_writer == null && writer._buffer.length <= _maxRetainedBufferSize) {
+      writer._offset = 0;
+      _writer = writer;
+    }
+  }
+}

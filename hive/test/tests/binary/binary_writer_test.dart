@@ -680,4 +680,163 @@ void main() {
       }
     });
   });
+
+  group('ReusableBinaryWriter', () {
+    ReusableBinaryWriter getReusableWriter() =>
+        ReusableBinaryWriter(TypeRegistryImpl());
+
+    test('reuses writer and resets offset across sequential acquire/release',
+        () {
+      final reusable = getReusableWriter();
+
+      final first = reusable.acquire();
+      first.writeByteList([1, 2, 3], writeLength: false);
+      expect(first.toBytes(), [1, 2, 3]);
+      reusable.release(first);
+
+      final second = reusable.acquire();
+      expect(identical(second, first), isTrue);
+      expect(second.toBytes(), isEmpty);
+
+      second.writeByteList([4, 5], writeLength: false);
+      expect(second.toBytes(), [4, 5]);
+      reusable.release(second);
+    });
+
+    test('retains buffers up to 65536 bytes', () {
+      final reusableMid = getReusableWriter();
+      final mid = reusableMid.acquire();
+      mid.writeDouble(1.23);
+      mid.writeByteList(Uint8List(5000));
+      mid.writeDouble(4.56);
+      expect(mid.toBytes().buffer.lengthInBytes, 16384);
+      reusableMid.release(mid);
+
+      final midAgain = reusableMid.acquire();
+      expect(identical(midAgain, mid), isTrue);
+      expect(midAgain.toBytes(), isEmpty);
+      expect(midAgain.toBytes().buffer.lengthInBytes, 16384);
+      midAgain.writeDouble(9.87);
+      expect(fromBytes(midAgain.toBytes()).readDouble(), 9.87);
+      reusableMid.release(midAgain);
+
+      final reusableBoundary = getReusableWriter();
+      final boundary = reusableBoundary.acquire();
+      boundary.writeByteList(Uint8List(20000));
+      expect(boundary.toBytes().buffer.lengthInBytes, 65536);
+      reusableBoundary.release(boundary);
+
+      final boundaryAgain = reusableBoundary.acquire();
+      expect(identical(boundaryAgain, boundary), isTrue);
+      expect(boundaryAgain.toBytes(), isEmpty);
+      expect(boundaryAgain.toBytes().buffer.lengthInBytes, 65536);
+      reusableBoundary.release(boundaryAgain);
+    });
+
+    test('drops writers larger than 65536 bytes', () {
+      final reusable = getReusableWriter();
+
+      final large1 = reusable.acquire();
+      large1.writeDouble(1.23);
+      large1.writeByteList(Uint8List(40000));
+      large1.writeDouble(4.56);
+      expect(large1.toBytes().buffer.lengthInBytes, 131072);
+      reusable.release(large1);
+
+      final afterLarge1 = reusable.acquire();
+      expect(identical(afterLarge1, large1), isFalse);
+      expect(afterLarge1.toBytes(), isEmpty);
+      expect(afterLarge1.toBytes().buffer.lengthInBytes, 4096);
+      afterLarge1.writeDouble(9.87);
+      expect(fromBytes(afterLarge1.toBytes()).readDouble(), 9.87);
+
+      afterLarge1.writeByteList(Uint8List(70000));
+      expect(afterLarge1.toBytes().buffer.lengthInBytes, 262144);
+      reusable.release(afterLarge1);
+
+      final afterLarge2 = reusable.acquire();
+      expect(identical(afterLarge2, afterLarge1), isFalse);
+      expect(afterLarge2.toBytes(), isEmpty);
+      expect(afterLarge2.toBytes().buffer.lengthInBytes, 4096);
+      reusable.release(afterLarge2);
+    });
+
+    test('handles re-entrant acquire and release safely', () {
+      final reusable = getReusableWriter();
+      final outer = reusable.acquire();
+      outer.writeByteList([1, 2], writeLength: false);
+
+      final inner = reusable.acquire();
+      expect(identical(inner, outer), isFalse);
+      inner.writeByteList([3, 4], writeLength: false);
+
+      expect(outer.toBytes(), [1, 2]);
+      expect(inner.toBytes(), [3, 4]);
+
+      reusable.release(inner);
+      reusable.release(outer);
+
+      final next = reusable.acquire();
+      expect(identical(next, inner), isTrue);
+      expect(next.toBytes(), isEmpty);
+      reusable.release(next);
+
+      final reusable2 = getReusableWriter();
+      final outer2 = reusable2.acquire();
+      outer2.writeByteList([5, 6], writeLength: false);
+
+      final inner2 = reusable2.acquire();
+      inner2.writeByteList(Uint8List(40000));
+      expect(inner2.toBytes().buffer.lengthInBytes, 131072);
+
+      reusable2.release(inner2);
+      reusable2.release(outer2);
+
+      final next2 = reusable2.acquire();
+      expect(identical(next2, outer2), isTrue);
+      expect(next2.toBytes(), isEmpty);
+      reusable2.release(next2);
+    });
+
+    test('cleans up cleanly on exception in try/finally', () {
+      final reusable = getReusableWriter();
+
+      final small = reusable.acquire();
+      expect(
+        () {
+          try {
+            small.writeByteList([1, 2, 3], writeLength: false);
+            throw StateError('small');
+          } finally {
+            reusable.release(small);
+          }
+        },
+        throwsStateError,
+      );
+
+      final afterSmall = reusable.acquire();
+      expect(identical(afterSmall, small), isTrue);
+      expect(afterSmall.toBytes(), isEmpty);
+      reusable.release(afterSmall);
+
+      final large = reusable.acquire();
+      expect(
+        () {
+          try {
+            large.writeByteList(Uint8List(40000));
+            throw StateError('large');
+          } finally {
+            reusable.release(large);
+          }
+        },
+        throwsStateError,
+      );
+
+      final afterLarge = reusable.acquire();
+      expect(identical(afterLarge, large), isFalse);
+      expect(afterLarge.toBytes(), isEmpty);
+      expect(afterLarge.toBytes().buffer.lengthInBytes, 4096);
+      reusable.release(afterLarge);
+    });
+  });
 }
