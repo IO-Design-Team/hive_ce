@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up IsolatedHive writes and reduces memory usage by reusing a bounded BinaryWriterImpl
 - Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
 - Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
