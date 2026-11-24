@@ -1,22 +1,41 @@
 import 'dart:collection';
 import 'dart:math';
 
+import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/util/b_plus_tree.dart';
 import 'package:test/test.dart';
 
 const _capacity = 64;
 const _maxEntries = 63;
 const _minFill = 32;
+const _maxHeight = 16;
 
 int _intCompare(int a, int b) => a.compareTo(b);
 
 int _reverseIntCompare(int a, int b) => b.compareTo(a);
+
+int _nullableIntCompare(int? a, int? b) {
+  if (a == null) return b == null ? 0 : -1;
+  if (b == null) return 1;
+  return a.compareTo(b);
+}
 
 void verifyInvariants<K>(
   BPlusTree<K, Object?> tree,
   Comparator<K> comparator,
 ) {
   final snapshot = tree.debugSnapshot();
+  if (snapshot.pathNodes.length != _maxHeight) {
+    throw StateError(
+      'Expected $_maxHeight pathNodes slots, got ${snapshot.pathNodes.length}',
+    );
+  }
+  for (var i = 0; i < snapshot.pathNodes.length; i++) {
+    if (snapshot.pathNodes[i] != null) {
+      throw StateError('Unclean _pathNodes[$i]');
+    }
+  }
+
   if (snapshot.length == 0) {
     if (snapshot.height != 1) {
       throw StateError('Empty tree must have height 1, got ${snapshot.height}');
@@ -48,9 +67,11 @@ void verifyInvariants<K>(
           'Internal node found at leaf depth $depth/${snapshot.height}',
         );
       }
-      if (info.count < 2 || info.count > _maxEntries) {
+      final minChildren = depth == 1 ? 2 : _minFill;
+      if (info.count < minChildren || info.count > _maxEntries) {
         throw StateError(
-          'Internal node count ${info.count} out of [2, $_maxEntries]',
+          'Internal node count ${info.count} out of '
+          '[$minChildren, $_maxEntries]',
         );
       }
       final children = info.children;
@@ -83,23 +104,7 @@ void verifyInvariants<K>(
             'Subtree count mismatch at $i: ${counts[i]} != $cCount',
           );
         }
-        final childInfo = snapshot.inspect(child);
         if (i > 0) {
-          final prevChild = children[i - 1];
-          if (prevChild == null) {
-            throw StateError('Null child at ${i - 1}');
-          }
-          final prevInfo = snapshot.inspect(prevChild);
-          final childIsTail =
-              childInfo.isLeaf && identical(child, snapshot.tail);
-          if (!childIsTail &&
-              prevInfo.count < _minFill &&
-              childInfo.count < _minFill) {
-            throw StateError(
-              'Adjacent underfilled non-tail siblings: '
-              '${prevInfo.count}, ${childInfo.count}',
-            );
-          }
           final sep = info.keys[i - 1] as K;
           if (comparator(prevMax as K, sep) >= 0) {
             throw StateError('Left max $prevMax >= separator $sep');
@@ -119,9 +124,11 @@ void verifyInvariants<K>(
     if (depth != snapshot.height) {
       throw StateError('Leaf depth $depth != height ${snapshot.height}');
     }
-    if (info.count < 1 || info.count > _maxEntries) {
+    final minEntries =
+        snapshot.height == 1 || identical(node, snapshot.tail) ? 1 : _minFill;
+    if (info.count < minEntries || info.count > _maxEntries) {
       throw StateError(
-        'Leaf count ${info.count} out of [1, $_maxEntries]',
+        'Leaf count ${info.count} out of [$minEntries, $_maxEntries]',
       );
     }
     final values = info.values;
@@ -183,30 +190,39 @@ void verifyInvariants<K>(
 
 void main() {
   group('BPlusTree', () {
-    test('empty tree behavior', () {
+    test('empty tree and iterable properties', () {
       final tree = BPlusTree<int, String>(_intCompare);
       verifyInvariants(tree, _intCompare);
       expect(tree.length, 0);
       expect(tree.isEmpty, true);
       expect(tree.isNotEmpty, false);
       expect(tree.keys, isEmpty);
+      expect(tree.keys.isEmpty, true);
+      expect(tree.keys.isNotEmpty, false);
+      expect(tree.keys.length, 0);
       expect(tree.values, isEmpty);
+      expect(tree.values.isEmpty, true);
+      expect(tree.values.isNotEmpty, false);
+      expect(tree.values.length, 0);
       expect(tree.get(1), null);
       expect(tree.containsKey(1), false);
       expect(tree.delete(1), null);
       expect(tree.valuesFromKey(1), isEmpty);
       expect(() => tree.getAt(0), throwsRangeError);
       expect(() => tree.getAt(-1), throwsRangeError);
+      expect(() => tree.getAt(1), throwsRangeError);
       expect(() => tree.getKeyAt(0), throwsRangeError);
       expect(() => tree.getKeyAt(-1), throwsRangeError);
+      expect(() => tree.getKeyAt(1), throwsRangeError);
     });
 
     test(
-      'ascending inserts trigger tail fast path across multiple heights',
+      'ascending inserts trigger tail fast path across internal splits',
       () {
         final tree = BPlusTree<int, String>(_intCompare);
-        // 63 * 63 + 531 = 4500 ensures height >= 3 on right-edge tail splits.
-        const count = 4500;
+        // > 5923 ascending entries splits a non-root internal child at level 1,
+        // exercising ancestor count updates in _propagateSplitUp.
+        const count = 6500;
         for (var i = 0; i < count; i++) {
           expect(tree.insert(i, 'v$i'), null);
           if (i < 300 || i % 250 == 0 || i == count - 1) {
@@ -214,10 +230,15 @@ void main() {
           }
         }
 
+        expect(tree.debugSnapshot().height, 3);
         expect(tree.length, count);
         expect(tree.isEmpty, false);
         expect(tree.isNotEmpty, true);
+        expect(tree.keys.isEmpty, false);
+        expect(tree.keys.isNotEmpty, true);
         expect(tree.keys.length, count);
+        expect(tree.values.isEmpty, false);
+        expect(tree.values.isNotEmpty, true);
         expect(tree.values.length, count);
 
         for (var i = 0; i < count; i++) {
@@ -228,8 +249,12 @@ void main() {
         }
         expect(tree.containsKey(-1), false);
         expect(tree.containsKey(count), false);
+        expect(() => tree.getAt(-1), throwsRangeError);
         expect(() => tree.getAt(count), throwsRangeError);
+        expect(() => tree.getAt(count + 1), throwsRangeError);
+        expect(() => tree.getKeyAt(-1), throwsRangeError);
         expect(() => tree.getKeyAt(count), throwsRangeError);
+        expect(() => tree.getKeyAt(count + 1), throwsRangeError);
       },
     );
 
@@ -243,12 +268,47 @@ void main() {
         }
       }
 
+      expect(tree.debugSnapshot().height, 3);
       expect(tree.length, count);
       expect(tree.keys, List.generate(count, (i) => i));
       for (var i = 0; i < count; i++) {
         expect(tree.get(i), i * 2);
         expect(tree.getAt(i), i * 2);
         expect(tree.getKeyAt(i), i);
+      }
+    });
+
+    test('non-tail-append split of full _tail updates _tail', () {
+      final tree = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < _maxEntries; i++) {
+        expect(tree.insert(i * 2, i), null);
+      }
+      expect(tree.debugSnapshot().height, 1);
+
+      // Insert < tail.last into a full 63-entry _tail so the leaf splits and
+      // updates _tail.
+      expect(tree.insert(123, 123), null);
+      verifyInvariants(tree, _intCompare);
+      expect(tree.debugSnapshot().height, 2);
+      expect(tree.length, 64);
+
+      expect(tree.insert(200, 200), null);
+      verifyInvariants(tree, _intCompare);
+      expect(tree.getKeyAt(64), 200);
+      expect(tree.get(123), 123);
+    });
+
+    test('getAt and getKeyAt RangeError across heights 1, 2, and 3', () {
+      for (final (size, expectedHeight) in [(10, 1), (100, 2), (4100, 3)]) {
+        final tree = BPlusTree<int, int>(_intCompare);
+        for (var i = 0; i < size; i++) {
+          tree.insert(i, i);
+        }
+        expect(tree.debugSnapshot().height, expectedHeight);
+        for (final badIndex in [-1, size, size + 1]) {
+          expect(() => tree.getAt(badIndex), throwsRangeError);
+          expect(() => tree.getKeyAt(badIndex), throwsRangeError);
+        }
       }
     });
 
@@ -270,7 +330,7 @@ void main() {
     test('deletions down to zero (ascending, descending, and random)', () {
       const count = 4300;
 
-      // Ascending deletion (exercises left-edge merges).
+      // Ascending deletion (exercises left-edge borrows and merges).
       final ascTree = BPlusTree<int, int>(_intCompare);
       for (var i = 0; i < count; i++) {
         ascTree.insert(i, i);
@@ -285,7 +345,7 @@ void main() {
       expect(ascTree.length, 0);
       expect(ascTree.keys, isEmpty);
 
-      // Descending deletion (exercises tail & left-neighbor merges).
+      // Descending deletion (exercises tail & left-neighbor borrows/merges).
       final descTree = BPlusTree<int, int>(_intCompare);
       for (var i = 0; i < count; i++) {
         descTree.insert(i, i);
@@ -316,175 +376,293 @@ void main() {
       expect(randTree.values, isEmpty);
     });
 
-    test('sparse tail leaf merge and root collapse edge cases', () {
-      // Deleting the sole entry in a 1-entry tail leaf when left sibling has
-      // 63 entries merges into left and collapses the root.
-      final singleTailTree = BPlusTree<int, int>(_intCompare);
-      for (var i = 0; i < 64; i++) {
-        singleTailTree.insert(i, i);
-      }
-      verifyInvariants(singleTailTree, _intCompare);
-      expect(singleTailTree.delete(63), 63);
-      verifyInvariants(singleTailTree, _intCompare);
-      expect(singleTailTree.length, 63);
-
-      // Deleting from child 0 down to < 32 entries when right sibling is a
-      // 1-entry tail leaf merges and collapses root cleanly.
-      final mergeTree = BPlusTree<int, int>(_intCompare);
-      for (var i = 0; i < 64; i++) {
-        mergeTree.insert(i, i);
-      }
-      // Shrink left child (0..62) to 32 entries, leaving tail with [63].
-      for (var i = 0; i < 31; i++) {
-        expect(mergeTree.delete(i), i);
-      }
-      verifyInvariants(mergeTree, _intCompare);
-      // Now left child has 32 entries and tail has 1 entry; deleting 31 forces
-      // left child to 31 and merges with the 1-entry tail, collapsing root.
-      expect(mergeTree.delete(31), 31);
-      verifyInvariants(mergeTree, _intCompare);
-      expect(mergeTree.length, 32);
-      expect(mergeTree.keys, List.generate(32, (i) => i + 32));
-
-      // Deleting the sole entry of a 1-entry tail when left sibling has 32
-      // entries merges tail into left sibling and updates _tail.
-      final tailMergeTree = BPlusTree<int, int>(_intCompare);
-      for (var i = 0; i < 64; i++) {
-        tailMergeTree.insert(i, i);
-      }
-      for (var i = 0; i < 31; i++) {
-        expect(tailMergeTree.delete(i), i);
-      }
-      verifyInvariants(tailMergeTree, _intCompare);
-      expect(tailMergeTree.delete(63), 63);
-      verifyInvariants(tailMergeTree, _intCompare);
-      expect(tailMergeTree.length, 32);
-      expect(tailMergeTree.insert(100, 100), null);
-      verifyInvariants(tailMergeTree, _intCompare);
-      expect(tailMergeTree.getKeyAt(32), 100);
-    });
-
-    test('right-to-left sparse leaf merges including tail merge', () {
-      // Sub-case A: merge right into _tail and update _tail.
-      final tailTree = BPlusTree<int, int>(_intCompare);
-      for (var i = 0; i < 127; i++) {
-        tailTree.insert(i, i);
-      }
-      for (var i = 125; i >= 94; i--) {
-        expect(tailTree.delete(i), i);
-      }
-      verifyInvariants(tailTree, _intCompare);
-      expect(tailTree.length, 95);
-      expect(tailTree.keys.toList(), [...List.generate(94, (i) => i), 126]);
-      expect(tailTree.insert(200, 200), null);
-      verifyInvariants(tailTree, _intCompare);
-      expect(tailTree.getKeyAt(tailTree.length - 1), 200);
-
-      // Sub-case B: merge right into non-tail leaf, then empty child 0 into right.
+    test('boundary-merge regression keeps strict fill invariants', () {
       final tree = BPlusTree<int, int>(_intCompare);
-      for (var i = 0; i < 190; i++) {
+      final ref = SplayTreeMap<int, int>(_intCompare);
+      for (var i = 0; i < 4032; i++) {
         tree.insert(i, i);
-      }
-      for (var i = 188; i >= 158; i--) {
-        expect(tree.delete(i), i);
+        ref[i] = i;
       }
       verifyInvariants(tree, _intCompare);
-      for (var i = 125; i >= 94; i--) {
-        expect(tree.delete(i), i);
-      }
-      verifyInvariants(tree, _intCompare);
-      expect(
-        tree.keys.toList(),
-        [
-          ...List.generate(94, (i) => i),
-          ...List.generate(32, (i) => 126 + i),
-          189,
-        ],
-      );
 
-      for (var i = 62; i >= 0; i--) {
-        expect(tree.delete(i), i);
+      for (var i = 31 * 63; i <= 31 * 63 + 61; i++) {
+        expect(tree.delete(i), ref.remove(i));
+        verifyInvariants(tree, _intCompare);
       }
-      verifyInvariants(tree, _intCompare);
-      expect(
-        tree.keys.toList(),
-        [
-          ...List.generate(31, (i) => 63 + i),
-          ...List.generate(32, (i) => 126 + i),
-          189,
-        ],
-      );
-    });
-
-    test('internal node 1-child redistribution with 63-child sibling', () {
-      void expectRootChildCounts(
-        BPlusTree<int, int> tree,
-        int leftCount,
-        int rightCount, {
-        bool checkHeight = false,
-      }) {
-        final snap = tree.debugSnapshot();
-        if (checkHeight) {
-          expect(snap.height, 3);
-        }
-        final rootInfo = snap.inspect(snap.root);
-        final children = rootInfo.children ?? fail('Expected root children');
-        expect(rootInfo.count, 2);
-        final c0 = children[0] ?? fail('Missing child 0');
-        final c1 = children[1] ?? fail('Missing child 1');
-        expect(snap.inspect(c0).count, leftCount);
-        expect(snap.inspect(c1).count, rightCount);
+      for (var i = 32 * 63; i <= 32 * 63 + 61; i++) {
+        expect(tree.delete(i), ref.remove(i));
+        verifyInvariants(tree, _intCompare);
+      }
+      for (var i = 34 * 63; i <= 34 * 63 + 31; i++) {
+        expect(tree.delete(i), ref.remove(i));
+        verifyInvariants(tree, _intCompare);
+      }
+      for (var i = 35 * 63; i <= 35 * 63 + 31; i++) {
+        expect(tree.delete(i), ref.remove(i));
         verifyInvariants(tree, _intCompare);
       }
 
-      // Sub-case A: left 63-child sibling (childIdx == 1).
-      final leftSibTree = BPlusTree<int, int>(_intCompare);
+      expect(tree.length, ref.length);
+      expect(tree.keys.toList(), ref.keys.toList());
+      expect(tree.values.toList(), ref.values.toList());
+    });
+
+    test('leaf rebalancing covers borrow and merge paths', () {
+      // 1. borrowFromLeft on an interior leaf.
+      final borrowLeftInterior = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 127; i++) {
+        borrowLeftInterior.insert(i, i);
+      }
+      for (var i = 63; i <= 94; i++) {
+        expect(borrowLeftInterior.delete(i), i);
+      }
+      verifyInvariants(borrowLeftInterior, _intCompare);
+      final blSnap = borrowLeftInterior.debugSnapshot();
+      final blRoot = blSnap.inspect(blSnap.root);
+      final blChildren = blRoot.children ?? fail('Expected root children');
+      expect(blSnap.inspect(blChildren[0] as Object).count, 62);
+      expect(blSnap.inspect(blChildren[1] as Object).count, 32);
+
+      // 2. borrowFromLeft on a 1-entry _tail leaf when left has > 32 entries.
+      final borrowLeftTail = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 64; i++) {
+        borrowLeftTail.insert(i, i);
+      }
+      expect(borrowLeftTail.delete(63), 63);
+      verifyInvariants(borrowLeftTail, _intCompare);
+      final btSnap = borrowLeftTail.debugSnapshot();
+      expect(btSnap.height, 2);
+      expect(btSnap.inspect(btSnap.tail).count, 1);
+      expect(btSnap.inspect(btSnap.head).count, 62);
+      expect(borrowLeftTail.keys.toList(), List.generate(63, (i) => i));
+
+      // 3. borrowFromRight when childIdx == 0.
+      final borrowRight = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 126; i++) {
+        borrowRight.insert(i, i);
+      }
+      for (var i = 0; i < 32; i++) {
+        expect(borrowRight.delete(i), i);
+      }
+      verifyInvariants(borrowRight, _intCompare);
+      final brSnap = borrowRight.debugSnapshot();
+      final brRoot = brSnap.inspect(brSnap.root);
+      final brChildren = brRoot.children ?? fail('Expected root children');
+      expect(brSnap.inspect(brChildren[0] as Object).count, 32);
+      expect(brSnap.inspect(brChildren[1] as Object).count, 62);
+
+      // 4. Leaf left-merge on an interior leaf (leaves _tail unchanged).
+      final leftMergeInterior = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 127; i++) {
+        leftMergeInterior.insert(i, i);
+      }
+      for (var i = 0; i < 31; i++) {
+        expect(leftMergeInterior.delete(i), i);
+      }
+      for (var i = 63; i <= 94; i++) {
+        expect(leftMergeInterior.delete(i), i);
+      }
+      verifyInvariants(leftMergeInterior, _intCompare);
+      final lmiSnap = leftMergeInterior.debugSnapshot();
+      expect(lmiSnap.inspect(lmiSnap.root).count, 2);
+      expect(lmiSnap.inspect(lmiSnap.tail).keys[0], 126);
+      expect(leftMergeInterior.insert(200, 200), null);
+      verifyInvariants(leftMergeInterior, _intCompare);
+
+      // 5. Leaf left-merge on _tail updates _tail and collapses root.
+      final leftMergeTail = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 64; i++) {
+        leftMergeTail.insert(i, i);
+      }
+      for (var i = 0; i < 31; i++) {
+        expect(leftMergeTail.delete(i), i);
+      }
+      expect(leftMergeTail.delete(63), 63);
+      verifyInvariants(leftMergeTail, _intCompare);
+      expect(leftMergeTail.debugSnapshot().height, 1);
+      expect(leftMergeTail.length, 32);
+      expect(leftMergeTail.insert(100, 100), null);
+      verifyInvariants(leftMergeTail, _intCompare);
+      expect(leftMergeTail.getKeyAt(32), 100);
+
+      // 6. Leaf right-merge on non-tail leaf keeps _tail intact.
+      final rightMergeInterior = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 127; i++) {
+        rightMergeInterior.insert(i, i);
+      }
+      for (var i = 63; i <= 93; i++) {
+        expect(rightMergeInterior.delete(i), i);
+      }
+      for (var i = 0; i < 32; i++) {
+        expect(rightMergeInterior.delete(i), i);
+      }
+      verifyInvariants(rightMergeInterior, _intCompare);
+      expect(
+        rightMergeInterior.keys.toList(),
+        [
+          ...List.generate(31, (i) => 32 + i),
+          ...List.generate(32, (i) => 94 + i),
+          126,
+        ],
+      );
+
+      // 7. Leaf right-merge with _tail updates _tail and collapses root.
+      final rightMergeTail = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 64; i++) {
+        rightMergeTail.insert(i, i);
+      }
+      for (var i = 0; i < 31; i++) {
+        expect(rightMergeTail.delete(i), i);
+      }
+      expect(rightMergeTail.delete(31), 31);
+      verifyInvariants(rightMergeTail, _intCompare);
+      expect(rightMergeTail.debugSnapshot().height, 1);
+      expect(rightMergeTail.length, 32);
+      expect(rightMergeTail.keys.toList(), List.generate(32, (i) => i + 32));
+      expect(rightMergeTail.insert(100, 100), null);
+      verifyInvariants(rightMergeTail, _intCompare);
+      expect(rightMergeTail.getKeyAt(32), 100);
+    });
+
+    test('internal rebalancing covers borrow, merge, and root collapse', () {
+      void expectRootState(
+        BPlusTree<int, int> tree,
+        int expectedHeight,
+        List<int> childCounts,
+      ) {
+        verifyInvariants(tree, _intCompare);
+        final snap = tree.debugSnapshot();
+        expect(snap.height, expectedHeight);
+        final rootInfo = snap.inspect(snap.root);
+        expect(rootInfo.count, childCounts.length);
+        final children = rootInfo.children ?? fail('Expected root children');
+        for (var i = 0; i < childCounts.length; i++) {
+          expect(
+            snap.inspect(children[i] as Object).count,
+            childCounts[i],
+          );
+        }
+      }
+
+      // 1. Internal borrowFromLeft (childIdx > 0).
+      final borrowLeft = BPlusTree<int, int>(_intCompare);
       for (var i = 0; i < 3970; i++) {
-        leftSibTree.insert(i * 100, i);
+        borrowLeft.insert(i * 100, i);
       }
-      for (var j = 0; j < 31; j++) {
-        leftSibTree.insert(j * 63 * 100 + 1, j);
+      borrowLeft.insert(1, -1);
+      expectRootState(borrowLeft, 3, [33, 32]);
+      for (var i = 33 * 63; i < 33 * 63 + 31; i++) {
+        expect(borrowLeft.delete(i * 100), i);
       }
-      expectRootChildCounts(leftSibTree, 63, 32, checkHeight: true);
+      for (var i = 32 * 63; i < 32 * 63 + 32; i++) {
+        expect(borrowLeft.delete(i * 100), i);
+      }
+      expectRootState(borrowLeft, 3, [32, 32]);
+      expect(borrowLeft.get(1), -1);
+      expect(borrowLeft.get(3969 * 100), 3969);
 
-      for (var i = 3969; i >= 34 * 63; i--) {
-        expect(leftSibTree.delete(i * 100), i);
-      }
-      expectRootChildCounts(leftSibTree, 63, 2);
-
-      for (var i = 33 * 63 + 62; i >= 33 * 63; i--) {
-        expect(leftSibTree.delete(i * 100), i);
-      }
-      expectRootChildCounts(leftSibTree, 32, 32, checkHeight: true);
-      expect(leftSibTree.length, 32 * 63 + 31 + 63);
-      expect(leftSibTree.get(0), 0);
-      expect(leftSibTree.get(32 * 63 * 100), 32 * 63);
-      expect(leftSibTree.getAt(leftSibTree.length - 1), 33 * 63 - 1);
-
-      // Sub-case B: right 63-child sibling (childIdx == 0).
-      final rightSibTree = BPlusTree<int, int>(_intCompare);
+      // 2. Internal borrowFromRight (childIdx == 0).
+      final borrowRight = BPlusTree<int, int>(_intCompare);
       for (var i = 0; i < 3970; i++) {
-        rightSibTree.insert(i * 100, i);
+        borrowRight.insert(i * 100, i);
       }
-      for (var j = 32; j < 63; j++) {
-        rightSibTree.insert(j * 63 * 100 + 1, j);
+      borrowRight.insert(32 * 63 * 100 + 1, -1);
+      expectRootState(borrowRight, 3, [32, 33]);
+      for (var i = 63; i < 63 + 31; i++) {
+        expect(borrowRight.delete(i * 100), i);
       }
-      expectRootChildCounts(rightSibTree, 32, 63, checkHeight: true);
+      for (var i = 0; i < 32; i++) {
+        expect(borrowRight.delete(i * 100), i);
+      }
+      expectRootState(borrowRight, 3, [32, 32]);
+      expect(borrowRight.get(32 * 63 * 100 + 1), -1);
+      expect(borrowRight.get(3969 * 100), 3969);
 
-      for (var i = 0; i < 30 * 63; i++) {
-        expect(rightSibTree.delete(i * 100), i);
+      // 3. Internal left-merge (childIdx > 0) + root collapse 3 -> 2.
+      final mergeLeft = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 3970; i++) {
+        mergeLeft.insert(i * 100, i);
       }
-      expectRootChildCounts(rightSibTree, 2, 63);
+      expectRootState(mergeLeft, 3, [32, 32]);
+      for (var i = 33 * 63; i < 33 * 63 + 31; i++) {
+        expect(mergeLeft.delete(i * 100), i);
+      }
+      for (var i = 32 * 63; i < 32 * 63 + 32; i++) {
+        expect(mergeLeft.delete(i * 100), i);
+      }
+      verifyInvariants(mergeLeft, _intCompare);
+      expect(mergeLeft.debugSnapshot().height, 2);
+      expect(
+        mergeLeft.debugSnapshot().inspect(mergeLeft.debugSnapshot().root).count,
+        63,
+      );
 
-      for (var i = 30 * 63; i < 31 * 63; i++) {
-        expect(rightSibTree.delete(i * 100), i);
+      // 4. Internal right-merge (childIdx == 0) + root collapse 3 -> 2 -> 1.
+      final mergeRight = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 3970; i++) {
+        mergeRight.insert(i * 100, i);
       }
-      expectRootChildCounts(rightSibTree, 32, 32, checkHeight: true);
-      expect(rightSibTree.length, 3970 - 31 * 63 + 31);
-      expect(rightSibTree.get(31 * 63 * 100), 31 * 63);
-      expect(rightSibTree.get(3969 * 100), 3969);
-      expect(rightSibTree.getAt(0), 31 * 63);
-      expect(rightSibTree.getAt(rightSibTree.length - 1), 3969);
+      expectRootState(mergeRight, 3, [32, 32]);
+      for (var i = 63; i < 63 + 31; i++) {
+        expect(mergeRight.delete(i * 100), i);
+      }
+      for (var i = 0; i < 32; i++) {
+        expect(mergeRight.delete(i * 100), i);
+      }
+      verifyInvariants(mergeRight, _intCompare);
+      expect(mergeRight.debugSnapshot().height, 2);
+      expect(
+        mergeRight
+            .debugSnapshot()
+            .inspect(mergeRight.debugSnapshot().root)
+            .count,
+        63,
+      );
+
+      final remainingKeys = mergeRight.keys.toList();
+      for (var i = 0; i < remainingKeys.length - 32; i++) {
+        mergeRight.delete(remainingKeys[i]);
+      }
+      verifyInvariants(mergeRight, _intCompare);
+      expect(mergeRight.debugSnapshot().height, 1);
+      expect(mergeRight.length, 32);
+
+      // 5. Internal merge with non-collapsing root (root.count == 3 -> 2).
+      final nonCollapse = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 6500; i++) {
+        nonCollapse.insert(i, i);
+      }
+      verifyInvariants(nonCollapse, _intCompare);
+      final ncSnap = nonCollapse.debugSnapshot();
+      expect(ncSnap.height, 3);
+      final ncRoot = ncSnap.inspect(ncSnap.root);
+      expect(ncRoot.count, 3);
+      final ncChildren = ncRoot.children ?? fail('Expected root children');
+      final midNode = ncChildren[1] as Object;
+      final midInfo = ncSnap.inspect(midNode);
+      final midLeaves = midInfo.children ?? fail('Expected internal children');
+      final firstMidLeaf = ncSnap.inspect(midLeaves[0] as Object);
+      final minMidKey = firstMidLeaf.keys[0] as int;
+      final lastMidLeaf =
+          ncSnap.inspect(midLeaves[midInfo.count - 1] as Object);
+      final maxMidKey = lastMidLeaf.keys[lastMidLeaf.count - 1] as int;
+      // Drain the middle internal node down to 31 children so it merges left
+      // while root keeps 2 children and stays at height 3.
+      for (var k = minMidKey; k <= maxMidKey; k++) {
+        nonCollapse.delete(k);
+        if (nonCollapse.debugSnapshot().inspect(ncSnap.root).count == 2) {
+          break;
+        }
+      }
+      verifyInvariants(nonCollapse, _intCompare);
+      expect(nonCollapse.debugSnapshot().height, 3);
+      expect(
+        nonCollapse
+            .debugSnapshot()
+            .inspect(nonCollapse.debugSnapshot().root)
+            .count,
+        2,
+      );
     });
 
     test('valuesFromKey across leaf boundaries and missing keys', () {
@@ -493,45 +671,234 @@ void main() {
         tree.insert(i, 'v$i');
       }
 
-      // Missing key returns empty iterable.
       expect(tree.valuesFromKey(1), isEmpty);
       expect(tree.valuesFromKey(-5), isEmpty);
       expect(tree.valuesFromKey(999), isEmpty);
 
-      // Existing key iterates through end, and iterable can be iterated twice.
       final slice = tree.valuesFromKey(120);
       final expected = [for (var i = 120; i < 200; i += 2) 'v$i'];
       expect(slice, expected);
       expect(slice, expected);
 
-      // Last key.
       expect(tree.valuesFromKey(198), ['v198']);
-
-      // First key.
       expect(
         tree.valuesFromKey(0),
         [for (var i = 0; i < 200; i += 2) 'v$i'],
       );
     });
 
-    test('custom comparator and nullable values', () {
-      final tree = BPlusTree<int, String?>(_reverseIntCompare);
-      for (var i = 0; i < 100; i++) {
-        tree.insert(i, i.isEven ? null : 'v$i');
+    test('valuesFromKey handles mid-iteration leaf shrinkage safely', () {
+      // Single-leaf shrinkage.
+      final singleLeaf = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 10; i++) {
+        singleLeaf.insert(i, i);
       }
-      verifyInvariants(tree, _reverseIntCompare);
-      expect(tree.keys, List.generate(100, (i) => 99 - i));
-      for (var i = 0; i < 100; i++) {
-        expect(tree.containsKey(i), true);
-        expect(tree.get(i), i.isEven ? null : 'v$i');
+      final singleCollected = <int>[];
+      for (final val in singleLeaf.valuesFromKey(2)) {
+        singleCollected.add(val);
+        if (val == 3) {
+          for (var i = 4; i < 10; i++) {
+            singleLeaf.delete(i);
+          }
+        }
       }
-      expect(tree.getAt(0), 'v99');
-      expect(tree.getAt(1), null);
-      expect(tree.getKeyAt(0), 99);
-      expect(tree.valuesFromKey(2).toList(), [null, 'v1', null]);
-      expect(tree.delete(2), null);
-      expect(tree.containsKey(2), false);
-      verifyInvariants(tree, _reverseIntCompare);
+      expect(singleCollected, [2, 3]);
+      verifyInvariants(singleLeaf, _intCompare);
+
+      // Multi-leaf shrinkage: shrink current leaf (0..62) from 63 down to 32
+      // entries while iterating inside it; must not cast nulled slots as V and
+      // must still yield subsequent leaves cleanly.
+      final multiLeaf = BPlusTree<int, int>(_intCompare);
+      for (var i = 0; i < 150; i++) {
+        multiLeaf.insert(i, i);
+      }
+      final multiCollected = <int>[];
+      for (final val in multiLeaf.valuesFromKey(10)) {
+        multiCollected.add(val);
+        if (val == 15) {
+          for (var i = 16; i <= 46; i++) {
+            multiLeaf.delete(i);
+          }
+        }
+      }
+      verifyInvariants(multiLeaf, _intCompare);
+      expect(
+        multiCollected,
+        [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          for (var i = 47; i < 150; i++) i,
+        ],
+      );
+    });
+
+    test('custom comparators and nullable keys and values', () {
+      final revTree = BPlusTree<int, String?>(_reverseIntCompare);
+      for (var i = 0; i < 100; i++) {
+        revTree.insert(i, i.isEven ? null : 'v$i');
+      }
+      verifyInvariants(revTree, _reverseIntCompare);
+      expect(revTree.keys, List.generate(100, (i) => 99 - i));
+      for (var i = 0; i < 100; i++) {
+        expect(revTree.containsKey(i), true);
+        expect(revTree.get(i), i.isEven ? null : 'v$i');
+      }
+      expect(revTree.getAt(0), 'v99');
+      expect(revTree.getAt(1), null);
+      expect(revTree.getKeyAt(0), 99);
+      expect(revTree.valuesFromKey(2).toList(), [null, 'v1', null]);
+      expect(revTree.delete(2), null);
+      expect(revTree.containsKey(2), false);
+      verifyInvariants(revTree, _reverseIntCompare);
+
+      // Nullable keys and nullable values.
+      final nullableTree = BPlusTree<int?, String?>(_nullableIntCompare);
+      nullableTree.insert(null, 'null-val');
+      for (var i = 0; i < 100; i++) {
+        nullableTree.insert(i, i.isOdd ? null : 'k$i');
+      }
+      verifyInvariants(nullableTree, _nullableIntCompare);
+      expect(nullableTree.get(null), 'null-val');
+      expect(nullableTree.containsKey(null), true);
+      expect(nullableTree.getKeyAt(0), null);
+      expect(nullableTree.getAt(0), 'null-val');
+      expect(nullableTree.delete(null), 'null-val');
+      expect(nullableTree.containsKey(null), false);
+      verifyInvariants(nullableTree, _nullableIntCompare);
+
+      // Custom comparator returning arbitrary negative/positive ints.
+      int diffCompare(int a, int b) => a - b;
+      final diffTree = BPlusTree<int, int>(diffCompare);
+      for (var i = 0; i < 300; i++) {
+        diffTree.insert(i * 7, i);
+      }
+      for (var i = 0; i < 300; i += 2) {
+        expect(diffTree.delete(i * 7), i);
+      }
+      verifyInvariants(diffTree, diffCompare);
+      expect(diffTree.length, 150);
+    });
+
+    test('Hive defaultKeyComparator mixed int and String fuzz (5500 ops)', () {
+      final tree = BPlusTree<dynamic, int>(defaultKeyComparator);
+      final ref = SplayTreeMap<dynamic, int>(defaultKeyComparator);
+      final rng = Random(2026);
+      final longStr = 'x' * 255;
+      final keyPool = <dynamic>[
+        0,
+        1,
+        0x7FFFFFFF,
+        0xFFFFFFFF,
+        '',
+        '0',
+        'a',
+        'z',
+        '🔑',
+        '日本語',
+        longStr,
+        for (var i = 0; i < 500; i++) i * 3 + 2,
+        for (var i = 0; i < 500; i++) 'k_${i.toString().padLeft(4, '0')}',
+      ];
+
+      for (var step = 0; step < 5500; step++) {
+        final key = keyPool[rng.nextInt(keyPool.length)];
+        final op = rng.nextInt(100);
+        if (op < 55) {
+          final val = rng.nextInt(100000);
+          final expected = ref[key];
+          ref[key] = val;
+          expect(tree.insert(key, val), expected);
+        } else if (op < 85) {
+          final expected = ref.remove(key);
+          expect(tree.delete(key), expected);
+        } else if (op < 93 && ref.isNotEmpty) {
+          final idx = rng.nextInt(ref.length);
+          final expectedKey = ref.keys.elementAt(idx);
+          expect(tree.getKeyAt(idx), expectedKey);
+          expect(tree.getAt(idx), ref[expectedKey]);
+          expect(tree.get(expectedKey), ref[expectedKey]);
+          expect(tree.containsKey(expectedKey), true);
+        } else if (ref.isNotEmpty) {
+          final idx = rng.nextInt(ref.length);
+          final startKey = ref.keys.elementAt(idx);
+          expect(
+            tree.valuesFromKey(startKey).take(15).toList(),
+            ref.keys.skip(idx).take(15).map((k) => ref[k]).toList(),
+          );
+        }
+
+        expect(tree.length, ref.length);
+        if (step % 500 == 0 || step == 5499) {
+          verifyInvariants(tree, defaultKeyComparator);
+          expect(tree.keys.toList(), ref.keys.toList());
+          expect(tree.values.toList(), ref.values.toList());
+        }
+      }
+    });
+
+    test('comparator exception cleans _pathNodes and leaves tree intact', () {
+      var armed = true;
+      int? throwingSentinel = -999;
+
+      int guardedCompare(int a, int b) {
+        // Allow tail fast-path guard against tail.last (4099) to pass so
+        // insert() reaches _findLeafWithPath/_findInLeaf and exercises catch.
+        if (armed &&
+            a != 4099 &&
+            b != 4099 &&
+            (a == throwingSentinel || b == throwingSentinel)) {
+          throw StateError('comparator failure');
+        }
+        return a.compareTo(b);
+      }
+
+      final tree = BPlusTree<int, int>(guardedCompare);
+      for (var i = 0; i < 4100; i++) {
+        tree.insert(i, i * 10);
+      }
+      verifyInvariants(tree, _intCompare);
+
+      // Sentinel < tail.last enters _findLeafWithPath during insert and delete.
+      for (final op in <void Function()>[
+        () => tree.insert(-999, 1),
+        () => tree.delete(-999),
+        () => tree.get(-999),
+        () => tree.containsKey(-999),
+        () => tree.valuesFromKey(-999),
+      ]) {
+        expect(op, throwsStateError);
+        armed = false;
+        verifyInvariants(tree, _intCompare);
+        armed = true;
+      }
+
+      // Sentinel present at leaf depth populates _pathNodes before throwing
+      // in _findInLeaf.
+      throwingSentinel = 50;
+      for (final op in <void Function()>[
+        () => tree.insert(50, -1),
+        () => tree.delete(50),
+      ]) {
+        expect(op, throwsStateError);
+        armed = false;
+        verifyInvariants(tree, _intCompare);
+        expect(tree.get(50), 500);
+        armed = true;
+      }
+
+      armed = false;
+      expect(tree.length, 4100);
+      tree.clear();
+      verifyInvariants(tree, _intCompare);
+      for (var i = 0; i < 150; i++) {
+        tree.insert(i, i);
+      }
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 150);
     });
 
     test('clear and reuse', () {
@@ -572,54 +939,90 @@ void main() {
       expect(() => valIt.current, throwsStateError);
     });
 
-    test('differential stress test against SplayTreeMap (8000 ops)', () {
+    test('every-step invariant fuzz test against SplayTreeMap (3000 ops)', () {
       final tree = BPlusTree<int, int>(_intCompare);
       final ref = SplayTreeMap<int, int>(_intCompare);
-      final rng = Random(12345);
-      var tailSeq = 100000;
+      final rng = Random(777);
+      var tailSeq = 5000;
 
-      for (var step = 0; step < 8000; step++) {
+      for (var step = 0; step < 3000; step++) {
         final op = rng.nextInt(100);
         if (op < 15) {
-          // Ascending tail insert.
           final key = tailSeq++;
           final val = rng.nextInt(100000);
           final expected = ref[key];
           ref[key] = val;
           expect(tree.insert(key, val), expected);
         } else if (op < 60) {
-          // Random insert / overwrite.
-          final key = rng.nextInt(3000);
+          final key = rng.nextInt(1500);
           final val = rng.nextInt(100000);
           final expected = ref[key];
           ref[key] = val;
           expect(tree.insert(key, val), expected);
-        } else if (op < 90) {
-          // Delete.
-          final key = rng.nextInt(3000);
+        } else {
+          final key = rng.nextInt(1500);
           final expected = ref.remove(key);
           expect(tree.delete(key), expected);
-        } else if (op < 95 && ref.isNotEmpty) {
-          // Point & index lookups.
-          final idx = rng.nextInt(ref.length);
-          final expectedKey = ref.keys.elementAt(idx);
-          expect(tree.getKeyAt(idx), expectedKey);
-          expect(tree.getAt(idx), ref[expectedKey]);
-          expect(tree.get(expectedKey), ref[expectedKey]);
-        } else {
-          // Missing lookup.
-          final key = 50000 + rng.nextInt(1000);
-          expect(tree.containsKey(key), false);
-          expect(tree.get(key), null);
         }
 
+        verifyInvariants(tree, _intCompare);
         expect(tree.length, ref.length);
-        if (step % 400 == 0 || step == 7999) {
+      }
+      expect(tree.keys.toList(), ref.keys.toList());
+      expect(tree.values.toList(), ref.values.toList());
+    });
+
+    test('fill and drain wave cycles', () {
+      final tree = BPlusTree<int, int>(_intCompare);
+      final ref = SplayTreeMap<int, int>(_intCompare);
+      final rng = Random(31415);
+
+      // Wave 1: grow to 4500 with mixed inserts, then range-delete to 0.
+      final keys1 = List.generate(4500, (i) => i)..shuffle(rng);
+      for (final k in keys1) {
+        tree.insert(k, k * 3);
+        ref[k] = k * 3;
+      }
+      verifyInvariants(tree, _intCompare);
+      for (var k = 1500; k < 3000; k++) {
+        expect(tree.delete(k), ref.remove(k));
+      }
+      verifyInvariants(tree, _intCompare);
+      keys1.shuffle(rng);
+      for (final k in keys1) {
+        expect(tree.delete(k), ref.remove(k));
+      }
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 0);
+
+      // Wave 2: regrow ascending to 4500, random delete to 0.
+      for (var k = 0; k < 4500; k++) {
+        tree.insert(k, k);
+        ref[k] = k;
+      }
+      verifyInvariants(tree, _intCompare);
+      final keys2 = List.generate(4500, (i) => i)..shuffle(rng);
+      for (var i = 0; i < keys2.length; i++) {
+        final k = keys2[i];
+        expect(tree.delete(k), ref.remove(k));
+        if (i % 500 == 0 || i == keys2.length - 1) {
           verifyInvariants(tree, _intCompare);
-          expect(tree.keys.toList(), ref.keys.toList());
-          expect(tree.values.toList(), ref.values.toList());
         }
       }
+      expect(tree.length, 0);
+
+      // Wave 3: regrow, clear, and regrow again.
+      for (var k = 0; k < 1000; k++) {
+        tree.insert(k, k);
+      }
+      tree.clear();
+      verifyInvariants(tree, _intCompare);
+      for (var k = 0; k < 2000; k++) {
+        tree.insert(k * 2, k);
+      }
+      verifyInvariants(tree, _intCompare);
+      expect(tree.length, 2000);
+      expect(tree.get(1998), 999);
     });
   });
 }

@@ -32,6 +32,35 @@ final class _LeafNode<K, V> {
     count = newCount;
   }
 
+  void borrowFromLeft(_LeafNode<K, V> left) {
+    final leftLast = left.count - 1;
+    for (var i = count; i > 0; i--) {
+      keys[i] = keys[i - 1];
+      values[i] = values[i - 1];
+    }
+    keys[0] = left.keys[leftLast];
+    values[0] = left.values[leftLast];
+    left.keys[leftLast] = null;
+    left.values[leftLast] = null;
+    left.count = leftLast;
+    count++;
+  }
+
+  void borrowFromRight(_LeafNode<K, V> right) {
+    keys[count] = right.keys[0];
+    values[count] = right.values[0];
+    count++;
+
+    final newRightCount = right.count - 1;
+    for (var i = 0; i < newRightCount; i++) {
+      right.keys[i] = right.keys[i + 1];
+      right.values[i] = right.values[i + 1];
+    }
+    right.keys[newRightCount] = null;
+    right.values[newRightCount] = null;
+    right.count = newRightCount;
+  }
+
   void mergeWithRight(_LeafNode<K, V> right) {
     final rCount = right.count;
     final offset = count;
@@ -135,9 +164,8 @@ class BPlusTree<K, V> {
     var leaf = startLeaf;
     var idx = startIndex;
     while (leaf != null) {
-      final count = leaf.count;
       final values = leaf.values;
-      while (idx < count) {
+      while (idx < leaf.count) {
         yield values[idx] as V;
         idx++;
       }
@@ -172,8 +200,15 @@ class BPlusTree<K, V> {
     }
 
     final depth = _height - 1;
-    final leaf = _findLeafWithPath(key);
-    final pos = _findInLeaf(leaf, key);
+    final _LeafNode<K, V> leaf;
+    final int pos;
+    try {
+      leaf = _findLeafWithPath(key);
+      pos = _findInLeaf(leaf, key);
+    } on Object {
+      _clearPath(depth);
+      rethrow;
+    }
     if (pos >= 0) {
       final oldValue = leaf.values[pos];
       leaf.values[pos] = value;
@@ -238,8 +273,15 @@ class BPlusTree<K, V> {
     if (_length == 0) return null;
 
     final depth = _height - 1;
-    final leaf = _findLeafWithPath(key);
-    final idx = _findInLeaf(leaf, key);
+    final _LeafNode<K, V> leaf;
+    final int idx;
+    try {
+      leaf = _findLeafWithPath(key);
+      idx = _findInLeaf(leaf, key);
+    } on Object {
+      _clearPath(depth);
+      rethrow;
+    }
     if (idx < 0) {
       _clearPath(depth);
       return null;
@@ -271,6 +313,7 @@ class BPlusTree<K, V> {
     _tail = leaf;
     _height = 1;
     _length = 0;
+    _pathNodes.fillRange(0, _maxHeight, null);
   }
 
   int _findChildIndex(_InternalNode<K> node, K key) {
@@ -524,27 +567,41 @@ class BPlusTree<K, V> {
     final parent = _pathNodes[depth - 1] as _InternalNode<K>;
     final childIdx = _pathIndices[depth - 1];
 
-    final int leftIdx;
-    if (childIdx > 0 &&
-        (parent.children[childIdx - 1] as _LeafNode<K, V>).count + leaf.count <=
-            _maxEntries) {
-      leftIdx = childIdx - 1;
-    } else if (childIdx + 1 < parent.count &&
-        leaf.count + (parent.children[childIdx + 1] as _LeafNode<K, V>).count <=
-            _maxEntries) {
-      leftIdx = childIdx;
-    } else {
+    if (childIdx > 0) {
+      final left = parent.children[childIdx - 1] as _LeafNode<K, V>;
+      if (left.count > _minFill) {
+        leaf.borrowFromLeft(left);
+        parent.keys[childIdx - 1] = leaf.keys[0];
+        parent.counts[childIdx - 1]--;
+        parent.counts[childIdx]++;
+        return;
+      }
+
+      left.mergeWithRight(leaf);
+      if (identical(leaf, _tail)) {
+        _tail = left;
+      }
+      parent.counts[childIdx - 1] += parent.counts[childIdx];
+      _removeChildAt(parent, childIdx);
+      _rebalanceInternal(depth - 1);
       return;
     }
 
-    final leftLeaf = parent.children[leftIdx] as _LeafNode<K, V>;
-    final rightLeaf = parent.children[leftIdx + 1] as _LeafNode<K, V>;
-    leftLeaf.mergeWithRight(rightLeaf);
-    if (identical(rightLeaf, _tail)) {
-      _tail = leftLeaf;
+    final right = parent.children[1] as _LeafNode<K, V>;
+    if (right.count > _minFill) {
+      leaf.borrowFromRight(right);
+      parent.keys[0] = right.keys[0];
+      parent.counts[0]++;
+      parent.counts[1]--;
+      return;
     }
-    parent.counts[leftIdx] += parent.counts[leftIdx + 1];
-    _removeChildAt(parent, leftIdx + 1);
+
+    leaf.mergeWithRight(right);
+    if (identical(right, _tail)) {
+      _tail = leaf;
+    }
+    parent.counts[0] += parent.counts[1];
+    _removeChildAt(parent, 1);
     _rebalanceInternal(depth - 1);
   }
 
@@ -568,41 +625,76 @@ class BPlusTree<K, V> {
       final parent = _pathNodes[level - 1] as _InternalNode<K>;
       final childIdx = _pathIndices[level - 1];
 
-      int? leftIdx;
-      if (childIdx > 0 &&
-          (parent.children[childIdx - 1] as _InternalNode<K>).count +
-                  node.count <=
-              _maxEntries) {
-        leftIdx = childIdx - 1;
-      } else if (childIdx + 1 < parent.count &&
-          node.count +
-                  (parent.children[childIdx + 1] as _InternalNode<K>).count <=
-              _maxEntries) {
-        leftIdx = childIdx;
-      }
+      if (childIdx > 0) {
+        final left = parent.children[childIdx - 1] as _InternalNode<K>;
+        if (left.count > _minFill) {
+          final leftLast = left.count - 1;
+          final movedChild = left.children[leftLast] as Object;
+          final movedCount = left.counts[leftLast];
+          final movedKey = left.keys[leftLast - 1] as K;
 
-      if (leftIdx != null) {
-        final left = parent.children[leftIdx] as _InternalNode<K>;
-        final right = parent.children[leftIdx + 1] as _InternalNode<K>;
-        _appendInternal(left, parent.keys[leftIdx] as K, right);
-        parent.counts[leftIdx] += parent.counts[leftIdx + 1];
-        _removeChildAt(parent, leftIdx + 1);
+          for (var i = node.count - 1; i > 0; i--) {
+            node.keys[i] = node.keys[i - 1];
+          }
+          for (var i = node.count; i > 0; i--) {
+            node.children[i] = node.children[i - 1];
+            node.counts[i] = node.counts[i - 1];
+          }
+          node.keys[0] = parent.keys[childIdx - 1];
+          node.children[0] = movedChild;
+          node.counts[0] = movedCount;
+          node.count++;
+
+          parent.keys[childIdx - 1] = movedKey;
+          parent.counts[childIdx - 1] -= movedCount;
+          parent.counts[childIdx] += movedCount;
+
+          left.keys[leftLast - 1] = null;
+          left.children[leftLast] = null;
+          left.counts[leftLast] = 0;
+          left.count = leftLast;
+          return;
+        }
+
+        _appendInternal(left, parent.keys[childIdx - 1] as K, node);
+        parent.counts[childIdx - 1] += parent.counts[childIdx];
+        _removeChildAt(parent, childIdx);
         continue;
       }
 
-      if (node.count == 1) {
-        final idx = childIdx > 0 ? childIdx - 1 : 0;
-        final left = parent.children[idx] as _InternalNode<K>;
-        final right = parent.children[idx + 1] as _InternalNode<K>;
-        _appendInternal(left, parent.keys[idx] as K, right);
-        final (promoted, newRight, leftTotal, rightTotal) =
-            _splitInternal(left);
-        parent.keys[idx] = promoted;
-        parent.children[idx + 1] = newRight;
-        parent.counts[idx] = leftTotal;
-        parent.counts[idx + 1] = rightTotal;
+      final right = parent.children[1] as _InternalNode<K>;
+      if (right.count > _minFill) {
+        final movedChild = right.children[0] as Object;
+        final movedCount = right.counts[0];
+        final movedKey = right.keys[0] as K;
+
+        node.keys[node.count - 1] = parent.keys[0];
+        node.children[node.count] = movedChild;
+        node.counts[node.count] = movedCount;
+        node.count++;
+
+        parent.keys[0] = movedKey;
+        parent.counts[0] += movedCount;
+        parent.counts[1] -= movedCount;
+
+        final newRightCount = right.count - 1;
+        for (var i = 0; i < newRightCount - 1; i++) {
+          right.keys[i] = right.keys[i + 1];
+        }
+        for (var i = 0; i < newRightCount; i++) {
+          right.children[i] = right.children[i + 1];
+          right.counts[i] = right.counts[i + 1];
+        }
+        right.keys[newRightCount - 1] = null;
+        right.children[newRightCount] = null;
+        right.counts[newRightCount] = 0;
+        right.count = newRightCount;
+        return;
       }
-      return;
+
+      _appendInternal(node, parent.keys[0] as K, right);
+      parent.counts[0] += parent.counts[1];
+      _removeChildAt(parent, 1);
     }
   }
 
@@ -614,6 +706,7 @@ class BPlusTree<K, V> {
     Object root,
     Object head,
     Object tail,
+    List<Object?> pathNodes,
     ({
       bool isLeaf,
       int count,
@@ -630,6 +723,7 @@ class BPlusTree<K, V> {
         root: _root,
         head: _head,
         tail: _tail,
+        pathNodes: _pathNodes,
         inspect: (node) {
           if (node is _InternalNode<K>) {
             return (
