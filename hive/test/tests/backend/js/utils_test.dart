@@ -53,7 +53,7 @@ void main() {
       try {
         await txn.asFuture();
         fail('Expected transaction to fail with ConstraintError');
-      } on Object catch (e) {
+      } catch (e) {
         expect((e as DOMException).name, 'ConstraintError');
       }
 

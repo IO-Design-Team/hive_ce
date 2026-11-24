@@ -66,10 +66,10 @@ extension IDBTransactionExtension on IDBTransaction {
   Future<void> run(void Function() action) async {
     try {
       action();
-    } on Object {
+    } catch (_) {
       try {
         abort();
-      } on Object {
+      } catch (_) {
         // Keep the original error if aborting fails.
       }
       rethrow;
