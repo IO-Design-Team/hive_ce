@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up encrypted writes by reusing a bounded scratch writer in `BinaryWriterImpl.writeEncrypted`
 - Speeds up IsolatedHive writes and reduces memory usage by reusing a bounded BinaryWriterImpl
 - Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
 - Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
