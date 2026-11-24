@@ -328,6 +328,8 @@ class BinaryReaderImpl extends BinaryReader {
     } else if (lazy) {
       frame = Frame.lazy(key);
     } else if (verbatim) {
+      // Copy instead of viewing so callers with reused buffers (e.g. streaming
+      // box opens) don't overwrite or retain the backing buffer.
       frame = Frame(key, readBytes(availableBytes));
     } else if (cipher == null) {
       frame = Frame(key, read());

@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 /// Not part of public API
 class BufferedFileReader {
   /// Not part of public API
+  @visibleForTesting
   static const defaultChunkSize = 1000 * 64;
 
   /// Not part of public API

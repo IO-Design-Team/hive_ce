@@ -1,18 +1,16 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
-import 'package:hive_ce/src/binary/frame_helper.dart';
 import 'package:hive_ce/src/box/keystore.dart';
 import 'package:hive_ce/src/io/buffered_file_reader.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:meta/meta.dart';
 
 /// Not part of public API
-class FrameIoHelper extends FrameHelper {
-  static const _bigBoxChunkSize = 1 << 20;
+class FrameIoHelper {
+  static const _maxChunkSize = 1 << 20;
 
   /// Not part of public API
   @visibleForTesting
@@ -68,90 +66,57 @@ class FrameIoHelper extends FrameHelper {
     try {
       final fileLength = await raf.length();
       if (fileLength == 0) return -1;
+      if (fileLength < 8) return 0;
 
-      final chunkSize = lazy
-          ? (fileLength > _bigBoxChunkSize
-              ? _bigBoxChunkSize
-              : min(fileLength, BufferedFileReader.defaultChunkSize))
-          : min(fileLength, _bigBoxChunkSize);
-      final fileReader = BufferedFileReader(raf, chunkSize);
-      return await _FrameReader(fileReader, registry, fileLength).readFrames(
-        keystore,
-        cipher,
-        keyCrc,
-        lazy: lazy,
-        verbatim: verbatim,
+      final fileReader = BufferedFileReader(
+        raf,
+        min(fileLength, _maxChunkSize),
       );
+      var reader = await _loadReader(fileReader, registry, 4);
+
+      while (fileReader.offset < fileLength) {
+        final frameOffset = fileReader.offset;
+
+        if (reader.availableBytes < 4) {
+          reader = await _loadReader(fileReader, registry, 4);
+          if (reader.availableBytes < 4) return frameOffset;
+        }
+
+        final frameLength = reader.peekUint32();
+        if (frameLength < 8 || frameLength > fileLength - frameOffset) {
+          return frameOffset;
+        }
+
+        if (reader.availableBytes < frameLength) {
+          reader = await _loadReader(fileReader, registry, frameLength);
+          if (reader.availableBytes < frameLength) return frameOffset;
+        }
+
+        final frame = reader.readFrame(
+          cipher: cipher,
+          keyCrc: keyCrc,
+          lazy: lazy,
+          frameOffset: frameOffset,
+          verbatim: verbatim,
+        );
+        if (frame == null) return frameOffset;
+
+        keystore.insert(frame, notify: false);
+        fileReader.skip(frameLength);
+      }
+
+      return -1;
     } finally {
       await raf.close();
     }
   }
-}
 
-class _FrameReader {
-  final BufferedFileReader fileReader;
-  final TypeRegistry registry;
-  final int fileLength;
-
-  BinaryReaderImpl _reader;
-
-  _FrameReader(this.fileReader, this.registry, this.fileLength)
-      : _reader = BinaryReaderImpl(Uint8List(0), registry);
-
-  Future<int> readFrames(
-    Keystore keystore,
-    HiveCipher? cipher,
-    int? keyCrc, {
-    required bool lazy,
-    bool verbatim = false,
-  }) async {
-    while (true) {
-      final frameOffset = fileReader.offset;
-
-      if (_reader.availableBytes < 4) {
-        if (_reader.availableBytes == 0 && frameOffset == fileLength) {
-          break;
-        }
-        final available = await _load(4);
-        if (available == 0) {
-          break;
-        } else if (available < 4) {
-          return frameOffset;
-        }
-      }
-
-      final frameLength = _reader.peekUint32();
-      if (frameLength < 8 || frameLength > fileLength - frameOffset) {
-        return frameOffset;
-      }
-
-      if (_reader.availableBytes < frameLength) {
-        final available = await _load(frameLength);
-        if (available < frameLength) return frameOffset;
-      }
-
-      final frame = _reader.readFrame(
-        cipher: cipher,
-        keyCrc: keyCrc,
-        lazy: lazy,
-        frameOffset: frameOffset,
-        verbatim: verbatim,
-      );
-      if (frame == null) return frameOffset;
-
-      keystore.insert(frame, notify: false);
-
-      fileReader.skip(frameLength);
-    }
-
-    return -1;
-  }
-
-  Future<int> _load(int bytes) async {
+  Future<BinaryReaderImpl> _loadReader(
+    BufferedFileReader fileReader,
+    TypeRegistry registry,
+    int bytes,
+  ) async {
     final loadedBytes = await fileReader.loadBytes(bytes);
-    final buffer = fileReader.peekBytes(loadedBytes);
-    _reader = BinaryReaderImpl(buffer, registry);
-
-    return loadedBytes;
+    return BinaryReaderImpl(fileReader.peekBytes(loadedBytes), registry);
   }
 }

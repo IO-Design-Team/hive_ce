@@ -35,24 +35,55 @@ Uint8List _encodeFrames(List<Frame> frames) {
   return writer.toBytes();
 }
 
-Uint8List _encodeVerbatimValue(Object? value) {
-  final writer = BinaryWriterImpl(testRegistry);
-  writer.write(value);
-  return writer.toBytes();
-}
+Uint8List _filledBytes(int length, int fill) =>
+    Uint8List(length)..fillRange(0, length, fill);
 
-Uint8List _patternBytes(int length, int seed) {
-  return Uint8List.fromList(
-    List<int>.generate(length, (i) => (i + seed) & 0xFF),
+Future<void> _expectStreamedFrames(
+  List<Frame> frames, {
+  bool verbatim = false,
+}) async {
+  final bytes = _encodeFrames(frames);
+  expect(bytes.length, greaterThan(1 << 20));
+
+  final keystore = Keystore.debug();
+  final recoveryOffset = await _FrameIoHelperTest(bytes).framesFromFile(
+    'null',
+    keystore,
+    testRegistry,
+    null,
+    null,
+    verbatim: verbatim,
   );
-}
+  expect(recoveryOffset, -1);
 
-void _expectFrameOffsets(Iterable<Frame> actual, Iterable<Frame> expected) {
-  final actualList = actual.toList();
-  final expectedList = expected.toList();
-  expect(actualList.length, expectedList.length);
-  for (var i = 0; i < expectedList.length; i++) {
-    expect(actualList[i].offset, expectedList[i].offset);
+  final expectedFrames = verbatim
+      ? [
+          for (final frame in frames)
+            if (frame.deleted)
+              frame
+            else
+              Frame(
+                frame.key,
+                (BinaryWriterImpl(testRegistry)..write(frame.value)).toBytes(),
+                length: frame.length,
+                offset: frame.offset,
+              ),
+        ]
+      : frames;
+  final expectedKeystore = Keystore.debug(frames: expectedFrames);
+  expectFrames(keystore.frames, expectedKeystore.frames);
+  expect(
+    keystore.frames.map((f) => f.offset),
+    expectedKeystore.frames.map((f) => f.offset),
+  );
+
+  if (verbatim) {
+    for (final frame in keystore.frames) {
+      if (!frame.deleted) {
+        final value = frame.value as Uint8List;
+        expect(value.buffer.lengthInBytes, value.length);
+      }
+    }
   }
 }
 
@@ -100,11 +131,9 @@ void main() {
 
         expectFrames(keystore.frames, testKeystore.frames);
       });
-
-      test('returns offset if problem occurs', () {});
     });
 
-    group('.allFromFile()', () {
+    group('.framesFromFile()', () {
       test('frame', () async {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
@@ -143,8 +172,6 @@ void main() {
         expectFrames(keystore.frames, testKeystore.frames);
       });
 
-      test('returns offset if problem occurs', () {});
-
       test('empty file', () async {
         final keystore = Keystore.debug();
         final ioHelper = _FrameIoHelperTest(Uint8List(0));
@@ -156,6 +183,15 @@ void main() {
           null,
         );
         expect(recoveryOffset, -1);
+        expect(keystore.frames, isEmpty);
+      });
+
+      test('file shorter than minimum frame', () async {
+        final keystore = Keystore.debug();
+        final recoveryOffset = await _FrameIoHelperTest(
+          Uint8List.fromList([1, 2]),
+        ).framesFromFile('null', keystore, testRegistry, null, null);
+        expect(recoveryOffset, 0);
         expect(keystore.frames, isEmpty);
       });
 
@@ -193,122 +229,37 @@ void main() {
           await expectTailRecovery(corruptedFrame);
         });
       });
-    });
 
-    group('.framesFromFile() streaming (> 1 MiB)', () {
-      test('streams multiple chunks', () async {
-        final frames = <Frame>[
-          for (var i = 0; i < 8; i++)
-            Frame('chunk$i', _patternBytes(256 * 1024, i * 17)),
-          Frame('overwrite', _patternBytes(1024, 1)),
-          Frame('overwrite', 'updated_value'),
-          Frame('null_key', null),
-          Frame('deleted_key', _patternBytes(2048, 9)),
-          Frame.deleted('deleted_key'),
-          Frame(42, 'int_key_value'),
-        ];
-        final bytes = _encodeFrames(frames);
-        expect(bytes.length, greaterThan(1 << 20));
-
-        final keystore = Keystore.debug();
-        final ioHelper = _FrameIoHelperTest(bytes);
-        final recoveryOffset = await ioHelper.framesFromFile(
-          'null',
-          keystore,
-          testRegistry,
-          null,
-          null,
-        );
-        expect(recoveryOffset, -1);
-
-        final expectedKeystore = Keystore.debug(frames: frames);
-        expectFrames(keystore.frames, expectedKeystore.frames);
-        _expectFrameOffsets(keystore.frames, expectedKeystore.frames);
-      });
-
-      test(
-        'streams multiple chunks verbatim without sharing chunk buffer',
-        () async {
-          final frames = <Frame>[
-            for (var i = 0; i < 11; i++)
-              Frame('v$i', _patternBytes(300 * 1024, i * 29)),
-            Frame('null_v', null),
-            Frame('del_v', 'temp'),
-            Frame.deleted('del_v'),
+      group('streaming (> 1 MiB)', () {
+        test('streams multiple chunks', () async {
+          final frames = [
+            // Leaves 2 bytes in the first 1 MiB chunk so the next frame's
+            // length header straddles the chunk boundary.
+            Frame('a', _filledBytes((1 << 20) - 18, 1)),
+            Frame('b', _filledBytes(512 * 1024, 2)),
+            Frame('c', _filledBytes(600 * 1024, 3)),
           ];
-          final bytes = _encodeFrames(frames);
-          expect(bytes.length, greaterThan(3 * (1 << 20)));
+          await _expectStreamedFrames(frames);
+          expect(frames.first.length, (1 << 20) - 2);
+        });
 
-          final expectedVerbatimFrames = <Frame>[
-            for (final frame in frames)
-              if (frame.deleted)
-                frame
-              else
-                Frame(
-                  frame.key,
-                  _encodeVerbatimValue(frame.value),
-                  length: frame.length,
-                  offset: frame.offset,
-                ),
-          ];
-
-          final keystore = Keystore.debug();
-          final ioHelper = _FrameIoHelperTest(bytes);
-          final recoveryOffset = await ioHelper.framesFromFile(
-            'null',
-            keystore,
-            testRegistry,
-            null,
-            null,
+        test('streams multiple chunks verbatim', () async {
+          await _expectStreamedFrames(
+            [
+              for (var i = 0; i < 4; i++)
+                Frame('v$i', _filledBytes(300 * 1024, i + 1)),
+            ],
             verbatim: true,
           );
-          expect(recoveryOffset, -1);
+        });
 
-          final expectedKeystore =
-              Keystore.debug(frames: expectedVerbatimFrames);
-          expectFrames(keystore.frames, expectedKeystore.frames);
-          _expectFrameOffsets(keystore.frames, expectedKeystore.frames);
-
-          final actualFrames = keystore.frames.toList();
-          final expectedSnapshots = <Uint8List>[
-            for (final frame in actualFrames)
-              Uint8List.fromList(frame.value as Uint8List),
-          ];
-          for (final frame in actualFrames) {
-            final value = frame.value as Uint8List;
-            expect(value.buffer.lengthInBytes, value.length);
-          }
-
-          (actualFrames.first.value as Uint8List)[0] ^= 0xFF;
-          for (var i = 1; i < actualFrames.length; i++) {
-            expect(actualFrames[i].value, expectedSnapshots[i]);
-          }
-        },
-      );
-
-      test('streams single frame larger than 1 MiB', () async {
-        final frames = <Frame>[
-          Frame('before', 'start'),
-          Frame('huge', _patternBytes((1 << 20) + 128 * 1024, 55)),
-          Frame('after', 'end'),
-        ];
-        final bytes = _encodeFrames(frames);
-        expect(bytes.length, greaterThan(1 << 20));
-
-        final keystore = Keystore.debug();
-        final ioHelper = _FrameIoHelperTest(bytes);
-        final recoveryOffset = await ioHelper.framesFromFile(
-          'null',
-          keystore,
-          testRegistry,
-          null,
-          null,
-        );
-        expect(recoveryOffset, -1);
-
-        final expectedKeystore = Keystore.debug(frames: frames);
-        expectFrames(keystore.frames, expectedKeystore.frames);
-        _expectFrameOffsets(keystore.frames, expectedKeystore.frames);
+        test('streams single frame larger than 1 MiB', () async {
+          await _expectStreamedFrames([
+            Frame('before', 'start'),
+            Frame('huge', _filledBytes((1 << 20) + 128 * 1024, 1)),
+            Frame('after', 'end'),
+          ]);
+        });
       });
     });
   });
