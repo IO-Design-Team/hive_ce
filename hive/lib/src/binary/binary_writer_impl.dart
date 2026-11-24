@@ -451,17 +451,21 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 }
 
-/// Not part of public API
+/// Caches a single [BinaryWriterImpl] for reuse across sequential writes while
+/// bounding retained buffer memory to 64 KiB (65536 bytes) and remaining safe
+/// under re-entrant calls.
 class ReusableBinaryWriter {
   static const _maxRetainedBufferSize = 65536;
 
   final TypeRegistry _typeRegistry;
   BinaryWriterImpl? _writer;
 
-  /// Not part of public API
+  /// Creates a reusable writer slot backed by the given [TypeRegistry].
   ReusableBinaryWriter(this._typeRegistry);
 
-  /// Not part of public API
+  /// Borrows the cached [BinaryWriterImpl], clearing the slot while in use so
+  /// re-entrant callers receive an independent instance, or allocates a new
+  /// writer if none is cached.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   BinaryWriterImpl acquire() {
@@ -473,7 +477,11 @@ class ReusableBinaryWriter {
     return BinaryWriterImpl(_typeRegistry);
   }
 
-  /// Not part of public API
+  /// Resets [writer]'s offset and returns it to the cache if the slot is empty
+  /// and the buffer is at most 64 KiB (65536 bytes).
+  ///
+  /// Oversized or superseded writers are discarded so they can be
+  /// garbage-collected. Intended to be called in a `finally` block.
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void release(BinaryWriterImpl writer) {
