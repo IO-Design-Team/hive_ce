@@ -5,7 +5,7 @@ import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/box/change_notifier.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
 import 'package:hive_ce/src/object/hive_object.dart';
-import 'package:hive_ce/src/util/indexable_skip_list.dart';
+import 'package:hive_ce/src/util/b_plus_tree.dart';
 import 'package:meta/meta.dart';
 
 import 'package:hive_ce/src/box/box_base_impl.dart';
@@ -29,7 +29,7 @@ class Keystore<E> {
 
   final ChangeNotifier _notifier;
 
-  final IndexableSkipList<dynamic, Frame> _store;
+  final BPlusTree<dynamic, Frame> _store;
 
   /// Not part of public API
   @visibleForTesting
@@ -40,7 +40,7 @@ class Keystore<E> {
 
   /// Not part of public API
   Keystore(this._box, this._notifier, KeyComparator? keyComparator)
-      : _store = IndexableSkipList(keyComparator ?? defaultKeyComparator);
+      : _store = BPlusTree(keyComparator ?? defaultKeyComparator);
 
   /// Not part of public API
   factory Keystore.debug({
@@ -90,7 +90,7 @@ class Keystore<E> {
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   bool containsKey(dynamic key) {
-    return _store.get(key) != null;
+    return _store.containsKey(key);
   }
 
   /// Not part of public API
