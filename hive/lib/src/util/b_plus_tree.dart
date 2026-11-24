@@ -205,7 +205,7 @@ class BPlusTree<K, V> {
     try {
       leaf = _findLeafWithPath(key);
       pos = _findInLeaf(leaf, key);
-    } on Object {
+    } catch (_) {
       _clearPath(depth);
       rethrow;
     }
@@ -278,7 +278,7 @@ class BPlusTree<K, V> {
     try {
       leaf = _findLeafWithPath(key);
       idx = _findInLeaf(leaf, key);
-    } on Object {
+    } catch (_) {
       _clearPath(depth);
       rethrow;
     }
