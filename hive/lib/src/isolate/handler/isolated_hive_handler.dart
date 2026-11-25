@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/box/default_compaction_strategy.dart';
 import 'package:hive_ce/src/box/default_key_comparator.dart';
@@ -25,9 +27,9 @@ Future<dynamic> handleHiveMethodCall(
       if (boxHandlers.containsKey(name)) {
         // Ensure this is a valid `openBox` call
         if (lazy) {
-          Hive.lazyBox(name);
+          Hive.lazyBox<Uint8List>(name);
         } else {
-          Hive.box(name);
+          Hive.box<Uint8List>(name);
         }
         return;
       }
@@ -47,9 +49,9 @@ Future<dynamic> handleHiveMethodCall(
       final bytes = call.arguments['bytes'];
       final collection = call.arguments['collection'];
 
-      final BoxBase box;
+      final BoxBase<Uint8List> box;
       if (lazy) {
-        box = await (Hive as HiveImpl).openLazyBox(
+        box = await (Hive as HiveImpl).openLazyBox<Uint8List>(
           name,
           keyCrc: keyCrc,
           keyComparator: keyComparator,
@@ -59,7 +61,7 @@ Future<dynamic> handleHiveMethodCall(
           collection: collection,
         );
       } else {
-        box = await (Hive as HiveImpl).openBox(
+        box = await (Hive as HiveImpl).openBox<Uint8List>(
           name,
           keyCrc: keyCrc,
           keyComparator: keyComparator,

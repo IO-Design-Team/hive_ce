@@ -427,6 +427,45 @@ void main() {
           expect(await reopened.get(addedKeys[1]), large);
         }
       });
+
+      test('detached reads', () async {
+        final dir = await getTempDir();
+        final hive = IsolatedHiveImpl();
+        addTearDown(hive.close);
+        await hive.init(dir.path, isolateNameServer: StubIns());
+
+        final large = Uint8List.fromList(List.generate(70000, (i) => i & 0xff));
+        final box = await hive.openBox<dynamic>('detached');
+        final watched1 = box.watch().take(3).toList();
+        final watched2 = box.watch(key: 'large1').take(1).toList();
+        await box.putAll({'small': 'hi', 'large1': large, 'large2': large});
+        expect((await watched1).map((e) => e.value), ['hi', large, large]);
+        expect((await watched2).single.value, large);
+        await box.close();
+
+        final reopened = await hive.openBox<dynamic>('detached');
+        final keys = await reopened.keys;
+        final smallIdx = keys.indexOf('small');
+        final largeIdx = keys.indexOf('large1');
+        final channel =
+            IsolateMethodChannel('box', (hive as HiveIsolate).connection);
+
+        final smallWire = await channel.invokeMethod(
+          'get',
+          {'name': 'detached', 'key': 'small'},
+        ) as Uint8List;
+        expect(smallWire.buffer.lengthInBytes, lessThanOrEqualTo(4096));
+
+        final largeWire = await channel.invokeMethod(
+          'getAt',
+          {'name': 'detached', 'index': largeIdx},
+        ) as TransferableTypedData;
+        expect(largeWire.materialize().asUint8List().length, lessThan(71000));
+
+        expect(await reopened.get('small'), 'hi');
+        expect(await reopened.getAt(smallIdx), 'hi');
+        expect(await reopened.getAt(largeIdx), large);
+      });
     },
     onPlatform: {
       'chrome': Skip('Isolates are not supported on web'),
