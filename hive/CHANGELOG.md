@@ -1,7 +1,6 @@
 ## NEXT
 
-- Speeds up `IsolatedHive` batch writes by packing values into a single buffer
-- Speeds up large `IsolatedHive` writes using selective `TransferableTypedData`
+- Speeds up `IsolatedHive` batch and large writes by packing batch values into a single buffer and using selective `TransferableTypedData`
 - Speeds up web batch writes (`StorageBackendJs.writeFrames()`) and `CollectionBox.deleteAll()` by batching IndexedDB operations in a single transaction and fixing O(N²) cached key removal
 - Speeds up encrypted and `IsolatedHive` writes and reduces memory usage by reusing a bounded `BinaryWriterImpl` via `ReusableBinaryWriter`
 - Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
