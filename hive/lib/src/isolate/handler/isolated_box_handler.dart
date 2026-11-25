@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
@@ -46,6 +48,10 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
     _subscriptions.remove(id)?.cancel();
   }
 
+  static Uint8List _unwrapBytes(dynamic value) => value is TransferableTypedData
+      ? value.materialize().asUint8List()
+      : value as Uint8List;
+
   void _close() {
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
@@ -71,15 +77,27 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'containsKey':
         return box.containsKey(call.arguments['key']);
       case 'put':
-        await box.put(call.arguments['key'], call.arguments['value']);
+        await box.put(
+          call.arguments['key'],
+          _unwrapBytes(call.arguments['value']),
+        );
       case 'putAt':
-        await box.putAt(call.arguments['index'], call.arguments['value']);
+        await box.putAt(
+          call.arguments['index'],
+          _unwrapBytes(call.arguments['value']),
+        );
       case 'putAll':
-        await box.putAll(call.arguments['entries']);
+        await box.putAll(
+          (call.arguments['entries'] as Map).map(
+            (key, value) => MapEntry(key, _unwrapBytes(value)),
+          ),
+        );
       case 'add':
-        return await box.add(call.arguments['value']);
+        return await box.add(_unwrapBytes(call.arguments['value']));
       case 'addAll':
-        final keys = await box.addAll(call.arguments['values']);
+        final keys = await box.addAll(
+          (call.arguments['values'] as List).map(_unwrapBytes),
+        );
         return keys.toList();
       case 'delete':
         await box.delete(call.arguments['key']);

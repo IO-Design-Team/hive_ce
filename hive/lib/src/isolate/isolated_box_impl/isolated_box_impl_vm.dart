@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -17,6 +18,7 @@ abstract class IsolatedBoxBaseImpl<E>
     implements IsolatedBoxBase<E>, InspectableBox {
   /// Value to inform the get method to return the default value
   static const defaultValuePlaceholder = '_hive_ce.defaultValue';
+  static const _transferThreshold = 65536;
 
   final IsolatedHiveImpl _hive;
   final HiveCipher? _cipher;
@@ -167,7 +169,14 @@ abstract class IsolatedBoxBaseImpl<E>
     return _readValue(bytes);
   }
 
-  Uint8List _writeValue(E value) {
+  // Copy out of the reused writer buffer: use TransferableTypedData for large
+  // payloads to avoid an extra SendPort copy, or copy small slices directly.
+  static Object _wrapBytes(Uint8List bytes) =>
+      bytes.length >= _transferThreshold
+          ? TransferableTypedData.fromList([bytes])
+          : Uint8List.fromList(bytes);
+
+  Object _writeValue(E value) {
     final writer = _writer.acquire();
     try {
       if (_cipher != null) {
@@ -175,7 +184,7 @@ abstract class IsolatedBoxBaseImpl<E>
       } else {
         writer.write(value);
       }
-      return Uint8List.fromList(writer.toBytes());
+      return _wrapBytes(writer.toBytes());
     } finally {
       _writer.release(writer);
     }
