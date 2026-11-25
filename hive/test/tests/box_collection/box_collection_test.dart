@@ -146,11 +146,39 @@ void main() {
       expect(await box.get('fluffy'), null);
     });
 
-    test('.deleteAll()', () async {
-      final collection = await _openCollection(withData: true);
-      final box = await collection.openBox('cats');
-      await box.deleteAll(['fluffy', 'loki']);
-      expect(await box.getAllKeys(), []);
+    group('.deleteAll()', () {
+      test('updates cache and persisted values', () async {
+        final collection = await _openCollection(withData: true);
+        final box = await collection.openBox('cats');
+        await box.put('whiskers', {'name': 'Whiskers', 'age': 5});
+        await box.getAllKeys();
+        await box.get('fluffy');
+
+        await box.deleteAll([]);
+        expect(await box.getAllKeys(), ['fluffy', 'loki', 'whiskers']);
+
+        await box.deleteAll(['fluffy', 'whiskers']);
+        expect(await box.getAllKeys(), ['loki']);
+        expect(await box.get('fluffy'), null);
+        expect(await box.getAllValues(), {
+          'loki': {'name': 'Loki', 'age': 2},
+        });
+      });
+
+      test('inside transaction', () async {
+        final collection = await _openCollection(withData: true);
+        final box = await collection.openBox('cats');
+        await box.getAllKeys();
+        await box.get('fluffy');
+
+        await collection.transaction(() async {
+          await box.deleteAll(['fluffy', 'loki']);
+        });
+
+        expect(await box.getAllKeys(), []);
+        expect(await box.get('fluffy'), null);
+        expect(await box.getAllValues(), {});
+      });
     });
 
     test('.clear()', () async {

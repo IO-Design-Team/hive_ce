@@ -43,3 +43,37 @@ extension IDBObjectStoreExtension on IDBObjectStore {
     return controller.stream;
   }
 }
+
+/// Extensions for [IDBTransaction]
+extension IDBTransactionExtension on IDBTransaction {
+  /// Returns a [Future] that completes when this transaction completes, or
+  /// completes with an error if the transaction aborts.
+  Future<void> asFuture() {
+    final completer = Completer<void>();
+    oncomplete = (Event e) {
+      completer.complete();
+    }.toJS;
+    onabort = (Event e) {
+      completer.completeError(
+        error ?? StateError('IDBTransaction aborted without an error'),
+      );
+    }.toJS;
+    return completer.future;
+  }
+
+  /// Executes [action] synchronously within this transaction, aborting the
+  /// transaction if [action] throws, and awaits transaction completion.
+  Future<void> run(void Function() action) async {
+    try {
+      action();
+    } catch (_) {
+      try {
+        abort();
+      } catch (_) {
+        // Keep the original error if aborting fails.
+      }
+      rethrow;
+    }
+    await asFuture();
+  }
+}

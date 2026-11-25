@@ -278,6 +278,8 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
 
   @override
   Future<void> deleteAll(List<String> keys, [IDBTransaction? txn]) async {
+    if (keys.isEmpty) return;
+
     final txnCache = boxCollection._txnCache;
     if (txnCache != null) {
       txnCache.add((txn) => deleteAll(keys, txn));
@@ -288,14 +290,25 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
       return;
     }
 
-    txn ??= boxCollection._db.transaction(name.toJS, 'readwrite');
-    final store = txn.objectStore(name);
-    for (final key in keys) {
-      await store.delete(key.toJS).asFuture();
-      _cache[key] = null;
-      _cachedKeys?.removeAll(keys);
+    if (txn == null) {
+      txn = boxCollection._db.transaction(name.toJS, 'readwrite');
+      final store = txn.objectStore(name);
+      await txn.run(() {
+        for (final key in keys) {
+          store.delete(key.toJS);
+        }
+      });
+    } else {
+      final store = txn.objectStore(name);
+      final requests = [
+        for (final key in keys) store.delete(key.toJS).asFuture(),
+      ];
+      await Future.wait(requests);
     }
-    return;
+    for (final key in keys) {
+      _cache[key] = null;
+    }
+    _cachedKeys?.removeAll(keys);
   }
 
   @override
