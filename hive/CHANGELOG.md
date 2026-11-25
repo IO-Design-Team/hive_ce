@@ -1,7 +1,7 @@
 ## NEXT
 
-- Speeds up web `CollectionBox.deleteAll()` by batching IndexedDB deletes and fixing O(N²) cached key removal
-- Speeds up web batch writes by pipelining `StorageBackendJs.writeFrames()` in a single IndexedDB transaction
+- Speeds up web batch writes (`StorageBackendJs.writeFrames()`) and `CollectionBox.deleteAll()` by batching IndexedDB operations in a single transaction and fixing O(N²) cached key removal
+- Speeds up encrypted and `IsolatedHive` writes and reduces memory usage by reusing a bounded `BinaryWriterImpl` via `ReusableBinaryWriter`
 - Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
 - Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
 - Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`

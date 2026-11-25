@@ -25,6 +25,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   var _offset = 0;
 
+  late final _valueWriter = ReusableBinaryWriter(typeRegistry);
+
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   ByteData get _byteData => _byteDataInstance ??= ByteData.view(_buffer.buffer);
@@ -421,15 +423,19 @@ class BinaryWriterImpl extends BinaryWriter {
     HiveCipher cipher, {
     bool withTypeId = true,
   }) {
-    final valueWriter = BinaryWriterImpl(typeRegistry)
-      ..write(value, withTypeId: withTypeId);
-    final inp = valueWriter.toBytes();
+    final valueWriter = _valueWriter.acquire();
+    try {
+      valueWriter.write(value, withTypeId: withTypeId);
+      final inp = valueWriter.toBytes();
 
-    _reserveBytes(cipher.maxEncryptedSize(inp));
+      _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
+      final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
 
-    _offset += len;
+      _offset += len;
+    } finally {
+      _valueWriter.release(valueWriter);
+    }
   }
 
   /// Not part of public API
@@ -448,5 +454,46 @@ class BinaryWriterImpl extends BinaryWriter {
     x |= x >> 8;
     x |= x >> 16;
     return x + 1;
+  }
+}
+
+/// Caches a single [BinaryWriterImpl] for reuse across sequential writes while
+/// bounding retained buffer memory to 64 KiB (65536 bytes) and remaining safe
+/// under re-entrant calls.
+class ReusableBinaryWriter {
+  static const _maxRetainedBufferSize = 65536;
+
+  final TypeRegistry _typeRegistry;
+  BinaryWriterImpl? _writer;
+
+  /// Creates a reusable writer slot backed by the given [TypeRegistry].
+  ReusableBinaryWriter(this._typeRegistry);
+
+  /// Borrows the cached [BinaryWriterImpl], clearing the slot while in use so
+  /// re-entrant callers receive an independent instance, or allocates a new
+  /// writer if none is cached.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  BinaryWriterImpl acquire() {
+    final writer = _writer;
+    if (writer != null) {
+      _writer = null;
+      return writer;
+    }
+    return BinaryWriterImpl(_typeRegistry);
+  }
+
+  /// Resets [writer]'s offset and returns it to the cache if the slot is empty
+  /// and the buffer is at most 64 KiB (65536 bytes).
+  ///
+  /// Oversized or superseded writers are discarded so they can be
+  /// garbage-collected. Intended to be called in a `finally` block.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  void release(BinaryWriterImpl writer) {
+    if (_writer == null && writer._buffer.length <= _maxRetainedBufferSize) {
+      writer._offset = 0;
+      _writer = writer;
+    }
   }
 }
