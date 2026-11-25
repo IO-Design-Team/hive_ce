@@ -80,7 +80,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-dart-${{ matrix.dart-channel }}-pub-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml') }}
+          key: ${{ runner.os }}-dart-${{ matrix.dart-channel }}-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dart-${{ matrix.dart-channel }}-pub-
       - name: Check hive
@@ -130,7 +130,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('hive_generator/pubspec.yaml') }}
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dart-stable-pub-
       - name: Install dependencies
@@ -155,7 +155,7 @@ jobs:
         with:
           channel: ${{ matrix.flutter-channel }}
           cache: true
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('hive_flutter/pubspec.yaml', 'hive_flutter/example/pubspec.yaml', 'hive_ce_inspector/pubspec.yaml') }}
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ hashFiles('**/pubspec.yaml') }}
       - name: Check and test hive_flutter
         if: needs.changes.outputs.hive_flutter == 'true'
         working-directory: hive_flutter
@@ -217,7 +217,7 @@ jobs:
       - uses: actions/cache@v5
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-dart-3.4.0-pub-${{ hashFiles('hive/pubspec.yaml') }}
+          key: ${{ runner.os }}-dart-3.4.0-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dart-3.4.0-pub-
       # These dev dependencies require a newer SDK, but are not needed for testing
@@ -243,10 +243,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
-      - uses: actions/cache@v5
+      - uses: actions/cache/restore@v5
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('hive/pubspec.yaml') }}
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
             ${{ runner.os }}-dart-stable-pub-
       - name: Collect coverage
@@ -272,16 +272,15 @@ jobs:
         if: needs.changes.outputs.hive_flutter == 'true'
         with:
           cache: true
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-codegen-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_flutter/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml', 'benchmarks/drift/pubspec.yaml') }}
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-codegen-${{ hashFiles('**/pubspec.yaml') }}
       - uses: dart-lang/setup-dart@v1
         if: needs.changes.outputs.hive_flutter != 'true'
-      - uses: actions/cache@v5
+      - uses: actions/cache/restore@v5
         if: needs.changes.outputs.hive_flutter != 'true'
         with:
           path: ~/.pub-cache
-          key: ${{ runner.os }}-dart-stable-codegen-pub-${{ hashFiles('hive/pubspec.yaml', 'hive/example/pubspec.yaml', 'hive_generator/pubspec.yaml', 'hive_generator/example/pubspec.yaml', 'benchmarks/drift/pubspec.yaml') }}
+          key: ${{ runner.os }}-dart-stable-pub-${{ hashFiles('**/pubspec.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-dart-stable-codegen-pub-
             ${{ runner.os }}-dart-stable-pub-
       - name: Run codegen
         env:
@@ -379,8 +378,7 @@ jobs:
           # race in Flutter 3.50 stable), fixed by flutter/flutter#193142 in 3.51+.
           channel: ${{ matrix.platform == 'apple' && 'beta' || 'stable' }}
           cache: true
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ matrix.platform }}
-          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-${{ matrix.platform }}-${{ hashFiles('hive/pubspec.yaml', 'hive_flutter/pubspec.yaml', 'hive_flutter/example/pubspec.yaml') }}
+          pub-cache-key: flutter-pub-:os:-:channel:-:version:-:arch:-integration-${{ hashFiles('**/pubspec.yaml') }}
       - name: Install dependencies
         run: flutter pub get
       - name: Precache iOS artifacts
