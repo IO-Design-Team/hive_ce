@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -59,6 +60,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
   // and cheap enough for SendPort to copy directly, avoiding an extra copy on
   // small buffers while still detaching views into large box or batch buffers.
   static const _maxSlackBytes = 4096;
+  static final _emptyHeader = Uint32List(0);
 
   // Detach views backed by much larger buffers so SendPort copies only the value.
   static Object? _detachBytes(Uint8List? value) {
@@ -67,6 +69,21 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       return wrapBytes(value);
     }
     return value;
+  }
+
+  // Pack raw value slices as [count, ...lengths, ...rawValues] in one transfer.
+  static TransferableTypedData? _packValues(Iterable<Uint8List> rawValues) {
+    final chunks = <TypedData>[_emptyHeader, ...rawValues];
+    final count = chunks.length - 1;
+    if (count == 0) return null;
+
+    final header = Uint32List(count + 1);
+    header[0] = count;
+    for (var i = 0; i < count; i++) {
+      header[i + 1] = chunks[i + 1].lengthInBytes;
+    }
+    chunks[0] = header;
+    return TransferableTypedData.fromList(chunks);
   }
 
   static List<Uint8List> _unpackValues(dynamic value) {
@@ -146,16 +163,14 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'flush':
         await box.flush();
       case 'values':
-        // This needs to be a list or it is unsendable
-        return (box as Box<Uint8List>).values.toList();
+        return _packValues((box as Box<Uint8List>).values);
       case 'valuesBetween':
-        // This needs to be a list or it is unsendable
-        return (box as Box<Uint8List>)
-            .valuesBetween(
-              startKey: call.arguments['startKey'],
-              endKey: call.arguments['endKey'],
-            )
-            .toList();
+        return _packValues(
+          (box as Box<Uint8List>).valuesBetween(
+            startKey: call.arguments['startKey'],
+            endKey: call.arguments['endKey'],
+          ),
+        );
       case 'get':
         if (box.lazy) {
           return await (box as LazyBox<Uint8List>).get(call.arguments['key']);
@@ -174,7 +189,11 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
           );
         }
       case 'toMap':
-        return (box as Box<Uint8List>).toMap();
+        final eagerBox = box as Box<Uint8List>;
+        return {
+          'keys': eagerBox.keys.toList(growable: false),
+          'values': _packValues(eagerBox.values),
+        };
       case 'getFrames':
         final frames = await (box as InspectableBox).getFrames();
         return frames.map((e) => e.toJson()).toList();

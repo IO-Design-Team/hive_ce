@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
+import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/binary/frame.dart';
 import 'package:hive_ce/src/object/hive_list_impl.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
@@ -611,6 +612,31 @@ void main() {
         expect(hiveList.boxName, 'Box');
         expect(hiveList.keys, [123, 'hi']);
       });
+    });
+
+    test('.readValue()', () {
+      final registry = TypeRegistryImpl();
+      final hello = (BinaryWriterImpl(registry)
+            ..write('hello')
+            ..writeUint32(0xdeadbeef))
+          .toBytes();
+      final secret = (BinaryWriterImpl(registry)
+            ..writeEncrypted('secret', testCipher))
+          .toBytes();
+      final number = (BinaryWriterImpl(registry)..write(99)).toBytes();
+
+      final br = BinaryReaderImpl(
+        Uint8List.fromList([...hello, ...secret, ...number]),
+        registry,
+      );
+      expect(br.readValue(hello.length), 'hello');
+      expect(br.readValue(secret.length, cipher: testCipher), 'secret');
+      expect(br.readValue(number.length), 99);
+      expect(br.availableBytes, 0);
+
+      final shortBr = fromBytes([FrameValueType.intT, 2]);
+      expect(() => shortBr.readValue(5), throwsRangeError);
+      expect(shortBr.availableBytes, 2);
     });
   });
 

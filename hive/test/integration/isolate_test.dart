@@ -466,6 +466,40 @@ void main() {
         expect(await reopened.getAt(smallIdx), 'hi');
         expect(await reopened.getAt(largeIdx), large);
       });
+
+      test('packed bulk reads', () async {
+        final dir = await getTempDir();
+        final hive = IsolatedHiveImpl();
+        addTearDown(hive.close);
+        await hive.init(dir.path, isolateNameServer: StubIns());
+
+        final cipher = HiveAesCipher(Hive.generateSecureKey());
+        final box = await hive.openBox<dynamic>(
+          'bulk',
+          encryptionCipher: cipher,
+        );
+        expect(await box.values, isEmpty);
+        expect(await box.valuesBetween(), isEmpty);
+        expect(await box.toMap(), isEmpty);
+
+        await box.putAll({'a': 'first', 'b': null, 'c': 'last'});
+        await box.close();
+
+        final reopened = await hive.openBox<dynamic>(
+          'bulk',
+          encryptionCipher: cipher,
+        );
+        expect(await reopened.values, ['first', null, 'last']);
+        expect(
+          await reopened.valuesBetween(startKey: 'a', endKey: 'b'),
+          ['first', null],
+        );
+        expect(await reopened.valuesBetween(startKey: 'z'), isEmpty);
+        expect(
+          await reopened.toMap(),
+          {'a': 'first', 'b': null, 'c': 'last'},
+        );
+      });
     },
     onPlatform: {
       'chrome': Skip('Isolates are not supported on web'),

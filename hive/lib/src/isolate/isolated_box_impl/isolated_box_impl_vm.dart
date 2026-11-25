@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -234,27 +235,49 @@ class IsolatedBoxImpl<E> extends IsolatedBoxBaseImpl<E>
   @override
   final lazy = false;
 
-  @override
-  Future<Iterable<E>> get values async {
-    final bytes =
-        await _channel.invokeListMethod<Uint8List>('values', {'name': name});
-    return bytes.map(_readValue).cast<E>();
+  List<E> _readValues(TransferableTypedData? packed) {
+    if (packed == null) return List<E>.empty();
+    final buffer = packed.materialize();
+    final count = buffer.asUint32List(0, 1)[0];
+    final lengths = buffer.asUint32List(4, count);
+    final reader = BinaryReaderImpl(
+      buffer.asUint8List((count + 1) * 4),
+      _hive,
+    );
+    return List<E>.generate(
+      count,
+      (i) => reader.readValue(lengths[i], cipher: _cipher) as E,
+      growable: false,
+    );
   }
 
   @override
-  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) async {
-    final bytes = await _channel.invokeListMethod<Uint8List>(
-      'valuesBetween',
-      {'name': name, 'startKey': startKey, 'endKey': endKey},
-    );
-    return bytes.map(_readValue).cast<E>();
-  }
+  Future<Iterable<E>> get values async => _readValues(
+        await _channel.invokeMethod<TransferableTypedData?>(
+          'values',
+          {'name': name},
+        ),
+      );
+
+  @override
+  Future<Iterable<E>> valuesBetween({dynamic startKey, dynamic endKey}) async =>
+      _readValues(
+        await _channel.invokeMethod<TransferableTypedData?>(
+          'valuesBetween',
+          {'name': name, 'startKey': startKey, 'endKey': endKey},
+        ),
+      );
 
   @override
   Future<Map<dynamic, E>> toMap() async {
-    final bytes = await _channel
-        .invokeMapMethod<dynamic, Uint8List>('toMap', {'name': name});
-    return bytes.map((key, value) => MapEntry(key, _readValue(value) as E));
+    final result = await _channel.invokeMapMethod<String, dynamic>(
+      'toMap',
+      {'name': name},
+    );
+    return Map<dynamic, E>.fromIterables(
+      result['keys'] as List,
+      _readValues(result['values'] as TransferableTypedData?),
+    );
   }
 }
 
