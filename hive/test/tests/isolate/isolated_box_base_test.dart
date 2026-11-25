@@ -145,6 +145,7 @@ void main() {
     test('.addAll()', () async {
       final box = await _openBox();
 
+      expect(await box.addAll([]), isEmpty);
       expect(await box.addAll([1, 2, 3]), [0, 1, 2]);
       expect(await box.get(0), 1);
       expect(await box.get(1), 2);

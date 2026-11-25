@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/hive_impl.dart';
@@ -385,6 +386,46 @@ void main() {
         await hive.init(dir.path, isolateNameServer: ins);
 
         expect(spawned, isTrue);
+      });
+
+      test('large writes', () async {
+        final dir = await getTempDir();
+        final hive = IsolatedHiveImpl();
+        addTearDown(hive.close);
+        await hive.init(dir.path, isolateNameServer: StubIns());
+
+        final large = Uint8List.fromList(List.generate(70000, (i) => i & 0xff));
+        final ciphers = [null, HiveAesCipher(Hive.generateSecureKey())];
+        for (var i = 0; i < ciphers.length; i++) {
+          final cipher = ciphers[i];
+          final name = 'large_$i';
+          final box = await hive.openBox<dynamic>(
+            name,
+            encryptionCipher: cipher,
+          );
+          await box.put('a', 'before');
+          await box.put('b', 'small');
+          await box.put('c', large);
+          await box.putAt(0, large);
+          final addedKey = await box.add(large);
+          await box.putAll({'k1': 'v1', 'k2': large, 'k3': null});
+          final addedKeys = await box.addAll(['small', large]);
+
+          await box.close();
+          final reopened = await hive.openBox<dynamic>(
+            name,
+            encryptionCipher: cipher,
+          );
+          expect(await reopened.get('a'), large);
+          expect(await reopened.get('b'), 'small');
+          expect(await reopened.get('c'), large);
+          expect(await reopened.get(addedKey), large);
+          expect(await reopened.get('k1'), 'v1');
+          expect(await reopened.get('k2'), large);
+          expect(await reopened.get('k3'), isNull);
+          expect(await reopened.get(addedKeys[0]), 'small');
+          expect(await reopened.get(addedKeys[1]), large);
+        }
       });
     },
     onPlatform: {

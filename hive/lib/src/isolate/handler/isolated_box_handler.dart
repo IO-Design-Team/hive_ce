@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
+import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
 import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
+import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
 
@@ -46,6 +50,22 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
     _subscriptions.remove(id)?.cancel();
   }
 
+  static Uint8List _unwrapBytes(dynamic value) => value is TransferableTypedData
+      ? value.materialize().asUint8List()
+      : value as Uint8List;
+
+  static List<Uint8List> _unpackValues(dynamic value) {
+    final reader = BinaryReaderImpl(
+      _unwrapBytes(value),
+      TypeRegistryImpl.nullImpl,
+    );
+    final values = <Uint8List>[];
+    while (reader.availableBytes > 0) {
+      values.add(reader.viewBytes(reader.readUint32()));
+    }
+    return values;
+  }
+
   void _close() {
     for (final subscription in _subscriptions.values) {
       subscription.cancel();
@@ -71,15 +91,26 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'containsKey':
         return box.containsKey(call.arguments['key']);
       case 'put':
-        await box.put(call.arguments['key'], call.arguments['value']);
+        await box.put(
+          call.arguments['key'],
+          _unwrapBytes(call.arguments['value']),
+        );
       case 'putAt':
-        await box.putAt(call.arguments['index'], call.arguments['value']);
+        await box.putAt(
+          call.arguments['index'],
+          _unwrapBytes(call.arguments['value']),
+        );
       case 'putAll':
-        await box.putAll(call.arguments['entries']);
+        await box.putAll(
+          Map.fromIterables(
+            call.arguments['keys'] as List,
+            _unpackValues(call.arguments['values']),
+          ),
+        );
       case 'add':
-        return await box.add(call.arguments['value']);
+        return await box.add(_unwrapBytes(call.arguments['value']));
       case 'addAll':
-        final keys = await box.addAll(call.arguments['values']);
+        final keys = await box.addAll(_unpackValues(call.arguments['values']));
         return keys.toList();
       case 'delete':
         await box.delete(call.arguments['key']);
