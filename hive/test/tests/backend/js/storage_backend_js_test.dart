@@ -254,17 +254,43 @@ void main() async {
       expect(await backend.readValue(Frame('key2', null)), null);
     });
 
-    test('.writeFrames()', () async {
-      final db = await _getDbWith({});
-      final backend = _getBackend(db: db);
+    group('.writeFrames()', () {
+      test('puts, deletes, and ignores empty batches', () async {
+        final db = await _getDbWith({});
+        final backend = _getBackend(db: db);
 
-      final frames = [Frame('key1', 123), Frame('key2', null)];
-      await backend.writeFrames(frames);
-      expect(frames, [Frame('key1', 123), Frame('key2', null)]);
-      expect(await backend.getKeys(), ['key1', 'key2']);
+        final frames = [Frame('key1', 123), Frame('key2', null)];
+        await backend.writeFrames(frames);
+        expect(frames, [Frame('key1', 123), Frame('key2', null)]);
+        expect(await backend.getKeys(), ['key1', 'key2']);
 
-      await backend.writeFrames([Frame.deleted('key1')]);
-      expect(await backend.getKeys(), ['key2']);
+        await backend.writeFrames([]);
+        expect(await backend.getKeys(), ['key1', 'key2']);
+
+        await backend.writeFrames([
+          Frame.deleted('key1'),
+          Frame('key2', 'updated'),
+          Frame(10, 100),
+        ]);
+        expect(await backend.getKeys(), [10, 'key2']);
+        expect(await backend.getValues(), [100, 'updated']);
+      });
+
+      test('aborts transaction if encoding fails mid-batch', () async {
+        final db = await _getDbWith({'existing': 'before'});
+        final backend = _getBackend(db: db, registry: TypeRegistryImpl());
+
+        await expectLater(
+          backend.writeFrames([
+            Frame('existing', 'after'),
+            Frame('bad', Object()),
+          ]),
+          throwsA(isA<HiveError>()),
+        );
+
+        expect(await backend.getKeys(), ['existing']);
+        expect(await backend.getValues(), ['before']);
+      });
     });
 
     test('.compact()', () async {
