@@ -7,9 +7,7 @@ import 'package:hive_ce/src/backend/js/native/utils.dart';
 import 'package:test/test.dart';
 import 'package:web/web.dart';
 
-void _closeDb(IDBDatabase db) => db.close();
-
-Future<IDBDatabase> _openDb() async {
+Future<IDBDatabase> _openDb() {
   final request = window.self.indexedDB.open('utilsTestBox', 1);
   request.onupgradeneeded = (IDBVersionChangeEvent e) {
     final db = (e.target as IDBOpenDBRequest).result as IDBDatabase;
@@ -17,107 +15,89 @@ Future<IDBDatabase> _openDb() async {
       db.createObjectStore('box');
     }
   }.toJS;
-  final db = await request.asFuture<IDBDatabase>();
-  addTearDown(() => _closeDb(db));
-  await db
-      .transaction('box'.toJS, 'readwrite')
-      .objectStore('box')
-      .clear()
-      .asFuture();
-  return db;
+  return request.asFuture<IDBDatabase>();
 }
 
-void main() {
+IDBTransaction _txn(IDBDatabase db, [String mode = 'readwrite']) =>
+    db.transaction('box'.toJS, mode);
+
+Future<String?> _get(IDBDatabase db, String key) async {
+  final value = await _txn(db, 'readonly')
+      .objectStore('box')
+      .get(key.toJS)
+      .asFuture<JSString?>();
+  return value?.toDart;
+}
+
+void main() async {
+  final db = await _openDb();
+
   group('IDBTransactionExtension', () {
-    test('.asFuture() completes when transaction commits', () async {
-      final db = await _openDb();
-      final txn = db.transaction('box'.toJS, 'readwrite');
-      txn.objectStore('box').put('value'.toJS, 'key'.toJS);
-      await txn.asFuture();
+    setUp(() => _txn(db).objectStore('box').clear().asFuture());
 
-      final stored = await db
-          .transaction('box'.toJS, 'readonly')
-          .objectStore('box')
-          .get('key'.toJS)
-          .asFuture<JSString?>();
-      expect(stored?.toDart, 'value');
-    });
-
-    test('.asFuture() completes with request error on failure', () async {
-      final db = await _openDb();
-      final txn = db.transaction('box'.toJS, 'readwrite');
-      final store = txn.objectStore('box');
-      store.add('first'.toJS, 'dup'.toJS);
-      store.add('second'.toJS, 'dup'.toJS);
-
-      try {
+    group('.asFuture()', () {
+      test('completes on commit', () async {
+        final txn = _txn(db);
+        txn.objectStore('box').put('value'.toJS, 'key'.toJS);
         await txn.asFuture();
-        fail('Expected transaction to fail with ConstraintError');
-      } catch (e) {
-        expect((e as DOMException).name, 'ConstraintError');
-      }
 
-      final keys = await db
-          .transaction('box'.toJS, 'readonly')
-          .objectStore('box')
-          .getAllKeys(null)
-          .asFuture<JSArray>();
-      expect(keys.toDart, isEmpty);
-    });
+        expect(await _get(db, 'key'), 'value');
+      });
 
-    test(
-      '.asFuture() completes with StateError when aborted without requests',
-      () async {
-        final db = await _openDb();
-        final txn = db.transaction('box'.toJS, 'readwrite');
+      test('fails with request error on abort', () async {
+        final txn = _txn(db);
+        txn.objectStore('box')
+          ..add('first'.toJS, 'dup'.toJS)
+          ..add('second'.toJS, 'dup'.toJS);
+
+        await expectLater(
+          txn.asFuture(),
+          throwsA(
+            isA<DOMException>()
+                .having((e) => e.name, 'name', 'ConstraintError'),
+          ),
+        );
+        expect(await _get(db, 'dup'), isNull);
+      });
+
+      test('fails with StateError when manually aborted', () async {
+        final txn = _txn(db);
         final future = txn.asFuture();
         txn.abort();
 
-        await expectLater(future, throwsA(isA<StateError>()));
-      },
-    );
-
-    test('.run() executes action and commits', () async {
-      final db = await _openDb();
-      final txn = db.transaction('box'.toJS, 'readwrite');
-      await txn.run(() {
-        final store = txn.objectStore('box');
-        store.put('v1'.toJS, 'k1'.toJS);
-        store.put('v2'.toJS, 'k2'.toJS);
+        await expectLater(future, throwsStateError);
       });
-
-      final readStore =
-          db.transaction('box'.toJS, 'readonly').objectStore('box');
-      final v1 = await readStore.get('k1'.toJS).asFuture<JSString?>();
-      final v2 = await readStore.get('k2'.toJS).asFuture<JSString?>();
-      expect(v1?.toDart, 'v1');
-      expect(v2?.toDart, 'v2');
     });
 
-    test('.run() aborts transaction and rethrows on synchronous error',
-        () async {
-      final db = await _openDb();
-      await db
-          .transaction('box'.toJS, 'readwrite')
-          .objectStore('box')
-          .put('before'.toJS, 'existing'.toJS)
-          .asFuture();
+    group('.run()', () {
+      test('commits action', () async {
+        final txn = _txn(db);
+        await txn.run(() {
+          txn.objectStore('box')
+            ..put('v1'.toJS, 'k1'.toJS)
+            ..put('v2'.toJS, 'k2'.toJS);
+        });
 
-      final txn = db.transaction('box'.toJS, 'readwrite');
-      await expectLater(
-        txn.run(() {
-          txn.objectStore('box').put('after'.toJS, 'existing'.toJS);
-          throw StateError('sync failure');
-        }),
-        throwsA(isA<StateError>()),
-      );
+        expect(await _get(db, 'k1'), 'v1');
+        expect(await _get(db, 'k2'), 'v2');
+      });
 
-      final stored = await db
-          .transaction('box'.toJS, 'readonly')
-          .objectStore('box')
-          .get('existing'.toJS)
-          .asFuture<JSString?>();
-      expect(stored?.toDart, 'before');
+      test('aborts and rethrows on sync error', () async {
+        await _txn(db)
+            .objectStore('box')
+            .put('before'.toJS, 'key'.toJS)
+            .asFuture();
+
+        final txn = _txn(db);
+        await expectLater(
+          txn.run(() {
+            txn.objectStore('box').put('after'.toJS, 'key'.toJS);
+            throw StateError('sync failure');
+          }),
+          throwsStateError,
+        );
+        expect(await _get(db, 'key'), 'before');
+      });
     });
   });
 }
