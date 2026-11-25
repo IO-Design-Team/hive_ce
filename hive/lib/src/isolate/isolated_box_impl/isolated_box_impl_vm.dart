@@ -101,8 +101,8 @@ abstract class IsolatedBoxBaseImpl<E>
         'putAll',
         {
           'name': name,
-          'entries':
-              entries.map((key, value) => MapEntry(key, _writeValue(value))),
+          'keys': entries.keys.toList(growable: false),
+          'values': _writeValues(entries.values),
         },
       );
 
@@ -113,7 +113,7 @@ abstract class IsolatedBoxBaseImpl<E>
   @override
   Future<List<int>> addAll(Iterable<E> values) => _channel.invokeMethod(
         'addAll',
-        {'name': name, 'values': values.map(_writeValue).toList()},
+        {'name': name, 'values': _writeValues(values)},
       );
 
   @override
@@ -183,6 +183,18 @@ abstract class IsolatedBoxBaseImpl<E>
         writer.writeEncrypted(value, _cipher);
       } else {
         writer.write(value);
+      }
+      return _wrapBytes(writer.toBytes());
+    } finally {
+      _writer.release(writer);
+    }
+  }
+
+  Object _writeValues(Iterable<E> values) {
+    final writer = _writer.acquire();
+    try {
+      for (final value in values) {
+        writer.writeLengthPrefixed(value, cipher: _cipher);
       }
       return _wrapBytes(writer.toBytes());
     } finally {
