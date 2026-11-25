@@ -306,6 +306,21 @@ class BinaryWriterImpl extends BinaryWriter {
     return length;
   }
 
+  /// Writes [value] prefixed with its uint32 byte length.
+  ///
+  /// Not part of public API
+  void writeLengthPrefixed(dynamic value, {HiveCipher? cipher}) {
+    final startOffset = _offset;
+    _reserveBytes(4);
+    _offset += 4;
+    if (cipher != null) {
+      writeEncrypted(value, cipher);
+    } else {
+      write(value);
+    }
+    _buffer.writeUint32(startOffset, _offset - startOffset - 4);
+  }
+
   @override
   void write<T>(T value, {bool withTypeId = true}) {
     if (value == null) {

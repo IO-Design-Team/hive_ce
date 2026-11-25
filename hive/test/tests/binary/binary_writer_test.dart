@@ -679,6 +679,23 @@ void main() {
         }
       }
     });
+
+    test('.writeLengthPrefixed()', () {
+      final bw = getWriter();
+      final large = Uint8List(5000);
+      bw.writeLengthPrefixed('hi');
+      bw.writeLengthPrefixed(large);
+      bw.writeLengthPrefixed('secret', cipher: testCipher);
+
+      final reader = fromBytes(bw.toBytes());
+      expect(fromBytes(reader.readByteList()).read(), 'hi');
+      expect(fromBytes(reader.readByteList()).read(), large);
+      expect(
+        fromBytes(reader.readByteList()).readEncrypted(testCipher),
+        'secret',
+      );
+      expect(reader.availableBytes, 0);
+    });
   });
 
   group('ReusableBinaryWriter', () {
