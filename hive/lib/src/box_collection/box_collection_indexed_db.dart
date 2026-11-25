@@ -291,9 +291,9 @@ class CollectionBox<V> implements implementation.CollectionBox<V> {
     }
 
     if (txn == null) {
-      final activeTxn = boxCollection._db.transaction(name.toJS, 'readwrite');
-      await activeTxn.run(() {
-        final store = activeTxn.objectStore(name);
+      txn = boxCollection._db.transaction(name.toJS, 'readwrite');
+      final store = txn.objectStore(name);
+      await txn.run(() {
         for (final key in keys) {
           store.delete(key.toJS);
         }
