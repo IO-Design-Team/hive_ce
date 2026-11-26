@@ -226,7 +226,16 @@ class Keystore<E> {
         }
       }
 
-      _store.insert(key, deletedFrame);
+      final restoredValue = deletedFrame.value;
+      final replacedValue = _store.insert(key, deletedFrame)?.value;
+      if (replacedValue is HiveObjectMixin &&
+          !identical(replacedValue, restoredValue)) {
+        replacedValue.dispose();
+      }
+      // Restore the object's binding before publishing the rollback.
+      if (restoredValue is HiveObjectMixin) {
+        restoredValue.init(key, _box);
+      }
       _notifier.notify(deletedFrame);
     }
 
@@ -246,6 +255,10 @@ class Keystore<E> {
       }
       if (!isOverride) {
         final deletedFrame = _store.delete(key);
+        final deletedValue = deletedFrame?.value;
+        if (deletedValue is HiveObjectMixin) {
+          deletedValue.dispose();
+        }
         _notifier.notify(Frame.deleted(key), deletedValue: deletedFrame?.value);
       }
     }

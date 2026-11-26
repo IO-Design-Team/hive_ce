@@ -95,6 +95,45 @@ void main() {
     });
 
     group('.putAll()', () {
+      test('detaches HiveObjects when an insertion is rolled back', () async {
+        final backend = MockStorageBackend();
+        final box = _getBox(backend: backend);
+        final object = TestHiveObject();
+        final failure = StateError('Backend write failed.');
+        when(() => backend.writeFrames(any())).thenThrow(failure);
+
+        await expectLater(box.put('key', object), throwsA(same(failure)));
+
+        expect(box.get('key'), isNull);
+        expect(object.key, isNull);
+        expect(object.box, isNull);
+        expect(object.isInBox, isFalse);
+      });
+
+      test('restores HiveObjects when an overwrite is rolled back', () async {
+        final backend = MockStorageBackend();
+        final box = _getBox(backend: backend);
+        final original = TestHiveObject();
+        final replacement = TestHiveObject();
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        await box.put('key', original);
+        final failure = StateError('Backend write failed.');
+        when(() => backend.writeFrames(any())).thenThrow(failure);
+
+        await expectLater(box.put('key', replacement), throwsA(same(failure)));
+
+        expect(box.get('key'), same(original));
+        expect(original.key, 'key');
+        expect(original.box, same(box));
+        expect(original.isInBox, isTrue);
+        expect(replacement.key, isNull);
+        expect(replacement.box, isNull);
+        expect(replacement.isInBox, isFalse);
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        await original.save();
+        expect(box.get('key'), same(original));
+      });
+
       test('values', () async {
         final frames = <Frame>[
           Frame('key1', 'value1'),
@@ -162,6 +201,28 @@ void main() {
     });
 
     group('.deleteAll()', () {
+      test('restores HiveObjects when a deletion is rolled back', () async {
+        final backend = MockStorageBackend();
+        final box = _getBox(backend: backend);
+        final object = TestHiveObject();
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        await box.put('key', object);
+        final failure = StateError('Backend write failed.');
+        when(() => backend.writeFrames(any())).thenThrow(failure);
+
+        await expectLater(object.delete(), throwsA(same(failure)));
+
+        expect(box.get('key'), same(object));
+        expect(object.key, 'key');
+        expect(object.box, same(box));
+        expect(object.isInBox, isTrue);
+        returnFutureVoid(when(() => backend.writeFrames(any())));
+        await object.save();
+        await object.delete();
+        expect(box.get('key'), isNull);
+        expect(object.isInBox, isFalse);
+      });
+
       test('do nothing when deleting non existing keys', () async {
         final frames = <Frame>[];
 

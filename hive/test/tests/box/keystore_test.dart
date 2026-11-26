@@ -440,6 +440,30 @@ void main() {
     });
 
     group('.cancelTransaction()', () {
+      test('restores HiveObject bindings after queued rollbacks', () {
+        final box = MockBox();
+        final original = TestHiveObject();
+        final replacement = TestHiveObject();
+        final keystore = Keystore.debug(
+          box: box,
+          frames: [Frame('key', original)],
+        );
+        keystore.beginTransaction([Frame.deleted('key')]);
+        keystore.beginTransaction([Frame('key', replacement)]);
+
+        keystore.cancelTransaction();
+        expect(keystore.get('key')?.value, same(replacement));
+        expect(original.isInBox, isFalse);
+        expect(replacement.key, 'key');
+        expect(replacement.box, same(box));
+
+        keystore.cancelTransaction();
+        expect(keystore.get('key')?.value, same(original));
+        expect(original.key, 'key');
+        expect(original.box, same(box));
+        expect(replacement.isInBox, isFalse);
+      });
+
       test('add', () {
         final notifier = MockChangeNotifier();
         final keystore = Keystore.debug(notifier: notifier);
