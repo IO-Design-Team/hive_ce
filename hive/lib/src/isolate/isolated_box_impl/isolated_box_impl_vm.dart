@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -17,11 +18,13 @@ abstract class IsolatedBoxBaseImpl<E>
     implements IsolatedBoxBase<E>, InspectableBox {
   /// Value to inform the get method to return the default value
   static const defaultValuePlaceholder = '_hive_ce.defaultValue';
+  static const _transferThreshold = 65536;
 
   final IsolatedHiveImpl _hive;
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
   final IsolateEventChannel _eventChannel;
+  late final _writer = ReusableBinaryWriter(_hive);
   Stream<BoxEvent>? _stream;
 
   var _open = true;
@@ -98,8 +101,8 @@ abstract class IsolatedBoxBaseImpl<E>
         'putAll',
         {
           'name': name,
-          'entries':
-              entries.map((key, value) => MapEntry(key, _writeValue(value))),
+          'keys': entries.keys.toList(growable: false),
+          'values': _writeValues(entries.values),
         },
       );
 
@@ -110,7 +113,7 @@ abstract class IsolatedBoxBaseImpl<E>
   @override
   Future<List<int>> addAll(Iterable<E> values) => _channel.invokeMethod(
         'addAll',
-        {'name': name, 'values': values.map(_writeValue).toList()},
+        {'name': name, 'values': _writeValues(values)},
       );
 
   @override
@@ -166,14 +169,37 @@ abstract class IsolatedBoxBaseImpl<E>
     return _readValue(bytes);
   }
 
-  Uint8List _writeValue(E value) {
-    final writer = BinaryWriterImpl(_hive);
-    if (_cipher != null) {
-      writer.writeEncrypted(value, _cipher);
-    } else {
-      writer.write(value);
+  // Copy out of the reused writer buffer: use TransferableTypedData for large
+  // payloads to avoid an extra SendPort copy, or copy small slices directly.
+  static Object _wrapBytes(Uint8List bytes) =>
+      bytes.length >= _transferThreshold
+          ? TransferableTypedData.fromList([bytes])
+          : Uint8List.fromList(bytes);
+
+  Object _writeValue(E value) {
+    final writer = _writer.acquire();
+    try {
+      if (_cipher != null) {
+        writer.writeEncrypted(value, _cipher);
+      } else {
+        writer.write(value);
+      }
+      return _wrapBytes(writer.toBytes());
+    } finally {
+      _writer.release(writer);
     }
-    return Uint8List.fromList(writer.toBytes());
+  }
+
+  Object _writeValues(Iterable<E> values) {
+    final writer = _writer.acquire();
+    try {
+      for (final value in values) {
+        writer.writeLengthPrefixed(value, cipher: _cipher);
+      }
+      return _wrapBytes(writer.toBytes());
+    } finally {
+      _writer.release(writer);
+    }
   }
 
   E? _readValue(Uint8List? bytes) {

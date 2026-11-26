@@ -8,6 +8,16 @@ const _path = 'test_box';
 final objectBox = Target.create(
   name: 'ObjectBox',
   path: _path,
+  openLarge: largeDatabase(
+    open: (path) => openStore(directory: path),
+    addAll: (store, values) => store.box<LargeValueEntity>().putMany(
+      values.map(LargeValueEntity.new).toList(),
+    ),
+    readAll: (store) => [
+      for (final entity in store.box<LargeValueEntity>().getAll()) entity.value,
+    ],
+    close: (store) => store.close(),
+  ),
   open: () => openStore(directory: _path),
   add: (store, value) =>
       store.box<TestEntity>().put(TestEntity.fromModel(value)),

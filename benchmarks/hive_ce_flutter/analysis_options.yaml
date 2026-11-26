@@ -1,0 +1,5 @@
+analyzer:
+  exclude:
+    - bin/v4.dart
+    - build/**
+    - macos/**

@@ -1,3 +1,22 @@
+## NEXT
+
+- Speeds up `IsolatedHive` batch and large writes by packing batch values into a single buffer and using selective `TransferableTypedData`
+- Speeds up web batch writes (`StorageBackendJs.writeFrames()`) and `CollectionBox.deleteAll()` by batching IndexedDB operations in a single transaction and fixing O(N²) cached key removal
+- Speeds up encrypted and `IsolatedHive` writes and reduces memory usage by reusing a bounded `BinaryWriterImpl` via `ReusableBinaryWriter`
+- Speeds up box compaction writes by reusing a fixed buffer in `BufferedFileWriter`
+- Speeds up type adapter lookup with an O(1) `Type` map in `TypeRegistryImpl`
+- Reduces memory usage and speeds up UTF-8 string decoding by reading buffer ranges directly in `BinaryReaderImpl`
+- Speeds up web `CollectionBox.getAllValues()` by issuing bulk `getAllKeys` and `getAll` requests
+- Speeds up `Map` serialization by iterating `map.entries` instead of looking up each key
+- Speeds up binary serialization by eliminating per-write closure allocations in `BinaryWriterImpl`
+- Speeds up box compaction and cuts memory usage by seeking past deleted gaps instead of buffering them
+- Speeds up `Set` serialization by writing sets directly without intermediate `.toList()` copies
+- Speeds up `CollectionBox.clear()` on VM by delegating directly to `box.clear()`
+
+## 2.24.0
+
+- Adds support for CRC32 acceleration
+
 ## 2.23.3
 
 - Adds query benchmarks, indexes the queried field in sqflite, drift, and ObjectBox, and refreshes the benchmark results

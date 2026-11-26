@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:hive_ce_flutter/adapters.dart';
 import 'package:hive_ce_flutter/src/wrapper/path_provider.dart';
 import 'package:hive_ce_flutter/src/wrapper/path.dart' as path_helper;
+import 'package:hive_ce_flutter/src/zlib/zlib.dart'
+    if (dart.library.js_interop) 'package:hive_ce_flutter/src/zlib/stub/zlib.dart';
 
 class _FlushOnPause extends WidgetsBindingObserver {
   @override
@@ -46,6 +48,7 @@ extension TypeRegistryX on TypeRegistry {
       }
     }
 
+    useZlibCrc32();
     await initHive(path);
 
     _registerAdapter(ColorAdapter(typeId: colorAdapterTypeId));

@@ -25,6 +25,8 @@ class BinaryWriterImpl extends BinaryWriter {
 
   var _offset = 0;
 
+  late final _valueWriter = ReusableBinaryWriter(typeRegistry);
+
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   ByteData get _byteData => _byteDataInstance ??= ByteData.view(_buffer.buffer);
@@ -207,9 +209,9 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(map.length);
     }
-    for (final key in map.keys) {
-      write(key);
-      write(map[key]);
+    for (final entry in map.entries) {
+      write(entry.key);
+      write(entry.value);
     }
   }
 
@@ -304,89 +306,128 @@ class BinaryWriterImpl extends BinaryWriter {
     return length;
   }
 
+  /// Writes [value] prefixed with its uint32 byte length.
+  ///
+  /// Not part of public API
+  void writeLengthPrefixed(dynamic value, {HiveCipher? cipher}) {
+    final startOffset = _offset;
+    _reserveBytes(4);
+    _offset += 4;
+    if (cipher != null) {
+      writeEncrypted(value, cipher);
+    } else {
+      write(value);
+    }
+    _buffer.writeUint32(startOffset, _offset - startOffset - 4);
+  }
+
   @override
   void write<T>(T value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value == null) {
-      typeId = FrameValueType.nullT;
-      write = () {};
+      if (withTypeId) writeTypeId(FrameValueType.nullT);
     } else if (value is int) {
-      typeId = FrameValueType.intT;
-      write = () => writeInt(value);
+      if (withTypeId) writeTypeId(FrameValueType.intT);
+      writeInt(value);
     } else if (value is double) {
-      typeId = FrameValueType.doubleT;
-      write = () => writeDouble(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleT);
+      writeDouble(value);
     } else if (value is bool) {
-      typeId = FrameValueType.boolT;
-      write = () => writeBool(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolT);
+      writeBool(value);
     } else if (value is String) {
-      typeId = FrameValueType.stringT;
-      write = () => writeString(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringT);
+      writeString(value);
     } else if (value is List || value is Set) {
       _writeList(value as Iterable, withTypeId: withTypeId);
-      return;
     } else if (value is Map) {
-      typeId = FrameValueType.mapT;
-      write = () => writeMap(value);
+      if (withTypeId) writeTypeId(FrameValueType.mapT);
+      writeMap(value);
     } else {
       final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
       }
-      typeId = resolved.typeId;
-      write = () => resolved.adapter.write(this, value);
+      if (withTypeId) writeTypeId(resolved.typeId);
+      resolved.adapter.write(this, value);
     }
-
-    if (withTypeId) writeTypeId(typeId);
-    write();
   }
 
   @pragma('vm:prefer-inline')
   @pragma('dart2js:tryInline')
   void _writeList(Iterable value, {bool withTypeId = true}) {
-    final int typeId;
-    final void Function() write;
     if (value is HiveList) {
-      typeId = FrameValueType.hiveListT;
-      write = () => writeHiveList(value);
+      if (withTypeId) writeTypeId(FrameValueType.hiveListT);
+      writeHiveList(value);
     } else if (value is Uint8List) {
-      typeId = FrameValueType.byteListT;
-      write = () => writeByteList(value);
+      if (withTypeId) writeTypeId(FrameValueType.byteListT);
+      writeByteList(value);
     } else if (value is List<int>) {
-      typeId = FrameValueType.intListT;
-      write = () => writeIntList(value);
+      if (withTypeId) writeTypeId(FrameValueType.intListT);
+      writeIntList(value);
     } else if (value is List<double>) {
-      typeId = FrameValueType.doubleListT;
-      write = () => writeDoubleList(value);
+      if (withTypeId) writeTypeId(FrameValueType.doubleListT);
+      writeDoubleList(value);
     } else if (value is List<bool>) {
-      typeId = FrameValueType.boolListT;
-      write = () => writeBoolList(value);
+      if (withTypeId) writeTypeId(FrameValueType.boolListT);
+      writeBoolList(value);
     } else if (value is List<String>) {
-      typeId = FrameValueType.stringListT;
-      write = () => writeStringList(value);
+      if (withTypeId) writeTypeId(FrameValueType.stringListT);
+      writeStringList(value);
     } else if (value is List) {
-      typeId = FrameValueType.listT;
-      write = () => writeList(value);
+      if (withTypeId) writeTypeId(FrameValueType.listT);
+      writeList(value);
     } else if (value is Set<int>) {
-      typeId = FrameValueType.intSetT;
-      write = () => writeIntList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.intSetT);
+      _writeIntSet(value);
     } else if (value is Set<double>) {
-      typeId = FrameValueType.doubleSetT;
-      write = () => writeDoubleList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.doubleSetT);
+      _writeDoubleSet(value);
     } else if (value is Set<String>) {
-      typeId = FrameValueType.stringSetT;
-      write = () => writeStringList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.stringSetT);
+      _writeStringSet(value);
     } else if (value is Set) {
-      typeId = FrameValueType.setT;
-      write = () => writeList(value.toList());
+      if (withTypeId) writeTypeId(FrameValueType.setT);
+      _writeSet(value);
     } else {
       throw HiveError('Cannot write, unknown type: ${value.runtimeType}.');
     }
+  }
 
-    if (withTypeId) writeTypeId(typeId);
-    write();
+  void _writeIntSet(Set<int> set) {
+    final length = set.length;
+    writeUint32(length);
+    _reserveBytes(length * 8);
+    final byteData = _byteData;
+    for (final value in set) {
+      byteData.setFloat64(_offset, value.toDouble(), Endian.little);
+      _offset += 8;
+    }
+  }
+
+  void _writeDoubleSet(Set<double> set) {
+    final length = set.length;
+    writeUint32(length);
+    _reserveBytes(length * 8);
+    final byteData = _byteData;
+    for (final value in set) {
+      byteData.setFloat64(_offset, value, Endian.little);
+      _offset += 8;
+    }
+  }
+
+  void _writeStringSet(Set<String> set) {
+    writeUint32(set.length);
+    for (final str in set) {
+      writeString(str);
+    }
+  }
+
+  void _writeSet(Set<dynamic> set) {
+    writeUint32(set.length);
+    for (final value in set) {
+      write(value);
+    }
   }
 
   /// Not part of public API
@@ -397,15 +438,19 @@ class BinaryWriterImpl extends BinaryWriter {
     HiveCipher cipher, {
     bool withTypeId = true,
   }) {
-    final valueWriter = BinaryWriterImpl(typeRegistry)
-      ..write(value, withTypeId: withTypeId);
-    final inp = valueWriter.toBytes();
+    final valueWriter = _valueWriter.acquire();
+    try {
+      valueWriter.write(value, withTypeId: withTypeId);
+      final inp = valueWriter.toBytes();
 
-    _reserveBytes(cipher.maxEncryptedSize(inp));
+      _reserveBytes(cipher.maxEncryptedSize(inp));
 
-    final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
+      final len = cipher.encrypt(inp, 0, inp.length, _buffer, _offset);
 
-    _offset += len;
+      _offset += len;
+    } finally {
+      _valueWriter.release(valueWriter);
+    }
   }
 
   /// Not part of public API
@@ -424,5 +469,46 @@ class BinaryWriterImpl extends BinaryWriter {
     x |= x >> 8;
     x |= x >> 16;
     return x + 1;
+  }
+}
+
+/// Caches a single [BinaryWriterImpl] for reuse across sequential writes while
+/// bounding retained buffer memory to 64 KiB (65536 bytes) and remaining safe
+/// under re-entrant calls.
+class ReusableBinaryWriter {
+  static const _maxRetainedBufferSize = 65536;
+
+  final TypeRegistry _typeRegistry;
+  BinaryWriterImpl? _writer;
+
+  /// Creates a reusable writer slot backed by the given [TypeRegistry].
+  ReusableBinaryWriter(this._typeRegistry);
+
+  /// Borrows the cached [BinaryWriterImpl], clearing the slot while in use so
+  /// re-entrant callers receive an independent instance, or allocates a new
+  /// writer if none is cached.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  BinaryWriterImpl acquire() {
+    final writer = _writer;
+    if (writer != null) {
+      _writer = null;
+      return writer;
+    }
+    return BinaryWriterImpl(_typeRegistry);
+  }
+
+  /// Resets [writer]'s offset and returns it to the cache if the slot is empty
+  /// and the buffer is at most 64 KiB (65536 bytes).
+  ///
+  /// Oversized or superseded writers are discarded so they can be
+  /// garbage-collected. Intended to be called in a `finally` block.
+  @pragma('vm:prefer-inline')
+  @pragma('dart2js:tryInline')
+  void release(BinaryWriterImpl writer) {
+    if (_writer == null && writer._buffer.length <= _maxRetainedBufferSize) {
+      writer._offset = 0;
+      _writer = writer;
+    }
   }
 }

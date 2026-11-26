@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce/src/crypto/crc32.dart';
 import 'package:test/test.dart';
 
@@ -54,6 +55,29 @@ void main() {
 
     test('supports key CRCs outside of 32 bits', () {
       expectBitwise([0x100000000, 0x1234567890ab, 0x1fffffffffffff], 8, 40);
+    });
+
+    test('uses the installed accelerator for 32-bit seeds', () {
+      final bytes = Uint8List.fromList([1, 2, 3, 4]);
+      final previous = Crc32.nativeCompute;
+      addTearDown(() => Crc32.nativeCompute = previous);
+
+      var calls = 0;
+      installCrc32Accelerator((bytes, seed, offset, length) {
+        calls++;
+        return _bitwiseCrc32(bytes, seed, offset, length);
+      });
+
+      expect(
+        Crc32.compute(bytes, crc: 5, offset: 1, length: 2),
+        _bitwiseCrc32(bytes, 5, 1, 2),
+      );
+      expect(Crc32.compute(bytes, crc: 5, offset: 4, length: 0), 5);
+      expect(
+        Crc32.compute(bytes, crc: 0x100000000),
+        _bitwiseCrc32(bytes, 0x100000000, 0, bytes.length),
+      );
+      expect(calls, 2);
     });
   });
 }

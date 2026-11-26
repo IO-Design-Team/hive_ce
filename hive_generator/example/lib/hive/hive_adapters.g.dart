@@ -15,10 +15,18 @@ class ClassSpec1Adapter extends TypeAdapter<ClassSpec1> {
   @override
   ClassSpec1 read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return ClassSpec1((fields[0] as num).toInt(), (fields[1] as num).toInt());
+    dynamic field0, field1;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        default:
+          reader.read();
+      }
+    }
+    return ClassSpec1((field0 as num).toInt(), (field1 as num).toInt());
   }
 
   @override
@@ -49,15 +57,29 @@ class ClassSpec2Adapter extends TypeAdapter<ClassSpec2> {
   @override
   ClassSpec2 read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    dynamic field0, field1, field2, field3, field4;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        case 1:
+          field1 = reader.read();
+        case 2:
+          field2 = reader.read();
+        case 3:
+          field3 = reader.read();
+        case 4:
+          field4 = reader.read();
+        default:
+          reader.read();
+      }
+    }
     return ClassSpec2(
-      fields[0] as String,
-      fields[1] as String,
-      (fields[2] as List).cast<String>(),
-      (fields[3] as Set).cast<String>(),
-      (fields[4] as List).cast<String>(),
+      field0 as String,
+      field1 as String,
+      (field2 as List).cast<String>(),
+      (field3 as Set).cast<String>(),
+      (field4 as List).cast<String>(),
     );
   }
 
@@ -132,10 +154,16 @@ class ClassSpec3Adapter extends TypeAdapter<ClassSpec3> {
   @override
   ClassSpec3 read(BinaryReader reader) {
     final numOfFields = reader.readByte();
-    final fields = <int, dynamic>{
-      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
-    return ClassSpec3()..value = (fields[0] as num?)?.toInt();
+    dynamic field0;
+    for (var i = 0; i < numOfFields; i++) {
+      switch (reader.readByte()) {
+        case 0:
+          field0 = reader.read();
+        default:
+          reader.read();
+      }
+    }
+    return ClassSpec3()..value = (field0 as num?)?.toInt();
   }
 
   @override

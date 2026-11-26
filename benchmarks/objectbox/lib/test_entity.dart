@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:objectbox/objectbox.dart';
 import 'package:storage_benchmark/test_model.dart';
 
@@ -42,4 +44,14 @@ class TestEntity {
       testModelFieldSeven = model.testModelFieldSeven,
       testModelFieldEight = model.testModelFieldEight,
       testModelFieldNine = model.testModelFieldNine;
+}
+
+@Entity()
+class LargeValueEntity {
+  @Id()
+  var id = 0;
+
+  final Uint8List value;
+
+  LargeValueEntity(this.value);
 }

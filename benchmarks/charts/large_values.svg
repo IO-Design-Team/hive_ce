@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="356" viewBox="0 0 860 356">
+  <rect x="0.5" y="0.5" width="859" height="355" rx="10" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="20" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="700" fill="#0f172a">Large Binary Values (32 × 1 MiB)</text>
+  <text x="20" y="56" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#64748b">32 MiB total payload · 3-run average · lower is better</text>
+  <rect x="644" y="28" width="10" height="10" rx="2" fill="#0284c7"/>
+  <text x="659" y="37" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#334155">Hive CE</text>
+  <rect x="730" y="28" width="10" height="10" rx="2" fill="#94a3b8"/>
+  <text x="745" y="37" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#334155">Other databases</text>
+  <text x="20" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0f172a">1 MiB batch write</text>
+  <text x="142" y="115" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Hive CE</text>
+  <rect x="152" y="104.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="104.5" width="11.4" height="13" rx="3" fill="#0284c7"/>
+  <text x="348" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">15.9 ms</text>
+  <text x="142" y="137" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Hive CE (lazy)</text>
+  <rect x="152" y="126.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="126.5" width="10.4" height="13" rx="3" fill="#0369a1"/>
+  <text x="348" y="137" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f172a">14.6 ms</text>
+  <text x="142" y="159" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">IsolatedHive</text>
+  <rect x="152" y="148.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="148.5" width="22.3" height="13" rx="3" fill="#0284c7"/>
+  <text x="348" y="159" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">31.3 ms</text>
+  <text x="142" y="181" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">IsolatedHive (lazy)</text>
+  <rect x="152" y="170.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="170.5" width="20.6" height="13" rx="3" fill="#0284c7"/>
+  <text x="348" y="181" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">28.8 ms</text>
+  <line x1="20" y1="193" x2="416" y2="193" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="142" y="213" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">Hive v2</text>
+  <rect x="152" y="202.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="202.5" width="134.7" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="213" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">188.9 ms</text>
+  <text x="142" y="235" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">Hive v4</text>
+  <rect x="152" y="224.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="224.5" width="183.1" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">256.7 ms</text>
+  <text x="142" y="257" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">sqflite</text>
+  <rect x="152" y="246.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="246.5" width="31.1" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="257" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">43.6 ms</text>
+  <text x="142" y="279" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">drift</text>
+  <rect x="152" y="268.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="268.5" width="32.6" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="279" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">45.6 ms</text>
+  <text x="142" y="301" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">sembast</text>
+  <rect x="152" y="290.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="290.5" width="188" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="301" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">263.6 ms</text>
+  <text x="142" y="323" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">ObjectBox</text>
+  <rect x="152" y="312.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="152" y="312.5" width="65.2" height="13" rx="3" fill="#94a3b8"/>
+  <text x="348" y="323" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">91.5 ms</text>
+  <text x="444" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" font-weight="600" fill="#0f172a">1 MiB reopen</text>
+  <text x="566" y="115" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Hive CE</text>
+  <rect x="576" y="104.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="104.5" width="13.1" height="13" rx="3" fill="#0284c7"/>
+  <text x="772" y="115" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">13.7 ms</text>
+  <text x="566" y="137" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">Hive CE (lazy)</text>
+  <rect x="576" y="126.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="126.5" width="6.3" height="13" rx="3" fill="#0284c7"/>
+  <text x="772" y="137" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">6.58 ms</text>
+  <text x="566" y="159" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">IsolatedHive</text>
+  <rect x="576" y="148.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="148.5" width="9.1" height="13" rx="3" fill="#0284c7"/>
+  <text x="772" y="159" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">9.49 ms</text>
+  <text x="566" y="181" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#0f172a">IsolatedHive (lazy)</text>
+  <rect x="576" y="170.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="170.5" width="6.1" height="13" rx="3" fill="#0284c7"/>
+  <text x="772" y="181" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">6.35 ms</text>
+  <line x1="444" y1="193" x2="840" y2="193" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="566" y="213" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">Hive v2</text>
+  <rect x="576" y="202.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="202.5" width="120.3" height="13" rx="3" fill="#94a3b8"/>
+  <text x="772" y="213" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">125.5 ms</text>
+  <text x="566" y="235" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">Hive v4</text>
+  <rect x="576" y="224.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="224.5" width="3" height="13" rx="3" fill="#94a3b8"/>
+  <text x="772" y="235" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">415 µs</text>
+  <text x="566" y="257" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">sqflite</text>
+  <rect x="576" y="246.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="246.5" width="3" height="13" rx="3" fill="#475569"/>
+  <text x="772" y="257" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="700" fill="#0f172a">207 µs</text>
+  <text x="566" y="279" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">drift</text>
+  <rect x="576" y="268.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="268.5" width="3" height="13" rx="3" fill="#94a3b8"/>
+  <text x="772" y="279" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">313 µs</text>
+  <text x="566" y="301" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">sembast</text>
+  <rect x="576" y="290.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="290.5" width="188" height="13" rx="3" fill="#94a3b8"/>
+  <text x="772" y="301" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">196.2 ms</text>
+  <text x="566" y="323" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="400" fill="#475569">ObjectBox</text>
+  <rect x="576" y="312.5" width="188" height="13" rx="3" fill="#f1f5f9"/>
+  <rect x="576" y="312.5" width="3" height="13" rx="3" fill="#94a3b8"/>
+  <text x="772" y="323" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" font-weight="400" fill="#475569">457 µs</text>
+</svg>

@@ -1,3 +1,8 @@
+## 2.6.0
+
+- `initFlutter` sets up Hive to compute checksums with zlib, which speeds up opening large boxes
+- Updates minimum Dart SDK version to 3.10.0
+
 ## 2.5.0
 
 - `initFlutter` flushes every open box when the app is paused

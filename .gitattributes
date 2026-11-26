@@ -1,6 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 * text eol=lf
+
+# rc.exe rejects this icon after LF normalization strips bytes from it
+*.ico binary
 *.png binary
 *.dylib binary
 hive/extension/devtools/** binary
