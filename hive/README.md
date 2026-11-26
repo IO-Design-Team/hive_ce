@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/IO-Design-Team/hive_ce/master/.github/logo_transparent.svg?sanitize=true" width="350px">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/IO-Design-Team/hive_ce/main/.github/logo_transparent_dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/IO-Design-Team/hive_ce/main/.github/logo_transparent.svg">
+    <img alt="Hive CE" src="https://raw.githubusercontent.com/IO-Design-Team/hive_ce/main/.github/logo_transparent.svg" width="350px">
+  </picture>
 </p>
 <h2 align="center">Fast, Enjoyable & Secure NoSQL Database</h2>
 
