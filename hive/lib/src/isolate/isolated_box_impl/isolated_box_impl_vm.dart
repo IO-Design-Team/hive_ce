@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
@@ -8,6 +7,7 @@ import 'package:hive_ce/src/binary/binary_writer_impl.dart';
 import 'package:hive_ce/src/connect/hive_connect.dart';
 import 'package:hive_ce/src/connect/hive_connect_api.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
+import 'package:hive_ce/src/isolate/isolate_transfer.dart';
 import 'package:hive_ce/src/isolate/isolated_hive_impl/impl/isolated_hive_impl_vm.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 
@@ -16,10 +16,6 @@ import 'package:isolate_channel/isolate_channel.dart';
 /// Most methods are async due to isolate communication
 abstract class IsolatedBoxBaseImpl<E>
     implements IsolatedBoxBase<E>, InspectableBox {
-  /// Value to inform the get method to return the default value
-  static const defaultValuePlaceholder = '_hive_ce.defaultValue';
-  static const _transferThreshold = 65536;
-
   final IsolatedHiveImpl _hive;
   final HiveCipher? _cipher;
   final IsolateMethodChannel _channel;
@@ -69,14 +65,16 @@ abstract class IsolatedBoxBaseImpl<E>
 
   @override
   Stream<BoxEvent> watch({dynamic key}) {
-    final stream = _stream ??=
-        _eventChannel.receiveBroadcastStream(identityHashCode(this)).map(
-              (event) => BoxEvent(
-                event['key'],
-                _readValue(event['value']),
-                event['deleted'],
-              ),
-            );
+    final stream = _stream ??= _eventChannel
+        .receiveBroadcastStream(
+          identityHashCode(this),
+          (event) => BoxEvent(
+            event['key'],
+            _readValue(event['value']),
+            event['deleted'],
+          ),
+        )
+        .cast<BoxEvent>();
     return stream.where((event) => key == null || event.key == key);
   }
 
@@ -158,7 +156,7 @@ abstract class IsolatedBoxBaseImpl<E>
   Future<E?> get(dynamic key, {E? defaultValue}) async {
     final result =
         await _channel.invokeMethod('get', {'name': name, 'key': key});
-    if (result == defaultValuePlaceholder) return defaultValue;
+    if (result == null) return defaultValue;
     return _readValue(result);
   }
 
@@ -169,13 +167,6 @@ abstract class IsolatedBoxBaseImpl<E>
     return _readValue(bytes);
   }
 
-  // Copy out of the reused writer buffer: use TransferableTypedData for large
-  // payloads to avoid an extra SendPort copy, or copy small slices directly.
-  static Object _wrapBytes(Uint8List bytes) =>
-      bytes.length >= _transferThreshold
-          ? TransferableTypedData.fromList([bytes])
-          : Uint8List.fromList(bytes);
-
   Object _writeValue(E value) {
     final writer = _writer.acquire();
     try {
@@ -184,7 +175,7 @@ abstract class IsolatedBoxBaseImpl<E>
       } else {
         writer.write(value);
       }
-      return _wrapBytes(writer.toBytes());
+      return wrapBytes(writer.toBytes());
     } finally {
       _writer.release(writer);
     }
@@ -196,15 +187,15 @@ abstract class IsolatedBoxBaseImpl<E>
       for (final value in values) {
         writer.writeLengthPrefixed(value, cipher: _cipher);
       }
-      return _wrapBytes(writer.toBytes());
+      return wrapBytes(writer.toBytes());
     } finally {
       _writer.release(writer);
     }
   }
 
-  E? _readValue(Uint8List? bytes) {
+  E? _readValue(dynamic bytes) {
     if (bytes == null) return null;
-    final reader = BinaryReaderImpl(bytes, _hive);
+    final reader = BinaryReaderImpl(unwrapBytes(bytes), _hive);
     final E? value;
     if (_cipher != null) {
       value = reader.readEncrypted(_cipher);

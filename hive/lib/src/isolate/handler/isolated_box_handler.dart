@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:hive_ce/hive_ce.dart';
 import 'package:hive_ce/src/binary/binary_reader_impl.dart';
 import 'package:hive_ce/src/connect/inspectable_box.dart';
-import 'package:hive_ce/src/isolate/isolated_box_impl/isolated_box_impl_vm.dart';
+import 'package:hive_ce/src/isolate/isolate_transfer.dart';
 import 'package:hive_ce/src/registry/type_registry_impl.dart';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:meta/meta.dart';
@@ -14,7 +13,7 @@ import 'package:meta/meta.dart';
 @immutable
 class IsolatedBoxHandler extends IsolateStreamHandler {
   /// The wrapped box
-  final BoxBase box;
+  final BoxBase<Uint8List> box;
 
   /// Map of identity hash codes to subscriptions
   final _subscriptions = <int, StreamSubscription>{};
@@ -31,7 +30,13 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
 
     final subscription = box
         .watch()
-        .map((e) => {'key': e.key, 'value': e.value, 'deleted': e.deleted})
+        .map(
+          (e) => {
+            'key': e.key,
+            'value': _detachBytes(e.value as Uint8List?),
+            'deleted': e.deleted,
+          },
+        )
         .listen(events.success);
     subscription.onError(
       (e) => events.error(
@@ -50,13 +55,23 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
     _subscriptions.remove(id)?.cancel();
   }
 
-  static Uint8List _unwrapBytes(dynamic value) => value is TransferableTypedData
-      ? value.materialize().asUint8List()
-      : value as Uint8List;
+  // 4 KiB (one page) is well above single-frame overhead (header + key + CRC)
+  // and cheap enough for SendPort to copy directly, avoiding an extra copy on
+  // small buffers while still detaching views into large box or batch buffers.
+  static const _maxSlackBytes = 4096;
+
+  // Detach views backed by much larger buffers so SendPort copies only the value.
+  static Object? _detachBytes(Uint8List? value) {
+    if (value != null &&
+        value.buffer.lengthInBytes - value.length > _maxSlackBytes) {
+      return wrapBytes(value);
+    }
+    return value;
+  }
 
   static List<Uint8List> _unpackValues(dynamic value) {
     final reader = BinaryReaderImpl(
-      _unwrapBytes(value),
+      unwrapBytes(value),
       TypeRegistryImpl.nullImpl,
     );
     final values = <Uint8List>[];
@@ -93,12 +108,12 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
       case 'put':
         await box.put(
           call.arguments['key'],
-          _unwrapBytes(call.arguments['value']),
+          unwrapBytes(call.arguments['value']),
         );
       case 'putAt':
         await box.putAt(
           call.arguments['index'],
-          _unwrapBytes(call.arguments['value']),
+          unwrapBytes(call.arguments['value']),
         );
       case 'putAll':
         await box.putAll(
@@ -108,7 +123,7 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
           ),
         );
       case 'add':
-        return await box.add(_unwrapBytes(call.arguments['value']));
+        return await box.add(unwrapBytes(call.arguments['value']));
       case 'addAll':
         final keys = await box.addAll(_unpackValues(call.arguments['values']));
         return keys.toList();
@@ -132,10 +147,10 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
         await box.flush();
       case 'values':
         // This needs to be a list or it is unsendable
-        return (box as Box).values.toList();
+        return (box as Box<Uint8List>).values.toList();
       case 'valuesBetween':
         // This needs to be a list or it is unsendable
-        return (box as Box)
+        return (box as Box<Uint8List>)
             .valuesBetween(
               startKey: call.arguments['startKey'],
               endKey: call.arguments['endKey'],
@@ -143,24 +158,23 @@ class IsolatedBoxHandler extends IsolateStreamHandler {
             .toList();
       case 'get':
         if (box.lazy) {
-          return await (box as LazyBox).get(
-            call.arguments['key'],
-            defaultValue: IsolatedBoxBaseImpl.defaultValuePlaceholder,
-          );
+          return await (box as LazyBox<Uint8List>).get(call.arguments['key']);
         } else {
-          return (box as Box).get(
-            call.arguments['key'],
-            defaultValue: IsolatedBoxBaseImpl.defaultValuePlaceholder,
+          return _detachBytes(
+            (box as Box<Uint8List>).get(call.arguments['key']),
           );
         }
       case 'getAt':
         if (box.lazy) {
-          return await (box as LazyBox).getAt(call.arguments['index']);
+          return await (box as LazyBox<Uint8List>)
+              .getAt(call.arguments['index']);
         } else {
-          return (box as Box).getAt(call.arguments['index']);
+          return _detachBytes(
+            (box as Box<Uint8List>).getAt(call.arguments['index']),
+          );
         }
       case 'toMap':
-        return (box as Box).toMap();
+        return (box as Box<Uint8List>).toMap();
       case 'getFrames':
         final frames = await (box as InspectableBox).getFrames();
         return frames.map((e) => e.toJson()).toList();
