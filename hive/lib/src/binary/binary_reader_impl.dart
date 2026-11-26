@@ -428,4 +428,18 @@ IsolatedHive to prevent this in the future. Examples of isolate usage include:
     final valueReader = BinaryReaderImpl(out, _typeRegistry, outLength);
     return valueReader.read();
   }
+
+  /// Reads a single value bounded to [length] bytes, advancing past any unread
+  /// trailing bytes.
+  ///
+  /// Not part of public API
+  dynamic readValue(int length, {HiveCipher? cipher}) {
+    _limitAvailableBytes(length);
+    try {
+      return cipher == null ? read() : readEncrypted(cipher);
+    } finally {
+      skip(availableBytes);
+      _resetLimit();
+    }
+  }
 }

@@ -1,5 +1,6 @@
 ## NEXT
 
+- Speeds up `IsolatedHive` bulk reads (`values`, `valuesBetween`, `toMap`) by packing values into a single `TransferableTypedData`
 - Speeds up `IsolatedHive` single reads and watch events by detaching oversized backing buffers
 - Speeds up `IsolatedHive` batch and large writes by packing batch values into a single buffer and using selective `TransferableTypedData`
 - Speeds up web batch writes (`StorageBackendJs.writeFrames()`) and `CollectionBox.deleteAll()` by batching IndexedDB operations in a single transaction and fixing O(N²) cached key removal
